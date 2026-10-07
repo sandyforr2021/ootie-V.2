@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOTie - 穿搭商品收藏助手</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="brand-row">
+        <div class="brand-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="brand-inline">
+          <span class="brand-title">OOTie</span>
+          <span class="brand-sep">｜</span>
+          <span class="brand-subtitle">商品收藏助手</span>
+        </div>
+      </div>
+      <button type="button" class="icon-btn" id="refreshBtn" title="重新擷取網頁資料">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="popup-body">
+      <div id="loadingView" class="status-view">
+        <div class="spinner"></div>
+        <p>正在分析電商商品資訊...</p>
+      </div>
+
+      <div id="errorView" class="status-view" style="display:none;">
+        <p id="errorMessage">無法從當前頁面擷取商品資訊</p>
+        <button type="button" class="btn secondary" id="retryBtn">重試</button>
+      </div>
+
+      <main id="mainView" class="popup-main" style="display:none;">
+        <!-- 橫式雙欄排版 -->
+        <div class="popup-layout">
+          <!-- 左側：4:3 預覽大圖 (參考建立書籤頁面樣式，等比不拉伸) -->
+          <div class="popup-left">
+            <div class="preview-media" id="previewMedia">
+              <div class="preview-placeholder" id="previewPlaceholder">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span>尚未加入商品圖片</span>
+                <small>請在右側輸入網址</small>
+              </div>
+              <img id="previewImage" src="" alt="商品圖片預覽" style="display:none;">
+            </div>
+          </div>
+
+          <!-- 右側：資訊欄位 -->
+          <div class="popup-right">
+            <div class="preview-fields">
+              <div class="field-group">
+                <label for="inputTitle">商品名稱 *</label>
+                <input type="text" id="inputTitle" placeholder="例如：純棉羅紋上衣" required>
+              </div>
+
+              <div class="field-group">
+                <label for="inputUrl">商品來源網址</label>
+                <input type="url" id="inputUrl" placeholder="https://...">
+              </div>
+
+              <div class="field-group">
+                <label for="inputImageUrl">圖片網址</label>
+                <input type="url" id="inputImageUrl" placeholder="https://...">
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" style="flex: 1;">
+                  <label for="inputBrand">品牌</label>
+                  <input type="text" id="inputBrand" placeholder="例如：UNIQLO">
+                </div>
+                <div class="field-group" style="flex: 1;">
+                  <label for="inputColor">顏色</label>
+                  <input type="text" id="inputColor" placeholder="例如：01 OFF WHITE">
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field-group" style="flex: 1;">
+                  <label for="inputSize">尺寸</label>
+                  <input type="text" id="inputSize" placeholder="例如：M / 38">
+                </div>
+                <div class="field-group" style="flex: 1.15;">
+                  <label for="inputPrice">價格與幣別</label>
+                  <div class="combined-price-field">
+                    <input type="text" id="inputPrice" placeholder="例如：790">
+                    <select id="selectCurrency">
+                      <option value="TWD">TWD</option>
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="JPY">JPY</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-box">
+              <details>
+                <summary>⚙️ OOTie 網址設定</summary>
+                <div class="settings-content">
+                  <label for="inputOotieUrl">OOTie 書籤頁網址：</label>
+                  <input type="text" id="inputOotieUrl" value="http://127.0.0.1:5500/bookmarks.html">
+                  <span class="hint">若使用 Live Server 或其他 Port，請在此調整。</span>
+                </div>
+              </details>
+            </div>
+
+            <footer class="popup-footer">
+              <button type="button" class="btn primary" id="sendToOotieBtn">
+                <span>傳送到 OOTie 書籤</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-left:3px;">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+            </footer>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

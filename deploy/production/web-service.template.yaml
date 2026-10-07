@@ -1,0 +1,19 @@
+service: ootie-web
+region: asia-southeast1
+ingress: all
+allowUnauthenticated: true
+scaling:
+  minInstances: 0
+  maxInstances: 3
+container:
+  cpu: 1
+  memory: 512Mi
+  concurrency: 80
+  timeoutSeconds: 60
+runtimeServiceAccount: REQUIRED_OOTIE_WEB_PROD_SERVICE_ACCOUNT
+publicBuildConfig:
+  VITE_SUPABASE_URL: REQUIRED_PRODUCTION_SUPABASE_URL
+  VITE_SUPABASE_PUBLISHABLE_KEY: REQUIRED_PRODUCTION_PUBLISHABLE_KEY
+  VITE_OOTIE_AI_GATEWAY_URL: REQUIRED_PRODUCTION_GATEWAY_URL
+  VITE_SITE_URL: REQUIRED_PRODUCTION_CANONICAL_ORIGIN
+

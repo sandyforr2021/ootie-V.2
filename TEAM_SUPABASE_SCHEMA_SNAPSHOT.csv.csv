@@ -1,0 +1,1091 @@
+object_type,object_name,definition
+COLUMN,public.careu.active_ingredients,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.applicant,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.approval_date,type=date; nullable=YES; default=NULL
+COLUMN,public.careu.category,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.contraindicated_allergy,type=boolean; nullable=YES; default=NULL
+COLUMN,public.careu.contraindicated_breastfeeding,type=boolean; nullable=YES; default=NULL
+COLUMN,public.careu.contraindicated_pregnant,type=boolean; nullable=YES; default=NULL
+COLUMN,public.careu.efficacy,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.efficacy_claim,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.evidence_score,type=bigint; nullable=YES; default=NULL
+COLUMN,public.careu.evidence_type,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.id,type=bigint; nullable=NO; default=NULL
+COLUMN,public.careu.license_no,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.mechanism_tag,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.precautions,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.product_name,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.status,type=text; nullable=YES; default=NULL
+COLUMN,public.careu.warnings,type=text; nullable=YES; default=NULL
+COLUMN,public.documents.content,type=text; nullable=NO; default=NULL
+COLUMN,public.documents.created_at,type=timestamp with time zone; nullable=YES; default=now()
+COLUMN,public.documents.embedding,type=USER-DEFINED; nullable=YES; default=NULL
+COLUMN,public.documents.id,type=bigint; nullable=NO; default=nextval('documents_id_seq'::regclass)
+COLUMN,public.documents.metadata,type=jsonb; nullable=YES; default='{}'::jsonb
+COLUMN,public.functions.code,type=text; nullable=NO; default=NULL
+COLUMN,public.functions.id,type=smallint; nullable=NO; default=NULL
+COLUMN,public.functions.name_zh,type=text; nullable=NO; default=NULL
+COLUMN,public.ootie_bookmarks.brand,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.color,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.created_at,type=timestamp with time zone; nullable=NO; default=now()
+COLUMN,public.ootie_bookmarks.currency,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.description,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_bookmarks.image_storage_path,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.image_url,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.notes,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.owner_id,type=uuid; nullable=NO; default=NULL
+COLUMN,public.ootie_bookmarks.price,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.product_url,type=text; nullable=NO; default=NULL
+COLUMN,public.ootie_bookmarks.size,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.source_domain,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_bookmarks.title,type=text; nullable=NO; default=NULL
+COLUMN,public.ootie_bookmarks.updated_at,type=timestamp with time zone; nullable=NO; default=now()
+COLUMN,public.ootie_bookmarks.variant_name,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.brand,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.category,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.color_hex,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.favorite,type=boolean; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.hidden,type=boolean; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_clothing_items.last_worn,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.name,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.name_zh,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.notes,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.owner_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_clothing_items.photo,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.price,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.primary_color,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.purchase_date,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.season,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.secondary_color,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.shape,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.style,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_clothing_items.wear_count,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_notifications.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_notifications.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_notifications.meta,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_notifications.read,type=boolean; nullable=YES; default=NULL
+COLUMN,public.ootie_notifications.text,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_notifications.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_ootd_posts.caption,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.comments,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.hashtags,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_ootd_posts.image,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.item_ids,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.likes,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_ootd_posts.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_ootd_posts.wearing,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.ootie_outfit_suggestions.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_outfit_suggestions.hearts,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_outfit_suggestions.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_outfit_suggestions.item_ids,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.ootie_outfit_suggestions.message,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_outfit_suggestions.sos_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_outfit_suggestions.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_post_likes.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_post_likes.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_post_likes.post_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_post_likes.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_profiles.avatar_url,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.bio,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.hearts,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.helped,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_profiles.initials,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.likes,type=bigint; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.name,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.public_closet,type=boolean; nullable=YES; default=NULL
+COLUMN,public.ootie_profiles.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_profiles.username,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_saved_posts.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_saved_posts.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_saved_posts.post_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_saved_posts.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_sos_posts.closet_item_ids,type=ARRAY; nullable=NO; default='{}'::uuid[]
+COLUMN,public.ootie_sos_posts.closet_owner_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_sos_posts.created_at,type=timestamp with time zone; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.details,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.ootie_sos_posts.liked_suggestion_ids,type=ARRAY; nullable=NO; default='{}'::uuid[]
+COLUMN,public.ootie_sos_posts.notes,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.occasion,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.picked_suggestion_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_sos_posts.status,type=text; nullable=NO; default='OPEN'::text
+COLUMN,public.ootie_sos_posts.title,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.user_id,type=uuid; nullable=YES; default=gen_random_uuid()
+COLUMN,public.ootie_sos_posts.vibes,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.weather,type=text; nullable=YES; default=NULL
+COLUMN,public.ootie_sos_posts.when_label,type=text; nullable=YES; default=NULL
+COLUMN,public.rag_query_logs.answer,type=text; nullable=YES; default=NULL
+COLUMN,public.rag_query_logs.created_at,type=timestamp with time zone; nullable=YES; default=now()
+COLUMN,public.rag_query_logs.filters,type=jsonb; nullable=YES; default='{}'::jsonb
+COLUMN,public.rag_query_logs.id,type=bigint; nullable=NO; default=nextval('rag_query_logs_id_seq'::regclass)
+COLUMN,public.rag_query_logs.original_query,type=text; nullable=NO; default=NULL
+COLUMN,public.rag_query_logs.refused,type=boolean; nullable=YES; default=false
+COLUMN,public.rag_query_logs.retrieved_chunks,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.rag_query_logs.rewritten_query,type=text; nullable=YES; default=NULL
+COLUMN,public.rag_query_logs.session_id,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.applicant,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.assessment_id,type=uuid; nullable=NO; default=NULL
+COLUMN,public.recommendations.created_at,type=timestamp with time zone; nullable=NO; default=now()
+COLUMN,public.recommendations.efficacy,type=text; nullable=NO; default=NULL
+COLUMN,public.recommendations.efficacy_rank,type=integer; nullable=NO; default=NULL
+COLUMN,public.recommendations.evidence_type,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.exclusion_note,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.id,type=uuid; nullable=NO; default=gen_random_uuid()
+COLUMN,public.recommendations.license_no,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.note,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.product_name,type=text; nullable=YES; default=NULL
+COLUMN,public.recommendations.rec_rank,type=integer; nullable=NO; default=NULL
+COLUMN,public.recommendations.score_breakdown,type=jsonb; nullable=YES; default=NULL
+COLUMN,public.recommendations.source_claim_id,type=bigint; nullable=YES; default=NULL
+COLUMN,public.test_table.created_at,type=timestamp with time zone; nullable=NO; default=now()
+COLUMN,public.test_table.id,type=bigint; nullable=NO; default=NULL
+COLUMN,public.test_table.name,type=text; nullable=YES; default=NULL
+CONSTRAINT,public.careu.careu_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.documents.documents_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.functions.functions_code_key,UNIQUE (code)
+CONSTRAINT,public.functions.functions_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_bookmarks.ootie_bookmarks_owner_id_fk,FOREIGN KEY (owner_id) REFERENCES ootie_profiles(id) ON DELETE CASCADE
+CONSTRAINT,public.ootie_bookmarks.ootie_bookmarks_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_clothing_items.ootie_clothing_items_owner_id_fkey,FOREIGN KEY (owner_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_clothing_items.ootie_clothing_items_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_notifications.ootie_notifications_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_notifications.ootie_notifications_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_ootd_posts.ootie_ootd_posts_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_ootd_posts.ootie_ootd_posts_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_outfit_suggestions.ootie_outfit_suggestions_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_outfit_suggestions.ootie_outfit_suggestions_sos_id_fkey,FOREIGN KEY (sos_id) REFERENCES ootie_sos_posts(id)
+CONSTRAINT,public.ootie_outfit_suggestions.ootie_outfit_suggestions_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_post_likes.ootie_post_likes_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_post_likes.ootie_post_likes_post_id_fkey,FOREIGN KEY (post_id) REFERENCES ootie_ootd_posts(id)
+CONSTRAINT,public.ootie_post_likes.ootie_post_likes_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_profiles.profiles_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_saved_posts.ootie_saved_posts_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_saved_posts.ootie_saved_posts_post_id_fkey,FOREIGN KEY (post_id) REFERENCES ootie_ootd_posts(id)
+CONSTRAINT,public.ootie_saved_posts.ootie_saved_posts_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.ootie_sos_posts.ootie_sos_posts_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.ootie_sos_posts.ootie_sos_posts_status_check,"CHECK (status = ANY (ARRAY['OPEN'::text, 'CLOSED'::text]))"
+CONSTRAINT,public.ootie_sos_posts.ootie_sos_posts_user_id_fkey,FOREIGN KEY (user_id) REFERENCES ootie_profiles(id)
+CONSTRAINT,public.rag_query_logs.rag_query_logs_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.recommendations.recommendations_efficacy_rank_check,CHECK (efficacy_rank > 0)
+CONSTRAINT,public.recommendations.recommendations_pkey,PRIMARY KEY (id)
+CONSTRAINT,public.recommendations.recommendations_rec_rank_check,"CHECK (rec_rank = ANY (ARRAY[1, 2]))"
+CONSTRAINT,public.recommendations.recommendations_source_claim_id_fkey,FOREIGN KEY (source_claim_id) REFERENCES careu(id)
+CONSTRAINT,public.test_table.test_table_pkey,PRIMARY KEY (id)
+FUNCTION,"public.array_to_halfvec(double precision[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_halfvec(double precision[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+FUNCTION,"public.array_to_halfvec(integer[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_halfvec(integer[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+FUNCTION,"public.array_to_halfvec(numeric[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_halfvec(numeric[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+FUNCTION,"public.array_to_halfvec(real[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_halfvec(real[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+"
+FUNCTION,"public.array_to_sparsevec(double precision[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_sparsevec(double precision[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+FUNCTION,"public.array_to_sparsevec(integer[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_sparsevec(integer[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+FUNCTION,"public.array_to_sparsevec(numeric[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_sparsevec(numeric[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+FUNCTION,"public.array_to_sparsevec(real[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_sparsevec(real[], integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_sparsevec$function$
+"
+FUNCTION,"public.array_to_vector(double precision[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_vector(double precision[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+FUNCTION,"public.array_to_vector(integer[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_vector(integer[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+FUNCTION,"public.array_to_vector(numeric[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_vector(numeric[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+FUNCTION,"public.array_to_vector(real[], integer, boolean)","CREATE OR REPLACE FUNCTION public.array_to_vector(real[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+"
+FUNCTION,public.binary_quantize(halfvec),"CREATE OR REPLACE FUNCTION public.binary_quantize(halfvec)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_binary_quantize$function$
+"
+FUNCTION,public.binary_quantize(vector),"CREATE OR REPLACE FUNCTION public.binary_quantize(vector)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$binary_quantize$function$
+"
+FUNCTION,"public.cosine_distance(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.cosine_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cosine_distance$function$
+"
+FUNCTION,"public.cosine_distance(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.cosine_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cosine_distance$function$
+"
+FUNCTION,"public.cosine_distance(vector, vector)","CREATE OR REPLACE FUNCTION public.cosine_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$cosine_distance$function$
+"
+FUNCTION,public.get_brand_stats(),"CREATE OR REPLACE FUNCTION public.get_brand_stats()
+ RETURNS TABLE(brand text, item_count bigint, total_wear_count bigint)
+ LANGUAGE sql
+ STABLE
+AS $function$
+  with normalized_brands as (
+    select
+      lower(nullif(trim(brand), '')) as brand_key,
+      nullif(trim(brand), '') as display_brand,
+      coalesce(wear_count, 0)::bigint as wear_count
+    from public.ootie_clothing_items
+    where hidden = false
+  )
+  select
+    coalesce(min(display_brand), '未分類') as brand,
+    count(*)::bigint as item_count,
+    sum(wear_count)::bigint as total_wear_count
+  from normalized_brands
+  group by brand_key
+  order by item_count desc, total_wear_count desc
+  limit 10;
+$function$
+"
+FUNCTION,public.get_closet_stats(),"CREATE OR REPLACE FUNCTION public.get_closet_stats()
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE
+AS $function$
+  with visible_items as (
+    select primary_color, style, category, color_hex
+    from public.ootie_clothing_items
+    where owner_id = auth.uid()
+      and hidden = false
+  ),
+  -- 1. 顏色統計 (先 Group BY 再轉 JSON)
+  grouped_colors as (
+    select 
+      primary_color as color,
+      coalesce(min(color_hex), '#D8D2C8') as color_hex,
+      count(*) as item_count
+    from visible_items
+    where nullif(primary_color, '') is not null
+    group by primary_color
+  ),
+  color_stats as (
+    select jsonb_agg(jsonb_build_object(
+      'color', color,
+      'color_hex', color_hex,
+      'count', item_count
+    ) order by item_count desc) as value
+    from grouped_colors
+  ),
+  -- 2. 風格統計 (先 Group BY 再轉 JSON)
+  grouped_styles as (
+    select 
+      style,
+      count(*) as item_count
+    from visible_items
+    where nullif(style, '') is not null
+    group by style
+  ),
+  style_stats as (
+    select jsonb_agg(jsonb_build_object(
+      'style', style,
+      'count', item_count
+    ) order by item_count desc) as value
+    from grouped_styles
+  ),
+  -- 3. 分類統計 (先 Group BY 再轉 JSON)
+  grouped_categories as (
+    select 
+      category,
+      count(*) as item_count
+    from visible_items
+    where nullif(category, '') is not null
+    group by category
+  ),
+  category_stats as (
+    select jsonb_agg(jsonb_build_object(
+      'category', category,
+      'count', item_count
+    ) order by item_count desc) as value
+    from grouped_categories
+  )
+  select jsonb_build_object(
+    'colorStats', coalesce((select value from color_stats), '[]'::jsonb),
+    'styleStats', coalesce((select value from style_stats), '[]'::jsonb),
+    'categoryStats', coalesce((select value from category_stats), '[]'::jsonb)
+  );
+$function$
+"
+FUNCTION,public.get_disused_items(),"CREATE OR REPLACE FUNCTION public.get_disused_items()
+ RETURNS TABLE(id uuid, name text, name_zh text, photo text, last_worn text, wear_count integer)
+ LANGUAGE sql
+ STABLE
+AS $function$
+  select id, name, name_zh, photo, last_worn, wear_count
+  from public.ootie_clothing_items
+  where hidden = false
+    and (
+      (nullif(last_worn, '') is not null and last_worn::date < current_date - 30)
+      or wear_count < 2
+      or (nullif(last_worn, '') is null and coalesce(wear_count, 0) = 0)
+    )
+  order by last_worn is not null, last_worn asc nulls first, wear_count asc;
+$function$
+"
+FUNCTION,"public.halfvec(halfvec, integer, boolean)","CREATE OR REPLACE FUNCTION public.halfvec(halfvec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec$function$
+"
+FUNCTION,"public.halfvec_accum(double precision[], halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_accum(double precision[], halfvec)
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_accum$function$
+"
+FUNCTION,"public.halfvec_add(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_add(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_add$function$
+"
+FUNCTION,public.halfvec_avg(double precision[]),"CREATE OR REPLACE FUNCTION public.halfvec_avg(double precision[])
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_avg$function$
+"
+FUNCTION,"public.halfvec_cmp(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_cmp(halfvec, halfvec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cmp$function$
+"
+FUNCTION,"public.halfvec_combine(double precision[], double precision[])","CREATE OR REPLACE FUNCTION public.halfvec_combine(double precision[], double precision[])
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_combine$function$
+"
+FUNCTION,"public.halfvec_concat(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_concat(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_concat$function$
+"
+FUNCTION,"public.halfvec_eq(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_eq(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_eq$function$
+"
+FUNCTION,"public.halfvec_ge(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_ge(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ge$function$
+"
+FUNCTION,"public.halfvec_gt(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_gt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_gt$function$
+"
+FUNCTION,"public.halfvec_in(cstring, oid, integer)","CREATE OR REPLACE FUNCTION public.halfvec_in(cstring, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_in$function$
+"
+FUNCTION,"public.halfvec_l2_squared_distance(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_l2_squared_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_squared_distance$function$
+"
+FUNCTION,"public.halfvec_le(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_le(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_le$function$
+"
+FUNCTION,"public.halfvec_lt(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_lt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_lt$function$
+"
+FUNCTION,"public.halfvec_mul(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_mul(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_mul$function$
+"
+FUNCTION,"public.halfvec_ne(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_ne(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ne$function$
+"
+FUNCTION,"public.halfvec_negative_inner_product(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_negative_inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_negative_inner_product$function$
+"
+FUNCTION,public.halfvec_out(halfvec),"CREATE OR REPLACE FUNCTION public.halfvec_out(halfvec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_out$function$
+"
+FUNCTION,"public.halfvec_recv(internal, oid, integer)","CREATE OR REPLACE FUNCTION public.halfvec_recv(internal, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_recv$function$
+"
+FUNCTION,public.halfvec_send(halfvec),"CREATE OR REPLACE FUNCTION public.halfvec_send(halfvec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_send$function$
+"
+FUNCTION,"public.halfvec_spherical_distance(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_spherical_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_spherical_distance$function$
+"
+FUNCTION,"public.halfvec_sub(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.halfvec_sub(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_sub$function$
+"
+FUNCTION,"public.halfvec_to_float4(halfvec, integer, boolean)","CREATE OR REPLACE FUNCTION public.halfvec_to_float4(halfvec, integer, boolean)
+ RETURNS real[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_float4$function$
+"
+FUNCTION,"public.halfvec_to_sparsevec(halfvec, integer, boolean)","CREATE OR REPLACE FUNCTION public.halfvec_to_sparsevec(halfvec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_sparsevec$function$
+"
+FUNCTION,"public.halfvec_to_vector(halfvec, integer, boolean)","CREATE OR REPLACE FUNCTION public.halfvec_to_vector(halfvec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_vector$function$
+"
+FUNCTION,public.halfvec_typmod_in(cstring[]),"CREATE OR REPLACE FUNCTION public.halfvec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_typmod_in$function$
+"
+FUNCTION,"public.hamming_distance(bit, bit)","CREATE OR REPLACE FUNCTION public.hamming_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$hamming_distance$function$
+"
+FUNCTION,public.hnsw_bit_support(internal),"CREATE OR REPLACE FUNCTION public.hnsw_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_bit_support$function$
+"
+FUNCTION,public.hnsw_halfvec_support(internal),"CREATE OR REPLACE FUNCTION public.hnsw_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_halfvec_support$function$
+"
+FUNCTION,public.hnsw_sparsevec_support(internal),"CREATE OR REPLACE FUNCTION public.hnsw_sparsevec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_sparsevec_support$function$
+"
+FUNCTION,public.hnswhandler(internal),"CREATE OR REPLACE FUNCTION public.hnswhandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$hnswhandler$function$
+"
+FUNCTION,"public.inner_product(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_inner_product$function$
+"
+FUNCTION,"public.inner_product(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_inner_product$function$
+"
+FUNCTION,"public.inner_product(vector, vector)","CREATE OR REPLACE FUNCTION public.inner_product(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$inner_product$function$
+"
+FUNCTION,public.ivfflat_bit_support(internal),"CREATE OR REPLACE FUNCTION public.ivfflat_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_bit_support$function$
+"
+FUNCTION,public.ivfflat_halfvec_support(internal),"CREATE OR REPLACE FUNCTION public.ivfflat_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_halfvec_support$function$
+"
+FUNCTION,public.ivfflathandler(internal),"CREATE OR REPLACE FUNCTION public.ivfflathandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflathandler$function$
+"
+FUNCTION,"public.jaccard_distance(bit, bit)","CREATE OR REPLACE FUNCTION public.jaccard_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$jaccard_distance$function$
+"
+FUNCTION,"public.l1_distance(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.l1_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l1_distance$function$
+"
+FUNCTION,"public.l1_distance(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.l1_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l1_distance$function$
+"
+FUNCTION,"public.l1_distance(vector, vector)","CREATE OR REPLACE FUNCTION public.l1_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l1_distance$function$
+"
+FUNCTION,"public.l2_distance(halfvec, halfvec)","CREATE OR REPLACE FUNCTION public.l2_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_distance$function$
+"
+FUNCTION,"public.l2_distance(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.l2_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_distance$function$
+"
+FUNCTION,"public.l2_distance(vector, vector)","CREATE OR REPLACE FUNCTION public.l2_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_distance$function$
+"
+FUNCTION,public.l2_norm(halfvec),"CREATE OR REPLACE FUNCTION public.l2_norm(halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_norm$function$
+"
+FUNCTION,public.l2_norm(sparsevec),"CREATE OR REPLACE FUNCTION public.l2_norm(sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_norm$function$
+"
+FUNCTION,public.l2_normalize(halfvec),"CREATE OR REPLACE FUNCTION public.l2_normalize(halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_normalize$function$
+"
+FUNCTION,public.l2_normalize(sparsevec),"CREATE OR REPLACE FUNCTION public.l2_normalize(sparsevec)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_normalize$function$
+"
+FUNCTION,public.l2_normalize(vector),"CREATE OR REPLACE FUNCTION public.l2_normalize(vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_normalize$function$
+"
+FUNCTION,"public.match_documents(query_embedding vector, match_count integer, filter jsonb)","CREATE OR REPLACE FUNCTION public.match_documents(query_embedding vector, match_count integer DEFAULT 5, filter jsonb DEFAULT '{}'::jsonb)
+ RETURNS TABLE(id bigint, content text, metadata jsonb, similarity double precision)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    d.id,
+    d.content,
+    d.metadata,
+    (1 - ((d.embedding::halfvec(3072)) <=> (query_embedding::halfvec(3072))))::FLOAT AS similarity
+  FROM documents d
+  WHERE
+    -- filter 為空物件時不過濾；否則要求 metadata 包含 filter 的所有鍵值
+    (filter = '{}'::jsonb OR d.metadata @> filter)
+  ORDER BY (d.embedding::halfvec(3072)) <=> (query_embedding::halfvec(3072))
+  LIMIT match_count;
+END;
+$function$
+"
+FUNCTION,public.set_updated_at(),"CREATE OR REPLACE FUNCTION public.set_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$function$
+"
+FUNCTION,"public.sparsevec(sparsevec, integer, boolean)","CREATE OR REPLACE FUNCTION public.sparsevec(sparsevec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec$function$
+"
+FUNCTION,"public.sparsevec_cmp(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_cmp(sparsevec, sparsevec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cmp$function$
+"
+FUNCTION,"public.sparsevec_eq(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_eq(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_eq$function$
+"
+FUNCTION,"public.sparsevec_ge(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_ge(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ge$function$
+"
+FUNCTION,"public.sparsevec_gt(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_gt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_gt$function$
+"
+FUNCTION,"public.sparsevec_in(cstring, oid, integer)","CREATE OR REPLACE FUNCTION public.sparsevec_in(cstring, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_in$function$
+"
+FUNCTION,"public.sparsevec_l2_squared_distance(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_l2_squared_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_squared_distance$function$
+"
+FUNCTION,"public.sparsevec_le(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_le(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_le$function$
+"
+FUNCTION,"public.sparsevec_lt(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_lt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_lt$function$
+"
+FUNCTION,"public.sparsevec_ne(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_ne(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ne$function$
+"
+FUNCTION,"public.sparsevec_negative_inner_product(sparsevec, sparsevec)","CREATE OR REPLACE FUNCTION public.sparsevec_negative_inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_negative_inner_product$function$
+"
+FUNCTION,public.sparsevec_out(sparsevec),"CREATE OR REPLACE FUNCTION public.sparsevec_out(sparsevec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_out$function$
+"
+FUNCTION,"public.sparsevec_recv(internal, oid, integer)","CREATE OR REPLACE FUNCTION public.sparsevec_recv(internal, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_recv$function$
+"
+FUNCTION,public.sparsevec_send(sparsevec),"CREATE OR REPLACE FUNCTION public.sparsevec_send(sparsevec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_send$function$
+"
+FUNCTION,"public.sparsevec_to_halfvec(sparsevec, integer, boolean)","CREATE OR REPLACE FUNCTION public.sparsevec_to_halfvec(sparsevec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_halfvec$function$
+"
+FUNCTION,"public.sparsevec_to_vector(sparsevec, integer, boolean)","CREATE OR REPLACE FUNCTION public.sparsevec_to_vector(sparsevec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_vector$function$
+"
+FUNCTION,public.sparsevec_typmod_in(cstring[]),"CREATE OR REPLACE FUNCTION public.sparsevec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_typmod_in$function$
+"
+FUNCTION,"public.subvector(halfvec, integer, integer)","CREATE OR REPLACE FUNCTION public.subvector(halfvec, integer, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_subvector$function$
+"
+FUNCTION,"public.subvector(vector, integer, integer)","CREATE OR REPLACE FUNCTION public.subvector(vector, integer, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$subvector$function$
+"
+FUNCTION,public.update_ootie_bookmarks_updated_at(),"CREATE OR REPLACE FUNCTION public.update_ootie_bookmarks_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$function$
+"
+FUNCTION,"public.vector(vector, integer, boolean)","CREATE OR REPLACE FUNCTION public.vector(vector, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector$function$
+"
+FUNCTION,"public.vector_accum(double precision[], vector)","CREATE OR REPLACE FUNCTION public.vector_accum(double precision[], vector)
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_accum$function$
+"
+FUNCTION,"public.vector_add(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_add(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_add$function$
+"
+FUNCTION,public.vector_avg(double precision[]),"CREATE OR REPLACE FUNCTION public.vector_avg(double precision[])
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_avg$function$
+"
+FUNCTION,"public.vector_cmp(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_cmp(vector, vector)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_cmp$function$
+"
+FUNCTION,"public.vector_combine(double precision[], double precision[])","CREATE OR REPLACE FUNCTION public.vector_combine(double precision[], double precision[])
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_combine$function$
+"
+FUNCTION,"public.vector_concat(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_concat(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_concat$function$
+"
+FUNCTION,public.vector_dims(halfvec),"CREATE OR REPLACE FUNCTION public.vector_dims(halfvec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_vector_dims$function$
+"
+FUNCTION,public.vector_dims(vector),"CREATE OR REPLACE FUNCTION public.vector_dims(vector)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_dims$function$
+"
+FUNCTION,"public.vector_eq(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_eq(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_eq$function$
+"
+FUNCTION,"public.vector_ge(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_ge(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_ge$function$
+"
+FUNCTION,"public.vector_gt(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_gt(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_gt$function$
+"
+FUNCTION,"public.vector_in(cstring, oid, integer)","CREATE OR REPLACE FUNCTION public.vector_in(cstring, oid, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_in$function$
+"
+FUNCTION,"public.vector_l2_squared_distance(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_l2_squared_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_l2_squared_distance$function$
+"
+FUNCTION,"public.vector_le(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_le(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_le$function$
+"
+FUNCTION,"public.vector_lt(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_lt(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_lt$function$
+"
+FUNCTION,"public.vector_mul(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_mul(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_mul$function$
+"
+FUNCTION,"public.vector_ne(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_ne(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_ne$function$
+"
+FUNCTION,"public.vector_negative_inner_product(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_negative_inner_product(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_negative_inner_product$function$
+"
+FUNCTION,public.vector_norm(vector),"CREATE OR REPLACE FUNCTION public.vector_norm(vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_norm$function$
+"
+FUNCTION,public.vector_out(vector),"CREATE OR REPLACE FUNCTION public.vector_out(vector)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_out$function$
+"
+FUNCTION,"public.vector_recv(internal, oid, integer)","CREATE OR REPLACE FUNCTION public.vector_recv(internal, oid, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_recv$function$
+"
+FUNCTION,public.vector_send(vector),"CREATE OR REPLACE FUNCTION public.vector_send(vector)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_send$function$
+"
+FUNCTION,"public.vector_spherical_distance(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_spherical_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_spherical_distance$function$
+"
+FUNCTION,"public.vector_sub(vector, vector)","CREATE OR REPLACE FUNCTION public.vector_sub(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_sub$function$
+"
+FUNCTION,"public.vector_to_float4(vector, integer, boolean)","CREATE OR REPLACE FUNCTION public.vector_to_float4(vector, integer, boolean)
+ RETURNS real[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_float4$function$
+"
+FUNCTION,"public.vector_to_halfvec(vector, integer, boolean)","CREATE OR REPLACE FUNCTION public.vector_to_halfvec(vector, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_halfvec$function$
+"
+FUNCTION,"public.vector_to_sparsevec(vector, integer, boolean)","CREATE OR REPLACE FUNCTION public.vector_to_sparsevec(vector, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_sparsevec$function$
+"
+FUNCTION,public.vector_typmod_in(cstring[]),"CREATE OR REPLACE FUNCTION public.vector_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_typmod_in$function$
+"
+INDEX,public.careu_pkey,CREATE UNIQUE INDEX careu_pkey ON public.careu USING btree (id)
+INDEX,public.documents_embedding_idx,CREATE INDEX documents_embedding_idx ON public.documents USING hnsw (((embedding)::halfvec(3072)) halfvec_cosine_ops)
+INDEX,public.documents_metadata_gin_idx,CREATE INDEX documents_metadata_gin_idx ON public.documents USING gin (metadata)
+INDEX,public.documents_pkey,CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id)
+INDEX,public.functions_code_key,CREATE UNIQUE INDEX functions_code_key ON public.functions USING btree (code)
+INDEX,public.functions_pkey,CREATE UNIQUE INDEX functions_pkey ON public.functions USING btree (id)
+INDEX,public.idx_careu_efficacy,CREATE INDEX idx_careu_efficacy ON public.careu USING btree (efficacy)
+INDEX,public.idx_ootie_bookmarks_owner_created_at,"CREATE INDEX idx_ootie_bookmarks_owner_created_at ON public.ootie_bookmarks USING btree (owner_id, created_at DESC)"
+INDEX,public.idx_ootie_bookmarks_owner_updated_at,"CREATE INDEX idx_ootie_bookmarks_owner_updated_at ON public.ootie_bookmarks USING btree (owner_id, updated_at DESC)"
+INDEX,public.idx_ootie_bookmarks_source_domain,CREATE INDEX idx_ootie_bookmarks_source_domain ON public.ootie_bookmarks USING btree (source_domain)
+INDEX,public.idx_recommendations_assessment_id,CREATE INDEX idx_recommendations_assessment_id ON public.recommendations USING btree (assessment_id)
+INDEX,public.ootie_bookmarks_pkey,CREATE UNIQUE INDEX ootie_bookmarks_pkey ON public.ootie_bookmarks USING btree (id)
+INDEX,public.ootie_clothing_items_pkey,CREATE UNIQUE INDEX ootie_clothing_items_pkey ON public.ootie_clothing_items USING btree (id)
+INDEX,public.ootie_notifications_pkey,CREATE UNIQUE INDEX ootie_notifications_pkey ON public.ootie_notifications USING btree (id)
+INDEX,public.ootie_ootd_posts_pkey,CREATE UNIQUE INDEX ootie_ootd_posts_pkey ON public.ootie_ootd_posts USING btree (id)
+INDEX,public.ootie_outfit_suggestions_pkey,CREATE UNIQUE INDEX ootie_outfit_suggestions_pkey ON public.ootie_outfit_suggestions USING btree (id)
+INDEX,public.ootie_post_likes_pkey,CREATE UNIQUE INDEX ootie_post_likes_pkey ON public.ootie_post_likes USING btree (id)
+INDEX,public.ootie_saved_posts_pkey,CREATE UNIQUE INDEX ootie_saved_posts_pkey ON public.ootie_saved_posts USING btree (id)
+INDEX,public.ootie_sos_posts_pkey,CREATE UNIQUE INDEX ootie_sos_posts_pkey ON public.ootie_sos_posts USING btree (id)
+INDEX,public.profiles_pkey,CREATE UNIQUE INDEX profiles_pkey ON public.ootie_profiles USING btree (id)
+INDEX,public.rag_query_logs_pkey,CREATE UNIQUE INDEX rag_query_logs_pkey ON public.rag_query_logs USING btree (id)
+INDEX,public.recommendations_pkey,CREATE UNIQUE INDEX recommendations_pkey ON public.recommendations USING btree (id)
+INDEX,public.test_table_pkey,CREATE UNIQUE INDEX test_table_pkey ON public.test_table USING btree (id)
+INDEX,public.uq_recommendations_assessment_efficacy_rank,"CREATE UNIQUE INDEX uq_recommendations_assessment_efficacy_rank ON public.recommendations USING btree (assessment_id, efficacy, rec_rank)"
+POLICY,"public.ootie_bookmarks.""Users can delete own bookmarks""","command=DELETE; roles={public}; using=(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid()))); check=NULL"
+POLICY,"public.ootie_bookmarks.""Users can delete their own bookmarks""",command=DELETE; roles={public}; using=(auth.uid() = owner_id); check=NULL
+POLICY,"public.ootie_bookmarks.""Users can insert own bookmarks""","command=INSERT; roles={public}; using=NULL; check=(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))"
+POLICY,"public.ootie_bookmarks.""Users can insert their own bookmarks""",command=INSERT; roles={public}; using=NULL; check=(auth.uid() = owner_id)
+POLICY,"public.ootie_bookmarks.""Users can update own bookmarks""","command=UPDATE; roles={public}; using=(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid()))); check=(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))"
+POLICY,"public.ootie_bookmarks.""Users can update their own bookmarks""",command=UPDATE; roles={public}; using=(auth.uid() = owner_id); check=(auth.uid() = owner_id)
+POLICY,"public.ootie_bookmarks.""Users can view own bookmarks""","command=SELECT; roles={public}; using=(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid()))); check=NULL"
+POLICY,"public.ootie_bookmarks.""Users can view their own bookmarks""",command=SELECT; roles={public}; using=(auth.uid() = owner_id); check=NULL
+POLICY,"public.ootie_clothing_items.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_notifications.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_ootd_posts.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_outfit_suggestions.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_post_likes.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_profiles.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_saved_posts.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"public.ootie_sos_posts.""Enable read access for all users""",command=SELECT; roles={public}; using=true; check=NULL
+POLICY,"storage.objects.""Bookmark images are viewable by everyone""",command=SELECT; roles={public}; using=(bucket_id = 'ootie-bookmarks-images'::text); check=NULL
+POLICY,"storage.objects.""Users can delete their own bookmark images""",command=DELETE; roles={public}; using=((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text)); check=NULL
+POLICY,"storage.objects.""Users can update their own bookmark images""",command=UPDATE; roles={public}; using=((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text)); check=((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text))
+POLICY,"storage.objects.""Users can upload their own bookmark images""",command=INSERT; roles={public}; using=NULL; check=((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text))
+RLS_STATUS,public.careu,enabled=t; forced=f
+RLS_STATUS,public.documents,enabled=t; forced=f
+RLS_STATUS,public.functions,enabled=t; forced=f
+RLS_STATUS,public.ootie_bookmarks,enabled=t; forced=f
+RLS_STATUS,public.ootie_clothing_items,enabled=f; forced=f
+RLS_STATUS,public.ootie_notifications,enabled=f; forced=f
+RLS_STATUS,public.ootie_ootd_posts,enabled=f; forced=f
+RLS_STATUS,public.ootie_outfit_suggestions,enabled=f; forced=f
+RLS_STATUS,public.ootie_post_likes,enabled=f; forced=f
+RLS_STATUS,public.ootie_profiles,enabled=f; forced=f
+RLS_STATUS,public.ootie_saved_posts,enabled=f; forced=f
+RLS_STATUS,public.ootie_sos_posts,enabled=f; forced=f
+RLS_STATUS,public.rag_query_logs,enabled=t; forced=f
+RLS_STATUS,public.recommendations,enabled=f; forced=f
+RLS_STATUS,public.test_table,enabled=t; forced=f
+RLS_STATUS,storage.buckets,enabled=t; forced=f
+RLS_STATUS,storage.buckets_analytics,enabled=t; forced=f
+RLS_STATUS,storage.buckets_vectors,enabled=t; forced=f
+RLS_STATUS,storage.migrations,enabled=t; forced=f
+RLS_STATUS,storage.objects,enabled=t; forced=f
+RLS_STATUS,storage.s3_multipart_uploads,enabled=t; forced=f
+RLS_STATUS,storage.s3_multipart_uploads_parts,enabled=t; forced=f
+RLS_STATUS,storage.vector_indexes,enabled=t; forced=f
+STORAGE_BUCKET,storage.buckets.ootie-bookmarks-images,name=ootie-bookmarks-images; public=t; file_size_limit=NULL; allowed_mime_types=NULL
+TRIGGER,public.ootie_bookmarks.ootie_bookmarks_set_updated_at,CREATE TRIGGER ootie_bookmarks_set_updated_at BEFORE UPDATE ON ootie_bookmarks FOR EACH ROW EXECUTE FUNCTION set_updated_at()
+TRIGGER,public.ootie_bookmarks.set_ootie_bookmarks_updated_at,CREATE TRIGGER set_ootie_bookmarks_updated_at BEFORE UPDATE ON ootie_bookmarks FOR EACH ROW EXECUTE FUNCTION update_ootie_bookmarks_updated_at()
+TRIGGER,storage.buckets.enforce_bucket_name_length_trigger,CREATE TRIGGER enforce_bucket_name_length_trigger BEFORE INSERT OR UPDATE OF name ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.enforce_bucket_name_length()
+TRIGGER,storage.buckets.protect_bucket_control_insert,CREATE TRIGGER protect_bucket_control_insert BEFORE INSERT ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.protect_bucket_control_columns('service_role')
+TRIGGER,storage.buckets.protect_bucket_control_update,"CREATE TRIGGER protect_bucket_control_update BEFORE UPDATE OF lifecycle_configuration, lifecycle_configuration_generation ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.protect_bucket_control_columns()"
+TRIGGER,storage.buckets.protect_bucket_control_update_role,"CREATE TRIGGER protect_bucket_control_update_role AFTER UPDATE OF lifecycle_configuration, lifecycle_configuration_generation ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.enforce_bucket_lifecycle_service_role('service_role')"
+TRIGGER,storage.buckets.protect_buckets_delete,CREATE TRIGGER protect_buckets_delete BEFORE DELETE ON storage.buckets FOR EACH STATEMENT EXECUTE FUNCTION storage.protect_delete()
+TRIGGER,storage.objects.protect_objects_delete,CREATE TRIGGER protect_objects_delete BEFORE DELETE ON storage.objects FOR EACH STATEMENT EXECUTE FUNCTION storage.protect_delete()
+TRIGGER,storage.objects.update_objects_updated_at,CREATE TRIGGER update_objects_updated_at BEFORE UPDATE ON storage.objects FOR EACH ROW EXECUTE FUNCTION storage.update_updated_at_column()

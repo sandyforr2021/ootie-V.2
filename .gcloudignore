@@ -1,0 +1,12 @@
+.gcloudignore
+.git
+.gitignore
+.env
+.env.*
+node_modules
+dist
+test-results
+scripts/assets/demo-capture-backgrounds
+scripts/assets/demo-garments-capture
+supabase/personal_baseline.rar
+OOTIE_SUPABASE_BATCH_003_012_SAFE

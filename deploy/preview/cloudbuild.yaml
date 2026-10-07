@@ -1,0 +1,19 @@
+substitutions:
+  _IMAGE: gcr.io/ferrous-phoenix-16888/ootie-web-dev
+  _VITE_SUPABASE_URL: ''
+  _VITE_SUPABASE_PUBLISHABLE_KEY: ''
+  _VITE_OOTIE_AI_GATEWAY_URL: ''
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file=deploy/preview/Dockerfile
+      - --build-arg=VITE_SUPABASE_URL=${_VITE_SUPABASE_URL}
+      - --build-arg=VITE_SUPABASE_PUBLISHABLE_KEY=${_VITE_SUPABASE_PUBLISHABLE_KEY}
+      - --build-arg=VITE_OOTIE_AI_GATEWAY_URL=${_VITE_OOTIE_AI_GATEWAY_URL}
+      - --tag=${_IMAGE}
+      - .
+
+images:
+  - ${_IMAGE}

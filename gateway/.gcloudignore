@@ -1,0 +1,9 @@
+.gcloudignore
+.dockerignore
+node_modules
+test
+scripts
+smoke-assets
+cloudrun.env.yaml
+env.example
+*.log

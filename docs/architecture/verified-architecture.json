@@ -1,0 +1,61 @@
+{
+  "checked_on": "2026-10-07",
+  "timezone": "Asia/Taipei",
+  "scope": "User-specified OOTIE Personal Cloud Run Development website",
+  "website": {
+    "url": "https://ootie-web-dev-s5nwal7adq-as.a.run.app/",
+    "http_status": 200,
+    "title": "OOTIE｜數位衣櫥與穿搭社群",
+    "service": "ootie-web-dev",
+    "revision": "ootie-web-dev-dev-20261005-a541e222",
+    "traffic_percent": 100
+  },
+  "gateway": {
+    "url": "https://ootie-ai-gateway-dev-s5nwal7adq-as.a.run.app/",
+    "health_status": 200,
+    "provider": "google_cloud",
+    "revision": "ootie-ai-gateway-dev-dev-20261005-31ee4231",
+    "traffic_percent": 100,
+    "project": "ferrous-phoenix-16888",
+    "region": "asia-southeast1",
+    "models": {
+      "styling": "gemini-3.5-flash",
+      "virtual_try_on": "virtual-try-on-001",
+      "outfit_preview": "gemini-3.1-flash-image"
+    },
+    "image_generation_enabled": true,
+    "images_per_user_per_day": 3
+  },
+  "supabase": {
+    "name": "OOTIE-personal-dev",
+    "project_ref": "hoxkrmadzjnyjaqjbyxc",
+    "dashboard": "https://supabase.com/dashboard/project/hoxkrmadzjnyjaqjbyxc",
+    "status": "ACTIVE_HEALTHY",
+    "region": "ap-southeast-1",
+    "postgres_major_version": "17",
+    "public_tables": 15,
+    "all_public_tables_rls_enabled": true,
+    "private_buckets": ["ootie-ai-private", "ootie-closet-media"],
+    "public_buckets": ["ootie-bookmarks-images", "ootie-ootd-images", "ootie-profile-avatars"],
+    "deployed_edge_functions": 0,
+    "realtime_publication_tables": 0
+  },
+  "frontend_source": ["Vue 3", "Composition API", "Pinia", "Vue Router", "Vite", "HTML", "CSS", "JavaScript", "Chart.js", "tus-js-client"],
+  "backend_source": ["Node.js native HTTP", "Fetch", "Sharp", "Supabase REST and SQL RPC", "JWT validation"],
+  "uiux_source": ["Responsive sidebar and mobile bottom navigation", "CSS design tokens", "DM Sans", "Playfair Display", "Shared modal, button, field and toast components", "Keyboard focus trap and restoration", "Escape dismissal", "Reduced motion", "Upload previews and operation states"],
+  "other_source_integrations": ["Open-Meteo weather and geocoding", "PWA manifest and service worker", "Separate Chrome Manifest V3 extension"],
+  "testing_tools_source": ["Vitest", "Vue Test Utils", "Happy DOM", "Playwright", "Node native tests", "SQL schema validators"],
+  "deployment_source": ["Docker", "Nginx", "Google Cloud Build", "Google Cloud Run"],
+  "github": {
+    "local_remote_configured": false,
+    "team_repository_opened": "https://github.com/ai-learners2026-team01/ootie-web",
+    "team_repository_is_current_cloud_run_source": "NOT_CONFIRMED; inspected package and services differ",
+    "independent_personal_repository": "UNKNOWN",
+    "automatic_github_to_cloud_run_deployment": "NOT_CONFIRMED"
+  },
+  "production": "Local release documents state not deployed; no Production services were returned in the verified Cloud Run project and region",
+  "verification_limits": "Runtime endpoint, revisions, environment model names and Supabase metadata were read live. UI/UX, optional integrations and test tools were identified from current local source; no full user journey or paid AI inference was exercised.",
+  "paid_ai_inference_requests_in_this_check": 0,
+  "remote_mutations_in_this_check": 0,
+  "diagram": "OOTIE-technology-architecture.png"
+}

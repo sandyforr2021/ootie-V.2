@@ -1,0 +1,15 @@
+{
+  "name": "OOTIE 數位衣櫥",
+  "short_name": "OOTIE",
+  "description": "數位衣櫥、穿搭靈感、Style SOS 與 AI 視覺預覽。",
+  "lang": "zh-Hant",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffaf5",
+  "theme_color": "#fffaf5",
+  "icons": [
+    { "src": "/ootie-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

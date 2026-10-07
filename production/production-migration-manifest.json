@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "status": "BLOCKED",
+  "environment": "production",
+  "sourceRange": "001-027",
+  "rules": {
+    "allowDemoSeed": false,
+    "allowDevelopmentUrls": false,
+    "allowHardcodedUserIds": false,
+    "requireCleanRehearsal": true
+  },
+  "migrations": [
+    { "range": "001-019", "action": "REVIEW_APPLY", "reason": "Core schema; remove stale Development target comments and complete final policy review." },
+    { "range": "020", "action": "REPLACE", "reason": "Development demo subscription/payment RPCs must become a Production-safe entitlement and points contract." },
+    { "range": "021", "action": "EXCLUDE", "reason": "Development saved-outfit seed grant." },
+    { "range": "022", "action": "REVIEW_APPLY", "reason": "Useful remote social/import/weather schema; Development annotation and grants need Production review." },
+    { "range": "023", "action": "EXCLUDE", "reason": "Development service-role social seed/smoke grant." },
+    { "range": "024", "action": "APPLY", "reason": "RLS helper ACL hardening." },
+    { "range": "025", "action": "REBASE", "reason": "Index must follow the Production replacement for migration 020." },
+    { "range": "026", "action": "APPLY", "reason": "Private original/derivative clothing media lifecycle." },
+    { "range": "027", "action": "APPLY", "reason": "Trigger-only SECURITY DEFINER ACL hardening." }
+  ],
+  "excludedData": [
+    "development presenter account",
+    "fake social profiles, OOTD and SOS content",
+    "demo saved outfits",
+    "demo subscription and simulated purchase state",
+    "presentation notifications",
+    "development AI smoke ledger rows"
+  ]
+}
+

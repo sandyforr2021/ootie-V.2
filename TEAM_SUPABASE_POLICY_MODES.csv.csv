@@ -1,0 +1,31 @@
+schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check
+public,ootie_bookmarks,Users can delete own bookmarks,PERMISSIVE,{public},DELETE,"(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))",null
+public,ootie_bookmarks,Users can delete their own bookmarks,PERMISSIVE,{public},DELETE,(auth.uid() = owner_id),null
+public,ootie_bookmarks,Users can insert own bookmarks,PERMISSIVE,{public},INSERT,null,"(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))"
+public,ootie_bookmarks,Users can insert their own bookmarks,PERMISSIVE,{public},INSERT,null,(auth.uid() = owner_id)
+public,ootie_bookmarks,Users can update own bookmarks,PERMISSIVE,{public},UPDATE,"(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))","(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))"
+public,ootie_bookmarks,Users can update their own bookmarks,PERMISSIVE,{public},UPDATE,(auth.uid() = owner_id),(auth.uid() = owner_id)
+public,ootie_bookmarks,Users can view own bookmarks,PERMISSIVE,{public},SELECT,"(owner_id = ( SELECT ootie_profiles.id
+   FROM ootie_profiles
+  WHERE (ootie_profiles.user_id = auth.uid())))",null
+public,ootie_bookmarks,Users can view their own bookmarks,PERMISSIVE,{public},SELECT,(auth.uid() = owner_id),null
+public,ootie_clothing_items,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_notifications,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_ootd_posts,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_outfit_suggestions,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_post_likes,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_profiles,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_saved_posts,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+public,ootie_sos_posts,Enable read access for all users,PERMISSIVE,{public},SELECT,true,null
+storage,objects,Bookmark images are viewable by everyone,PERMISSIVE,{public},SELECT,(bucket_id = 'ootie-bookmarks-images'::text),null
+storage,objects,Users can delete their own bookmark images,PERMISSIVE,{public},DELETE,((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text)),null
+storage,objects,Users can update their own bookmark images,PERMISSIVE,{public},UPDATE,((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text)),((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text))
+storage,objects,Users can upload their own bookmark images,PERMISSIVE,{public},INSERT,null,((bucket_id = 'ootie-bookmarks-images'::text) AND (auth.role() = 'authenticated'::text))

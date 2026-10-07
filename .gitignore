@@ -1,0 +1,81 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic data
+.pnpm-debug.log*
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Vite / Vitest cache
+.vite/
+.vitest/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+DEMO_ACCOUNT.local.md
+coverage/
+test-results/
+scripts/assets/demo-capture-backgrounds/
+scripts/assets/demo-garments-capture/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Personal database backups (may contain private data)
+pre_migration_backup/
+pre_batch_sql_backup/
+supabase_batch_logs/
+_old_inventory/
+supabase/.temp/
+
+# Legacy credential/config exports; never include in the personal baseline.
+**/SUPABASE.env.txt
+
+# Nested duplicate project; the canonical root is this directory.
+/OOTIE-main/
+
+# Production release work may use local rendered templates, but their values
+# and any exported secrets must never be committed.
+deploy/production/*.local.*
+production/*.local.*
+production/secrets/
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local verification, environment exports and private credentials
+verification/
+gateway/cloudrun.env.yaml
+gateway/cloudrun*.local.*
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+*credentials*.json
+supabase/personal_baseline.rar
+playwright-report/
+/outputs/
+/backups/

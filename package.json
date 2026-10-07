@@ -1,0 +1,45 @@
+{
+  "name": "ootie",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "seed:demo": "node scripts/seed-demo-data.mjs",
+    "sync:demo-media": "node scripts/sync-demo-media.mjs",
+    "audit:demo": "node scripts/audit-demo-data.mjs",
+    "smoke:ootd-consistency": "node scripts/smoke-ootd-consistency.mjs",
+    "preview": "vite preview",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "test": "npm run test:unit && npm run test:isolation && npm run test:gateway && npm run test:schema",
+    "test:unit": "vitest run",
+    "test:unit:targeted": "vitest run src/contracts/__tests__ src/services/__tests__ src/components/ui/__tests__ src/directives/__tests__ src/router/__tests__",
+    "test:isolation": "node --test tests/supabase-isolation.test.mjs tests/demo-seed.test.mjs tests/pwa-foundation.test.mjs tests/media-integrity.test.mjs tests/media-safety.test.mjs",
+    "test:gateway": "node --test --test-isolation=none gateway/test/*.test.js",
+    "test:e2e": "playwright test",
+    "test:schema": "node supabase/personal_baseline/tests/validate_auth_identity.mjs && node supabase/personal_baseline/tests/validate_clothing_ownership.mjs && node supabase/personal_baseline/tests/validate_ootd_publish_015.mjs && node supabase/personal_baseline/tests/validate_profile_account_013.mjs && node supabase/personal_baseline/tests/validate_saved_outfits_014.mjs && node supabase/personal_baseline/tests/validate_ai_gateway_016.mjs && node supabase/personal_baseline/tests/validate_demo_subscription_020.mjs && node supabase/personal_baseline/tests/validate_phase3_022.mjs && node supabase/personal_baseline/tests/validate_clothing_media_026.mjs && node supabase/personal_baseline/tests/validate_production_readiness_027.mjs",
+    "audit:orphan-media": "node scripts/audit-orphan-media.mjs",
+    "check:production-readiness": "node scripts/validate-production-readiness.mjs",
+    "smoke:clothing-media": "node scripts/smoke-clothing-media-remote.mjs",
+    "test:schema:ai": "node supabase/personal_baseline/tests/validate_ai_gateway_016.mjs",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "chart.js": "^4.5.1",
+    "pinia": "^2.1.7",
+    "tus-js-client": "4.3.1",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.14.5",
+    "jsdom": "^27.4.0",
+    "vite": "^5.1.6",
+    "vitest": "^3.2.4"
+  }
+}

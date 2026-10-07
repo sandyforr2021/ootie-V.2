@@ -1,0 +1,2 @@
+# Preserve the snapshot bytes across platforms, including hash-verified SQL.
+* -text
