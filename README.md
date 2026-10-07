@@ -1,6 +1,6 @@
 # OOTIE Personal
 
-目前狀態：LOCAL_READY_NOT_UPLOADED。2026-10-07 建立 GitHub 私人倉庫時 API 回傳 HTTP 500，網頁也無法檢查名稱；下方 GitHub URL 是預定位置，尚未建立或上傳成功。本機原始碼、測試與文件已準備完成。
+GitHub 私人倉庫： [sandyforr2021-debug/ootie-personal](https://github.com/sandyforr2021-debug/ootie-personal)。原始碼、測試與小組開發文件保存在本倉庫；GitHub 存取權限由擁有者管理。
 
 這是獨立於團隊原始倉庫的 OOTIE Personal 專案，保存目前 Vue 前端、Google Cloud AI Gateway、Supabase schema、測試與操作文件。倉庫由 sandyforr2021-debug 擁有，供受邀小組成員協作。
 
@@ -13,7 +13,7 @@
 | 網站 | https://ootie-web-dev-s5nwal7adq-as.a.run.app/ |
 | AI Gateway | https://ootie-ai-gateway-dev-s5nwal7adq-as.a.run.app/ |
 | Supabase | OOTIE-personal-dev（hoxkrmadzjnyjaqjbyxc） |
-| 預定原始碼倉庫（尚未建立） | https://github.com/sandyforr2021-debug/OOTIE-Personal |
+| 獨立私人原始碼倉庫 | https://github.com/sandyforr2021-debug/ootie-personal |
 
 這次建立倉庫不包含部署更新、資料庫 migration、資料重置、Google Cloud／Supabase 成員邀請或付費 AI 請求。Production 仍未上線。
 
@@ -39,8 +39,8 @@ GitHub 協作者可讀寫程式碼；Cloud Run／Supabase 管理權限另外配�
 需求：Node.js 22 以上、npm、Git。
 
 ```powershell
- git clone https://github.com/sandyforr2021-debug/OOTIE-Personal.git
- cd OOTIE-Personal
+ git clone https://github.com/sandyforr2021-debug/ootie-personal.git
+ cd ootie-personal
  npm ci
  npm ci --prefix gateway
  Copy-Item .env.example .env.local
