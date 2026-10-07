@@ -1,5 +1,7 @@
 # OOTIE Personal
 
+目前狀態：LOCAL_READY_NOT_UPLOADED。2026-10-07 建立 GitHub 私人倉庫時 API 回傳 HTTP 500，網頁也無法檢查名稱；下方 GitHub URL 是預定位置，尚未建立或上傳成功。本機原始碼、測試與文件已準備完成。
+
 這是獨立於團隊原始倉庫的 OOTIE Personal 專案，保存目前 Vue 前端、Google Cloud AI Gateway、Supabase schema、測試與操作文件。倉庫由 sandyforr2021-debug 擁有，供受邀小組成員協作。
 
 初始快照建立於 2026-10-07，來源為現有 OOTIE-main 工作資料夾，包含目前修改與新增的應用程式檔案。Git 歷史重新開始；legacy、舊 Git 歷史、本機帳密、資料備份與執行紀錄未帶入。保留既有團隊程式的貢獻與來源。
@@ -11,7 +13,7 @@
 | 網站 | https://ootie-web-dev-s5nwal7adq-as.a.run.app/ |
 | AI Gateway | https://ootie-ai-gateway-dev-s5nwal7adq-as.a.run.app/ |
 | Supabase | OOTIE-personal-dev（hoxkrmadzjnyjaqjbyxc） |
-| 原始碼 | https://github.com/sandyforr2021-debug/OOTIE-Personal |
+| 預定原始碼倉庫（尚未建立） | https://github.com/sandyforr2021-debug/OOTIE-Personal |
 
 這次建立倉庫不包含部署更新、資料庫 migration、資料重置、Google Cloud／Supabase 成員邀請或付費 AI 請求。Production 仍未上線。
 

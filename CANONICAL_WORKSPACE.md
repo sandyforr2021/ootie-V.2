@@ -1,6 +1,6 @@
 # OOTIE Personal Canonical Workspace
 
-The active workspace is the root of this independent repository, returned by `git rev-parse --show-toplevel`. Repository: sandyforr2021-debug/OOTIE-Personal.
+The active workspace is the root of this independent local repository, returned by `git rev-parse --show-toplevel`. Planned GitHub repository: sandyforr2021-debug/OOTIE-Personal. Initial remote creation is pending an HTTP 500 service error; no remote is configured yet.
 
 The original OOTIE-main checkout, nested mirror, legacy, backups and previous Git history are not part of this repository. Work in this clone when contributing to the independent project.
 
