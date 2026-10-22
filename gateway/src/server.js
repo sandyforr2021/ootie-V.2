@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
+import { readFile } from 'node:fs/promises';
 import { createStaticSite } from './staticSite.js';
 import { loadConfig } from './config.js';
 import { createGatewayApp, readJsonBody } from './app.js';
@@ -14,7 +15,14 @@ import { YouCamClient } from './commerce/youcamClient.js';
 import { CommerceJobWorker, startCommerceWorker } from './commerce/jobWorker.js';
 
 const config = loadConfig();
-const serveSite = process.env.SERVE_WEB_APP === 'true' ? createStaticSite(fileURLToPath(new URL('../../dist', import.meta.url))) : null;
+const webRoot = fileURLToPath(new URL('../../dist', import.meta.url));
+const serveSite = process.env.SERVE_WEB_APP === 'true' ? createStaticSite(webRoot,{revision:process.env.RENDER_GIT_COMMIT}) : null;
+if (serveSite) {
+  const html = await readFile(new URL('../../dist/index.html',import.meta.url),'utf8');
+  const entry = html.match(/src="(\/assets\/[A-Za-z0-9_-]+\.js)"/)?.[1];
+  if (!entry) throw new Error('Built frontend entry is missing');
+  console.log(`OOTIE frontend entry ${entry}`);
+}
 const provider = config.competitionMode
   ? { healthCheck: async () => ({ provider: 'youcam', configured: !!config.youcam.apiKey }) }
   : createGoogleAiProvider(config);
