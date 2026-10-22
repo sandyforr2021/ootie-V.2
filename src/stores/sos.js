@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import { genuineContent } from '@/services/contentAuthenticity';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
@@ -35,10 +36,10 @@ export const useSosStore = defineStore('sos', () => {
       if (!result) throw new Error('REMOTE_WRITE_FAILED');
       if (profileId !== authStore.profileId) return false;
       apply(result);
-      appStore.showToast(message, { type: 'success', syncStatus: 'SYNCED' });
+      appStore.showToast(t(message), { type: 'success', syncStatus: 'SYNCED' });
       return true;
     } catch {
-      appStore.showToast('尚未儲存成功，請稍後再試。', { type: 'error', syncStatus: 'REMOTE_FAILED' });
+      appStore.showToast(t('尚未儲存成功，請稍後再試。'), { type: 'error', syncStatus: 'REMOTE_FAILED' });
       return false;
     } finally { pending.value.delete(key); }
   };
@@ -188,7 +189,7 @@ export const useSosStore = defineStore('sos', () => {
     const finalItemIds = [...new Set(requestedItemIds.map((id) => String(id)))]
       .filter((id) => ownedItemIds.has(id));
     if (!finalItemIds.length) {
-      appStore.showToast('請至少選擇 1 件要公開給衣友的衣物。');
+      appStore.showToast(t('請至少選擇 1 件要公開給衣友的衣物。'));
       return false;
     }
 
@@ -224,12 +225,12 @@ export const useSosStore = defineStore('sos', () => {
 
     // Self-suggestion guard
     if (targetSos.sender_id === profileId) {
-      appStore.showToast('你不能為自己的求救貼文提交搭配建議。');
+      appStore.showToast(t('你不能為自己的求救貼文提交搭配建議。'));
       return false;
     }
 
     if (targetSos.status !== 'OPEN') {
-      appStore.showToast('這筆求救已結束，無法提交搭配建議。');
+      appStore.showToast(t('這筆求救已結束，無法提交搭配建議。'));
       return false;
     }
 
@@ -241,7 +242,7 @@ export const useSosStore = defineStore('sos', () => {
     const validSelectedIds = [...new Set((Array.isArray(selectedIds) ? selectedIds : []).map((id) => String(id)))]
       .filter((id) => sharedIdSet.has(id) && availableIdSet.has(id));
     if (!validSelectedIds.length || validSelectedIds.length !== (Array.isArray(selectedIds) ? selectedIds.length : 0)) {
-      appStore.showToast('只能使用這筆求救公開的衣物。');
+      appStore.showToast(t('只能使用這筆求救公開的衣物。'));
       return false;
     }
 

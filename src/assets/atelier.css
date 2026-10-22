@@ -117,3 +117,14 @@ main{max-width:1510px;padding:24px clamp(24px,4vw,64px) 64px;margin-inline:auto}
 .detail-source-links{display:flex;flex-wrap:wrap;gap:12px 20px;margin:20px 0}
 .detail-source-links a{display:inline-flex;gap:6px;align-items:center;min-height:44px;text-decoration:underline;text-underline-offset:4px;color:var(--accent)}
 .detail-source-links small{flex-basis:100%;color:var(--muted);line-height:1.5}
+
+/* Request controls grow with translated labels and user-written titles. */
+#sosPage .sos-meta,#sosPage .sos-card-actions,.sos-detail-modal .sos-suggestion-actions{flex-wrap:wrap}
+#sosPage .sos-feed-card h2,.sos-detail-heading h2{overflow-wrap:anywhere;line-height:1.4}
+.sos-form-modal .form-field,.suggestion-form-modal .form-field{min-width:0}
+.sos-form-modal .form-grid select{width:100%;min-width:0}
+.sos-form-modal .vibe-options{flex-wrap:wrap}
+.sos-form-modal .sos-share-tools{gap:12px;flex-wrap:wrap}
+:lang(zh-TW) #sosPage .sos-feed-card h2,:lang(ja) #sosPage .sos-feed-card h2{letter-spacing:.015em;line-height:1.55}
+@media(max-width:600px){.sos-form-modal .form-grid{grid-template-columns:1fr}.sos-detail-modal .sos-suggestions-header{align-items:flex-start;gap:12px;flex-wrap:wrap}}
+.sos-form-fields{border:0;margin:0;padding:0;min-width:0}

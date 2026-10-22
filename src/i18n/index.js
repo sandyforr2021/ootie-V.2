@@ -31,11 +31,15 @@ export function translateFor(language, key, english) {
   return entry?.[language] || entry?.en || english || key;
 }
 export function t(key, english) { return translateFor(activeLocale.value, key, english); }
+export function tf(key, values = {}) {
+  return t(key).replace(/\{(\w+)\}/g, (placeholder, name) => Object.hasOwn(values, name) ? String(values[name]) : placeholder);
+}
 export function formatDate(value, options = {}) {
   const date = new Date(value);
   return Number.isNaN(+date) ? '' : new Intl.DateTimeFormat(activeLocale.value, options).format(date);
 }
 export function installI18n(app) {
   app.config.globalProperties.$t = t;
+  app.config.globalProperties.$tf = tf;
   setLocale(activeLocale.value);
 }

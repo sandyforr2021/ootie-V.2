@@ -4,7 +4,7 @@
       <div>
         <p class="eyebrow">Style SOS</p>
         <h1>{{ $t("穿搭求救") }}</h1>
-        <p class="intro">衣友正在求救，從她真正擁有的衣櫥裡幫她搭一套。</p>
+        <p class="intro">{{ t("衣友正在求救，從她真正擁有的衣櫥裡幫她搭一套。") }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">real people<br />real style ♡</p>
     </header>
@@ -16,15 +16,15 @@
         <input
           v-model="sosStore.searchQuery"
           type="search"
-          placeholder="搜尋場合或穿搭需求"
-          aria-label="搜尋場合或穿搭需求"
+          :placeholder="t('搜尋場合或穿搭需求')"
+          :aria-label="t('搜尋場合或穿搭需求')"
         />
       </label>
-      <button class="primary" @click="openSosForm">＋ 發布求救</button>
+      <button class="primary" @click="openSosForm()">＋ {{ t('發布求救') }}</button>
     </div>
 
     <!-- Tabs: 衣友求救板 vs 我發出的求救 -->
-    <div class="sos-tabs" role="tablist" aria-label="穿搭求救分類">
+    <div class="sos-tabs" role="tablist" :aria-label="t('穿搭求救分類')">
       <button
         :class="['sos-tab', { active: sosStore.activeTab === 'received' }]"
         type="button"
@@ -32,7 +32,7 @@
         :aria-selected="sosStore.activeTab === 'received'"
         @click="sosStore.activeTab = 'received'"
       >
-        衣友求救板 ({{ sosStore.receivedSosPosts.length }})
+        {{ t("衣友求救板") }} ({{ sosStore.receivedSosPosts.length }})
       </button>
       <button
         :class="['sos-tab', { active: sosStore.activeTab === 'sent' }]"
@@ -41,7 +41,7 @@
         :aria-selected="sosStore.activeTab === 'sent'"
         @click="sosStore.activeTab = 'sent'"
       >
-        我發出的求救 ({{ sosStore.sentSosPosts.length }})
+        {{ t("我發出的求救") }} ({{ sosStore.sentSosPosts.length }})
       </button>
     </div>
 
@@ -59,7 +59,7 @@
             <div>
               <strong>{{ post.username }}</strong>
               <span>{{ $t("穿搭求救") }}<em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
-                  {{ post.status }}
+                  {{ t(post.status === 'CLOSED' ? '已結束' : '公開中') }}
                 </em>
               </span>
             </div>
@@ -68,12 +68,12 @@
           <h2>{{ post.title }}</h2>
 
           <div class="sos-meta">
-            <span>場合｜{{ post.occasion }}</span>
-            <span>天氣｜{{ post.weather }}</span>
-            <span>時間｜{{ post.when_label }}</span>
+            <span>{{ t("場合") }} · {{ t(post.occasion) }}</span>
+            <span>{{ t("天氣") }} · {{ t(post.weather) }}</span>
+            <span>{{ t("穿著時機") }} · {{ t(post.when_label) }}</span>
           </div>
 
-          <div class="sos-vibes">想呈現：{{ (post.vibes || []).join('　') }}</div>
+          <div class="sos-vibes">{{ t('想呈現的風格') }} · {{ (post.vibes || []).map(v => t(v)).join(' · ') }}</div>
 
           <!-- Public closet items preview thumbnails -->
           <div v-if="getPublicItemThumbs(post).length" class="sos-card-clothing-preview">
@@ -90,7 +90,7 @@
                 v-if="getPublicItemThumbs(post).length > 5"
                 type="button"
                 class="sos-card-clothing-more"
-                :aria-label="`查看 ${getPublicItemThumbs(post).length - 5} 件更多公開衣物並幫她搭配`"
+                :aria-label="tf('查看另外 {count} 件公開衣物', { count: getPublicItemThumbs(post).length - 5 })"
                 @click="openSuggestion(post.id)"
               >
                 ＋{{ getPublicItemThumbs(post).length - 5 }} {{ $t("更多") }}</button>
@@ -99,8 +99,7 @@
 
           <div class="sos-card-footer">
             <span class="sos-available">
-              {{ (post.closet_item_ids || []).length }} 件公開衣物 ·
-              {{ sosStore.getHelperCountForSos(post.id) }} 位衣友建議
+              {{ tf('{count} 件公開衣物 · {helpers} 位衣友建議', { count: (post.closet_item_ids || []).length, helpers: sosStore.getHelperCountForSos(post.id) }) }}
             </span>
 
             <div class="sos-card-actions">
@@ -109,11 +108,11 @@
                 :class="['sos-cta', 'secondary-btn', { saved: post.saved }]"
                 @click="sosStore.toggleSave(post.id)"
               >
-                {{ post.saved ? '▣ 已收藏' : '♡ 收藏' }}
+                {{ post.saved ? '▣ ' + t('已收藏') : '♡ ' + t('收藏') }}
               </button>
               <!-- View detail button -->
               <button class="sos-cta secondary-btn" @click="openSosDetail(post.id)">
-                查看詳情
+                {{ t("查看詳情") }}
               </button>
 
               <!-- Suggest button for received tab -->
@@ -122,7 +121,7 @@
                 class="sos-cta"
                 @click="openSuggestion(post.id)"
               >
-                幫她搭配
+                {{ t("幫她搭配") }}
               </button>
 
               <!-- Explicit close button for sent tab -->
@@ -132,7 +131,7 @@
                 style="background:#a65f5b;"
                 @click="openCloseConfirm(post.id)"
               >
-                結束求救
+                {{ t("結束求救") }}
               </button>
             </div>
           </div>
@@ -140,13 +139,14 @@
       </template>
 
       <div v-else class="sos-empty">
-        {{ sosStore.activeTab === 'received' ? '目前沒有求救貼文，或找不到符合關鍵字的貼文。' : '你尚未發布任何穿搭求救。' }}
+        {{ t(sosStore.activeTab === 'received' ? '目前沒有求救貼文，或找不到符合關鍵字的貼文。' : '你尚未發布任何穿搭求救。') }}
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
+import { t, tf } from '@/i18n';
 import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '@/stores/app';
@@ -179,11 +179,11 @@ const openSuggestion = (sosId) => {
   const post = sosStore.sosPosts.find((item) => item.id === sosId);
   if (!post || post.status !== 'OPEN') return;
   if (post.sender_id === appStore.profile.id) {
-    appStore.showToast('你不能為自己的求救貼文提交搭配建議。');
+    appStore.showToast(t('你不能為自己的求救貼文提交搭配建議。'));
     return;
   }
   if (!Array.isArray(post.closet_item_ids) || post.closet_item_ids.length === 0) {
-    appStore.showToast('這筆求救沒有可使用的公開衣物。');
+    appStore.showToast(t('這筆求救沒有可使用的公開衣物。'));
     return;
   }
   appStore.activeSosId = sosId;
@@ -199,4 +199,11 @@ const openCloseConfirm = (sosId) => {
   appStore.sosToCloseId = sosId;
   appStore.isSosCloseConfirmOpen = true;
 };
+
+// Shared links can arrive before the public request list has loaded.
+watch(
+  () => sosStore.sosPosts.find(post => post.id === route.query.sos)?.id,
+  (sosId) => { if (sosId) openSosDetail(sosId); },
+  { immediate: true }
+);
 </script>

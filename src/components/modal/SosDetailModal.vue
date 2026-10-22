@@ -11,21 +11,21 @@
           <div>
             <strong>{{ targetPost.username }}</strong>
             <span>
-              狀態：
+              {{ t('狀態') }}:
               <em :class="['sos-status-badge', { 'is-closed': targetPost.status === 'CLOSED' }]">
-                {{ targetPost.status }}
+                {{ t(targetPost.status === 'CLOSED' ? '已結束' : '公開中') }}
               </em>
             </span>
           </div>
         </div>
 
         <div class="sos-meta">
-          <span>場合｜{{ targetPost.occasion }}</span>
-          <span>天氣｜{{ targetPost.weather }}</span>
-          <span>時機｜{{ targetPost.when_label }}</span>
+          <span>{{ t("場合") }} · {{ t(targetPost.occasion) }}</span>
+          <span>{{ t("天氣") }} · {{ t(targetPost.weather) }}</span>
+          <span>{{ t("穿著時機") }} · {{ t(targetPost.when_label) }}</span>
         </div>
 
-        <div class="sos-vibes">想呈現：{{ (targetPost.vibes || []).join('　') }}</div>
+        <div class="sos-vibes">{{ t('想呈現的風格') }} · {{ (targetPost.vibes || []).map(v => t(v)).join(' · ') }}</div>
 
         <p v-if="targetPost.details" style="color:var(--ink); font-size:14px; line-height:1.6; margin-top:12px;">
           {{ targetPost.details }}
@@ -34,7 +34,7 @@
 
       <!-- Public Closet Gallery Section -->
       <div class="sos-detail-gallery">
-        <h3>本次公開的衣物 ({{ publicItems.length }} 件)</h3>
+        <h3>{{ t('本次公開的衣物') }} ({{ publicItems.length }})</h3>
         <div v-if="publicItems.length" class="sos-detail-gallery-grid">
           <div v-for="item in publicItems" :key="item.id" class="sos-detail-gallery-item">
             <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
@@ -42,7 +42,7 @@
           </div>
         </div>
         <p v-else style="color:var(--muted); font-size:13px; font-style:italic;">
-          這是歷史求救貼文，當時公開的衣物清單未被保存。
+          {{ t("這是歷史求救貼文，當時公開的衣物清單未被保存。") }}
         </p>
       </div>
 
@@ -50,21 +50,21 @@
       <div style="margin: 20px 0; display:flex; gap:12px; justify-content: flex-end;">
         <button type="button" class="secondary" @click="shareSos">{{ $t("分享連結") }}</button>
         <button type="button" class="secondary" @click="toggleSave">
-          {{ targetPost.saved ? '▣ 已收藏' : '♡ 收藏' }}
+          {{ targetPost.saved ? '▣ ' + t('已收藏') : '♡ ' + t('收藏') }}
         </button>
         <button
           v-if="isOwner && targetPost.status === 'OPEN'"
           class="secondary"
           @click="openCloseConfirm"
         >
-          結束這次求救
+          {{ t("結束這次求救") }}
         </button>
         <button
           v-if="!isOwner && targetPost.status === 'OPEN'"
           class="primary"
           @click="openSuggestionForm"
         >
-          幫她搭配
+          {{ t("幫她搭配") }}
         </button>
       </div>
 
@@ -72,10 +72,10 @@
       <div class="sos-suggestions-section">
         <div class="sos-suggestions-header">
           <h3 style="font-size:16px; font-weight:600;">
-            搭配建議與回覆 ({{ suggestions.length }})
+            {{ t('搭配建議與回覆') }} ({{ suggestions.length }})
           </h3>
           <span style="color:var(--muted); font-size:12px;">
-            Helper 人數：{{ helperCount }} 人
+            {{ tf('{count} 位提案者', { count: helperCount }) }}
           </span>
         </div>
 
@@ -86,7 +86,7 @@
             :class="['sos-suggestion-card', { 'is-adopted': targetPost.adopted_suggestion_id === sug.id }]"
           >
             <div v-if="targetPost.adopted_suggestion_id === sug.id" class="sos-adopt-badge">
-              ★ 發布者已採納
+              ★ {{ t('發布者已採納') }}
             </div>
 
             <p style="font-size:14px; color:var(--ink); line-height:1.6; margin:6px 0;">
@@ -106,7 +106,7 @@
 
             <div class="sos-suggestion-actions">
               <span style="color:var(--muted); font-size:11px;">
-                {{ new Date(sug.created_at).toLocaleDateString() }}
+                {{ formatDate(sug.created_at) }}
               </span>
 
               <div style="display:flex; gap:10px; align-items:center;">
@@ -116,7 +116,7 @@
                   :class="['sos-like-btn', { liked: (targetPost.liked_suggestion_ids || []).includes(sug.id) }]"
                   @click="toggleLike(sug.id)"
                 >
-                  {{ (targetPost.liked_suggestion_ids || []).includes(sug.id) ? '♥ 已喜歡' : '♡ 喜歡' }}
+                  {{ (targetPost.liked_suggestion_ids || []).includes(sug.id) ? '♥ ' + t('已喜歡') : '♡ ' + t('喜歡') }}
                 </button>
 
                 <!-- Adopt button (only for SOS owner) -->
@@ -126,14 +126,14 @@
                   :style="{ background: targetPost.adopted_suggestion_id === sug.id ? 'var(--sage-dark)' : 'var(--ink)' }"
                   @click="adopt(sug.id)"
                 >
-                  {{ targetPost.adopted_suggestion_id === sug.id ? '取消採納' : '採用搭配' }}
+                  {{ targetPost.adopted_suggestion_id === sug.id ? t('取消採納') : t('採用搭配') }}
                 </button>
               </div>
             </div>
           </div>
         </div>
         <div v-else style="padding: 24px; text-align:center; color:var(--muted); font-size:13px; border:1px dashed var(--line); border-radius:12px;">
-          目前還沒有衣友提供搭配建議。
+          {{ t("目前還沒有衣友提供搭配建議。") }}
         </div>
       </div>
     </section>
@@ -141,6 +141,7 @@
 </template>
 
 <script setup>
+import { t, tf, formatDate } from '@/i18n';
 import { computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
@@ -176,7 +177,7 @@ watch(targetPost, (post) => {
   if (!post) return;
   updatePublicContentMeta({
     title: `${post.title}｜OOTIE 穿搭 SOS`,
-    description: String(post.details || '一起看看這則穿搭求救').slice(0, 160),
+    description: String(post.details || t('一起看看這則穿搭求救')).slice(0, 160),
     image: publicItems.value[0]?.photo || '',
     url: `${window.location.origin}/sos?sos=${encodeURIComponent(post.id)}`
   });
@@ -211,14 +212,14 @@ const shareSos = async () => {
   const url = `${window.location.origin}/sos?sos=${encodeURIComponent(targetPost.value.id)}`;
   try {
     if (navigator.share) {
-      await navigator.share({ title: targetPost.value.title || 'OOTIE 穿搭 SOS', text: '一起看看這則穿搭求救', url });
-      appStore.showToast('已完成分享', { type: 'success' });
+      await navigator.share({ title: targetPost.value.title || 'OOTIE 穿搭 SOS', text: t('一起看看這則穿搭求救'), url });
+      appStore.showToast(t('已完成分享'), { type: 'success' });
       return;
     }
     await navigator.clipboard.writeText(url);
-    appStore.showToast('SOS 連結已複製', { type: 'success' });
+    appStore.showToast(t('SOS 連結已複製'), { type: 'success' });
   } catch (error) {
-    if (error?.name !== 'AbortError') appStore.showToast('無法分享連結，請稍後再試。', { type: 'error' });
+    if (error?.name !== 'AbortError') appStore.showToast(t('無法分享連結，請稍後再試。'), { type: 'error' });
   }
 };
 

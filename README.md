@@ -1,8 +1,8 @@
 # OOTIE Personal
 
-> 2026-10-22 YouCam 參賽改版進行中：購物試穿與工作池位於本機 `/shop`，免費額度保護已啟用，但真實產圖尚待驗收。新版尚未對外部署。[進度表](docs/PROJECT_PROGRESS.md) · [資料庫隔離與啟動說明](docs/YOUCAM_HANDOFF.md)。
+> 2026-10-23 YouCam 參賽預覽已部署：https://ootie-youcam-jury.onrender.com/ 。真實試穿、AI 模特兒膚色流程及線上評審登入／私人相簿已驗收；其餘未完成事項以進度表為準。[進度表](docs/PROJECT_PROGRESS.md) · [資料庫隔離與啟動說明](docs/YOUCAM_HANDOFF.md)。
 
-目前 Git 遠端倉庫：[sandyforr2021/ootie-V.2](https://github.com/sandyforr2021/ootie-V.2)。原始碼、測試與小組開發文件保存在此；存取權限由擁有者管理。下方環境表記錄前一階段部署，不代表本輪改版已上線。
+目前 Git 遠端倉庫：[sandyforr2021/ootie-V.2](https://github.com/sandyforr2021/ootie-V.2)。原始碼、測試與小組開發文件保存在此；存取權限由擁有者管理。下方環境表記錄前一階段 Cloud Run 部署；參賽預覽另列於頁首，舊部署未被取代。
 
 這份 OOTIE Personal 程式基礎包含 Vue 前端、Google Cloud AI Gateway、Supabase schema、測試與操作文件。本輪新增 YouCam 電商試穿體驗，保留既有團隊貢獻。
 

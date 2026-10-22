@@ -1,5 +1,15 @@
 # Free jury deployment
 
+## Live acceptance — 2026-10-22
+
+- URL: https://ootie-youcam-jury.onrender.com
+- Render service: `srv-dbd300psrm7s73bf4s0g`; deployment `dep-dbd3019srm7s73bf4tdg`, commit `5004bd3`, status **Deploy succeeded | Live**.
+- Free compute selected; existing OOTIE-only credentials transferred with explicit user approval. No payment method or paid add-on added.
+- Public HTTPS health and SPA routes return 200. Anonymous job access and `/.env` return 401.
+- Jury password login succeeds; prepared wardrobe and saved genuine YouCam try-on/color jobs load from the public origin. No additional generation was submitted.
+- Approved team SOS “A colorful weekend walk” persisted with exactly three selected wardrobe pieces; reload retains the request.
+- Remaining: full four-language coverage (SOS/profile still contain Chinese), Chrome installation acceptance, OAuth redirect configuration if used, and submission materials.
+
 The reviewed configuration is `render.yaml`: one **Free Node Web Service**, no new database, disk, paid worker, payment provider, or automatic deploy. It serves the compiled Vue app and `/api` gateway from one HTTPS origin. All persistent photos, queues and user records stay in OOTIE Supabase (`hoxkrmadzjnyjaqjbyxc`).
 
 ## Configure
