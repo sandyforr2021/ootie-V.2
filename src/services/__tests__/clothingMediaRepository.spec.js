@@ -6,8 +6,12 @@ import {
   uploadResumableOriginal,
   cleanupUploadedClothingMedia,
   hydratePrivateClothingPhotos,
+  hydrateSharedClothingPhotos,
+  releaseSharedClothingPhotoUrls,
   getAuthenticatedMediaUserId
 } from '../clothingMediaRepository';
+import { aiGateway } from '../aiGateway';
+vi.mock('../aiGateway', () => ({ aiGateway: { loadSharedClothingImage: vi.fn() } }));
 
 const defaultClient = vi.hoisted(() => ({ getUser: vi.fn() }));
 vi.mock('../supabase', () => ({ supabase: { auth: { getUser: defaultClient.getUser } } }));
@@ -15,6 +19,35 @@ vi.mock('../supabase', () => ({ supabase: { auth: { getUser: defaultClient.getUs
 const userId = '11111111-1111-4111-8111-111111111111';
 const itemId = '22222222-2222-4222-8222-222222222222';
 const operationId = '33333333-3333-4333-8333-333333333333';
+
+it('loads shared display media through the authorized gateway and revokes it when the account changes', async () => {
+  const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  aiGateway.loadSharedClothingImage.mockResolvedValue('blob:shared-display');
+  const client = { auth: { getSession: async () => ({ data: { session: { access_token: 'viewer-token' } } }) } };
+  const [item] = await hydrateSharedClothingPhotos([{ id: itemId, photo_display_path: 'display.webp' }], client);
+  expect(item.photo).toBe('blob:shared-display');
+  expect(aiGateway.loadSharedClothingImage).toHaveBeenCalledWith('viewer-token', itemId);
+  releaseSharedClothingPhotoUrls();
+  expect(revoke).toHaveBeenCalledWith('blob:shared-display');
+  revoke.mockRestore();
+  aiGateway.loadSharedClothingImage.mockReset();
+});
+
+it('discards a shared media response that finishes after logout', async () => {
+  let finish;
+  const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  aiGateway.loadSharedClothingImage.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const client = { auth: { getSession: async () => ({ data: { session: { access_token: 'old-viewer' } } }) } };
+  const pending = hydrateSharedClothingPhotos([{ id: itemId, photo_display_path: 'display.webp' }], client);
+  await Promise.resolve();
+  releaseSharedClothingPhotoUrls();
+  finish('blob:late-response');
+  const [item] = await pending;
+  expect(item.photo).toBe('');
+  expect(revoke).toHaveBeenCalledWith('blob:late-response');
+  revoke.mockRestore();
+  aiGateway.loadSharedClothingImage.mockReset();
+});
 
 const prepared = {
   originalFile: new Blob(['original'], { type: 'image/jpeg' }),

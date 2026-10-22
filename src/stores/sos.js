@@ -66,6 +66,7 @@ export const useSosStore = defineStore('sos', () => {
   // A new account must never inherit the previous account's saved state.
   const initFromSupabase = async () => {
     const version = ++loadVersion;
+    publicClosetItems.value = [];
     const profileId = authStore.isMember ? authStore.profileId : null;
     try {
       const remotePosts = genuineContent(await fetchSosPostsFromSupabase());

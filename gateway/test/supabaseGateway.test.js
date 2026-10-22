@@ -13,6 +13,49 @@ const config = {
   }
 };
 
+test('shared clothing authorizes with the viewer JWT before reading only the owner display image', async () => {
+  const itemId = '33333333-3333-4333-8333-333333333333';
+  const profileId = '22222222-2222-4222-8222-222222222222';
+  const path = `closet/${USER_ID}/${itemId}/operation/display.webp`;
+  const image = await sharp({ create: { width: 256, height: 256, channels: 3, background: 'white' } }).webp().toBuffer();
+  const calls = [];
+  const gateway = new SupabaseGateway({ config, fetchImpl: async (url, options) => {
+    calls.push({ url, options });
+    if (url.includes('/ootie_clothing_items?')) return Response.json([{ id: itemId, owner_id: profileId, photo_display_path: path }]);
+    if (url.includes('/ootie_profiles?')) return Response.json([{ user_id: USER_ID }]);
+    return new Response(image, { headers: { 'content-type': 'image/webp' } });
+  } });
+  const result = await gateway.sharedClothingImage({ accessToken: 'viewer-session' }, itemId);
+  assert.equal(calls[0].options.headers.Authorization, 'Bearer viewer-session');
+  assert.equal(calls[0].options.headers.apikey, 'publishable');
+  assert.equal(calls[2].url, `https://project.supabase.co/storage/v1/object/authenticated/ootie-closet-media/${path}`);
+  assert.equal(result.mimeType, 'image/jpeg');
+});
+
+test('unshared or revoked clothing never falls back to service-role row access', async () => {
+  const calls = [];
+  const gateway = new SupabaseGateway({ config, fetchImpl: async (url) => { calls.push(url); return Response.json([]); } });
+  await assert.rejects(gateway.sharedClothingImage({ accessToken: 'viewer-session' }, '33333333-3333-4333-8333-333333333333'), e => e.code === 'ITEM_NOT_FOUND');
+  assert.equal(calls.length, 1);
+  await assert.rejects(gateway.sharedClothingImage({}, '33333333-3333-4333-8333-333333333333'), e => e.code === 'AUTH_REQUIRED');
+  assert.equal(calls.length, 1);
+});
+
+test('shared clothing rejects originals and forged cross-owner display references before storage access', async () => {
+  const itemId = '33333333-3333-4333-8333-333333333333';
+  for (const path of [`closet/${USER_ID}/${itemId}/op/original.jpg`, `closet/99999999-9999-4999-8999-999999999999/${itemId}/op/display.jpg`]) {
+    let storageCalls = 0;
+    const gateway = new SupabaseGateway({ config, fetchImpl: async (url) => {
+      if (url.includes('/ootie_clothing_items?')) return Response.json([{ id: itemId, owner_id: '22222222-2222-4222-8222-222222222222', photo_display_path: path }]);
+      if (url.includes('/ootie_profiles?')) return Response.json([{ user_id: USER_ID }]);
+      storageCalls += 1;
+      return new Response('');
+    } });
+    await assert.rejects(gateway.sharedClothingImage({ accessToken: 'viewer-session' }, itemId));
+    assert.equal(storageCalls, 0);
+  }
+});
+
 test('person photo delete resolves an exact owner-scoped object before removal', async () => {
   const calls = [];
   const fetchImpl = async (url, options = {}) => {

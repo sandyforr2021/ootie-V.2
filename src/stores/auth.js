@@ -8,7 +8,7 @@ import { validatePublicProfileInput, validatePrivateProfileInput } from '@/servi
 import { uploadAvatar, removeAvatar } from '@/services/avatarService';
 import { signInWithProvider, consumeOAuthReturnTo } from '@/services/authProvider';
 import { useAppStore } from '@/stores/app';
-import { releasePrivateClothingPhotoUrls } from '@/services/clothingMediaRepository';
+import { releasePrivateClothingPhotoUrls, releaseSharedClothingPhotoUrls } from '@/services/clothingMediaRepository';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null);
@@ -102,6 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
       offerGuestImport();
 
       supabase.auth.onAuthStateChange((_event, currentSession) => {
+        if (user.value?.id !== currentSession?.user?.id) releaseSharedClothingPhotoUrls();
         // Supabase awaits this callback while holding its auth lock. Start
         // profile requests in a later task so other SDK calls can complete.
         profileResolutionVersion += 1;
@@ -317,6 +318,7 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Logout error:', err);
     } finally {
       releasePrivateClothingPhotoUrls();
+      releaseSharedClothingPhotoUrls();
       user.value = null;
       session.value = null;
       await resolveProfileIdentity(null);

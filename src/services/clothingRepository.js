@@ -5,7 +5,7 @@ import {
   ServiceError,
   normalizeServiceError
 } from './serviceError';
-import { hydratePrivateClothingPhotos } from './clothingMediaRepository';
+import { hydratePrivateClothingPhotos, hydrateSharedClothingPhotos } from './clothingMediaRepository';
 
 const isUuid = (str) =>
   typeof str === 'string' &&
@@ -139,10 +139,10 @@ export async function getPublicItemsByIds(itemIds, client = supabase) {
   try {
     const { data, error } = await client
       .from('ootie_clothing_items')
-      .select('id,owner_id,name,name_zh,brand,category,primary_color,photo')
+      .select('id,owner_id,name,name_zh,brand,category,primary_color,photo,photo_display_path')
       .in('id', ids);
     if (error) throw normalizeServiceError(error);
-    return genuineContent(data || []);
+    return await hydrateSharedClothingPhotos(genuineContent(data || []), client);
   } catch (err) {
     throw normalizeServiceError(err);
   }

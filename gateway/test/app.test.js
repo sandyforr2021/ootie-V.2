@@ -45,6 +45,13 @@ test('guest cannot call paid Virtual Try-On', async () => {
   assert.equal(paidCalls(), 0);
 });
 
+test('shared wardrobe images require a signed-in member', async () => {
+  const { app, paidCalls } = createApp({ authenticated: false });
+  const result = await app.dispatch({ method: 'GET', path: '/v1/shared-clothing/33333333-3333-4333-8333-333333333333/image' });
+  assert.equal(result.status, 401);
+  assert.equal(paidCalls(), 0);
+});
+
 test('private image proxy requires a current member session after logout', async () => {
   const { app } = createApp({ authenticated: true });
   const path = `/v1/private-images/${encodeURIComponent('ai-generated/11111111-1111-4111-8111-111111111111/result.png')}`;

@@ -68,6 +68,7 @@
         </button>
       </div>
 
+      <p v-if="shareUrl" class="sos-copy-link"><a :href="shareUrl">{{ shareUrl }}</a></p>
       <!-- Outfit Suggestions List -->
       <div class="sos-suggestions-section">
         <div class="sos-suggestions-header">
@@ -142,13 +143,14 @@
 
 <script setup>
 import { t, tf, formatDate } from '@/i18n';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
 import { updateDocumentMeta, updatePublicContentMeta } from '@/services/documentMeta';
 
 const appStore = useAppStore();
 const sosStore = useSosStore();
+const shareUrl = ref('');
 
 const targetPost = computed(() => {
   return sosStore.sosPosts.find((p) => p.id === appStore.activeSosDetailId);
@@ -174,9 +176,10 @@ const helperCount = computed(() => {
 });
 
 watch(targetPost, (post) => {
+  shareUrl.value = '';
   if (!post) return;
   updatePublicContentMeta({
-    title: `${post.title}｜OOTIE 穿搭 SOS`,
+    title: `${post.title}｜OOTIE ${t('穿搭求救')}`,
     description: String(post.details || t('一起看看這則穿搭求救')).slice(0, 160),
     image: publicItems.value[0]?.photo || '',
     url: `${window.location.origin}/sos?sos=${encodeURIComponent(post.id)}`
@@ -210,6 +213,7 @@ const toggleSave = () => {
 
 const shareSos = async () => {
   const url = `${window.location.origin}/sos?sos=${encodeURIComponent(targetPost.value.id)}`;
+  shareUrl.value = url;
   try {
     if (navigator.share) {
       await navigator.share({ title: targetPost.value.title || 'OOTIE 穿搭 SOS', text: t('一起看看這則穿搭求救'), url });

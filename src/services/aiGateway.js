@@ -110,7 +110,7 @@ export function createAiGatewayClient({
     return payload;
   };
 
-  const loadPrivateImage = async (accessToken, storagePath) => {
+  const loadImage = async (accessToken, route) => {
     if (!normalizedBaseUrl) {
       throw new AiGatewayError('GATEWAY_NOT_CONFIGURED', 'OOTIE AI Gateway 尚未設定。');
     }
@@ -121,7 +121,7 @@ export function createAiGatewayClient({
     let response;
     try {
       response = await fetchImpl(
-        `${normalizedBaseUrl}/v1/private-images/${encodeURIComponent(storagePath)}`,
+        `${normalizedBaseUrl}${route}`,
         { headers: { Authorization: `Bearer ${accessToken}` }, signal: controller.signal }
       );
     } catch (error) {
@@ -160,7 +160,8 @@ export function createAiGatewayClient({
       accessToken,
       method: 'DELETE'
     }),
-    loadPrivateImage,
+    loadPrivateImage: (token, path) => loadImage(token, `/v1/private-images/${encodeURIComponent(path)}`),
+    loadSharedClothingImage: (token, id) => loadImage(token, `/v1/shared-clothing/${encodeURIComponent(id)}/image`),
     generateSingleGarmentTryOn: (accessToken, input) => request('/v1/generations/single-try-on', {
       accessToken,
       method: 'POST',

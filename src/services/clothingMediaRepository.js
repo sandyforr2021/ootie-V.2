@@ -1,9 +1,35 @@
 import { supabase } from './supabase';
+import { aiGateway } from './aiGateway';
 
 export const CLOSET_MEDIA_BUCKET = 'ootie-closet-media';
 export const RESUMABLE_UPLOAD_THRESHOLD_BYTES = 6 * 1024 * 1024;
 export const RESUMABLE_CHUNK_SIZE_BYTES = 6 * 1024 * 1024;
 const privateObjectUrls = new Set();
+const sharedObjectUrls = new Set();
+let sharedUrlVersion = 0;
+
+export function releaseSharedClothingPhotoUrls() {
+  sharedUrlVersion += 1;
+  for (const url of sharedObjectUrls) URL.revokeObjectURL(url);
+  sharedObjectUrls.clear();
+}
+
+export async function hydrateSharedClothingPhotos(items, client = supabase) {
+  if (!items.some(item => item.photo_display_path)) return items;
+  const version = sharedUrlVersion;
+  const { data } = await client.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) return items;
+  return Promise.all(items.map(async item => {
+    if (!item.photo_display_path) return item;
+    try {
+      const photo = await aiGateway.loadSharedClothingImage(token, item.id);
+      if (version !== sharedUrlVersion) { URL.revokeObjectURL(photo); return { ...item, photo: '' }; }
+      sharedObjectUrls.add(photo);
+      return { ...item, photo };
+    } catch { return { ...item, photo: '' }; }
+  }));
+}
 
 const extensionForMime = (mime) => ({
   'image/jpeg': 'jpg',

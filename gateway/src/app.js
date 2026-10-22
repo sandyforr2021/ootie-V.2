@@ -42,6 +42,12 @@ export function createGatewayApp({ config, supabase, provider, generationService
         return ok({ post });
       }
       const identity = await authenticate(headers);
+      const sharedClothing = method === 'GET' && /^\/v1\/shared-clothing\/([\da-f-]{36})\/image$/i.exec(path);
+      if (sharedClothing) {
+        const image = await supabase.sharedClothingImage(identity.user, sharedClothing[1]);
+        return { status: 200, headers: { ...corsHeaders, 'Content-Type': image.mimeType,
+          'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' }, rawBody: image.buffer };
+      }
       if (commerceService && path.startsWith('/v1/shop/')) {
         const user = identity.user;
         const repo = commerceService.repository;

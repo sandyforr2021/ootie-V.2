@@ -128,3 +128,5 @@ main{max-width:1510px;padding:24px clamp(24px,4vw,64px) 64px;margin-inline:auto}
 :lang(zh-TW) #sosPage .sos-feed-card h2,:lang(ja) #sosPage .sos-feed-card h2{letter-spacing:.015em;line-height:1.55}
 @media(max-width:600px){.sos-form-modal .form-grid{grid-template-columns:1fr}.sos-detail-modal .sos-suggestions-header{align-items:flex-start;gap:12px;flex-wrap:wrap}}
 .sos-form-fields{border:0;margin:0;padding:0;min-width:0}
+
+.sos-copy-link{overflow-wrap:anywhere;font-size:14px;line-height:1.6}.sos-copy-link a{text-decoration:underline;text-underline-offset:4px}.sos-detail-user>div:last-child{display:grid;gap:6px}
