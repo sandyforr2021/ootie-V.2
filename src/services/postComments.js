@@ -17,8 +17,10 @@ export async function insertPostComment({id, postId, profileId, text}, client = 
   if (error?.code === '23505') {
     const existing = await client.from('ootie_post_comments').select('id').eq('id',id).eq('profile_id',profileId).eq('post_id',postId).eq('body',body).single();
     if (existing.error) throw existing.error;
+    if (!existing.data?.id) throw new Error('COMMENT_NOT_CONFIRMED');
     return existing.data;
   }
   if (error) throw error;
+  if (!data?.id) throw new Error('COMMENT_NOT_CONFIRMED');
   return data;
 }

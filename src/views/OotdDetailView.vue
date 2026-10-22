@@ -29,6 +29,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useOotdStore } from '@/stores/ootd';
 import { supabase } from '@/services/supabase';
+import { useAuthStore } from '@/stores/auth';
+import { loadPostInteractionState } from '@/services/socialMetrics';
 import { getPublicItemsByIds } from '@/services/clothingRepository';
 import { withDevelopmentDemoMediaRevision } from '@/services/mediaUrl';
 import PostDetailContent from '@/components/ootd/PostDetailContent.vue';
@@ -162,6 +164,16 @@ const loadPost = async () => {
         commentList: [],
         created_at: data.created_at
       });
+      const auth = useAuthStore();
+      if (auth.isMember && auth.profileId) {
+        const state = await loadPostInteractionState(auth.profileId);
+        post.value.liked = state.likedPostIds.has(String(data.id));
+        post.value.saved = state.savedPostIds.has(String(data.id));
+      }
+      // Direct links outside the feed page still share the canonical store record.
+      const existing = appStore.ootdPosts.find(entry => entry.id === post.value.id);
+      if (existing) { Object.assign(existing, post.value); post.value = existing; }
+      else appStore.ootdPosts.push(post.value);
       updateShareMeta();
       openRequestedComments();
     }

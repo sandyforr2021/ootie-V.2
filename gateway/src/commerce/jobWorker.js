@@ -28,7 +28,8 @@ export class CommerceJobWorker {
       }
       const result = await this.provider.poll(job);
       if (result?.task_status === 'error') {
-        await update({ status: 'failed', error_code: 'YOUCAM_TASK_FAILED', completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
+        const noFace = /no face was detected/i.test(String(result.error_message || result.error || ''));
+        await update({ status: 'failed', error_code: noFace ? 'YOUCAM_FACE_NOT_DETECTED' : 'YOUCAM_TASK_FAILED', completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
       } else if (result?.task_status === 'success') {
         let resultPath = null;
         let resultData = null;

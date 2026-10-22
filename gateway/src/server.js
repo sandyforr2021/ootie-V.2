@@ -1,4 +1,6 @@
 import http from 'node:http';
+import { fileURLToPath } from 'node:url';
+import { createStaticSite } from './staticSite.js';
 import { loadConfig } from './config.js';
 import { createGatewayApp, readJsonBody } from './app.js';
 import { createGoogleAiProvider } from './providers/index.js';
@@ -12,6 +14,7 @@ import { YouCamClient } from './commerce/youcamClient.js';
 import { CommerceJobWorker, startCommerceWorker } from './commerce/jobWorker.js';
 
 const config = loadConfig();
+const serveSite = process.env.SERVE_WEB_APP === 'true' ? createStaticSite(fileURLToPath(new URL('../../dist', import.meta.url))) : null;
 const provider = config.competitionMode
   ? { healthCheck: async () => ({ provider: 'youcam', configured: !!config.youcam.apiKey }) }
   : createGoogleAiProvider(config);
@@ -30,12 +33,18 @@ process.on('SIGTERM', () => { stopWorker(); server.close(); });
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`);
+    const staticResult = serveSite ? await serveSite(url.pathname, request.method) : null;
+    if (staticResult) {
+      response.writeHead(staticResult.status, staticResult.headers);
+      response.end(staticResult.rawBody);
+      return;
+    }
     const body = ['POST', 'PUT', 'PATCH'].includes(request.method || '')
       ? await readJsonBody(request)
       : null;
     const result = await app.dispatch({
       method: request.method || 'GET',
-      path: url.pathname,
+      path: serveSite && url.pathname.startsWith('/api/') ? url.pathname.slice(4) : url.pathname,
       headers: request.headers,
       body
     });

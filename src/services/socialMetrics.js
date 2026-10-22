@@ -106,7 +106,7 @@ export async function loadReceivedLikeCount(profileId, client = supabase) {
       .select('id')
       .eq('user_id', profileId);
     if (postError) throw postError;
-    const postIds = (posts || []).map((post) => post.id).filter(Boolean);
+    const postIds = genuineContent(posts || []).map((post) => post.id).filter(Boolean);
     if (!postIds.length) return 0;
 
     const { data: likes, error: likeError } = await client
@@ -126,10 +126,10 @@ export async function loadHelpedFriendsCount(profileId, client = supabase) {
   try {
     const { data, error } = await client
       .from('ootie_outfit_suggestions')
-      .select('user_id, ootie_sos_posts!inner(user_id)')
+      .select('id, sos_id, user_id, ootie_sos_posts!inner(user_id)')
       .eq('user_id', profileId);
     if (error) throw error;
-    const suggestions = (data || []).map((suggestion) => ({
+    const suggestions = genuineContent(data || []).map((suggestion) => ({
       ...suggestion,
       sos: suggestion.ootie_sos_posts
     }));
@@ -153,7 +153,7 @@ export async function loadHelpHistory(profileId, days, client = supabase, now = 
       .eq('user_id', profileId)
       .gte('created_at', since.toISOString());
     if (error) throw error;
-    return (data || []).filter((suggestion) => suggestion?.ootie_sos_posts?.user_id !== profileId);
+    return genuineContent(data || []).filter((suggestion) => suggestion?.ootie_sos_posts?.user_id !== profileId);
   } catch (error) {
     throw normalizeServiceError(error);
   }

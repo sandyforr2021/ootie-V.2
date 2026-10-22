@@ -17,3 +17,9 @@ Photorealistic natural full-body street fashion editorial, an original fictional
 ## Look 4
 
 Photorealistic natural fashion editorial for OOTIE, an original fictional adult white American woman about 35, natural red hair with freckles, joyful relaxed expression, walking on a Brooklyn street with warm brick buildings, lavender crisp shirt tucked into deep navy wide-leg trousers, burgundy ballet flats and small structured orange-red handbag. Elegant believable everyday dressing with playful colors. Entire body including head, both arms and both shoes visible with 10 percent margin above and below, 2:3 portrait photo, eye-level candid 50mm lens, natural daylight, subtle lived-in fabric wrinkles and realistic skin texture, no beauty retouching. No text, logo, watermark, collage or celebrities.
+
+## Portrait 1 — API acceptance input
+
+Built-in imagegen edit of Look 1, saved as `public/images/editorial/portrait-1.png`. Fictional adult; used only to validate YouCam API flow, not real-person color accuracy. The original full-body photo is preserved.
+
+Prompt: Create a companion close-up portrait of the same original fictional adult woman in Look 1. Preserve her identity and natural facial features. Head and shoulders facing straight at camera, both eyes visible, relaxed closed mouth, even diffuse neutral daylight and ivory background. Ivory tee and raspberry blazer. No text, logo, beauty retouch, skin classification, or comparison.

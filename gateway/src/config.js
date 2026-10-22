@@ -85,7 +85,7 @@ export function loadConfig(env = process.env) {
       vtoPoints: positiveInteger(env.VTO_POINTS_COST, 8),
       previewPoints: positiveInteger(env.OUTFIT_PREVIEW_POINTS_COST, 12)
     },
-    corsAllowedOrigins: String(env.CORS_ALLOWED_ORIGINS || '')
+    corsAllowedOrigins: [env.CORS_ALLOWED_ORIGINS || '', env.RENDER_EXTERNAL_URL && /^https:\/\/[a-z0-9-]+\.onrender\.com$/.test(env.RENDER_EXTERNAL_URL) ? env.RENDER_EXTERNAL_URL : ''].join(',')
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean)

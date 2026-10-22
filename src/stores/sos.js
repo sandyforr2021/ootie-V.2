@@ -11,11 +11,37 @@ import {
   updateSosStatusInSupabase,
   updateAdoptedSuggestionInSupabase,
   fetchOutfitSuggestionsFromSupabase,
-  insertOutfitSuggestionToSupabase
+  insertOutfitSuggestionToSupabase,
+  updateLikedSuggestionsInSupabase,
+  fetchSavedSosIds
 } from '@/services/supabase';
 
 export const useSosStore = defineStore('sos', () => {
   const appStore = useAppStore();
+  const authStore = useAuthStore();
+  const pending = ref(new Set());
+  let loadVersion = 0;
+  const requireMember = () => {
+    if (authStore.isMember && authStore.profileId) return authStore.profileId;
+    appStore.openLoginGate('AUTH_REQUIRED', '/sos');
+    return null;
+  };
+  const persist = async (key, write, apply, message) => {
+    const profileId = requireMember();
+    if (!profileId || pending.value.has(key)) return false;
+    pending.value.add(key);
+    try {
+      const result = await write();
+      if (!result) throw new Error('REMOTE_WRITE_FAILED');
+      if (profileId !== authStore.profileId) return false;
+      apply(result);
+      appStore.showToast(message, { type: 'success', syncStatus: 'SYNCED' });
+      return true;
+    } catch {
+      appStore.showToast('尚未儲存成功，請稍後再試。', { type: 'error', syncStatus: 'REMOTE_FAILED' });
+      return false;
+    } finally { pending.value.delete(key); }
+  };
 
   const activeTab = ref('received'); // 'received' (衣友求救板) | 'sent' (我發出的求救)
   const searchQuery = ref('');
@@ -34,13 +60,21 @@ export const useSosStore = defineStore('sos', () => {
   );
 
 
-  // Sync with Supabase on mount/init
+  watch(outfitSuggestions, val => { appStore.outfitSuggestions = val; }, { deep: true });
+
+  // A new account must never inherit the previous account's saved state.
   const initFromSupabase = async () => {
+    const version = ++loadVersion;
+    const profileId = authStore.isMember ? authStore.profileId : null;
     try {
       const remotePosts = genuineContent(await fetchSosPostsFromSupabase());
+      if (version !== loadVersion) return;
+      const savedIds = await fetchSavedSosIds(profileId);
+      if (version !== loadVersion) return;
       if (Array.isArray(remotePosts)) {
         sosPosts.value = remotePosts.map((p) => ({
           id: p.id,
+          saved: savedIds.has(p.id),
           sender_id: p.user_id || p.sender_id,
           closet_owner_id: p.closet_owner_id || p.user_id,
           username: p.ootie_profiles?.username || p.username || '@衣友',
@@ -59,10 +93,13 @@ export const useSosStore = defineStore('sos', () => {
           created_at: p.created_at || new Date().toISOString()
         }));
         const referencedIds = remotePosts.flatMap((post) => Array.isArray(post.closet_item_ids) ? post.closet_item_ids : []);
-        publicClosetItems.value = await getPublicItemsByIds(referencedIds);
+        const items = await getPublicItemsByIds(referencedIds);
+        if (version !== loadVersion) return;
+        publicClosetItems.value = items;
       }
 
       const remoteSuggestions = genuineContent(await fetchOutfitSuggestionsFromSupabase());
+      if (version !== loadVersion) return;
       if (Array.isArray(remoteSuggestions)) {
         outfitSuggestions.value = remoteSuggestions.map((s) => ({
           id: s.id,
@@ -81,8 +118,10 @@ export const useSosStore = defineStore('sos', () => {
     }
   };
 
-  // Run initial sync asynchronously
-  initFromSupabase();
+  watch(() => authStore.profileId, () => {
+    sosPosts.value.forEach(post => { post.saved = false; });
+    void initFromSupabase();
+  }, { immediate: true });
 
   // Tab filtering & Search filtering
   const receivedSosPosts = computed(() => {
@@ -125,44 +164,25 @@ export const useSosStore = defineStore('sos', () => {
   };
 
   const toggleSave = async (sosId) => {
-    const targetSos = sosPosts.value.find((post) => String(post.id) === String(sosId));
-    if (!targetSos) return false;
-    const authStore = useAuthStore();
-    if (authStore.isMember && authStore.profileId) {
-      try {
-        if (targetSos.saved) {
-          await deleteSavedOutfit(authStore.profileId, { target_type: 'SOS', target_id: sosId });
-        } else {
-          await createSavedOutfit(authStore.profileId, { target_type: 'SOS', target_id: sosId });
-        }
-        targetSos.saved = !targetSos.saved;
-        appStore.showToast(targetSos.saved ? '已收藏這筆衣友求救' : '已取消收藏', {
-          type: 'success', syncStatus: 'SYNCED'
-        });
-        return true;
-      } catch (error) {
-        appStore.showToast(error?.userMessage || '收藏尚未同步到伺服器。', {
-          type: 'error', syncStatus: 'REMOTE_FAILED'
-        });
-        return false;
-      }
-    }
-
-    targetSos.saved = !targetSos.saved;
-    appStore.showToast(targetSos.saved ? '已在此裝置收藏這筆衣友求救' : '已取消此裝置收藏', {
-      type: 'info', syncStatus: 'LOCAL_ONLY'
-    });
-    return true;
+    const post = sosPosts.value.find(entry => entry.id === sosId);
+    const profileId = requireMember();
+    if (!post || !profileId) return false;
+    const saved = !post.saved;
+    return persist(`save:${sosId}`,
+      () => saved ? createSavedOutfit(profileId, {target_type:'SOS',target_id:sosId}) : deleteSavedOutfit(profileId, {target_type:'SOS',target_id:sosId}),
+      () => { post.saved = saved; }, saved ? '已收藏這筆衣友求救' : '已取消收藏');
   };
 
   // Actions
   const createSosPost = async ({ title, occasion, weather, when_label, vibes, details, closet_item_ids }) => {
+    const profileId = requireMember();
+    if (!profileId) return false;
     const requestedItemIds = Array.isArray(closet_item_ids)
       ? closet_item_ids
       : appStore.items.map((item) => item.id);
     const ownedItemIds = new Set(
       appStore.items
-        .filter((item) => String(item.owner_id) === String(appStore.profile.id))
+        .filter((item) => String(item.owner_id) === String(profileId))
         .map((item) => String(item.id))
     );
     const finalItemIds = [...new Set(requestedItemIds.map((id) => String(id)))]
@@ -173,9 +193,9 @@ export const useSosStore = defineStore('sos', () => {
     }
 
     const newPost = {
-      id: `sos-${Date.now()}`,
-      sender_id: appStore.profile.id,
-      closet_owner_id: appStore.profile.id,
+      id: crypto.randomUUID(),
+      sender_id: profileId,
+      closet_owner_id: profileId,
       username: appStore.profile.username,
       initials: appStore.profile.initials,
       title: (title || '').trim(),
@@ -191,22 +211,19 @@ export const useSosStore = defineStore('sos', () => {
       created_at: new Date().toISOString()
     };
 
-    sosPosts.value.unshift(newPost);
-    const remotePost = await insertSosPostToSupabase(newPost);
-    const synced = Boolean(remotePost);
-    appStore.showToast(
-      synced ? '穿搭求救已發布並同步' : '求救已保存在此裝置，但遠端發布失敗',
-      { type: synced ? 'success' : 'warning', syncStatus: synced ? 'SYNCED' : 'REMOTE_FAILED' }
-    );
-    return true;
+    return persist('create', () => insertSosPostToSupabase(newPost), row => {
+      sosPosts.value.unshift({...newPost, ...row, sender_id: row.user_id || newPost.sender_id});
+    }, '穿搭求救已發布並同步');
   };
 
   const submitSuggestion = async ({ sosId, selectedIds, message }) => {
+    const profileId = requireMember();
+    if (!profileId) return false;
     const targetSos = sosPosts.value.find((p) => p.id === sosId);
     if (!targetSos) return false;
 
     // Self-suggestion guard
-    if (targetSos.sender_id === appStore.profile.id) {
+    if (targetSos.sender_id === profileId) {
       appStore.showToast('你不能為自己的求救貼文提交搭配建議。');
       return false;
     }
@@ -230,13 +247,13 @@ export const useSosStore = defineStore('sos', () => {
 
     // Single active suggestion per responder rule
     const existingIdx = outfitSuggestions.value.findIndex(
-      (s) => s.sos_id === sosId && (s.responder_id === appStore.profile.id || s.user_id === appStore.profile.id)
+      (s) => s.sos_id === sosId && (s.responder_id === profileId || s.user_id === profileId)
     );
     const newSug = {
-      id: existingIdx >= 0 ? outfitSuggestions.value[existingIdx].id : `suggestion-${Date.now()}`,
+      id: existingIdx >= 0 ? outfitSuggestions.value[existingIdx].id : crypto.randomUUID(),
       sos_id: sosId,
-      responder_id: appStore.profile.id,
-      user_id: appStore.profile.id,
+      responder_id: profileId,
+      user_id: profileId,
       item_ids: validSelectedIds,
       message: (message || '').trim(),
       hearts: 0,
@@ -244,67 +261,40 @@ export const useSosStore = defineStore('sos', () => {
     };
 
 
-    if (existingIdx >= 0) {
-      outfitSuggestions.value[existingIdx] = newSug;
-    } else {
-      outfitSuggestions.value.unshift(newSug);
-    }
-
-    appStore.profile.helped += 1;
-    const remoteSuggestion = await insertOutfitSuggestionToSupabase(newSug);
-    const synced = Boolean(remoteSuggestion);
-    if (synced) appStore.addNotification('你的 SOS 穿搭建議已送出。', 'sos');
-    appStore.showToast(
-      synced ? '穿搭建議已送出並同步' : '建議已保存在此裝置，但遠端送出失敗',
-      { type: synced ? 'success' : 'warning', syncStatus: synced ? 'SYNCED' : 'REMOTE_FAILED' }
-    );
-    return true;
+    return persist(`suggest:${sosId}`, () => insertOutfitSuggestionToSupabase(newSug, {update: existingIdx >= 0}), row => {
+      const confirmed = {...newSug,...row,responder_id:row.user_id || newSug.responder_id,
+        username:appStore.profile.username,initials:appStore.profile.initials};
+      if (existingIdx >= 0) outfitSuggestions.value[existingIdx] = confirmed;
+      else outfitSuggestions.value.unshift(confirmed);
+    }, '穿搭建議已送出並同步');
   };
 
+  const ownedPost = id => sosPosts.value.find(post => post.id === id && post.sender_id === authStore.profileId);
   const adoptSuggestion = async ({ sosId, suggestionId }) => {
-    const targetSos = sosPosts.value.find((p) => p.id === sosId);
-    if (!targetSos) return;
-
-    // Adopt sets adopted_suggestion_id, but keeps SOS status as OPEN!
-    targetSos.adopted_suggestion_id = targetSos.adopted_suggestion_id === suggestionId ? null : suggestionId;
-    const synced = await updateAdoptedSuggestionInSupabase(sosId, targetSos.adopted_suggestion_id);
-    appStore.showToast(
-      synced
-        ? (targetSos.adopted_suggestion_id ? '採納狀態已同步' : '取消採納已同步')
-        : '採納狀態已保存在此裝置，但遠端同步失敗',
-      { type: synced ? 'success' : 'warning', syncStatus: synced ? 'SYNCED' : 'REMOTE_FAILED' }
-    );
+    const post = ownedPost(sosId);
+    if (!post || !getSuggestionsForSos(sosId).some(entry => entry.id === suggestionId)) return false;
+    const nextId = post.adopted_suggestion_id === suggestionId ? null : suggestionId;
+    return persist(`post:${sosId}`, () => updateAdoptedSuggestionInSupabase(sosId,nextId),
+      () => { post.adopted_suggestion_id = nextId; }, '採納狀態已同步');
   };
-
   const toggleLikeSuggestion = async ({ sosId, suggestionId }) => {
-    const targetSos = sosPosts.value.find((p) => p.id === sosId);
-    if (!targetSos) return;
-
-    if (!Array.isArray(targetSos.liked_suggestion_ids)) {
-      targetSos.liked_suggestion_ids = [];
-    }
-
-    const idx = targetSos.liked_suggestion_ids.indexOf(suggestionId);
-    if (idx >= 0) {
-      targetSos.liked_suggestion_ids.splice(idx, 1);
-    } else {
-      targetSos.liked_suggestion_ids.push(suggestionId);
-    }
+    const post = ownedPost(sosId);
+    if (!post || !getSuggestionsForSos(sosId).some(entry => entry.id === suggestionId)) return false;
+    const ids = post.liked_suggestion_ids || [];
+    const next = ids.includes(suggestionId) ? ids.filter(id => id !== suggestionId) : [...ids,suggestionId];
+    return persist(`post:${sosId}`, () => updateLikedSuggestionsInSupabase(sosId,next),
+      () => { post.liked_suggestion_ids = next; }, '喜歡的搭配已同步');
   };
-
-  const closeSosPost = async (sosId) => {
-    const targetSos = sosPosts.value.find((p) => p.id === sosId);
-    if (!targetSos) return;
-
-    targetSos.status = 'CLOSED';
-    const synced = await updateSosStatusInSupabase(sosId, 'CLOSED');
-    appStore.showToast(
-      synced ? '該筆穿搭求救已結束並同步' : '求救已在此裝置結束，但遠端同步失敗',
-      { type: synced ? 'success' : 'warning', syncStatus: synced ? 'SYNCED' : 'REMOTE_FAILED' }
-    );
+  const closeSosPost = async sosId => {
+    const post = ownedPost(sosId);
+    if (!post) return false;
+    return persist(`post:${sosId}`, () => updateSosStatusInSupabase(sosId,'CLOSED'),
+      () => { post.status = 'CLOSED'; }, '該筆穿搭求救已結束並同步');
   };
 
   return {
+    pending,
+    initFromSupabase,
     activeTab,
     searchQuery,
     sosPosts,

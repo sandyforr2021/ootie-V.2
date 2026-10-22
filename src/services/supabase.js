@@ -105,7 +105,7 @@ export async function upsertProfileToSupabase(profileData, userId) {
       console.error('Supabase profile upsert error:', error);
       return null;
     }
-    return data?.[0] || payload;
+    return data?.[0] || null;
   } catch (err) {
     console.error('Supabase profile upsert failed:', err);
     return null;
@@ -172,7 +172,7 @@ export async function insertItemToSupabase(itemData, userId) {
       console.error('Supabase item insert error:', error);
       return null;
     }
-    return data?.[0] || payload;
+    return data?.[0] || null;
   } catch (err) {
     console.error('Supabase item insert failed:', err);
     return null;
@@ -370,7 +370,7 @@ export async function insertSosPostToSupabase(sosData) {
       console.error('Supabase SOS insert error:', error);
       return null;
     }
-    return data?.[0] || payload;
+    return data?.[0] || null;
   } catch (err) {
     console.error('Supabase SOS insert failed:', err);
     return null;
@@ -393,7 +393,7 @@ export async function updateSosStatusInSupabase(sosId, status) {
       console.error('Supabase SOS status update error:', error);
       return false;
     }
-    return true;
+    return data?.length === 1;
   } catch (err) {
     console.error('Supabase SOS status update failed:', err);
     return false;
@@ -416,7 +416,7 @@ export async function updateAdoptedSuggestionInSupabase(sosId, suggestionId) {
       console.error('Supabase SOS adopt update error:', error);
       return false;
     }
-    return true;
+    return data?.length === 1;
   } catch (err) {
     console.error('Supabase SOS adopt update failed:', err);
     return false;
@@ -447,7 +447,7 @@ export async function fetchOutfitSuggestionsFromSupabase() {
 /**
  * Insert new outfit suggestion to Supabase ootie_outfit_suggestions
  */
-export async function insertOutfitSuggestionToSupabase(suggestionData) {
+export async function insertOutfitSuggestionToSupabase(suggestionData, { update = false } = {}) {
   if (!isUuid(suggestionData?.responder_id || suggestionData?.user_id)) return null;
   try {
     const sugUuid = isUuid(suggestionData.id) ? suggestionData.id : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined);
@@ -461,16 +461,17 @@ export async function insertOutfitSuggestionToSupabase(suggestionData) {
     };
     if (sugUuid) payload.id = sugUuid;
 
-    const { data, error } = await supabase
-      .from('ootie_outfit_suggestions')
-      .insert(payload)
-      .select();
+    const table = supabase.from('ootie_outfit_suggestions');
+    const query = update
+      ? table.update({ item_ids: payload.item_ids, message: payload.message }).eq('id', sugUuid).eq('user_id', payload.user_id).eq('sos_id', payload.sos_id)
+      : table.insert(payload);
+    const { data, error } = await query.select();
 
     if (error) {
       console.error('Supabase suggestion insert error:', error);
       return null;
     }
-    return data?.[0] || payload;
+    return data?.[0] || null;
   } catch (err) {
     console.error('Supabase suggestion insert failed:', err);
     return null;
@@ -650,7 +651,7 @@ export async function insertBookmarkToSupabase(bookmarkData, userId) {
       console.warn('Supabase bookmark insert error:', error);
       return null;
     }
-    return data || payload;
+    return data || null;
   } catch (err) {
     console.warn('Supabase bookmark insert failed:', err);
     return null;
@@ -690,7 +691,7 @@ export async function updateBookmarkInSupabase(bookmarkId, bookmarkData) {
       console.warn('Supabase bookmark update error:', error);
       return null;
     }
-    return data || true;
+    return data || null;
   } catch (err) {
     console.warn('Supabase bookmark update failed:', err);
     return null;
@@ -703,16 +704,16 @@ export async function updateBookmarkInSupabase(bookmarkId, bookmarkData) {
 export async function deleteBookmarkFromSupabase(bookmarkId) {
   if (!isUuid(bookmarkId)) return false;
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('ootie_bookmarks')
       .delete()
-      .eq('id', bookmarkId);
+      .eq('id', bookmarkId).select('id');
 
     if (error) {
       console.warn('Supabase bookmark delete error:', error);
       return false;
     }
-    return true;
+    return data?.length === 1;
   } catch (err) {
     console.warn('Supabase bookmark delete failed:', err);
     return false;
@@ -727,16 +728,16 @@ export async function deleteBatchBookmarksFromSupabase(bookmarkIds) {
   const validUuids = bookmarkIds.filter(isUuid);
   if (!validUuids.length) return false;
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('ootie_bookmarks')
       .delete()
-      .in('id', validUuids);
+      .in('id', validUuids).select('id');
 
     if (error) {
       console.warn('Supabase batch delete bookmarks error:', error);
       return false;
     }
-    return true;
+    return data?.length === validUuids.length;
   } catch (err) {
     console.warn('Supabase batch delete bookmarks failed:', err);
     return false;
@@ -777,3 +778,20 @@ export async function uploadBookmarkImageToStorage(file, userId) {
   }
 }
 
+
+export async function updateLikedSuggestionsInSupabase(sosId, ids) {
+  if (!isUuid(sosId) || !Array.isArray(ids) || !ids.every(isUuid)) return false;
+  try {
+    const {data,error} = await supabase.from('ootie_sos_posts')
+      .update({liked_suggestion_ids:[...new Set(ids)]}).eq('id',sosId).select('id');
+    return !error && data?.length === 1;
+  } catch { return false; }
+}
+
+export async function fetchSavedSosIds(profileId) {
+  if (!isUuid(profileId)) return new Set();
+  const {data,error} = await supabase.from('ootie_saved_outfits')
+    .select('target_id').eq('profile_id',profileId).eq('target_type','SOS');
+  if(error) throw error;
+  return new Set((data || []).map(row=>row.target_id));
+}

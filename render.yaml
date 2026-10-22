@@ -1,0 +1,38 @@
+# Deploy only after confirming a free workspace without a payment method.
+services:
+  - type: web
+    name: ootie-youcam-jury
+    runtime: node
+    plan: free
+    branch: codex/youcam-commerce-checkpoint-20261022
+    buildCommand: npm ci && npm ci --prefix gateway && node scripts/build-free-deploy.mjs
+    startCommand: node gateway/src/server.js
+    healthCheckPath: /healthz
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_WEB_APP
+        value: 'true'
+      - key: OOTIE_COMPETITION_MODE
+        value: 'true'
+      - key: OOTIE_SUPABASE_PROJECT_REF
+        value: hoxkrmadzjnyjaqjbyxc
+      - key: SUPABASE_URL
+        value: https://hoxkrmadzjnyjaqjbyxc.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: YOUCAM_API_KEY
+        sync: false
+      - key: YOUCAM_FREE_CREDIT_EXPIRY_MS
+        value: '1800489599000'
+      - key: YOUCAM_ENABLED
+        value: 'true'
+      - key: YOUCAM_WORKER_ENABLED
+        value: 'true'
+      - key: AI_IMAGE_GENERATION_ENABLED
+        value: 'false'

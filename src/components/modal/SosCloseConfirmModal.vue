@@ -24,9 +24,10 @@ const close = () => {
   appStore.sosToCloseId = null;
 };
 
-const handleConfirm = () => {
+const handleConfirm = async () => {
   if (appStore.sosToCloseId) {
-    sosStore.closeSosPost(appStore.sosToCloseId);
+    const success = await sosStore.closeSosPost(appStore.sosToCloseId);
+    if (!success) return;
   }
   close();
 };

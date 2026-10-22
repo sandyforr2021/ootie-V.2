@@ -48,3 +48,10 @@ test('product import rejects internal, mapped and metadata addresses before netw
   assert.throws(()=>publicHttpUrl('https://secret:password@example.com'),/HTTP/);
   await assert.rejects(safeDownload('https://example.com',{lookup:async()=>[{address:'127.0.0.1',family:4}]}),/內部/);
 });
+test('an undetected face gives actionable feedback without resubmission',async()=>{
+ const f=workerFixture({provider_task_id:'tone',kind:'skin_tone',status:'processing'});
+ f.provider.poll=async()=>({task_status:'error',error_message:'No face was detected in the source image.'});
+ await f.worker.tick();await f.worker.tick();
+ assert.equal(f.job.status,'failed');assert.equal(f.job.error_code,'YOUCAM_FACE_NOT_DETECTED');
+ assert.equal(f.calls.filter(c=>c[0]==='submit').length,0);
+});

@@ -385,7 +385,7 @@
               :disabled="convertingToCloset"
               @click="convertBookmarkToCloset(bookmarksStore.activeDetailBookmark)"
             >
-              {{ convertingToCloset ? '加入中…' : '已購買，加入我的衣櫥' }}
+              {{ $t('到工作室確認入櫥') }}
             </button>
             <button
               type="button"
@@ -586,32 +586,8 @@ const convertBookmarkToCloset = async (bookmark) => {
     appStore.openLoginGate('AUTH_REQUIRED', '/bookmarks');
     return;
   }
-  convertingToCloset.value = true;
-  try {
-    await closetStore.loadRemoteItems(authStore.profileId);
-    const result = await closetStore.addItem({
-      name: bookmark.title,
-      name_zh: bookmark.title,
-      brand: bookmark.brand || '',
-      category: 'Tops',
-      primary_color: bookmark.color || '白色',
-      secondary_color: '無彩色系',
-      style: 'Casual',
-      season: 'All year',
-      photo: bookmark.image_url || '',
-      price: bookmark.price || null,
-      wear_count: 0,
-      source_url: bookmark.product_url || '',
-      source_domain: bookmark.source_domain || '',
-      notes: bookmark.notes || `品牌靈感來源：${bookmark.source_domain || '外部商品頁'}`
-    });
-    if (result?.ok) {
-      bookmarksStore.closeDetailModal();
-      appStore.showToast('已加入我的衣櫥，並保留商品來源。', { type: 'success', syncStatus: 'SYNCED' });
-    }
-  } finally {
-    convertingToCloset.value = false;
-  }
+  sendToStudio(bookmark);
+  appStore.showToast('請先確認商品圖片與分類，儲存後選擇「已購買，加入衣櫥」。', {type:'info'});
 };
 
 const handleOpenCreateModal = (prefill = null) => {
@@ -703,28 +679,17 @@ const handleSubmitForm = async () => {
 
   isSubmitting.value = true;
   try {
-    if (bookmarksStore.formMode === 'edit') {
-      await bookmarksStore.updateBookmark(
-        bookmarksStore.editingBookmarkId,
-        { ...formData, product_url: urlVal },
-        uploadedFile.value
-      );
-      const synced = bookmarksStore.lastMutationSyncStatus === 'SYNCED';
-      appStore.showToast(
-        synced ? '書籤已更新並同步' : '書籤已在此裝置更新，但遠端同步失敗',
-        { type: synced ? 'success' : 'warning', syncStatus: bookmarksStore.lastMutationSyncStatus }
-      );
-    } else {
-      await bookmarksStore.addBookmark(
-        { ...formData, product_url: urlVal, owner_id: authStore.isMember ? authStore.profileId : null },
-        uploadedFile.value
-      );
-      const synced = bookmarksStore.lastMutationSyncStatus === 'SYNCED';
-      appStore.showToast(
-        synced ? '書籤已建立並同步' : '書籤已保存在此裝置，但遠端同步失敗',
-        { type: synced ? 'success' : 'warning', syncStatus: bookmarksStore.lastMutationSyncStatus }
-      );
+    const result = bookmarksStore.formMode === 'edit'
+      ? await bookmarksStore.updateBookmark(bookmarksStore.editingBookmarkId, {...formData,product_url:urlVal}, uploadedFile.value)
+      : await bookmarksStore.addBookmark({...formData,product_url:urlVal,owner_id:authStore.isMember ? authStore.profileId : null}, uploadedFile.value);
+    if (!result) {
+      appStore.showToast('尚未儲存成功，請稍後再試。', {type:'error',syncStatus:'REMOTE_FAILED'});
+      return;
     }
+    const synced = bookmarksStore.lastMutationSyncStatus === 'SYNCED';
+    appStore.showToast(synced ? '書籤已儲存並同步' : '書籤已保存在此裝置', {
+      type:'success',syncStatus:bookmarksStore.lastMutationSyncStatus
+    });
     bookmarksStore.closeFormModal();
   } catch (err) {
     console.error('Save bookmark error:', err);
@@ -736,10 +701,12 @@ const handleSubmitForm = async () => {
 
 const handleDeleteFromDetail = async (id) => {
   if (!window.confirm('確定要移除此書籤嗎？')) return;
-  await bookmarksStore.deleteBookmark(id);
+  if (!await bookmarksStore.deleteBookmark(id)) {
+    appStore.showToast('未能移除書籤，請稍後再試。', {type:'error',syncStatus:'REMOTE_FAILED'}); return;
+  }
   const synced = bookmarksStore.lastMutationSyncStatus === 'SYNCED';
   appStore.showToast(
-    synced ? '書籤已移除並同步' : '書籤已從此裝置移除，但遠端同步失敗',
+    synced ? '書籤已移除並同步' : '書籤已從此裝置移除',
     { type: synced ? 'success' : 'warning', syncStatus: bookmarksStore.lastMutationSyncStatus }
   );
 };
@@ -754,9 +721,12 @@ const handleBatchDelete = async () => {
   if (!count) return;
   if (!window.confirm(`確定要刪除選取的 ${count} 個書籤嗎？`)) return;
   const deletedCount = await bookmarksStore.deleteSelectedBookmarks();
+  if (!deletedCount) {
+    appStore.showToast('未能移除書籤，請稍後再試。', {type:'error',syncStatus:'REMOTE_FAILED'}); return;
+  }
   const synced = bookmarksStore.lastMutationSyncStatus === 'SYNCED';
   appStore.showToast(
-    synced ? `已移除並同步 ${deletedCount} 個書籤` : `已從此裝置移除 ${deletedCount} 個書籤，但遠端同步失敗`,
+    synced ? `已移除並同步 ${deletedCount} 個書籤` : `已從此裝置移除 ${deletedCount} 個書籤`,
     { type: synced ? 'success' : 'warning', syncStatus: bookmarksStore.lastMutationSyncStatus }
   );
 };

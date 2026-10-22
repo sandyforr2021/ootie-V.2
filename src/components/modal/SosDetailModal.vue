@@ -4,7 +4,6 @@
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
 
       <div class="sos-detail-heading">
-        <p class="eyebrow">Style SOS 詳情</p>
         <h2>{{ targetPost.title }}</h2>
 
         <div class="sos-detail-user">
@@ -111,8 +110,9 @@
               </span>
 
               <div style="display:flex; gap:10px; align-items:center;">
-                <!-- Like button -->
+                <!-- The requester can shortlist a proposed look. -->
                 <button
+                  v-if="isOwner"
                   :class="['sos-like-btn', { liked: (targetPost.liked_suggestion_ids || []).includes(sug.id) }]"
                   @click="toggleLike(sug.id)"
                 >
@@ -159,8 +159,7 @@ const isOwner = computed(() => {
 
 const publicItems = computed(() => {
   if (!targetPost.value || !targetPost.value.closet_item_ids) return [];
-  const ids = targetPost.value.closet_item_ids;
-  return appStore.items.filter((i) => ids.includes(i.id));
+  return sosStore.getPublicItemsForSos(targetPost.value);
 });
 
 const suggestions = computed(() => {
@@ -185,7 +184,7 @@ watch(targetPost, (post) => {
 
 const getSuggestedItems = (itemIds) => {
   if (!Array.isArray(itemIds)) return [];
-  return appStore.items.filter((i) => itemIds.includes(i.id));
+  return sosStore.getPublicItemsForSos(itemIds);
 };
 
 const close = () => {

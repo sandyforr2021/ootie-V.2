@@ -138,4 +138,6 @@ AI 輔助製作的品牌穿搭靈感|Brand styling inspiration created with AI|A
 色系／顏色|Colors|色|Colores
 件尚未常穿|pieces to rediscover|点のアイテムを再発見|prendas por redescubrir
 目前沒有冷宮單品|No unworn pieces|着ていない服はありません|No hay prendas sin usar
+到工作室確認入櫥|Review in studio for wardrobe|スタジオで確認して追加|Revisar en estudio para el armario
+請改用光線均勻、臉部清晰的正面近照。|Use a well-lit, front-facing close-up with a clearly visible face.|明るい場所で顔がはっきり見える正面の顔写真をお使いください。|Usa un primer plano frontal bien iluminado con el rostro visible.
 `;

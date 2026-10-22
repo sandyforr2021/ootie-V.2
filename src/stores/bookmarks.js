@@ -1,7 +1,8 @@
 import { genuineContent } from '@/services/contentAuthenticity';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
-import { BOOKMARKS_STORAGE_KEY, defaultBookmarks } from '@/constants';
+import { BOOKMARKS_STORAGE_KEY } from '@/constants';
+import { useAuthStore } from './auth';
 import {
   fetchBookmarksFromSupabase,
   insertBookmarkToSupabase,
@@ -36,7 +37,9 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     return [];
   };
 
-  const bookmarks = ref(loadInitialBookmarks());
+  const auth = useAuthStore();
+  const bookmarks = ref(loadInitialBookmarks().filter(row => !isUuid(row.owner_id)));
+  let loadVersion = 0;
   const isManagerMode = ref(false);
   const selectedBookmarkIds = ref([]);
   const isFormModalOpen = ref(false);
@@ -58,8 +61,9 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
   // Watcher to save to LocalStorage
   const saveToLocalStorage = () => {
+    if (auth.isLoggedIn) return;
     try {
-      localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(bookmarks.value));
+      localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(bookmarks.value.filter(row => !isUuid(row.owner_id))));
     } catch (e) {
       console.warn('Failed to save bookmarks to localStorage:', e);
     }
@@ -122,7 +126,10 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
   // Actions
   const fetchRemoteBookmarks = async (userId) => {
+    const version = ++loadVersion;
+    bookmarks.value = [];
     const remoteData = await fetchBookmarksFromSupabase(userId);
+    if (version !== loadVersion || userId !== auth.profileId) return false;
     if (Array.isArray(remoteData)) {
       bookmarks.value = genuineContent(remoteData).map((item) => ({
         ...item,
@@ -138,6 +145,17 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       saveToLocalStorage();
     }
   };
+
+  watch(() => auth.profileId, profileId => {
+    loadVersion += 1;
+    bookmarks.value = [];
+    selectedBookmarkIds.value = [];
+    closeDetailModal();
+    if (profileId) void fetchRemoteBookmarks(profileId);
+    else bookmarks.value = loadInitialBookmarks().filter(row => !isUuid(row.owner_id));
+  });
+  const mayWrite = owner => !isUuid(owner) || (auth.isMember && auth.profileId === owner);
+  const failed = () => { lastMutationSyncStatus.value = 'REMOTE_FAILED'; return null; };
 
   const toggleSelectBookmark = (id) => {
     if (selectedBookmarkIds.value.includes(id)) {
@@ -188,6 +206,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   };
 
   const addBookmark = async (bookmarkPayload, fileUpload = null) => {
+    if (!mayWrite(bookmarkPayload.owner_id)) return failed();
     let imageUrl = bookmarkPayload.image_url || '';
     let imageStoragePath = '';
 
@@ -203,16 +222,16 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     }
 
     const domain = bookmarkPayload.product_url ? getSourceDomain(bookmarkPayload.product_url) : '';
-    const defaultBrand = domain ? domain.split('.')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : '';
+
 
     const newBookmark = {
-      id: `bookmark-${Date.now()}`,
+      id: crypto.randomUUID(),
       owner_id: bookmarkPayload.owner_id || null,
       product_url: bookmarkPayload.product_url || '',
       title: bookmarkPayload.title,
       image_url: imageUrl,
       image_storage_path: imageStoragePath,
-      brand: bookmarkPayload.brand || defaultBrand,
+      brand: bookmarkPayload.brand || '',
       price: String(bookmarkPayload.price || '').replace(/[^0-9.]/g, ''),
       currency: bookmarkPayload.currency || 'TWD',
       variant_name: bookmarkPayload.variant_name || '',
@@ -224,30 +243,22 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       updated_at: new Date().toISOString()
     };
 
-    bookmarks.value.unshift(newBookmark);
-    saveToLocalStorage();
-
+    if (remoteFailed) return failed();
     if (!isUuid(newBookmark.owner_id)) {
-      lastMutationSyncStatus.value = 'LOCAL_ONLY';
-      return newBookmark;
+      bookmarks.value.unshift(newBookmark); saveToLocalStorage();
+      lastMutationSyncStatus.value = 'LOCAL_ONLY'; return newBookmark;
     }
-
-    // Async sync to Supabase
     const created = await insertBookmarkToSupabase(newBookmark, newBookmark.owner_id);
-    if (created && created.id) {
-      newBookmark.id = created.id;
-      saveToLocalStorage();
-    } else {
-      remoteFailed = true;
-    }
-    lastMutationSyncStatus.value = remoteFailed ? 'REMOTE_FAILED' : 'SYNCED';
-
-    return newBookmark;
+    if (!created?.id || !mayWrite(newBookmark.owner_id)) return failed();
+    bookmarks.value.unshift(created);
+    lastMutationSyncStatus.value = 'SYNCED';
+    return created;
   };
 
   const updateBookmark = async (id, bookmarkPayload, fileUpload = null) => {
     const index = bookmarks.value.findIndex((b) => b.id === id);
     if (index === -1) return null;
+    if (!mayWrite(bookmarks.value[index].owner_id)) return failed();
 
     let imageUrl = bookmarkPayload.image_url || bookmarks.value[index].image_url || '';
     let imageStoragePath = bookmarks.value[index].image_storage_path || '';
@@ -264,7 +275,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     }
 
     const domain = bookmarkPayload.product_url ? getSourceDomain(bookmarkPayload.product_url) : (bookmarks.value[index].source_domain || '');
-    const defaultBrand = domain ? domain.split('.')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : '';
+
 
     const updated = {
       ...bookmarks.value[index],
@@ -272,7 +283,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       title: bookmarkPayload.title,
       image_url: imageUrl,
       image_storage_path: imageStoragePath,
-      brand: bookmarkPayload.brand || defaultBrand || bookmarks.value[index].brand,
+      brand: bookmarkPayload.brand ?? bookmarks.value[index].brand ?? '',
       price: String(bookmarkPayload.price || '').replace(/[^0-9.]/g, ''),
       currency: bookmarkPayload.currency || 'TWD',
       variant_name: bookmarkPayload.variant_name || '',
@@ -283,55 +294,45 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       updated_at: new Date().toISOString()
     };
 
-    bookmarks.value[index] = updated;
-    saveToLocalStorage();
-
-    if (!isUuid(updated.owner_id) || !isUuid(id)) {
-      lastMutationSyncStatus.value = 'LOCAL_ONLY';
-      return updated;
+    if (remoteFailed) return failed();
+    if (isUuid(updated.owner_id)) {
+      const confirmed = await updateBookmarkInSupabase(id, updated);
+      if (!confirmed?.id || !mayWrite(updated.owner_id)) return failed();
+      bookmarks.value = bookmarks.value.map(row => row.id === id ? confirmed : row);
+      lastMutationSyncStatus.value = 'SYNCED';
+      return confirmed;
     }
-
-    // Async sync to Supabase
-    const remoteUpdated = await updateBookmarkInSupabase(id, updated);
-    if (!remoteUpdated) remoteFailed = true;
-    lastMutationSyncStatus.value = remoteFailed ? 'REMOTE_FAILED' : 'SYNCED';
-
-    return updated;
+    bookmarks.value[index] = updated; saveToLocalStorage();
+    lastMutationSyncStatus.value = 'LOCAL_ONLY'; return updated;
   };
 
-  const deleteBookmark = async (id) => {
-    bookmarks.value = bookmarks.value.filter((b) => b.id !== id);
-    selectedBookmarkIds.value = selectedBookmarkIds.value.filter((item) => item !== id);
-    if (activeDetailBookmarkId.value === id) {
-      closeDetailModal();
-    }
+  const deleteBookmark = async id => {
+    const row = bookmarks.value.find(item => item.id === id);
+    if (!row || !mayWrite(row.owner_id)) return failed();
+    const remote = isUuid(row.owner_id);
+    if (remote && !await deleteBookmarkFromSupabase(id)) return failed();
+    if (!mayWrite(row.owner_id)) return failed();
+    bookmarks.value = bookmarks.value.filter(item => item.id !== id);
+    selectedBookmarkIds.value = selectedBookmarkIds.value.filter(value => value !== id);
+    if (activeDetailBookmarkId.value === id) closeDetailModal();
     saveToLocalStorage();
-
-    if (!isUuid(id)) {
-      lastMutationSyncStatus.value = 'LOCAL_ONLY';
-      return;
-    }
-
-    const synced = await deleteBookmarkFromSupabase(id);
-    lastMutationSyncStatus.value = synced ? 'SYNCED' : 'REMOTE_FAILED';
+    lastMutationSyncStatus.value = remote ? 'SYNCED' : 'LOCAL_ONLY';
+    return true;
   };
 
   const deleteSelectedBookmarks = async () => {
-    if (!selectedBookmarkIds.value.length) return 0;
-    const idsToDelete = [...selectedBookmarkIds.value];
-    bookmarks.value = bookmarks.value.filter((b) => !idsToDelete.includes(b.id));
-    selectedBookmarkIds.value = [];
-    isManagerMode.value = false;
+    const rows = bookmarks.value.filter(row => selectedBookmarkIds.value.includes(row.id));
+    if (!rows.length || rows.some(row => !mayWrite(row.owner_id))) { failed(); return 0; }
+    const remoteIds = rows.filter(row => isUuid(row.owner_id)).map(row => row.id);
+    if (remoteIds.length && !await deleteBatchBookmarksFromSupabase(remoteIds)) { failed(); return 0; }
+    if (rows.some(row => !mayWrite(row.owner_id))) { failed(); return 0; }
+    const removed = new Set(rows.map(row => row.id));
+    bookmarks.value = bookmarks.value.filter(row => !removed.has(row.id));
+    selectedBookmarkIds.value = []; isManagerMode.value = false;
+    if (removed.has(activeDetailBookmarkId.value)) closeDetailModal();
     saveToLocalStorage();
-
-    if (!idsToDelete.every((id) => isUuid(id))) {
-      lastMutationSyncStatus.value = 'LOCAL_ONLY';
-      return idsToDelete.length;
-    }
-
-    const synced = await deleteBatchBookmarksFromSupabase(idsToDelete);
-    lastMutationSyncStatus.value = synced ? 'SYNCED' : 'REMOTE_FAILED';
-    return idsToDelete.length;
+    lastMutationSyncStatus.value = remoteIds.length ? 'SYNCED' : 'LOCAL_ONLY';
+    return removed.size;
   };
 
   return {

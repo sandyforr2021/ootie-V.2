@@ -46,6 +46,7 @@ export const useOotdStore = defineStore('ootd', () => {
   const commentsLoading = ref(false);
   const commentsError = ref('');
   let loadSequence = 0;
+  const interactionPending = new Set();
 
   const getWearingName = (entry) => typeof entry === 'string' ? entry : entry?.name || '';
 
@@ -100,6 +101,7 @@ export const useOotdStore = defineStore('ootd', () => {
       if (itemIds.length) {
         try { publicItems = await getPublicItemsByIds(itemIds); } catch (_) { /* public snapshots remain available by canonical id */ }
       }
+      if (requestId !== loadSequence) return false;
       appStore.ootdPosts = uniquePostsById(remotePosts).sort((a,b) => (editorialLook(a)?.sort || 0) - (editorialLook(b)?.sort || 0)).map((remote) => {
         const taggedItems = (Array.isArray(remote.item_ids) ? remote.item_ids : [])
           .map((id) => publicItems.find((item) => String(item.id) === String(id)))
@@ -123,17 +125,22 @@ export const useOotdStore = defineStore('ootd', () => {
     const post = appStore.ootdPosts.find((item) => String(item.id) === String(postId));
     if (!post) return false;
     const authStore = useAuthStore();
+    const profileId = authStore.profileId;
+    const key = `like:${profileId}:${postId}`;
+    if (interactionPending.has(key)) return false;
     if (authStore.isMember && authStore.profileId) {
+      interactionPending.add(key);
       try {
         if (post.liked) await deletePostLike(authStore.profileId, postId);
         else await createPostLike(authStore.profileId, postId);
+        if (profileId !== authStore.profileId) return false;
         post.liked = !post.liked;
         post.likes = Math.max(0, (post.likes || 0) + (post.liked ? 1 : -1));
         return true;
       } catch (error) {
         appStore.showToast(error?.userMessage || '按讚尚未同步到伺服器。', { type: 'error', syncStatus: 'REMOTE_FAILED' });
         return false;
-      }
+      } finally { interactionPending.delete(key); }
     }
     appStore.openLoginGate('SOCIAL_AUTH_REQUIRED', `/ootd/${postId}`);
     return false;
@@ -143,17 +150,22 @@ export const useOotdStore = defineStore('ootd', () => {
     const post = appStore.ootdPosts.find((item) => String(item.id) === String(postId));
     if (!post) return false;
     const authStore = useAuthStore();
+    const profileId = authStore.profileId;
+    const key = `save:${profileId}:${postId}`;
+    if (interactionPending.has(key)) return false;
     if (authStore.isMember && authStore.profileId) {
+      interactionPending.add(key);
       try {
         if (post.saved) await deleteSavedOutfit(authStore.profileId, { target_type: 'OOTD', target_id: postId });
         else await createSavedOutfit(authStore.profileId, { target_type: 'OOTD', target_id: postId });
+        if (profileId !== authStore.profileId) return false;
         post.saved = !post.saved;
         appStore.showToast(post.saved ? '已收藏這篇穿搭' : '已取消收藏', { type: 'success', syncStatus: 'SYNCED' });
         return true;
       } catch (error) {
         appStore.showToast(error?.userMessage || '收藏尚未同步到伺服器。', { type: 'error', syncStatus: 'REMOTE_FAILED' });
         return false;
-      }
+      } finally { interactionPending.delete(key); }
     }
     appStore.openLoginGate('SOCIAL_AUTH_REQUIRED', `/ootd/${postId}`);
     return false;
