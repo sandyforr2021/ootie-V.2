@@ -1,4 +1,33 @@
 export const wardrobeInsightsMessages = `
+目前沒有需要回顧的穿著紀錄。|No wear records need a review right now.|現在、見直す着用記録はありません。|No hay registros de uso que revisar ahora.
+年度衣櫥回顧|Your year in clothes|年間ワードローブ|Tu año en prendas
+統計項目|Measure|項目|Medida
+重點紀錄|Highlight|注目の記録|Destacado
+紀錄數量|Recorded count|記録数|Cantidad registrada
+最常穿著的衣物|Most-worn pieces|よく着たアイテム|Prendas más usadas
+穿著次數 Top 5|Top five by recorded wears|着用記録トップ5|Cinco prendas con más usos
+完整清單|All pieces|全アイテム|Todas las prendas
+穿著紀錄回顧|Wear history review|着用記録を振り返る|Revisión de usos
+選擇年度|Choose a year|年を選択|Elegir año
+所選年度尚無購買或穿著日期紀錄。|No purchase or wear dates recorded for this year.|この年の購入日・着用日の記録はありません。|No hay fechas de compra o uso para este año.
+尚無穿著紀錄，從下一次穿搭開始記錄。|No wears recorded yet. Start with your next outfit.|次のコーデから着用を記録しましょう。|Aún no hay usos registrados. Empieza con tu próximo conjunto.
+補上品牌資訊，查看衣櫥品牌分布。|Add brand details to see your wardrobe's brand mix.|ブランドを追加して内訳を確認しましょう。|Añade marcas para ver su distribución.
+已記錄 {count} 次穿著|{count} wears recorded|着用記録 {count} 回|{count} usos registrados
+第 {rank} 名|Rank {rank}|{rank} 位|Puesto {rank}
+尚無穿著紀錄|No wears recorded|着用記録なし|Sin usos registrados
+距上次記錄已過 {days} 天|{days} days since the last recorded wear|最後の着用記録から {days} 日|{days} días desde el último uso registrado
+{count} 件衣物|{count} pieces|{count} 点|{count} prendas
+所選年度尚無相關紀錄|No record for this year|この年の記録はありません|Sin registros de este año
+已記錄購入 {count} 件|{count} purchases recorded|購入記録 {count} 点|{count} compras registradas
+年度最常購入顏色|Most-purchased color|購入が多い色|Color más comprado
+年度最常購入風格|Most-purchased style|購入が多いスタイル|Estilo más comprado
+年度內有穿著紀錄的愛用單品|Favorite worn this year|今年着用した愛用アイテム|Prenda favorita usada este año
+年度最常購入品牌|Most-purchased brand|購入が多いブランド|Marca más comprada
+累計記錄 {count} 次穿著|{count} lifetime wears recorded|累計着用記録 {count} 回|{count} usos acumulados
+購買統計依填寫的日期；單品穿著次數為累計紀錄。|Purchases use the dates you enter. Piece wear counts are lifetime totals.|購入集計は入力した日付、着用回数は累計の記録です。|Las compras usan las fechas introducidas. Los usos son totales acumulados.
+此年度的購買紀錄較少，仍可持續補充。|There are few purchase records for this year. You can add more over time.|今年の購入記録はまだ少なめです。後から追加できます。|Hay pocas compras registradas este año. Puedes añadir más.
+{brand} · {count} 件衣物，累計記錄 {wears} 次穿著|{brand} · {count} pieces, {wears} recorded wears|{brand} · {count} 点、着用記録 {wears} 回|{brand} · {count} prendas, {wears} usos registrados
+
 OOTIE Style Crew · 團隊策展穿搭故事|OOTIE Style Crew · A team-curated style story|OOTIE Style Crew · チームが届けるコーデストーリー|OOTIE Style Crew · Historia de estilo del equipo
 購買幣別|Purchase currency|購入通貨|Moneda de compra
 購買日期|Purchase date|購入日|Fecha de compra

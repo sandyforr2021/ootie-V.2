@@ -61,7 +61,7 @@
             <canvas ref="brandChartRef" aria-label="我的愛用品牌單品數量圖表"></canvas>
           </div>
           <div v-show="!hasBrandStats" class="stats-empty">
-            {{ appStore.items.length ? '幫衣服補上品牌資訊，看看你的愛用品牌排行吧！' : $t('尚無資料，快去新增你的第一件衣服吧！') }}
+            {{ appStore.items.length ? $t('補上品牌資訊，查看衣櫥品牌分布。') : $t('尚無資料，快去新增你的第一件衣服吧！') }}
           </div>
           <p v-if="brandHighlight" class="brand-stats-highlight">{{ brandHighlight }}</p>
         </article>
@@ -69,14 +69,14 @@
         <!-- 年度 No.1 報告 -->
         <article class="stats-card yearly-summary-card">
           <div class="yearly-summary-header">
-            <h3>年度 No.1 報告</h3>
+            <h3>{{ $t('年度衣櫥回顧') }}</h3>
             <select
               v-model="selectedYear"
               class="yearly-summary-select"
-              aria-label="選擇年度"
+              :aria-label="$t('選擇年度')"
               @change="updateYearlySummary"
             >
-              <option v-for="y in availableYears" :key="y" :value="y">{{ y }} 年</option>
+              <option v-for="y in availableYears" :key="y" :value="y">{{ y }}</option>
             </select>
           </div>
 
@@ -84,9 +84,9 @@
             <table class="yearly-summary-table">
               <thead>
                 <tr>
-                  <th>統計項目</th>
-                  <th>No.1 結果</th>
-                  <th>數據佐證</th>
+                  <th>{{ $t('統計項目') }}</th>
+                  <th>{{ $t('重點紀錄') }}</th>
+                  <th>{{ $t('紀錄數量') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,7 +105,7 @@
             </p>
           </div>
           <div v-else class="stats-empty">
-            今年還沒有相關紀錄，快去新增單品吧！
+            {{ $t('所選年度尚無購買或穿著日期紀錄。') }}
           </div>
         </article>
       </div>
@@ -114,8 +114,8 @@
     <!-- 我的百搭神器 Top 5 -->
     <section class="profile-insights top-worn-section" aria-labelledby="topWornTitle">
       <div class="profile-ootd-heading">
-        <h2 id="topWornTitle">我的百搭神器</h2>
-        <span class="eyebrow">戰力榜 Top 5</span>
+        <h2 id="topWornTitle">{{ $t('最常穿著的衣物') }}</h2>
+        <span class="eyebrow">{{ $t('穿著次數 Top 5') }}</span>
       </div>
       <div class="top-worn-list" v-if="topWornItems.length && topWornItems.some(i => i.wear_count > 0)">
         <article
@@ -123,26 +123,26 @@
           :key="item.id"
           :class="['top-worn-item', { 'is-champion': index === 0 }]"
         >
-          <span :class="['top-worn-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="`第 ${index + 1} 名`">
+          <span :class="['top-worn-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
             {{ index === 0 ? '♛' : index + 1 }}
           </span>
-          <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" />
+          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
           <div class="top-worn-copy">
-            <h3>{{ item.name_zh || item.name }}</h3>
-            <p>穿了 {{ item.wear_count }}{{ $t("次") }}</p>
+            <h3>{{ itemName(item) }}</h3>
+            <p>{{ tf('已記錄 {count} 次穿著', { count: item.wear_count }) }}</p>
           </div>
         </article>
       </div>
       <div v-else class="top-worn-empty">
-        還沒有穿搭紀錄，開始記錄你的第一次穿搭吧！
+        {{ $t('尚無穿著紀錄，從下一次穿搭開始記錄。') }}
       </div>
     </section>
 
     <!-- 冷宮衣物排名 完整清單 -->
     <section class="profile-insights disused-ranking-section" aria-labelledby="disusedRankingTitle">
       <div class="profile-ootd-heading">
-        <h2 id="disusedRankingTitle">冷宮衣物排名</h2>
-        <span class="eyebrow">完整清單</span>
+        <h2 id="disusedRankingTitle">{{ $t('穿著紀錄回顧') }}</h2>
+        <span class="eyebrow">{{ $t('完整清單') }}</span>
       </div>
       <div class="disused-ranking" v-if="disusedRanking.length">
         <article
@@ -150,23 +150,18 @@
           :key="item.id"
           class="disused-ranking-item"
         >
-          <span :class="['disused-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="`第 ${index + 1} 名`">
+          <span :class="['disused-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
             {{ index === 0 ? '♛' : index + 1 }}
           </span>
-          <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" />
+          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
           <div class="disused-ranking-copy">
-            <h3>{{ item.name_zh || item.name }}</h3>
+            <h3>{{ itemName(item) }}</h3>
             <p>{{ getDisusedMessage(item) }}</p>
-            <span>{{ $t("穿著") }}{{ item.wear_count || 0 }}{{ $t("次") }}{{
-                closetStore.getDaysSinceLastWorn(item.last_worn) !== null
-                  ? ` · ${closetStore.getDaysSinceLastWorn(item.last_worn)} 天前`
-                  : ' · 尚未穿過'
-              }}
-            </span>
+            <span>{{ tf('已記錄 {count} 次穿著', { count:item.wear_count || 0 }) }}</span>
           </div>
         </article>
       </div>
-      <div v-else class="disused-empty">{{ $t("太棒了！你的每件衣服都很常穿，衣櫥利用率很高！") }}</div>
+      <div v-else class="disused-empty">{{ $t('目前沒有需要回顧的穿著紀錄。') }}</div>
     </section>
   </section>
 </template>
@@ -180,6 +175,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { useStatsStore } from '@/stores/stats';
 import { labels } from '@/constants';
+import { t, tf, locale } from '@/i18n';
+import { itemName } from '@/services/itemPresentation';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -203,7 +200,6 @@ const categoryStats = ref([]);
 const brandStats = ref([]);
 const brandHighlight = ref('');
 const topWornItems = ref([]);
-const costRanking = ref([]);
 const disusedRanking = ref([]);
 
 // Yearly summary states
@@ -228,12 +224,12 @@ const hasBrandStats = computed(() => {
 const getDisusedMessage = (item) => {
   const days = closetStore.getDaysSinceLastWorn(item.last_worn);
   if (item.wear_count === 0 && !item.last_worn) {
-    return '你從來沒穿過耶！';
+    return t('尚無穿著紀錄');
   }
   if (days !== null) {
-    return `已經 ${days} 天沒穿囉！`;
+    return tf('距上次記錄已過 {days} 天', {days});
   }
-  return `只穿過 ${Number(item.wear_count || 0)} 次。`;
+  return tf('已記錄 {count} 次穿著', {count:Number(item.wear_count || 0)});
 };
 
 const destroyCharts = () => {
@@ -263,7 +259,7 @@ const renderAllCharts = async () => {
     charts.color = new Chart(colorChartRef.value, {
       type: 'doughnut',
       data: {
-        labels: colorStats.value.map((e) => labels[e.color] || e.color),
+        labels: colorStats.value.map((e) => t(labels[e.color] || e.color)),
         datasets: [
           {
             data: colorStats.value.map((e) => e.count),
@@ -280,7 +276,7 @@ const renderAllCharts = async () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` ${context.raw} 件`
+              label: (context) => tf('{count} 件衣物', {count:context.raw})
             }
           }
         }
@@ -293,7 +289,7 @@ const renderAllCharts = async () => {
     charts.colorFamily = new Chart(colorFamilyChartRef.value, {
       type: 'doughnut',
       data: {
-        labels: colorFamilyStats.value.map((e) => labels[e.secondary_color] || e.secondary_color),
+        labels: colorFamilyStats.value.map((e) => t(labels[e.secondary_color] || e.secondary_color)),
         datasets: [
           {
             data: colorFamilyStats.value.map((e) => e.count),
@@ -310,7 +306,7 @@ const renderAllCharts = async () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` ${context.raw} 件`
+              label: (context) => tf('{count} 件衣物', {count:context.raw})
             }
           }
         }
@@ -323,7 +319,7 @@ const renderAllCharts = async () => {
     charts.style = new Chart(styleChartRef.value, {
       type: 'bar',
       data: {
-        labels: styleStats.value.map((e) => labels[e.style] || e.style),
+        labels: styleStats.value.map((e) => t(labels[e.style] || e.style)),
         datasets: [
           {
             data: styleStats.value.map((e) => e.count),
@@ -339,7 +335,7 @@ const renderAllCharts = async () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` ${context.raw} 件`
+              label: (context) => tf('{count} 件衣物', {count:context.raw})
             }
           }
         },
@@ -363,7 +359,7 @@ const renderAllCharts = async () => {
     charts.category = new Chart(categoryChartRef.value, {
       type: 'doughnut',
       data: {
-        labels: categoryStats.value.map((e) => labels[e.category] || e.category),
+        labels: categoryStats.value.map((e) => t(labels[e.category] || e.category)),
         datasets: [
           {
             data: categoryStats.value.map((e) => e.count),
@@ -388,7 +384,7 @@ const renderAllCharts = async () => {
           },
           tooltip: {
             callbacks: {
-              label: (context) => ` ${context.raw} 件`
+              label: (context) => tf('{count} 件衣物', {count:context.raw})
             }
           }
         }
@@ -420,7 +416,7 @@ const renderAllCharts = async () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => ` ${context.raw} 件`
+              label: (context) => tf('{count} 件衣物', {count:context.raw})
             }
           }
         },
@@ -447,36 +443,17 @@ const updateYearlySummary = () => {
 
   if (!hasData) return;
 
+  const unavailable = t('所選年度尚無相關紀錄');
+  const purchased = count => tf('已記錄購入 {count} 件', { count });
   yearlyRows.value = [
-    {
-      icon: '🏆 年度最愛顏色',
-      result: summary.topColor ? summary.topColor.name : '今年還沒有相關紀錄',
-      proof: summary.topColor ? `共購入 ${summary.topColor.count} 件` : '無數據'
-    },
-    {
-      icon: '🏆 年度最愛風格',
-      result: summary.topStyle ? summary.topStyle.name : '今年還沒有相關紀錄',
-      proof: summary.topStyle ? `共購入 ${summary.topStyle.count} 件` : '無數據'
-    },
-    {
-      icon: '🏆 年度最常穿單品',
-      result: summary.mostWornItem ? summary.mostWornItem.name : '今年還沒有相關紀錄',
-      proof: summary.mostWornItem ? `共穿著 ${summary.mostWornItem.wearCount} 次` : '無數據'
-    },
-    {
-      icon: '🏆 年度最愛品牌',
-      result: summary.topBrand ? summary.topBrand.name : '今年還沒有相關紀錄',
-      proof: summary.topBrand ? `共購入 ${summary.topBrand.count} 件` : '無數據'
-    }
+    {icon:t('年度最常購入顏色'),result:summary.topColor ? t(summary.topColor.name) : unavailable,proof:summary.topColor ? purchased(summary.topColor.count) : '—'},
+    {icon:t('年度最常購入風格'),result:summary.topStyle ? t(summary.topStyle.name) : unavailable,proof:summary.topStyle ? purchased(summary.topStyle.count) : '—'},
+    {icon:t('年度內有穿著紀錄的愛用單品'),result:summary.mostWornItem ? summary.mostWornItem.name : unavailable,proof:summary.mostWornItem ? tf('累計記錄 {count} 次穿著', {count:summary.mostWornItem.wearCount}) : '—'},
+    {icon:t('年度最常購入品牌'),result:summary.topBrand?.name || unavailable,proof:summary.topBrand ? purchased(summary.topBrand.count) : '—'}
   ];
+  yearlyQuote.value = t('購買統計依填寫的日期；單品穿著次數為累計紀錄。');
+  yearlyWarning.value = summary.totalPurchased > 0 && summary.totalPurchased < 3 ? t('此年度的購買紀錄較少，仍可持續補充。') : '';
 
-  const colorText = summary.topColor ? `${summary.topColor.name}的` : '';
-  const styleText = summary.topStyle ? `${summary.topStyle.name}風格` : '風格多樣的';
-  const brandText = summary.topBrand ? `最愛的品牌是 ${summary.topBrand.name}` : '嘗試了許多不同品牌';
-  const itemText = summary.mostWornItem ? `而穿最兇的單品是${summary.mostWornItem.name}！` : '目前還沒有特別頻繁穿著的單品。';
-
-  yearlyQuote.value = `「你 ${selectedYear.value} 年最常買${colorText}${styleText}衣服，${brandText}，${itemText}」`;
-  yearlyWarning.value = summary.totalPurchased > 0 && summary.totalPurchased < 3 ? `⚠️ 提醒：${selectedYear.value} 年購入單品少於 3 件，統計僅供參考。` : '';
 };
 
 const loadData = async () => {
@@ -492,13 +469,10 @@ const loadData = async () => {
   brandStats.value = brands || [];
   const namedBrands = brands.filter((e) => e.brand !== '未分類');
   const mostWorn = [...namedBrands].sort((a, b) => b.totalWearCount - a.totalWearCount)[0];
-  brandHighlight.value = mostWorn && mostWorn.totalWearCount > 0 ? `你最常穿的品牌是 ${mostWorn.brand}，共有 ${mostWorn.count} 件單品\n總共穿了 ${mostWorn.totalWearCount} 次！` : '';
+  brandHighlight.value = mostWorn && mostWorn.totalWearCount > 0 ? tf('{brand} · {count} 件衣物，累計記錄 {wears} 次穿著', {brand:mostWorn.brand,count:mostWorn.count,wears:mostWorn.totalWearCount}) : '';
 
   // 3. Top worn items
   topWornItems.value = await statsStore.getTopWornItems();
-
-  // 4. Cost ranking
-  costRanking.value = await statsStore.getCostPerWearRanking();
 
   // 5. Disused ranking
   disusedRanking.value = await statsStore.getDisusedRanking();
@@ -524,6 +498,8 @@ const loadData = async () => {
   updateYearlySummary();
   await renderAllCharts();
 };
+
+watch(locale, () => { void loadData(); });
 
 onMounted(() => {
   loadData();

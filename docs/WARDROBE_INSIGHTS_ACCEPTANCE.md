@@ -13,4 +13,4 @@ Implemented without a paid service or additional YouCam generation.
 - Styling guidance is local logic based on temperature and rain, with links to actual visible wardrobe pieces. It does not submit another paid AI job.
 - Provider: [Open-Meteo documentation](https://open-meteo.com/en/docs). The free endpoint is for non-commercial use; a future revenue-producing release must review the provider's [commercial terms](https://open-meteo.com/en/pricing). No subscription was started.
 
-Pending separately: full keyboard/mobile/locale review of all older Statistics sections; existing yearly charts still contain older copy. Do not claim a complete site-wide translation audit.
+Statistics headings, chart labels and yearly summaries now use four-language messages. Missing wear records are described as missing records rather than never-worn facts. Lifetime wear counts are identified as lifetime totals. A complete site-wide keyboard/mobile/locale audit remains pending.
