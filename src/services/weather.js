@@ -47,9 +47,15 @@ export async function searchWeatherPlaces(city, language = 'en', fetchImpl = fet
   url.searchParams.set('format', 'json');
   const response = await fetchImpl(url, { signal: AbortSignal.timeout(12000) });
   if (!response.ok) throw new WeatherError('PROVIDER_ERROR', '城市搜尋暫時無法使用。');
-  const places = (await response.json())?.results || [];
+  const places = ((await response.json())?.results || []).filter(place=>!place.feature_code || /^(PPL|ADM)/.test(place.feature_code));
   if (!places.length) throw new WeatherError('CITY_NOT_FOUND', '找不到這個城市，請確認名稱後再試。');
-  return places.map(place => ({ id: place.id, name: place.name, label: [...new Set([place.name, place.admin1, place.country].filter(Boolean))].join(', '), latitude: place.latitude, longitude: place.longitude }));
+  return places.map(place => {
+    let region=place.country;
+    try { if(place.country_code) region=new Intl.DisplayNames([language],{type:'region'}).of(place.country_code) || region; } catch { /* Keep the provider's country name. */ }
+    let administrative=String(place.admin1 || '').split(/\s+or\s+/)[0].trim();
+    if(place.country_code==='TW' && /^(?:[臺台]灣省|Taiwan)$/i.test(administrative)) administrative='';
+    return {id:place.id,name:place.name,label:[...new Set([place.name,administrative,region].filter(Boolean))].join(', '),latitude:place.latitude,longitude:place.longitude};
+  });
 }
 
 export function weatherWardrobeAdvice(weather) {

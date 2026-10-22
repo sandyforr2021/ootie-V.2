@@ -38,4 +38,13 @@ describe('weather service', () => {
   it('rejects missing temperatures instead of interpreting null as zero degrees', async () => {
     await expect(fetchWeatherAt({latitude:25,longitude:121,city:'Taipei'},async()=>({ok:true,json:async()=>({current:{temperature_2m:null}})}))).rejects.toBeInstanceOf(WeatherError);
   });
+
+  it('uses regional country names and excludes airports from city choices',async()=>{
+    const places=await searchWeatherPlaces('Taipei','zh-TW',async()=>({ok:true,json:async()=>({results:[
+      {id:1,name:'台北市',admin1:'臺灣省 or 台灣省',country:'台湾',country_code:'TW',feature_code:'PPLC',latitude:25,longitude:121},
+      {id:2,name:'Taipei Airport',country_code:'TW',feature_code:'AIRP',latitude:25,longitude:121}
+    ]})}));
+    expect(places).toHaveLength(1);
+    expect(places[0].label).toBe('台北市, 台灣');
+  });
 });
