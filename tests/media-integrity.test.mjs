@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const root = process.cwd();
 
-test('demo media inventory remains complete and the optimized extension asset is used', async () => {
+test('legacy media is preserved and the extension guide offers an actual package', async () => {
   const garments = (await readdir(join(root, 'public/demo/garments'))).filter((name) => name.endsWith('.webp'));
   const ootd = (await readdir(join(root, 'public/demo/ootd'))).filter((name) => name.endsWith('.webp'));
   assert.equal(garments.length, 43);
@@ -13,10 +13,10 @@ test('demo media inventory remains complete and the optimized extension asset is
   assert.equal(new Set(garments).size, 43);
   assert.equal(new Set(ootd).size, 36);
 
-  const bookmarks = await readFile(join(root, 'src/views/BookmarksView.vue'), 'utf8');
-  assert.match(bookmarks, /extension-mockup\.webp/);
-  assert.doesNotMatch(bookmarks, /extension-mockup\.png/);
-  assert.ok((await stat(join(root, 'public/assets/extension-mockup.webp'))).size < 350_000);
+  const guide = await readFile(join(root, 'src/components/bookmarks/ExtensionGuide.vue'), 'utf8');
+  assert.match(guide, /href="\/downloads\/ootie-browser-companion\.zip" download/);
+  const archive = await readFile(join(root, 'public/downloads/ootie-browser-companion.zip'));
+  assert.equal(archive.subarray(0, 4).toString('hex'), '504b0304');
 });
 
 test('Explore, Closet and OOTD Detail preserve safe fashion-media framing', async () => {
@@ -38,11 +38,12 @@ test('Explore, Closet and OOTD Detail preserve safe fashion-media framing', asyn
 
 test('Home uses a dedicated responsive hero asset while Trending keeps canonical unique posts', async () => {
   const home = await readFile(join(root, 'src/views/HomeView.vue'), 'utf8');
-  assert.match(home, /guestTrendingPosts/);
-  assert.match(home, /ootie-home-hero-v2-720\.webp 720w/);
-  assert.match(home, /ootie-home-hero-v2-1024\.webp 1024w/);
+  const visual = await readFile(join(root, 'src/components/ui/EditorialVisual.vue'), 'utf8');
+  assert.match(home, /<EditorialVisual/);
+  assert.match(visual, /ootie-home-hero-v2-720\.webp 720w/);
+  assert.match(visual, /ootie-home-hero-v2-1024\.webp 1024w/);
   assert.doesNotMatch(home, /:src="heroPost\?\.image"/);
-  assert.match(home, /uniquePostsById\(appStore\.ootdPosts\)/);
+  assert.match(home, /uniquePostsById\(genuineContent\(appStore\.ootdPosts\)\)/);
   assert.ok((await stat(join(root, 'public/assets/ootie-home-hero-v2-720.webp'))).size < 160_000);
   assert.ok((await stat(join(root, 'public/assets/ootie-home-hero-v2-1024.webp'))).size < 300_000);
 });
@@ -50,7 +51,10 @@ test('Home uses a dedicated responsive hero asset while Trending keeps canonical
 test('brand opening V2 is session-only, reduced-motion aware and intentionally timed', async () => {
   const opening = await readFile(join(root, 'src/components/layout/BrandOpening.vue'), 'utf8');
   assert.match(opening, /ootie:brand-opening:v2/);
-  assert.match(opening, /BRAND_OPENING_DURATION_MS = 2850/);
+  const duration = Number(opening.match(/BRAND_OPENING_DURATION_MS = (\d+)/)?.[1]);
+  assert.ok(duration >= 1500 && duration <= 3000, 'opening exits within three seconds');
+  assert.match(opening, /brand-opening__door--left/);
+  assert.match(opening, /brand-opening__door--right/);
   assert.match(opening, /prefers-reduced-motion: reduce/);
   assert.match(opening, /window\.location\.pathname === '\/'/);
 });

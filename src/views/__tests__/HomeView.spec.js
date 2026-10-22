@@ -12,6 +12,7 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'Home', component: HomeView },
     { path: '/closet', component: { template: '<div>Closet</div>' } },
+    { path: '/shop', component: { template: '<div>Shop</div>' } },
     { path: '/sos', component: { template: '<div>SOS</div>' } },
     { path: '/explore', component: { template: '<div>Explore</div>' } },
     { path: '/ai', component: { template: '<div>AI</div>' } },
@@ -30,17 +31,18 @@ describe('HomeView guest/member presentation', () => {
     await router.isReady();
   });
 
-  it('shows product explanation, valid CTAs and populated trending content to guests', () => {
+  it('shows working entry points without invented community activity', () => {
     const wrapper = mount(HomeView, { global: { plugins: [router] } });
-    expect(wrapper.text()).toContain('今天，穿出自己的節奏。');
-    expect(wrapper.text()).toContain('從你已經擁有的衣服開始');
-    expect(wrapper.text()).toContain('開始建立我的衣櫥');
-    expect(wrapper.findAll('.trending-card').length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain('買之前，');
+    expect(wrapper.text()).toContain('先穿進自己的生活。');
+    expect(wrapper.text()).toContain('開始購物試穿');
+    expect(wrapper.findAll('.trending-card')).toHaveLength(0);
     expect(wrapper.find('.hero-photo img').attributes('src')).toBe('/assets/ootie-home-hero-v2-1024.webp');
     expect(wrapper.find('.hero-photo img').attributes('fetchpriority')).toBe('high');
-    expect(wrapper.findAll('.hero-wardrobe-doors .hero-door')).toHaveLength(2);
-    expect(wrapper.findAll('.capability-grid a')).toHaveLength(4);
-    expect(wrapper.find('.member-summary-grid').exists()).toBe(false);
+    expect(wrapper.find('a[href="/shop?tab=album"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/shop?tab=community"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(false);
+    wrapper.unmount();
   });
 
   it('switches to the utility dashboard for a resolved member', async () => {
@@ -52,9 +54,10 @@ describe('HomeView guest/member presentation', () => {
     app.setMemberProfile({ id: auth.profileId, name: 'OOTIE Demo', username: '@ootie_demo' });
     const wrapper = mount(HomeView, { global: { plugins: [router] } });
     await flushPromises();
-    expect(wrapper.text()).toContain('歡迎回來，OOTIE');
-    expect(wrapper.find('.member-summary-row').exists()).toBe(true);
-    expect(wrapper.text()).toContain('取得 AI 穿搭建議');
-    expect(wrapper.find('.guest-hero').exists()).toBe(false);
+    expect(wrapper.text()).toContain('歡迎回來， OOTIE');
+    expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/membership"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('取得 AI 穿搭建議');
+    wrapper.unmount();
   });
 });

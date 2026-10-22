@@ -1,7 +1,7 @@
 <template>
   <div v-if="appStore.isProfileEditOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal profile-edit-modal">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <p class="eyebrow">Profile</p><h2>編輯個人資料</h2>
       <form @submit.prevent="handleSubmit">
         <h3>公開個人資料</h3>
@@ -20,7 +20,7 @@
         </div>
         <p v-if="authStore.errorMsg" class="form-error" role="alert">{{ authStore.errorMsg }}</p>
         <p v-if="authStore.accountPrivateError" class="form-error" role="alert">{{ authStore.accountPrivateError }} 請重新開啟編輯後再試。</p>
-        <div class="form-actions"><button type="button" class="secondary" @click="close">取消</button><button type="submit" class="primary" :disabled="authStore.loading || privateDataPending || !!authStore.accountPrivateError">{{ privateDataPending ? '讀取資料中…' : '儲存資料' }}</button></div>
+        <div class="form-actions"><button type="button" class="secondary" @click="close">{{ $t("取消") }}</button><button type="submit" class="primary" :disabled="authStore.loading || privateDataPending || !!authStore.accountPrivateError">{{ privateDataPending ? '讀取資料中…' : '儲存資料' }}</button></div>
       </form>
     </section>
   </div>

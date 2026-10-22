@@ -2,10 +2,10 @@
   <section class="page active" id="closetPage">
     <header class="closet-page-header">
       <div>
-        <h1>我的衣櫥</h1>
-        <p>把擁有的每一件衣服，準備成下一套日常。</p>
+        <h1>{{ $t("我的衣櫥") }}</h1>
+        <p>{{ $t("把擁有的每一件衣服，準備成下一套日常。") }}</p>
       </div>
-      <button type="button" class="primary closet-header-add" @click="openAddForm">＋ 新增單品</button>
+      <button type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
     </header>
 
     <section
@@ -15,18 +15,18 @@
       :role="isRemoteFailure ? 'alert' : 'status'"
       aria-live="polite"
     >
-      <h2>{{ isRemoteLoading ? '正在整理衣櫥' : '衣櫥暫時無法載入' }}</h2>
+      <h2>{{ isRemoteLoading ? $t('正在整理衣櫥') : $t('衣櫥暫時無法載入') }}</h2>
       <p>{{ closetRuntimeMessage }}</p>
-      <button v-if="isRemoteFailure" type="button" class="primary" @click="retryClosetLoad">重新載入</button>
+      <button v-if="isRemoteFailure" type="button" class="primary" @click="retryClosetLoad">{{ $t("重新載入") }}</button>
     </section>
 
     <template v-else>
     <!-- 冷宮衣物提醒區塊 -->
     <details v-if="!isRemoteEmpty" class="disused-section">
       <summary>
-        <strong id="disusedTitle">冷宮衣物提醒</strong>
+        <strong id="disusedTitle">{{ $t("冷宮衣物提醒") }}</strong>
         <span class="disused-count">
-          {{ closetStore.disusedItems.length ? `${closetStore.disusedItems.length} 件需要關心` : '目前沒有冷宮單品' }}
+          {{ closetStore.disusedItems.length ? `${closetStore.disusedItems.length} ${$t('件尚未常穿')}` : $t('目前沒有冷宮單品') }}
         </span>
       </summary>
 
@@ -37,12 +37,11 @@
           class="disused-card"
           :style="{ animationDelay: `${index * 45}ms` }"
         >
-          <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" />
+          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
           <div class="disused-card-body">
-            <h3>{{ item.name_zh || item.name }}</h3>
+            <h3>{{ itemName(item) }}</h3>
             <p>{{ getDisusedMessage(item) }}</p>
-            <span class="disused-meta">
-              穿著 {{ item.wear_count || 0 }} 次{{
+            <span class="disused-meta">{{ $t("穿著") }}{{ item.wear_count || 0 }}{{ $t("次") }}{{
                 closetStore.getDaysSinceLastWorn(item.last_worn) !== null
                   ? ` · ${closetStore.getDaysSinceLastWorn(item.last_worn)} 天前`
                   : ' · 尚未穿過'
@@ -50,8 +49,8 @@
             </span>
             <div class="disused-actions">
               <button class="primary" type="button" @click="sendToSos(item.id)">
-                <span class="disused-action-wide">丟到 SOS 求救</span>
-                <span class="disused-action-compact">SOS 求救</span>
+                <span class="disused-action-wide">{{ $t("丟到 SOS 求救") }}</span>
+                <span class="disused-action-compact">{{ $t("SOS 求救") }}</span>
               </button>
               <button
                 :class="['secondary', { 'is-marked': isMarkedClearance(item) }]"
@@ -66,29 +65,25 @@
           </div>
         </article>
       </div>
-      <div v-else class="disused-empty">
-        太棒了！你的每件衣服都很常穿，衣櫥利用率很高！
-      </div>
+      <div v-else class="disused-empty">{{ $t("太棒了！你的每件衣服都很常穿，衣櫥利用率很高！") }}</div>
 
       <router-link
         v-if="closetStore.disusedItems.length > 3"
         class="disused-more-link"
         style="display: inline-block;"
         to="/stats"
-      >
-        查看完整冷宮排名 →
-      </router-link>
+      >{{ $t("查看完整冷宮排名 →") }}</router-link>
     </details>
 
     <!-- Toolbar & Filters -->
-    <div :class="['toolbar', { 'filters-open': isFilterPanelOpen }]">
+    <div v-if="!isWholeClosetEmpty" :class="['toolbar', { 'filters-open': isFilterPanelOpen }]">
       <label class="search">
         <span>⌕</span>
         <input
           v-model="closetStore.searchQuery"
           type="search"
-          placeholder="搜尋你的衣櫥"
-          aria-label="搜尋你的衣櫥"
+          :placeholder="$t(&quot;搜尋你的衣櫥&quot;)"
+          :aria-label="$t(&quot;搜尋你的衣櫥&quot;)"
         />
       </label>
 
@@ -98,8 +93,7 @@
         aria-controls="closetSecondaryFilters"
         :aria-expanded="isFilterPanelOpen"
         @click="isFilterPanelOpen = !isFilterPanelOpen"
-      >
-        篩選<span v-if="activeFilterCount">（{{ activeFilterCount }}）</span>
+      >{{ $t("篩選") }}<span v-if="activeFilterCount">（{{ activeFilterCount }}）</span>
       </button>
 
       <!-- 色系 / 顏色 篩選下拉選單 -->
@@ -112,21 +106,19 @@
           @click="isColorMenuOpen = !isColorMenuOpen"
         >
           <span :class="['color-filter-preview', { 'is-all': !closetStore.colorFilter && !closetStore.colorFamilyFilter }]"></span>
-          <span>{{ colorFilterDisplayLabel }}</span>
+          <span>{{ $t(colorFilterDisplayLabel) }}</span>
           <span class="color-filter-arrow">⌄</span>
         </button>
 
-        <div v-if="isColorMenuOpen" class="color-filter-options" role="listbox" aria-label="依色系篩選">
+        <div v-if="isColorMenuOpen" class="color-filter-options" role="listbox" :aria-label="$t(&quot;依色系篩選&quot;)">
           <div class="color-filter-group">
-            <strong>色系</strong>
+            <strong>{{ $t("色系") }}</strong>
             <div class="color-filter-group-options">
               <button
                 type="button"
                 :class="['color-filter-option', { selected: !closetStore.colorFamilyFilter }]"
                 @click="selectColorFamily('')"
-              >
-                全部色系
-              </button>
+              >{{ $t("全部色系") }}</button>
               <button
                 v-for="family in colorFamilies"
                 :key="family"
@@ -134,20 +126,19 @@
                 :class="['color-filter-option', { selected: closetStore.colorFamilyFilter === family }]"
                 @click="selectColorFamily(family)"
               >
-                {{ family }}
+                {{ $t(family) }}
               </button>
             </div>
           </div>
 
           <div v-if="closetStore.colorFamilyFilter && colorDetailOptions.length" class="color-filter-group color-detail-group">
-            <strong>主要顏色</strong>
+            <strong>{{ $t("主要顏色") }}</strong>
             <div class="color-filter-group-options">
               <button
                 type="button"
                 :class="['color-filter-option', { selected: !closetStore.colorFilter }]"
                 @click="selectDetailColor('')"
-              >
-                全部 {{ closetStore.colorFamilyFilter }}
+              >{{ $t("全部") }}{{ closetStore.colorFamilyFilter }}
               </button>
               <button
                 v-for="[name, swatch] in colorDetailOptions"
@@ -157,45 +148,45 @@
                 @click="selectDetailColor(name)"
               >
                 <span :class="['color-swatch', swatch]"></span>
-                {{ name }}
+                {{ $t(name) }}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <select v-model="closetStore.seasonFilter" class="select" aria-label="依季節篩選">
-        <option value="">季節</option>
-        <option value="Spring / Summer">春夏</option>
-        <option value="Autumn / Winter">秋冬</option>
-        <option value="All year">四季</option>
+      <select v-model="closetStore.seasonFilter" class="select" :aria-label="$t(&quot;依季節篩選&quot;)">
+        <option value="">{{ $t("季節") }}</option>
+        <option value="Spring / Summer">{{ $t("春夏") }}</option>
+        <option value="Autumn / Winter">{{ $t("秋冬") }}</option>
+        <option value="All year">{{ $t("四季") }}</option>
       </select>
 
-      <select v-model="closetStore.styleFilter" class="select" aria-label="依風格篩選">
-        <option value="">風格</option>
-        <option value="Minimal">極簡</option>
-        <option value="Casual">休閒</option>
-        <option value="Smart Casual">簡約正式</option>
-        <option value="Chic">時髦</option>
+      <select v-model="closetStore.styleFilter" class="select" :aria-label="$t(&quot;依風格篩選&quot;)">
+        <option value="">{{ $t("風格") }}</option>
+        <option value="Minimal">{{ $t("極簡") }}</option>
+        <option value="Casual">{{ $t("休閒") }}</option>
+        <option value="Smart Casual">{{ $t("簡約正式") }}</option>
+        <option value="Chic">{{ $t("時髦") }}</option>
       </select>
     </div>
 
     <!-- Category Tabs -->
-    <div class="category-row" aria-label="單品分類">
+    <div v-if="!isWholeClosetEmpty" class="category-row" :aria-label="$t(&quot;單品分類&quot;)">
       <button
         v-for="cat in categories"
         :key="cat"
         :class="['category', { active: closetStore.activeCategory === cat }]"
         @click="closetStore.activeCategory = cat"
       >
-        {{ labels[cat] }}
+        {{ $t(labels[cat]) }}
       </button>
     </div>
 
-    <div class="closet-meta">
-      <strong>{{ closetStore.filteredItems.length }} 件單品</strong>
+    <div v-if="!isWholeClosetEmpty" class="closet-meta">
+      <strong>{{ closetStore.filteredItems.length }} {{ $t("件單品") }}</strong>
       <div v-if="hasActiveClosetFilters" class="closet-meta-actions">
-        <button v-if="hasActiveClosetFilters" class="clear" @click="clearAllFilters">清除篩選</button>
+        <button v-if="hasActiveClosetFilters" class="clear" @click="clearAllFilters">{{ $t("清除篩選") }}</button>
       </div>
     </div>
 
@@ -212,14 +203,14 @@
             class="item-image"
             role="button"
             tabindex="0"
-            :aria-label="`查看 ${item.name_zh || item.name} 詳情`"
+            :aria-label="`${$t('查看單品')}: ${itemName(item)}`"
             @click="openDetail(item.id)"
             @keydown.enter="openDetail(item.id)"
             @keydown.space.prevent="openDetail(item.id)"
           >
             <button
               :class="['favorite', { 'is-favorite': item.favorite }]"
-              :aria-label="`${item.favorite ? '取消收藏' : '收藏'} ${item.name_zh || item.name}`"
+              :aria-label="`${$t(item.favorite ? '取消收藏' : '收藏')} ${itemName(item)}`"
               @click.stop="closetStore.toggleFavorite(item.id)"
             >
               {{ item.favorite ? '♥' : '♡' }}
@@ -227,26 +218,27 @@
             <img
               class="product-image"
               :src="item.photo"
-              :alt="`${item.brand || '未標示品牌'} ${item.name_zh || item.name}`"
+              :alt="`${item.brand || '未標示品牌'} ${itemName(item)}`"
               loading="lazy"
               decoding="async"
             />
           </div>
           <div class="item-info">
-            <h3>{{ item.name_zh || item.name }}</h3>
-            <p class="item-brand">{{ item.brand || '未標示品牌' }}</p>
-            <p class="item-meta">{{ labels[item.category] || item.category }} · {{ item.primary_color || '未標示顏色' }}</p>
-            <span v-if="isMarkedClearance(item)" class="item-state-chip">待出清</span>
+            <h3>{{ itemName(item) }}</h3>
+            <p v-if="item.brand" class="item-brand">{{ item.brand }}</p>
+            <p class="item-meta">{{ $t(labels[item.category] || item.category) }} · {{ $t(labels[item.primary_color] || item.primary_color || '') }}</p>
+            <span v-if="isMarkedClearance(item)" class="item-state-chip">{{ $t("待出清") }}</span>
           </div>
         </article>
       </template>
 
       <div v-else class="empty closet-empty-state" role="status">
-        <h2>{{ isWholeClosetEmpty ? '衣櫥目前沒有衣物' : '沒有符合條件的單品' }}</h2>
-        <p>{{ isWholeClosetEmpty ? '加入第一件真實衣物，開始整理你的日常穿搭。' : '換個分類或清除篩選，就能繼續瀏覽。' }}</p>
+        <AppIcon name="Closet" :size="40" />
+        <h2>{{ isWholeClosetEmpty ? $t('衣櫥目前沒有衣物') : $t('沒有符合條件的單品') }}</h2>
+        <p>{{ isWholeClosetEmpty ? $t('加入第一件衣服，開始整理你的日常穿搭。') : $t('換個分類或清除篩選，就能繼續瀏覽。') }}</p>
         <div class="closet-empty-actions">
-          <button v-if="!isWholeClosetEmpty" type="button" class="secondary" @click="clearAllFilters">清除篩選</button>
-          <button type="button" class="primary" @click="openAddForm">新增單品</button>
+          <button v-if="!isWholeClosetEmpty" type="button" class="secondary" @click="clearAllFilters">{{ $t("清除篩選") }}</button>
+          <button type="button" class="primary" @click="openAddForm">{{ $t("新增單品") }}</button>
         </div>
       </div>
     </div>
@@ -255,7 +247,9 @@
 </template>
 
 <script setup>
+import { itemName } from '@/services/itemPresentation';
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import AppIcon from '@/components/ui/AppIcon.vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';

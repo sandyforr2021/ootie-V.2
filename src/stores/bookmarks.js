@@ -1,3 +1,4 @@
+import { genuineContent } from '@/services/contentAuthenticity';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { BOOKMARKS_STORAGE_KEY, defaultBookmarks } from '@/constants';
@@ -20,19 +21,19 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       const raw = localStorage.getItem(BOOKMARKS_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return genuineContent(parsed);
       }
       const appState = localStorage.getItem('weary-app-state-v1');
       if (appState) {
         const parsed = JSON.parse(appState);
         if (parsed && Array.isArray(parsed.bookmarks) && parsed.bookmarks.length > 0) {
-          return parsed.bookmarks;
+          return genuineContent(parsed.bookmarks);
         }
       }
     } catch (e) {
       console.warn('Failed to load bookmarks from storage:', e);
     }
-    return JSON.parse(JSON.stringify(defaultBookmarks));
+    return [];
   };
 
   const bookmarks = ref(loadInitialBookmarks());
@@ -122,8 +123,8 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   // Actions
   const fetchRemoteBookmarks = async (userId) => {
     const remoteData = await fetchBookmarksFromSupabase(userId);
-    if (remoteData && Array.isArray(remoteData) && remoteData.length > 0) {
-      bookmarks.value = remoteData.map((item) => ({
+    if (Array.isArray(remoteData)) {
+      bookmarks.value = genuineContent(remoteData).map((item) => ({
         ...item,
         price: item.price || '',
         brand: item.brand || '',

@@ -22,7 +22,7 @@ export class SupabaseGateway {
   serviceHeaders(extra = {}) {
     return {
       apikey: this.serviceRoleKey,
-      Authorization: `Bearer ${this.serviceRoleKey}`,
+      ...(this.serviceRoleKey.startsWith('sb_secret_') ? {} : { Authorization: `Bearer ${this.serviceRoleKey}` }),
       ...extra
     };
   }
@@ -39,6 +39,13 @@ export class SupabaseGateway {
     }
     const body = await parseResponseBody(response);
     if (!response.ok) {
+      const commerceCodes = ['FREE_BUDGET_EXHAUSTED','BATCH_CONFLICT','PRODUCT_NOT_OWNED','INVALID_BATCH','PERSON_IMAGE_NOT_OWNED'];
+      const commerceCode = commerceCodes.find((code) => body?.message === code);
+      if (commerceCode) throw new GatewayError(commerceCode, commerceCode === 'FREE_BUDGET_EXHAUSTED' ? 429 : 409, {
+        FREE_BUDGET_EXHAUSTED: '可用免費額度不足或已到期，本次沒有送出生成。',
+        BATCH_CONFLICT: '此提交編號已使用，請重新選擇商品。',
+        PRODUCT_NOT_OWNED: '請選擇自己收藏的商品。'
+      }[commerceCode] || '請重新確認照片與商品。');
       throw new GatewayError('SUPABASE_ERROR', 502, 'Supabase operation failed', {
         status: response.status,
         code: body?.code

@@ -1,19 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "OOTie - 穿搭商品收藏助手",
-  "version": "1.0.0",
-  "description": "一鍵抓取電商商品資訊並收藏至 OOTie 書籤",
+  "name": "OOTIE — Shopping Companion",
+  "version": "1.1.0",
+  "description": "Review a product from the current page and bring it into your OOTIE shopping studio.",
   "permissions": [
     "activeTab",
-    "scripting",
-    "tabs"
-  ],
-  "host_permissions": [
-    "<all_urls>"
+    "scripting"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "開啟 OOTie 商品收藏助手",
+    "default_title": "Open OOTIE Shopping Companion",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -26,4 +22,3 @@
     "128": "icons/icon128.png"
   }
 }
-

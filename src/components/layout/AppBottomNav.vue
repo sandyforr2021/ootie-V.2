@@ -12,13 +12,13 @@
       <div class="mobile-more-header">
         <div>
           <p class="quick-action-kicker">Navigation</p>
-          <h2 id="mobile-more-title">更多功能</h2>
+          <h2 id="mobile-more-title">{{ $t("更多功能") }}</h2>
         </div>
-        <button ref="moreCloseButton" type="button" class="mobile-more-close" aria-label="關閉更多功能" @click="closeMoreMenu">×</button>
+        <button ref="moreCloseButton" type="button" class="mobile-more-close" :aria-label="$t(&quot;關閉更多功能&quot;)" @click="closeMoreMenu">×</button>
       </div>
 
-      <p class="quick-action-heading">功能導覽</p>
-      <div class="mobile-more-destinations" aria-label="次要導覽">
+      <p class="quick-action-heading">{{ $t("功能導覽") }}</p>
+      <div class="mobile-more-destinations" :aria-label="$t(&quot;次要導覽&quot;)">
         <router-link
           v-for="item in MOBILE_MORE_ITEMS"
           :key="item.routeName"
@@ -28,40 +28,40 @@
           exact-active-class="active"
           @click.prevent="navigateTo(item.path)"
         >
-          <span aria-hidden="true">{{ item.icon }}</span>
-          <strong>{{ item.label }}</strong>
+          <AppIcon :name="item.routeName" />
+          <strong>{{ $t(item.label) }}</strong>
         </router-link>
         <button type="button" class="mobile-more-link mobile-more-action" @click="openNotifications">
           <span aria-hidden="true">♧</span>
-          <strong>通知</strong>
+          <strong>{{ $t("通知") }}</strong>
           <span v-if="unreadCount > 0" class="mobile-more-badge" :aria-label="`${unreadCount} 則未讀通知`">{{ unreadCount }}</span>
         </button>
       </div>
 
-      <p class="quick-action-heading">快速新增</p>
-      <div class="quick-action-grid" aria-label="建立內容">
+      <p class="quick-action-heading">{{ $t("快速新增") }}</p>
+      <div class="quick-action-grid" :aria-label="$t(&quot;建立內容&quot;)">
         <button type="button" class="quick-action-item" @click="triggerQuickAction('add-item')">
           <span class="quick-action-icon" aria-hidden="true">＋</span>
-          <span><strong>加入單品</strong><small>上傳衣服、建立記錄</small></span>
+          <span><strong>{{ $t("加入單品") }}</strong><small>{{ $t("上傳衣服、建立記錄") }}</small></span>
         </button>
         <button type="button" class="quick-action-item" @click="triggerQuickAction('add-ootd')">
           <span class="quick-action-icon" aria-hidden="true">✦</span>
-          <span><strong>發布 OOTD</strong><small>分享今天的穿搭照片</small></span>
+          <span><strong>{{ $t("發布 OOTD") }}</strong><small>{{ $t("分享今天的穿搭照片") }}</small></span>
         </button>
         <button type="button" class="quick-action-item" @click="triggerQuickAction('add-sos')">
           <span class="quick-action-icon" aria-hidden="true">♡</span>
-          <span><strong>發布求救</strong><small>讓衣友提供搭配建議</small></span>
+          <span><strong>{{ $t("發布求救") }}</strong><small>{{ $t("讓衣友提供搭配建議") }}</small></span>
         </button>
         <button type="button" class="quick-action-item" @click="triggerQuickAction('add-bookmark')">
           <span class="quick-action-icon" aria-hidden="true">▣</span>
-          <span><strong>加入書籤</strong><small>收藏商品與穿搭靈感</small></span>
+          <span><strong>{{ $t("加入書籤") }}</strong><small>{{ $t("收藏商品與穿搭靈感") }}</small></span>
         </button>
       </div>
 
-      <button v-if="authStore.isLoggedIn" type="button" class="mobile-more-logout" @click="handleLogout">登出</button>
+      <button v-if="authStore.isLoggedIn" type="button" class="mobile-more-logout" @click="handleLogout">{{ $t("登出") }}</button>
     </section>
 
-    <nav class="bottom-nav" aria-label="手機版導覽">
+    <nav class="bottom-nav" :aria-label="$t(&quot;手機版導覽&quot;)">
       <router-link
         v-for="item in MOBILE_PRIMARY_ITEMS"
         :key="item.routeName"
@@ -70,7 +70,7 @@
         active-class=""
         exact-active-class=""
       >
-        <span aria-hidden="true">{{ item.icon }}</span>{{ item.shortLabel }}
+        <AppIcon :name="item.routeName" />{{ $t(item.shortLabel) }}
       </router-link>
       <button
         ref="moreTrigger"
@@ -80,8 +80,7 @@
         aria-controls="mobile-more-menu"
         @click="toggleMoreMenu"
       >
-        <span aria-hidden="true">•••</span>更多
-      </button>
+        <AppIcon name="more" />{{ $t("更多") }}</button>
     </nav>
   </div>
 </template>
@@ -95,6 +94,7 @@ import { useBookmarksStore } from '@/stores/bookmarks';
 import { useSocialStore } from '@/stores/social';
 import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS } from '@/router/navigation';
 import { GUEST_CLOSET_LIMIT, readGuestCloset } from '@/services/guestAccess';
+import AppIcon from '@/components/ui/AppIcon.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();

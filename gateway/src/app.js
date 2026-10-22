@@ -2,7 +2,7 @@ import { GatewayError, toErrorResponse } from './errors.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
-export function createGatewayApp({ config, supabase, provider, generationService, productImportService }) {
+export function createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService }) {
   const isOriginAllowed = (origin) => !origin || config.corsAllowedOrigins.includes(origin);
 
   const authenticate = async (headers) => {
@@ -33,7 +33,33 @@ export function createGatewayApp({ config, supabase, provider, generationService
         return { status: 200, headers: { ...JSON_HEADERS, ...corsHeaders }, body: { ok: true, ...health } };
       }
 
+      const ok = (body, status = 200) => ({ status, headers: { ...JSON_HEADERS, ...corsHeaders, 'Cache-Control': 'no-store' }, body });
+      if (commerceService && method === 'GET' && path === '/v1/shop/posts') return ok({ posts: await commerceService.repository.posts() });
+      const publicPost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
+      if (commerceService && method === 'GET' && publicPost) {
+        const post = await commerceService.repository.post(publicPost[1]);
+        if (!post) throw new GatewayError('POST_NOT_FOUND', 404, '找不到分享內容。');
+        return ok({ post });
+      }
       const identity = await authenticate(headers);
+      if (commerceService && path.startsWith('/v1/shop/')) {
+        const user = identity.user;
+        const repo = commerceService.repository;
+        if (method === 'GET' && path === '/v1/shop/capabilities') return ok(await commerceService.capabilities());
+        if (method === 'GET' && path === '/v1/shop/products') return ok({ products: await repo.listProducts(user.id) });
+        if (method === 'GET' && path === '/v1/shop/jobs') return ok({ jobs: await repo.listJobs(user.id) });
+        if (method === 'GET' && path === '/v1/shop/metrics') return ok(await commerceService.metrics(user));
+        if (method === 'POST' && path === '/v1/shop/preview') return ok(await commerceService.preview(body));
+        if (method === 'POST' && path === '/v1/shop/products') return ok({ product: await commerceService.createProduct(user, body) }, 201);
+        if (method === 'POST' && path === '/v1/shop/jobs') return ok({ jobs: await commerceService.enqueue(user, body) }, 202);
+        if (method === 'POST' && path === '/v1/shop/posts') return ok({ post: await commerceService.publish(user, body) }, 201);
+        if (method === 'POST' && path === '/v1/shop/events') return ok(await commerceService.recordEvent(user, body));
+        const product = /^\/v1\/shop\/products\/([\da-f-]{36})\/state$/i.exec(path);
+        if (method === 'POST' && product) return ok({ product: await commerceService.updateProduct(user, product[1], body) });
+        const cancel = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/cancel$/i.exec(path);
+        if (method === 'POST' && cancel) return ok(await commerceService.cancel(user, cancel[1]));
+        throw new GatewayError('NOT_FOUND', 404);
+      }
 
       if (method === 'GET' && path === '/v1/capabilities') {
         return {
@@ -57,7 +83,9 @@ export function createGatewayApp({ config, supabase, provider, generationService
         } catch {
           throw new GatewayError('INVALID_PRIVATE_IMAGE_PATH', 400, 'Private image path is invalid');
         }
-        const image = await generationService.privateImage(identity.user, storagePath);
+        const image = commerceService && storagePath.startsWith('shop/')
+          ? await commerceService.privateImage(identity.user, storagePath)
+          : await generationService.privateImage(identity.user, storagePath);
         return {
           status: 200,
           headers: {
@@ -97,6 +125,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
         };
       }
       if (method === 'POST' && path === '/v1/recommendations') {
+        if (config.competitionMode) throw new GatewayError('LEGACY_AI_DISABLED', 410, '請前往購物試穿，使用免費額度內的 YouCam 功能。');
         return {
           status: 200,
           headers: { ...JSON_HEADERS, ...corsHeaders },
@@ -112,6 +141,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
         };
       }
       if (method === 'POST' && path === '/v1/generations/single-try-on') {
+        if (config.competitionMode) throw new GatewayError('LEGACY_AI_DISABLED', 410, '請前往購物試穿提交工作。');
         return {
           status: 200,
           headers: { ...JSON_HEADERS, ...corsHeaders },
@@ -119,6 +149,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
         };
       }
       if (method === 'POST' && path === '/v1/generations/outfit-preview') {
+        if (config.competitionMode) throw new GatewayError('LEGACY_AI_DISABLED', 410, '請前往購物試穿提交工作。');
         return {
           status: 200,
           headers: { ...JSON_HEADERS, ...corsHeaders },

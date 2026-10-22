@@ -3,23 +3,21 @@
   <section v-else class="page active bookmarks-page">
     <header class="core-page-hero bookmarks-page-hero">
       <div>
-        <p class="eyebrow">Bookmarks</p>
-        <h1>書籤</h1>
-        <p class="intro">把想買或想再看的商品先存起來，等下一次想穿、想買時能直接找到。</p>
+        <h1>{{ $t("書籤") }}</h1>
+        <p class="intro">{{ $t("把想買或想再看的商品先存起來，等下一次想穿、想買時能直接找到。") }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">save now<br />style later ♡</p>
     </header>
 
     <section class="product-import-panel" aria-labelledby="product-import-title">
       <div>
-        <p class="eyebrow">Brand inspiration import</p>
-        <h2 id="product-import-title">貼上商品網址</h2>
-        <p>OOTIE 會從商品頁讀取可公開取得的結構化資料；辨識不到的欄位可由你手動補上。</p>
+        <h2 id="product-import-title">{{ $t("貼上商品網址") }}</h2>
+        <p>{{ $t("OOTIE 會從商品頁讀取可公開取得的結構化資料；辨識不到的欄位可由你手動補上。") }}</p>
       </div>
       <form class="product-import-form" @submit.prevent="handleProductPreview">
         <label class="sr-only" for="productImportUrl">商品網址</label>
         <input id="productImportUrl" v-model="importUrl" type="url" required placeholder="https://brand.example/product/..." />
-        <button class="primary" type="submit" :disabled="importLoading">{{ importLoading ? '讀取中…' : '讀取商品' }}</button>
+        <button class="primary" type="submit" :disabled="importLoading">{{ importLoading ? $t('讀取中…') : $t('讀取商品') }}</button>
       </form>
       <p v-if="importError" class="import-error" role="alert">{{ importError }}</p>
       <div v-if="importPreview" class="import-preview" role="status">
@@ -66,7 +64,7 @@
 
     <!-- 批次管理工具列 -->
     <div v-if="bookmarksStore.isManagerMode" class="bookmark-manager-bar">
-      <span>已選 {{ bookmarksStore.selectedBookmarkIds.length }} 件</span>
+      <span>已選 {{ bookmarksStore.selectedBookmarkIds.length }}{{ $t("件") }}</span>
       <button
         class="danger"
         type="button"
@@ -158,7 +156,7 @@
         <button
           class="modal-close"
           type="button"
-          aria-label="關閉"
+          :aria-label="$t(&quot;關閉&quot;)"
           @click="bookmarksStore.closeFormModal()"
         >
           ×
@@ -187,7 +185,6 @@
 
           <!-- 右側：輸入欄位 -->
           <div class="bookmark-form-right">
-            <p class="eyebrow">收藏商品</p>
             <h2>{{ bookmarksStore.formMode === 'edit' ? '編輯書籤' : '建立書籤' }}</h2>
             <form @submit.prevent="handleSubmitForm">
               <div class="form-grid">
@@ -252,7 +249,7 @@
 
               <div v-show="isExtraFieldsExpanded" class="form-grid">
                 <div class="form-field">
-                  <label for="bmBrand">品牌</label>
+                  <label for="bmBrand">{{ $t("品牌") }}</label>
                   <input id="bmBrand" v-model="formData.brand" placeholder="例如：Aritzia" />
                 </div>
 
@@ -287,7 +284,7 @@
                 </div>
 
                 <div class="form-field full">
-                  <label for="bmNotes">備註</label>
+                  <label for="bmNotes">{{ $t("備註") }}</label>
                   <input id="bmNotes" v-model="formData.notes" placeholder="例如：想等週末特價再買" />
                 </div>
               </div>
@@ -297,9 +294,7 @@
                   type="button"
                   class="secondary"
                   @click="bookmarksStore.closeFormModal()"
-                >
-                  取消
-                </button>
+                >{{ $t("取消") }}</button>
                 <button type="submit" class="primary" :disabled="isSubmitting">
                   {{ isSubmitting ? '儲存中...' : '儲存書籤' }}
                 </button>
@@ -320,7 +315,7 @@
         <button
           class="modal-close"
           type="button"
-          aria-label="關閉"
+          :aria-label="$t(&quot;關閉&quot;)"
           @click="bookmarksStore.closeDetailModal()"
         >
           ×
@@ -345,7 +340,6 @@
           </div>
         </div>
         <div class="detail-content">
-          <p class="eyebrow">{{ bookmarksStore.activeDetailBookmark.brand || '商品' }}</p>
           <h2>{{ bookmarksStore.activeDetailBookmark.title }}</h2>
           <p class="detail-category">
             {{ bookmarksStore.activeDetailBookmark.source_domain || '來源未知' }} •
@@ -354,7 +348,7 @@
 
           <dl class="detail-fields">
             <div>
-              <dt>品牌</dt>
+              <dt>{{ $t("品牌") }}</dt>
               <dd>{{ bookmarksStore.activeDetailBookmark.brand || '—' }}</dd>
             </div>
             <div>
@@ -384,6 +378,7 @@
           </p>
 
           <div class="modal-actions bookmark-detail-actions">
+            <button class="primary" @click="sendToStudio(bookmarksStore.activeDetailBookmark)">{{ $t('帶到試穿工作室') }}</button>
             <button
               type="button"
               class="primary"
@@ -435,58 +430,12 @@
         <button
           class="modal-close"
           type="button"
-          aria-label="關閉"
+          :aria-label="$t(&quot;關閉&quot;)"
           @click="bookmarksStore.isExtensionGuideOpen = false"
         >
           ×
         </button>
-        <p class="eyebrow">Chrome Extension</p>
-        <h2>OOTie 穿搭商品收藏助手</h2>
-        <p class="guide-intro">
-          在各大購物網站一鍵擷取穿搭單品，自動辨識商品款式、顏色、尺寸與即時售價，無縫收藏至你的 OOTie 書籤！
-        </p>
-
-        <!-- 圖片預覽展示區 -->
-        <div class="extension-mockup-showcase">
-          <img
-            src="/assets/extension-mockup.webp"
-            alt="OOTie 擴充功能操作預覽"
-            @error="handleMockupError"
-          />
-          <div class="mockup-placeholder" :style="{ display: isMockupError ? 'flex' : 'none' }">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <strong>擴充功能操作預覽圖</strong>
-            <small>可在 <code>chrome://extensions/</code> 載入專案的 <code>extension/</code> 目錄</small>
-          </div>
-        </div>
-
-        <div class="guide-steps">
-          <div class="guide-step-item">
-            <span class="step-badge">1</span>
-            <div>
-              <strong>開啟 Chrome 擴充功能管理頁</strong>
-              <p>在瀏覽器網址列輸入 <code>chrome://extensions/</code> 並開啟右上角「開發人員模式」。</p>
-            </div>
-          </div>
-          <div class="guide-step-item">
-            <span class="step-badge">2</span>
-            <div>
-              <strong>載入未封裝套件</strong>
-              <p>點擊「載入未封裝項目」，選擇 OOTie 專案內的 <code>extension</code> 資料夾。</p>
-            </div>
-          </div>
-          <div class="guide-step-item">
-            <span class="step-badge">3</span>
-            <div>
-              <strong>逛街一鍵擷取</strong>
-              <p>在 UNIQLO、GU、ZARA 等電商商品頁點擊擴充圖示，即可一鍵傳送至書籤！</p>
-            </div>
-          </div>
-        </div>
+        <ExtensionGuide />
 
         <div class="form-actions guide-footer-actions">
           <button
@@ -510,6 +459,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { previewExternalProduct } from '@/services/productImport';
+import ExtensionGuide from '@/components/bookmarks/ExtensionGuide.vue';
 import SavedOutfitsCollection from '@/components/bookmarks/SavedOutfitsCollection.vue';
 
 const bookmarksStore = useBookmarksStore();
@@ -519,6 +469,11 @@ const closetStore = useClosetStore();
 const route = useRoute();
 const router = useRouter();
 
+const sendToStudio = bookmark => {
+  bookmarksStore.closeDetailModal();
+  router.push({path:'/shop',query:{title:bookmark.title,url:bookmark.product_url || '',image:bookmark.image_url || ''}});
+};
+watch(() => route.query.extension, value => {if(value==='1') bookmarksStore.isExtensionGuideOpen=true;},{immediate:true});
 const isExtraFieldsExpanded = ref(false);
 const previewImageSrc = ref('');
 const uploadedFile = ref(null);

@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import { assertOotieProject } from '@/contracts/projectBoundary';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 if (!SUPABASE_URL) throw new Error('Missing VITE_SUPABASE_URL in .env');
 if (!SUPABASE_PUBLISHABLE_KEY) throw new Error('Missing VITE_SUPABASE_PUBLISHABLE_KEY in .env');
+assertOotieProject(SUPABASE_URL, import.meta.env.VITE_OOTIE_SUPABASE_PROJECT_REF || undefined);
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
@@ -207,7 +209,7 @@ export async function fetchProfileOotdPosts(userId) {
   try {
     let query = supabase
       .from('ootie_ootd_posts')
-      .select('*,ootie_profiles!ootie_ootd_posts_user_id_fkey(username,display_name,initials,avatar_url)')
+      .select('*,ootie_profiles!ootie_ootd_posts_user_id_fkey(username,display_name,initials,avatar_url),ootie_post_likes(count),ootie_post_comments(count)')
       .order('created_at', { ascending: false });
     if (isUuid(userId)) query = query.eq('user_id', userId);
     const { data, error } = await query;

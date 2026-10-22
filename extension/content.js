@@ -1,3 +1,4 @@
+(() => {
 /**
  * OOTie - Content Script
  * 智慧電商商品資訊解析引擎 (通用型解析：Microdata -> DOM <h1> -> 智慧正則清洗)
@@ -8,10 +9,10 @@ function toAbsoluteUrl(url) {
   const trimmed = String(url).trim();
   if (!trimmed || trimmed.startsWith('data:')) return '';
   try {
-    return new URL(trimmed, window.location.href).href;
+    const parsed = new URL(trimmed, window.location.href);
+    return ['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password ? parsed.href : '';
   } catch (e) {
-    if (trimmed.startsWith('//')) return 'https:' + trimmed;
-    return trimmed;
+    return '';
   }
 }
 
@@ -517,25 +518,15 @@ function extractProductInfo() {
   }
 
   if (result.price) {
-    result.price = result.price.replace(/[^0-9.]/g, '');
+    result.price = String(result.price).replace(/[^0-9.]/g, '');
   }
 
   const canonical = document.querySelector('link[rel="canonical"]');
-  if (canonical && canonical.href) result.url = canonical.href;
+  if (canonical && canonical.href) result.url = toAbsoluteUrl(canonical.href) || result.url;
 
   return result;
 }
 
-if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request && request.action === 'GET_PRODUCT_INFO') {
-      try {
-        const data = extractProductInfo();
-        sendResponse({ success: true, data });
-      } catch (err) {
-        sendResponse({ success: false, error: err.message });
-      }
-    }
-    return true;
-  });
-}
+
+return extractProductInfo();
+})();

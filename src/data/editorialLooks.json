@@ -1,0 +1,38 @@
+[
+  {
+    "id": "c415949b-8e34-4bdd-aab9-0614c2c26062",
+    "image": "/images/editorial/look-1.png",
+    "caption": "白色上衣、牛仔褲，讓莓紅外套成為重點。",
+    "sort": 1
+  },
+  {
+    "id": "47e1562f-7557-44c8-928a-c95caaa601dc",
+    "image": "/images/editorial/look-2.png",
+    "caption": "奶油黃與森林綠，讓日常多一點陽光。",
+    "sort": 2
+  },
+  {
+    "id": "6886b8f9-db0d-4f6d-b6b4-43ea14263570",
+    "image": "/images/editorial/look-3.png",
+    "caption": "鈷藍襯衫搭米色長褲，輕鬆也有俐落比例。",
+    "sort": 3
+  },
+  {
+    "id": "7d96031b-1094-4e32-8d2b-23557a05649f",
+    "image": "/images/editorial/look-4.png",
+    "caption": "薰衣草紫與深藍，用暖色配件點亮整套。",
+    "sort": 4
+  },
+  {
+    "id": "476b3a7f-4f6c-462e-9030-31d328167e1b",
+    "image": "/images/editorial/look-5.webp",
+    "caption": "經典西裝與簡潔配件，保留俐落的日常節奏。",
+    "sort": 5
+  },
+  {
+    "id": "09077f55-1cd0-44fb-9e45-9f8c49693c54",
+    "image": "/images/editorial/look-6.webp",
+    "caption": "針織與牛仔褲，讓週末保持輕鬆。",
+    "sort": 6
+  }
+]

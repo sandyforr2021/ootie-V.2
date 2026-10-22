@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 
@@ -18,6 +19,7 @@ describe('SOS saved outfit contract', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
     socialMetrics.createSavedOutfit.mockReset();
     socialMetrics.deleteSavedOutfit.mockReset();
   });

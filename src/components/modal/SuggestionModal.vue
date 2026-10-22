@@ -1,7 +1,7 @@
 <template>
   <div v-if="appStore.isSuggestionFormOpen && targetPost" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal suggestion-form-modal">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <p class="eyebrow">Style SOS</p>
       <h2>幫她搭一套</h2>
       <p class="suggestion-intro">
@@ -35,7 +35,7 @@
             這是歷史求救，當時公開的衣物清單未被保存。
           </div>
 
-          <p class="suggestion-selected">已選 {{ selectedIds.length }} 件</p>
+          <p class="suggestion-selected">已選 {{ selectedIds.length }}{{ $t("件") }}</p>
 
           <div :class="['current-outfit', { visible: selectedItems.length > 0 }]">
             <div class="current-outfit-title">目前搭配</div>
@@ -62,7 +62,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="secondary" @click="close">取消</button>
+          <button type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
           <button type="submit" class="primary">送出建議</button>
         </div>
       </form>

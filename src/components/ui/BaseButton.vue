@@ -11,7 +11,7 @@
     <span :class="{ 'sr-only': loading && hideLabelWhileLoading }">
       <slot>{{ label }}</slot>
     </span>
-    <span v-if="loading" class="sr-only">處理中</span>
+    <span v-if="loading" class="sr-only">{{ $t("處理中") }}</span>
   </button>
 </template>
 

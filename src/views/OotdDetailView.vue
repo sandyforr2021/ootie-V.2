@@ -22,6 +22,8 @@
 </template>
 
 <script setup>
+import { editorialLook } from '@/services/editorial';
+import { isFixtureContent } from '@/services/contentAuthenticity';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
@@ -71,7 +73,8 @@ const hydrateTaggedItems = async (sourcePost) => {
   if (!itemIds.length || sourcePost?.tagged_items?.length) return sourcePost;
   try {
     const taggedItems = await getPublicItemsByIds(itemIds);
-    return { ...sourcePost, tagged_items: taggedItems };
+    Object.assign(sourcePost, { tagged_items: taggedItems });
+    return sourcePost;
   } catch (_) {
     return sourcePost;
   }
@@ -119,11 +122,11 @@ const loadPost = async () => {
   try {
     const { data, error } = await supabase
       .from('ootie_ootd_posts')
-      .select('*')
+      .select('*,ootie_post_likes(count),ootie_post_comments(count)')
       .eq('id', postId)
       .maybeSingle();
 
-    if (error || !data) {
+    if (error || !data || isFixtureContent(data)) {
       errorMessage.value = '找不到這篇 OOTD，或目前沒有讀取權限。';
     } else {
       let authorProfile = null;
@@ -151,8 +154,9 @@ const loadPost = async () => {
         wearing: Array.isArray(data.wearing) ? data.wearing : [],
         item_ids: Array.isArray(data.item_ids) ? data.item_ids : [],
         hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
-        likes: data.likes || 0,
-        comments: data.comments || 0,
+        editorial: Boolean(editorialLook(data)),
+        likes: data.ootie_post_likes?.[0]?.count ?? data.likes ?? 0,
+        comments: data.ootie_post_comments?.[0]?.count ?? data.comments ?? 0,
         liked: false,
         saved: false,
         commentList: [],

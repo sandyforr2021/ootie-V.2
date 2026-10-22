@@ -2,9 +2,8 @@
   <section class="page active" id="explorePage">
     <header class="explore-hero">
       <div>
-        <p class="eyebrow">OOTD COMMUNITY</p>
-        <h1>探索</h1>
-        <p class="intro">從衣友的真實衣櫥，找到下一套靈感。</p>
+        <h1>{{ $t("探索") }}</h1>
+        <p class="intro" role="note">{{ $t('分享今天的穿搭，找到下一個靈感。') }}</p>
       </div>
       <p class="explore-note" aria-hidden="true">new looks<br />new stories ♡</p>
     </header>
@@ -15,8 +14,8 @@
         <input
           v-model="ootdStore.searchQuery"
           type="search"
-          placeholder="搜尋穿搭"
-          aria-label="搜尋穿搭、風格、使用者"
+          :placeholder="$t(&quot;搜尋穿搭&quot;)"
+          :aria-label="$t(&quot;搜尋穿搭、風格、使用者&quot;)"
         />
       </label>
       <div class="feed-tabs">
@@ -25,21 +24,17 @@
           :aria-pressed="ootdStore.activeFeedTab === 'for-you'"
           :class="['feed-tab', { active: ootdStore.activeFeedTab === 'for-you' }]"
           @click="ootdStore.activeFeedTab = 'for-you'"
-        >
-          為你推薦
-        </button>
+        > {{ $t("為你推薦") }} </button>
         <button
           type="button"
           :aria-pressed="ootdStore.activeFeedTab === 'following'"
           :class="['feed-tab', { active: ootdStore.activeFeedTab === 'following' }]"
           @click="ootdStore.activeFeedTab = 'following'"
-        >
-          追蹤中
-        </button>
+        > {{ $t("追蹤中") }} </button>
       </div>
     </div>
 
-    <div v-if="ootdStore.loading" class="explore-empty" role="status" aria-live="polite">正在載入穿搭動態…</div>
+    <div v-if="ootdStore.loading" class="explore-empty" role="status" aria-live="polite">{{ $t("正在載入穿搭動態…") }}</div>
     <div v-else-if="ootdStore.loadError" class="explore-empty" role="alert">{{ ootdStore.loadError }}</div>
     <div v-else class="ootd-grid">
       <template v-if="ootdStore.filteredPosts.length">
@@ -51,7 +46,8 @@
           :style="{ animationDelay: `${index * 45}ms` }"
         >
           <header class="ootd-user-row">
-            <button class="ootd-user" type="button" :aria-label="`查看 ${post.username} 的個人主頁`" @click="goToProfile(post.username)">
+            <span v-if="post.editorial" class="ootd-user"><span class="ootd-avatar">O.</span><span class="ootd-user-copy"><strong>{{ $t('OOTIE 編輯精選') }}</strong><small>{{ $t('品牌編輯') }}</small></span></span>
+            <button v-else class="ootd-user" type="button" :aria-label="`查看 ${post.username} 的個人主頁`" @click="goToProfile(post.username)">
               <span class="ootd-avatar" aria-hidden="true">
                 <img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" decoding="async" />
                 <span v-else>{{ post.initials }}</span>
@@ -63,6 +59,7 @@
             </button>
             <button
               type="button"
+              v-if="!post.editorial"
               :class="['follow-button', { following: isFollowing(post) }]"
               :aria-pressed="isFollowing(post)"
               :aria-label="`${isFollowing(post) ? '取消追蹤' : '追蹤'} ${post.username}`"
@@ -98,19 +95,18 @@
                 class="ootd-action"
                 :aria-label="`查看 ${post.comments} 則留言`"
                 @click="openPostDetail(post.id, { openComments: true })"
-              >
-                留言 <span>{{ post.comments }}</span>
+              > {{ $t("留言") }} <span>{{ post.comments }}</span>
               </button>
               <button
                 :class="['ootd-action', { saved: post.saved }]"
                 :aria-pressed="Boolean(post.saved)"
-                :aria-label="`${post.saved ? '取消收藏' : '收藏'} ${post.username} 的穿搭`"
+                :aria-label="`${post.saved ? '取消收藏' : $t('收藏')} ${post.username} 的穿搭`"
                 :disabled="isInteractionPending(post.id, 'save')"
                 @click="runPostAction(post.id, 'save', () => ootdStore.toggleSave(post.id))"
               >
-                {{ post.saved ? '已收藏' : '收藏' }}
+                {{ post.saved ? '已收藏' : $t('收藏') }}
               </button>
-              <button class="ootd-action" :aria-label="`分享 ${post.username} 的穿搭`" @click="ootdStore.sharePost(post.id)">分享</button>
+              <button class="ootd-action" :aria-label="`分享 ${post.username} 的穿搭`" @click="ootdStore.sharePost(post.id)">{{ $t("分享") }}</button>
             </div>
             <div
               class="post-detail-trigger"
@@ -119,7 +115,8 @@
               @click="openPostDetail(post.id)"
               @keydown.enter="openPostDetail(post.id)"
             >
-              <p class="ootd-caption">{{ post.caption }}</p>
+              <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
+              <p class="ootd-caption">{{ $t(post.caption) }}</p>
               <div class="ootd-tags">{{ (post.hashtags || []).join('　') }}</div>
             </div>
             <div v-if="post.tagged_items?.length" class="explore-tagged-items" aria-label="這套穿搭標註的衣櫥單品">
@@ -139,13 +136,14 @@
       </template>
 
       <div v-else class="explore-empty">
-        找不到符合的穿搭，換個關鍵字試試看吧。
+<AppIcon name="Explore" :size="36" /><h2>{{ $t(ootdStore.searchQuery ? '沒有符合條件的穿搭' : '讓你的穿搭，成為新的靈感。') }}</h2><p>{{ $t(ootdStore.searchQuery ? '換個關鍵字，再找找看。' : '分享自己的穿搭照片，和大家交流喜歡的風格。') }}</p><button class="primary" @click="startPost">{{ $t('分享我的穿搭') }}<AppIcon name="plus" :size="18" /></button>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
+import AppIcon from '@/components/ui/AppIcon.vue';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
@@ -159,6 +157,7 @@ const ootdStore = useOotdStore();
 const socialStore = useSocialStore();
 const route = useRoute();
 const router = useRouter();
+const startPost = () => {if (!authStore.isMember) appStore.openLoginGate('OOTD_PUBLISH_AUTH_REQUIRED','/explore?quick=add-ootd'); else appStore.isOotdFormOpen = true;};
 const pendingInteractions = ref(new Set());
 
 const interactionKey = (postId, action) => `${postId}:${action}`;

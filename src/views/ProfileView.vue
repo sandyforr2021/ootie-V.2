@@ -2,7 +2,7 @@
   <section v-if="isSelf && !isMember" class="page active profile-locked-state" id="profilePage">
     <h1>登入後查看你的個人檔案</h1>
     <p class="intro">登入會員即可管理個人資料、衣櫥設定與自己的 OOTD。</p>
-    <button type="button" class="primary" @click="openLoginGate">登入／註冊</button>
+    <button type="button" class="primary" @click="openLoginGate">{{ $t("登入／註冊") }}</button>
   </section>
 
   <section v-else class="page active" id="profilePage">
@@ -10,8 +10,8 @@
       <router-link to="/explore" class="back-link">← 返回探索</router-link>
     </div>
 
-    <p class="profile-context">{{ isSelf ? '我的帳號' : '衣友個人檔案' }}</p>
-    <h1>{{ isSelf ? '個人檔案' : (targetProfile.name || targetProfile.display_name) }}</h1>
+    <p class="profile-context">{{ isSelf ? $t('我的帳號') : '衣友個人檔案' }}</p>
+    <h1>{{ isSelf ? $t('個人檔案') : (targetProfile.name || targetProfile.display_name) }}</h1>
 
     <div class="profile-header">
       <div class="profile-avatar" :class="{ 'has-image': targetProfile.avatar_url }">
@@ -50,7 +50,7 @@
       </div>
       <div class="profile-stat">
         <strong>{{ formatMetric(followCounts.following) }}</strong>
-        <span>追蹤中</span>
+        <span>{{ $t("追蹤中") }}</span>
       </div>
       <button v-if="isSelf" type="button" class="profile-stat profile-stat-button" @click="openSavedOutfits">
         <strong>{{ formatMetric(profileMetrics.saved) }}</strong>
@@ -59,12 +59,12 @@
       </button>
       <button v-if="isSelf" type="button" class="profile-stat profile-stat-button" @click="openHelpHistory">
         <strong>{{ formatMetric(profileMetrics.helped) }}</strong>
-        <span>幫助衣友</span>
+        <span>{{ $t("幫助衣友") }}</span>
         <small v-if="profileMetrics.helpedError">暫時無法取得</small>
       </button>
       <div v-else class="profile-stat">
         <strong>{{ formatMetric(profileMetrics.helped) }}</strong>
-        <span>幫助衣友</span>
+        <span>{{ $t("幫助衣友") }}</span>
         <small v-if="profileMetrics.helpedError">暫時無法取得</small>
       </div>
       <div class="profile-stat">
@@ -74,21 +74,21 @@
       </div>
     </div>
 
-    <router-link v-if="isSelf" to="/membership" class="profile-membership-card">
+    <router-link v-if="isSelf" to="/shop?tab=activity" class="profile-membership-card">
       <div>
-        <span>方案與點數</span>
-        <strong>{{ subscriptionStore.currentPlan }} · {{ subscriptionStore.pointsBalance }} 點</strong>
-        <small>查看生日點數、AI 扣點與方案紀錄</small>
+
+        <strong>{{ $t('我的購物足跡') }}</strong>
+        <small>{{ $t('查看收藏、試穿與前往商家的紀錄。') }}</small>
       </div>
       <span aria-hidden="true">→</span>
     </router-link>
 
     <section class="profile-settings" v-if="isSelf">
-      <h2>衣櫥設定</h2>
+      <h2>{{ $t("衣櫥設定") }}</h2>
       <div class="setting-row">
         <div>
-          <strong>公開我的衣櫥</strong>
-          <p>讓衣友可以查看你的單品並提供穿搭建議。</p>
+          <strong>{{ $t("公開我的衣櫥") }}</strong>
+          <p>{{ $t("讓衣友可以查看你的單品並提供穿搭建議。") }}</p>
         </div>
         <button
           :class="['switch', { on: appStore.profile.public_closet }]"
@@ -101,7 +101,7 @@
 
     <section class="profile-ootd">
       <div class="profile-ootd-heading">
-        <h2>{{ isSelf ? '我的 OOTD' : `${targetProfile.username} 的 OOTD` }}</h2>
+        <h2>{{ isSelf ? $t('我的 OOTD') : `${targetProfile.username} 的 OOTD` }}</h2>
       </div>
 
       <div v-if="userPosts.length" class="ootd-grid">
@@ -110,7 +110,7 @@
             <img class="ootd-photo" :src="post.image" :alt="`${post.username} 的 OOTD`" loading="lazy" decoding="async" />
           </router-link>
           <div class="ootd-body">
-            <p class="ootd-caption">{{ post.caption }}</p>
+            <p class="ootd-caption">{{ $t(post.caption) }}</p>
             <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
               {{ post.hashtags.join('　') }}
             </div>
@@ -127,7 +127,7 @@
               <button type="button" :class="['ootd-action', { saved: post.saved }]" @click="ootdStore.toggleSave(post.id)">
                 {{ post.saved ? '▣ 已收藏' : '▢ 收藏' }}
               </button>
-              <button type="button" class="ootd-action" @click="shareOotd(post.id)">分享</button>
+              <button type="button" class="ootd-action" @click="shareOotd(post.id)">{{ $t("分享") }}</button>
               <template v-if="isSelf">
                 <button type="button" class="ootd-action" @click="editOotd(post.id)">編輯</button>
                 <button type="button" class="ootd-action ootd-delete-action" @click="deleteOotd(post.id)">
@@ -147,12 +147,12 @@
 </template>
 
 <script setup>
+import { isFixtureContent } from '@/services/contentAuthenticity';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
-import { useSubscriptionStore } from '@/stores/subscription';
 import { useSocialStore } from '@/stores/social';
 import { getPublicProfileByUsername } from '@/services/profileRepository';
 import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
@@ -165,7 +165,6 @@ import {
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
-const subscriptionStore = useSubscriptionStore();
 const socialStore = useSocialStore();
 const followCounts = ref({ followers: 0, following: 0 });
 
@@ -189,7 +188,8 @@ const loadPublicProfile = async () => {
     return;
   }
   try {
-    remotePublicProfile.value = await getPublicProfileByUsername(route.query.user);
+    const profile = await getPublicProfileByUsername(route.query.user);
+    remotePublicProfile.value = isFixtureContent(profile) ? null : profile;
   } catch (error) {
     // Keep the public page usable when the optional profile read is unavailable;
     // no private account fields are ever used in the local presentation fallback.
@@ -200,7 +200,6 @@ const loadPublicProfile = async () => {
 onMounted(() => {
   ootdStore.loadRemotePosts();
   loadPublicProfile().then(loadProfileMetrics);
-  if (isMember.value) subscriptionStore.refresh();
 });
 
 watch(() => route.query.user, async () => {
@@ -293,7 +292,7 @@ const loadProfileMetrics = async () => {
 
 watch(() => authStore.profileId, async (profileId) => {
   if (!profileId) return;
-  await Promise.allSettled([subscriptionStore.refresh(), loadProfileMetrics()]);
+  await loadProfileMetrics();
 }, { immediate: true });
 
 const formatMetric = (value) => value === null || value === undefined ? '—' : value;

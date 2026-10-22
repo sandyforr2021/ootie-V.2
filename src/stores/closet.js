@@ -1,3 +1,4 @@
+import { categoryFamily } from '@/services/commerce';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useAppStore } from './app';
@@ -250,7 +251,7 @@ export const useClosetStore = defineStore('closet', () => {
       const searchable = normalizeFilterValue(`${item.name} ${item.name_zh || ''} ${item.brand || ''} ${item.category}`);
       return (
         (!query || searchable.includes(query)) &&
-        (cat === 'All' || matchesFilterValue(item.category, cat)) &&
+        (cat === 'All' || matchesFilterValue(item.category, cat) || (cat !== 'Bags' && cat !== 'Accessories' && categoryFamily(item.category) === categoryFamily(cat))) &&
         matchesFilterValue(item.secondary_color, colorFamily) &&
         matchesFilterValue(item.primary_color, color) &&
         matchesFilterValue(item.season, season) &&
@@ -260,6 +261,10 @@ export const useClosetStore = defineStore('closet', () => {
   });
 
   const toggleFavorite = (id) => {
+    if (dataMode.value === CLOSET_DATA_MODE.REMOTE) {
+      const item = appStore.items.find(entry => entry.id === id);
+      return item ? updateItem(id, { favorite: !item.favorite }) : blockedMutation(SERVICE_ERROR_CODE.NOT_FOUND);
+    }
     if (!canApplyLocalMutation()) return localMutationUnavailable();
     const item = appStore.items.find((entry) => entry.id === id);
     if (item) {
@@ -282,7 +287,10 @@ export const useClosetStore = defineStore('closet', () => {
 
   const markItemForClearance = async (id) => {
     if (dataMode.value === CLOSET_DATA_MODE.REMOTE) {
-      return blockedMutation(SERVICE_ERROR_CODE.CLEARANCE_UNAVAILABLE);
+      const item = appStore.items.find(entry => entry.id === id);
+      if (!item) return blockedMutation(SERVICE_ERROR_CODE.NOT_FOUND);
+      if (String(item.notes || '').includes('[待出清]')) return { ok: true, data: item };
+      return updateItem(id, { notes: `${item.notes ? `${item.notes.trim()} ` : ''}[待出清]` });
     }
     if (!canApplyLocalMutation()) return localMutationUnavailable();
     const item = appStore.items.find((entry) => entry.id === id);

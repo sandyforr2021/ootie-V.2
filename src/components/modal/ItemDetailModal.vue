@@ -1,87 +1,40 @@
 <template>
   <div v-if="appStore.isDetailOpen && item" class="modal-backdrop open" @click.self="close">
     <article v-accessible-modal class="modal detail-layout">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <div class="detail-photo">
-        <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+        <img class="product-image" :src="item.photo" :alt="itemName(item)" />
       </div>
       <div class="detail-content">
-        <p class="eyebrow">{{ labels[item.category] || item.category }}</p>
-        <h2>{{ item.name_zh || item.name }}</h2>
-        <p class="detail-category">
-          {{ item.brand ? `品牌：${item.brand}` : '品牌未設定' }}
-        </p>
-
+        <h2>{{ itemName(item) }}</h2>
+        <p v-if="item.brand" class="detail-category">{{ item.brand }}</p>
         <dl class="detail-fields">
-          <div>
-            <dt>分類</dt>
-            <dd>{{ labels[item.category] || item.category }}</dd>
-          </div>
-          <div>
-            <dt>色系</dt>
-            <dd>{{ labels[item.secondary_color] || item.secondary_color || '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>主要顏色</dt>
-            <dd>{{ labels[item.primary_color] || item.primary_color || '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>品牌</dt>
-            <dd>{{ item.brand || '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>風格</dt>
-            <dd>{{ labels[item.style] || item.style }}</dd>
-          </div>
-          <div>
-            <dt>適合季節</dt>
-            <dd>{{ labels[item.season] || item.season }}</dd>
-          </div>
-          <div>
-            <dt>版型</dt>
-            <dd>{{ item.shape || '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>價格</dt>
-            <dd>{{ item.price !== null && item.price !== undefined ? `${item.price} 元` : '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>每次穿著成本</dt>
-            <dd>{{ closetStore.calculateCostPerWear(item) !== null ? `${closetStore.calculateCostPerWear(item)} 元 / 次` : '-' }}</dd>
-          </div>
-          <div>
-            <dt>購買日期</dt>
-            <dd>{{ item.purchase_date || '未設定' }}</dd>
-          </div>
-          <div>
-            <dt>穿著次數</dt>
-            <dd>{{ item.wear_count || 0 }} 次</dd>
-          </div>
-          <div>
-            <dt>上次穿著</dt>
-            <dd>{{ item.last_worn || '尚未穿著' }}</dd>
+          <div v-for="field in details" :key="field.label">
+            <dt>{{ $t(field.label) }}</dt><dd>{{ field.value }}</dd>
           </div>
         </dl>
-
-        <p class="detail-notes">
-          {{ item.notes || '這件單品還沒有備註。' }}
-        </p>
+        <p v-if="item.notes" class="detail-notes">{{ item.notes }}</p>
+        <div v-if="sourceUrl" class="detail-source-links">
+          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('查看原商品') }} <AppIcon name="ExternalLink" :size="15" /></a>
+          <a href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
+          <small>{{ $t('在 Google Lens 選擇要搜尋的圖片。') }}</small>
+        </div>
 
         <div class="modal-actions">
-          <button class="primary" @click="addToOutfit">加入穿搭</button>
-          <button class="secondary" @click="sendToSos">丟到 SOS 求救</button>
+          <button class="primary" @click="addToOutfit">{{ $t("用這件分享穿搭") }}</button>
+          <button class="secondary" @click="sendToSos">{{ $t("丟到 SOS 求救") }}</button>
           <button
             :class="['secondary', { 'is-marked': isMarkedClearance }]"
             :disabled="isMarkedClearance"
             @click="closetStore.markItemForClearance(item.id)"
           >
-            {{ isMarkedClearance ? '已標記待出清' : '標記為考慮出清' }}
+            {{ $t(isMarkedClearance ? '已標記待出清' : '標記為考慮出清') }}
           </button>
           <button class="secondary" @click="closetStore.toggleFavorite(item.id)">
-            {{ item.favorite ? '♥ 已收藏' : '♡ 加入收藏' }}
+            {{ $t(item.favorite ? '已收藏' : '加入收藏') }}
           </button>
-          <button class="secondary" @click="editItem">編輯</button>
-          <button class="danger" @click="deleteItem">刪除</button>
+          <button class="secondary" @click="editItem">{{ $t("編輯") }}</button>
+          <button class="danger" @click="deleteItem">{{ $t("刪除") }}</button>
         </div>
       </div>
     </article>
@@ -90,6 +43,11 @@
 
 <script setup>
 import { computed } from 'vue';
+import AppIcon from '@/components/ui/AppIcon.vue';
+import { itemName } from '@/services/itemPresentation';
+import { safeCommerceUrl } from '@/services/commerce';
+import { useOotdStore } from '@/stores/ootd';
+import { t } from '@/i18n';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useClosetStore } from '@/stores/closet';
@@ -101,6 +59,22 @@ const router = useRouter();
 
 const item = computed(() => {
   return appStore.items.find((i) => i.id === appStore.selectedItemId);
+});
+
+const sourceUrl = computed(() => safeCommerceUrl(item.value?.source_url));
+const details = computed(() => {
+  const i = item.value || {};
+  return [
+    ['分類', i.category && t(labels[i.category] || i.category)],
+    ['主要顏色', i.primary_color && t(labels[i.primary_color] || i.primary_color)],
+    ['風格', i.style && t(labels[i.style] || i.style)],
+    ['適合季節', i.season && t(labels[i.season] || i.season)],
+    ['版型', i.shape],
+    ['購入價格', i.price != null ? `NT$ ${Number(i.price).toLocaleString()}` : ''],
+    ['購買日期', i.purchase_date],
+    ['穿著次數', `${i.wear_count || 0}`],
+    ['上次穿著', i.last_worn]
+  ].filter(([,value]) => value !== '' && value != null).map(([label,value]) => ({label,value}));
 });
 
 const isMarkedClearance = computed(() => {
@@ -131,7 +105,10 @@ const deleteItem = () => {
 };
 
 const addToOutfit = () => {
-  appStore.showToast('穿搭建立功能尚未提供；這件單品沒有被加入', { type: 'info' });
+  useOotdStore().editingPostId = null;
+  appStore.ootdDraftItemIds = [item.value.id];
+  close();
+  appStore.isOotdFormOpen = true;
 };
 </script>
 

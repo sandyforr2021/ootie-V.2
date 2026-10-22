@@ -1,3 +1,4 @@
+import { genuineContent } from '@/services/contentAuthenticity';
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
@@ -55,8 +56,8 @@ export const useSocialStore = defineStore('social', () => {
         loadNotifications(profileId),
         getFollowCounts(profileId)
       ]);
-      followingProfiles.value = follows;
-      notifications.value = remoteNotifications.map((item) => ({ ...item, time: relativeTime(item.created_at) }));
+      followingProfiles.value = genuineContent(follows);
+      notifications.value = genuineContent(remoteNotifications).map((item) => ({ ...item, time: relativeTime(item.created_at) }));
       countsByProfile.value = { ...countsByProfile.value, [profileId]: counts };
     } catch (err) {
       error.value = err?.userMessage || '社群狀態暫時無法載入。';

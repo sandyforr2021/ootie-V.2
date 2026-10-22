@@ -12,7 +12,7 @@
     <p v-if="loading" class="saved-outfits-state">正在載入收藏穿搭…</p>
     <div v-else-if="errorMessage" class="saved-outfits-state is-error">
       <p>{{ errorMessage }}</p>
-      <p class="saved-outfits-hint">目前不會以本機示範資料取代會員收藏。</p>
+      <p class="saved-outfits-hint">{{ $t("收藏喜歡的穿搭，隨時回來找靈感。") }}</p>
     </div>
     <div v-else-if="entries.length" class="saved-outfits-grid">
       <article v-for="entry in entries" :key="entry.key" class="saved-outfit-card">

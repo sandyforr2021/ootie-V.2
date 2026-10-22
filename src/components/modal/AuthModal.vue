@@ -6,9 +6,9 @@
     @close="close"
   >
       <div class="auth-header">
-        <h2 id="auth-modal-title">{{ isLoginMode ? '歡迎回來' : '建立 OOTIE 帳號' }}</h2>
+        <h2 id="auth-modal-title">{{ isLoginMode ? $t('歡迎回來') : $t('建立 OOTIE 帳號') }}</h2>
         <p class="auth-subtitle">
-          {{ isLoginMode ? '登入後繼續整理衣櫥與收藏穿搭。' : '從自己的衣服開始，慢慢整理出喜歡的風格。' }}
+          {{ isLoginMode ? $t('登入後繼續整理衣櫥與收藏穿搭。') : $t('從自己的衣服開始，慢慢整理出喜歡的風格。') }}
         </p>
       </div>
 
@@ -18,17 +18,13 @@
           class="auth-tab" 
           :class="{ active: isLoginMode }" 
           @click="switchMode('login')"
-        >
-          登入
-        </button>
+        >{{ $t("登入") }}</button>
         <button 
           type="button" 
           class="auth-tab" 
           :class="{ active: !isLoginMode }" 
           @click="switchMode('register')"
-        >
-          註冊
-        </button>
+        >{{ $t("註冊") }}</button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="auth-form">
@@ -36,34 +32,34 @@
           <span>{{ authStore.errorMsg }}</span>
         </div>
 
-        <div class="oauth-actions" aria-label="第三方登入">
-          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" aria-label="使用 Google 帳號登入" @click="handleProviderLogin('google')">
+        <div class="oauth-actions" :aria-label="$t(&quot;第三方登入&quot;)">
+          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" :aria-label="$t(&quot;使用 Google 帳號登入&quot;)" @click="handleProviderLogin('google')">
             <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.19-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"/>
               <path fill="#34A853" d="M12 22c2.7 0 4.98-.9 6.64-2.43l-3.24-2.53c-.9.6-2.05.96-3.4.96-2.61 0-4.82-1.76-5.61-4.13H3.05v2.62A10 10 0 0 0 12 22Z"/>
               <path fill="#FBBC05" d="M6.39 13.87A6.02 6.02 0 0 1 6.08 12c0-.65.11-1.28.31-1.87V7.51H3.05A10 10 0 0 0 2 12c0 1.61.39 3.13 1.05 4.49l3.34-2.62Z"/>
               <path fill="#EA4335" d="M12 6c1.47 0 2.79.5 3.82 1.49l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.95 5.51l3.34 2.62C7.18 7.76 9.39 6 12 6Z"/>
             </svg>
-            <span>使用 Google 登入</span>
+            <span>{{ $t("使用 Google 登入") }}</span>
           </BaseButton>
         </div>
 
-        <div class="auth-divider"><span>或使用電子郵件</span></div>
+        <div class="auth-divider"><span>{{ $t("或使用電子郵件") }}</span></div>
 
         <BaseInput
           v-if="!isLoginMode"
             id="authFullName"
             v-model="form.fullName"
-            label="全名 / 暱稱"
+            :label="$t(&quot;全名 / 暱稱&quot;)"
             type="text"
             required
-            placeholder="例如：Alex Chen"
+            :placeholder="$t(&quot;例如：Alex Chen&quot;)"
         />
 
         <BaseInput
             id="authEmail"
             v-model="form.email"
-            label="電子郵件"
+            :label="$t(&quot;電子郵件&quot;)"
             type="email"
             required
             placeholder="name@example.com"
@@ -72,17 +68,17 @@
         <BaseInput
             id="authPassword"
             v-model="form.password"
-            label="密碼"
+            :label="$t(&quot;密碼&quot;)"
             type="password"
             required
             minlength="6"
-            placeholder="請輸入至少 6 位字元密碼"
+            :placeholder="$t(&quot;請輸入至少 6 位字元密碼&quot;)"
         />
 
         <div class="form-actions">
-          <BaseButton variant="ghost" @click="close">取消</BaseButton>
+          <BaseButton variant="ghost" @click="close">{{ $t("取消") }}</BaseButton>
           <BaseButton type="submit" :loading="authStore.loading">
-            {{ isLoginMode ? '立即登入' : '完成註冊' }}
+            {{ isLoginMode ? $t('立即登入') : $t('完成註冊') }}
           </BaseButton>
         </div>
       </form>

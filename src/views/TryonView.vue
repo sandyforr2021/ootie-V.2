@@ -10,7 +10,7 @@
 
     <section v-if="!isMember" class="state-card member-gate">
       <div><h2>登入後使用私人 AI 圖像功能</h2><p>訪客無法呼叫付費 Try-On，人物照與結果照也不會公開。</p></div>
-      <button type="button" class="primary-action" @click="openLoginGate">登入／註冊</button>
+      <button type="button" class="primary-action" @click="openLoginGate">{{ $t("登入／註冊") }}</button>
     </section>
 
     <template v-else>
@@ -61,7 +61,7 @@
             <label><span class="sr-only">搜尋衣物</span><input v-model.trim="clothingQuery" type="search" placeholder="搜尋衣物或品牌" /></label>
             <label><span class="sr-only">依分類篩選衣物</span><select v-model="clothingCategory"><option value="">全部分類</option><option v-for="category in clothingCategories" :key="category" :value="category">{{ category }}</option></select></label>
           </div>
-          <div class="selection-summary"><strong>已選 {{ selectedItemIds.length }} 件</strong><span>{{ mode === 'single' ? '想搭多件？選擇「預覽完整穿搭」' : '最多選 5 件，可再次點擊取消' }}</span></div>
+          <div class="selection-summary"><strong>已選 {{ selectedItemIds.length }}{{ $t("件") }}</strong><span>{{ mode === 'single' ? '想搭多件？選擇「預覽完整穿搭」' : '最多選 5 件，可再次點擊取消' }}</span></div>
           <div v-if="selectedItems.length" class="selected-tray" aria-label="已選衣物">
             <button v-for="item in selectedItems" :key="item.id" type="button" :aria-label="`移除 ${item.name_zh || item.name}`" @click="toggleItem(item.id)">
               <img :src="item.photo" alt="" /><span>{{ item.name_zh || item.name }}</span><b aria-hidden="true">×</b>
@@ -103,7 +103,7 @@
             <div class="result-copy"><h3>{{ mode === 'single' ? '虛擬試穿完成' : 'AI 穿搭預覽完成' }}</h3><p>AI 圖像為視覺模擬，實際版型、尺寸、材質、垂墜感與色彩可能不同。</p><p class="private-note">此結果目前為 Private，未自動發布到 OOTD。</p></div>
             <div class="result-actions">
               <button type="button" class="secondary-action" @click="modifySelection">返回修改單品</button>
-              <button type="button" class="secondary-action" :disabled="isSaving || currentResult.savedAt" @click="saveResult">{{ currentResult.savedAt ? '已儲存' : isSaving ? '儲存中…' : '儲存結果' }}</button>
+              <button type="button" class="secondary-action" :disabled="isSaving || currentResult.savedAt" @click="saveResult">{{ currentResult.savedAt ? '已儲存' : isSaving ? $t('儲存中…') : '儲存結果' }}</button>
               <button type="button" class="primary-action" :disabled="generationState === 'generating'" @click="generate">重新生成</button>
             </div>
           </article>

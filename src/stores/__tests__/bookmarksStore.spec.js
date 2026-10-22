@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useBookmarksStore } from '../bookmarks';
-import { BOOKMARKS_STORAGE_KEY } from '@/constants';
+import { BOOKMARKS_STORAGE_KEY, defaultBookmarks } from '@/constants';
 
 describe('Bookmarks Store', () => {
   beforeEach(() => {
@@ -9,11 +9,9 @@ describe('Bookmarks Store', () => {
     localStorage.clear();
   });
 
-  it('should initialize with default bookmarks', () => {
+  it('starts with no bookmarks until the user saves one', () => {
     const store = useBookmarksStore();
-    expect(store.bookmarks.length).toBeGreaterThan(0);
-    expect(store.bookmarks[0]).toHaveProperty('title');
-    expect(store.bookmarks[0]).toHaveProperty('product_url');
+    expect(store.bookmarks).toEqual([]);
   });
 
   it('should add a new bookmark and persist to localStorage', async () => {
@@ -42,6 +40,7 @@ describe('Bookmarks Store', () => {
 
   it('should update an existing bookmark', async () => {
     const store = useBookmarksStore();
+    store.bookmarks = JSON.parse(JSON.stringify(defaultBookmarks));
     const targetId = store.bookmarks[0].id;
 
     await store.updateBookmark(targetId, {
@@ -59,6 +58,7 @@ describe('Bookmarks Store', () => {
 
   it('should delete a bookmark', async () => {
     const store = useBookmarksStore();
+    store.bookmarks = JSON.parse(JSON.stringify(defaultBookmarks));
     const initialCount = store.bookmarks.length;
     const targetId = store.bookmarks[0].id;
 
@@ -70,6 +70,7 @@ describe('Bookmarks Store', () => {
 
   it('should batch delete selected bookmarks', async () => {
     const store = useBookmarksStore();
+    store.bookmarks = JSON.parse(JSON.stringify(defaultBookmarks));
     const initialCount = store.bookmarks.length;
     const idsToDelete = [store.bookmarks[0].id, store.bookmarks[1].id];
 
@@ -84,6 +85,7 @@ describe('Bookmarks Store', () => {
 
   it('should detect duplicate bookmarks with matching url, variant, color, and size', () => {
     const store = useBookmarksStore();
+    store.bookmarks = JSON.parse(JSON.stringify(defaultBookmarks));
     const first = store.bookmarks[0];
 
     const duplicate = store.findDuplicateBookmark(

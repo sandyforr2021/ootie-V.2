@@ -15,20 +15,22 @@ const SubscriptionView = () => import('@/views/SubscriptionView.vue');
 const SettingsView = () => import('@/views/SettingsView.vue');
 const LegalView = () => import('@/views/LegalView.vue');
 const NotFoundView = () => import('@/views/NotFoundView.vue');
+const ShopView = () => import('@/views/ShopView.vue');
 
 const routes = [
   { path: '/', name: 'Home', component: HomeView },
   { path: '/home', redirect: '/' },
+  { path: '/shop', name: 'Shop', component: ShopView },
   { path: '/closet', name: 'Closet', component: ClosetView },
   { path: '/bookmarks', name: 'Bookmarks', component: BookmarksView },
   { path: '/stats', name: 'Stats', component: StatsView },
   { path: '/explore', name: 'Explore', component: ExploreView },
   { path: '/sos', name: 'Sos', component: SosView },
-  { path: '/ai', name: 'Ai', component: AiView },
-  { path: '/tryon', name: 'Tryon', component: TryonView },
+  { path: '/ai', name: 'Ai', redirect: '/shop' },
+  { path: '/tryon', name: 'Tryon', redirect: '/shop' },
   { path: '/profile', name: 'Profile', component: ProfileView },
   { path: '/profile/help-history', name: 'HelpHistory', component: HelpHistoryView },
-  { path: '/membership', name: 'Membership', component: SubscriptionView },
+  { path: '/membership', name: 'Membership', redirect: '/shop?tab=activity' },
   { path: '/settings', name: 'Settings', component: SettingsView },
   { path: '/legal/:document(privacy|terms|ai)', name: 'Legal', component: LegalView },
   { path: '/ootd/:id', name: 'OotdDetail', component: OotdDetailView },

@@ -1,7 +1,7 @@
 <template>
   <div v-if="appStore.isSosFormOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal sos-form-modal">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <p class="eyebrow">Style SOS</p>
       <h2>請衣友幫忙搭配</h2>
       <p v-if="contextItem" class="sos-item-context">
@@ -84,7 +84,7 @@
           </p>
 
           <div class="sos-share-tools">
-            <span class="suggestion-selected">已選 {{ selectedClosetItemIds.length }} 件</span>
+            <span class="suggestion-selected">已選 {{ selectedClosetItemIds.length }}{{ $t("件") }}</span>
             <div>
               <button type="button" @click="selectAllClosetItems">全選</button>
               <span style="margin:0 4px; color:var(--muted);">|</span>
@@ -115,8 +115,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="secondary" @click="close">取消</button>
-          <button type="submit" class="primary">發布求救</button>
+          <button type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
+          <button type="submit" class="primary">{{ $t("發布求救") }}</button>
         </div>
       </form>
     </section>

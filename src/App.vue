@@ -1,5 +1,5 @@
 <template>
-  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <a class="skip-link" href="#main-content">{{ $t("跳到主要內容") }}</a>
   <BrandOpening />
   <GlobalStatus />
 
@@ -16,7 +16,7 @@
         <Suspense>
           <component :is="Component" />
           <template #fallback>
-            <div class="route-loading" role="status" aria-live="polite">正在開啟頁面…</div>
+            <div class="route-loading" role="status" aria-live="polite">{{ $t("正在開啟頁面…") }}</div>
           </template>
         </Suspense>
       </router-view>

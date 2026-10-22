@@ -1,8 +1,10 @@
 # OOTIE Personal
 
-GitHub 私人倉庫： [sandyforr2021-debug/ootie-personal](https://github.com/sandyforr2021-debug/ootie-personal)。原始碼、測試與小組開發文件保存在本倉庫；GitHub 存取權限由擁有者管理。
+> 2026-10-22 YouCam 參賽改版進行中：購物試穿與工作池位於本機 `/shop`，免費額度保護已啟用，但真實產圖尚待驗收。新版尚未對外部署。[進度表](docs/PROJECT_PROGRESS.md) · [資料庫隔離與啟動說明](docs/YOUCAM_HANDOFF.md)。
 
-這是獨立於團隊原始倉庫的 OOTIE Personal 專案，保存目前 Vue 前端、Google Cloud AI Gateway、Supabase schema、測試與操作文件。倉庫由 sandyforr2021-debug 擁有，供受邀小組成員協作。
+目前 Git 遠端倉庫：[sandyforr2021/ootie-V.2](https://github.com/sandyforr2021/ootie-V.2)。原始碼、測試與小組開發文件保存在此；存取權限由擁有者管理。下方環境表記錄前一階段部署，不代表本輪改版已上線。
+
+這份 OOTIE Personal 程式基礎包含 Vue 前端、Google Cloud AI Gateway、Supabase schema、測試與操作文件。本輪新增 YouCam 電商試穿體驗，保留既有團隊貢獻。
 
 初始快照建立於 2026-10-07，來源為現有 OOTIE-main 工作資料夾，包含目前修改與新增的應用程式檔案。Git 歷史重新開始；legacy、舊 Git 歷史、本機帳密、資料備份與執行紀錄未帶入。保留既有團隊程式的貢獻與來源。
 
@@ -13,7 +15,7 @@ GitHub 私人倉庫： [sandyforr2021-debug/ootie-personal](https://github.com/s
 | 網站 | https://ootie-web-dev-s5nwal7adq-as.a.run.app/ |
 | AI Gateway | https://ootie-ai-gateway-dev-s5nwal7adq-as.a.run.app/ |
 | Supabase | OOTIE-personal-dev（hoxkrmadzjnyjaqjbyxc） |
-| 獨立私人原始碼倉庫 | https://github.com/sandyforr2021-debug/ootie-personal |
+| 本輪原始碼倉庫 | https://github.com/sandyforr2021/ootie-V.2 |
 
 這次建立倉庫不包含部署更新、資料庫 migration、資料重置、Google Cloud／Supabase 成員邀請或付費 AI 請求。Production 仍未上線。
 
@@ -39,8 +41,8 @@ GitHub 協作者可讀寫程式碼；Cloud Run／Supabase 管理權限另外配�
 需求：Node.js 22 以上、npm、Git。
 
 ```powershell
- git clone https://github.com/sandyforr2021-debug/ootie-personal.git
- cd ootie-personal
+ git clone https://github.com/sandyforr2021/ootie-V.2.git
+ cd ootie-V.2
  npm ci
  npm ci --prefix gateway
  Copy-Item .env.example .env.local

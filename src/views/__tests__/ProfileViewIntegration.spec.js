@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
@@ -44,6 +45,7 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
     pinia = createPinia();
     setActivePinia(pinia);
     localStorage.clear();
+    installLocalInteractionFixtures();
 
     const appStore = useAppStore();
     const authStore = useAuthStore();
@@ -238,7 +240,6 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
 
     await flushPromises();
 
-    expect(wrapper.text()).toContain('OOTD STORY');
     expect(wrapper.text()).toContain(testPost.caption);
     expect(wrapper.find('.ootd-photo').attributes('src')).toBe(testPost.image);
   });

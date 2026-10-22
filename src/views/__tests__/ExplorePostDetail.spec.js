@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
@@ -21,6 +22,7 @@ describe('Explore shared post detail and follow contract', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
   });
 
   it('opens the shared post detail route from a post image and supports browser back', async () => {

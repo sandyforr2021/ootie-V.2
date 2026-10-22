@@ -2,9 +2,8 @@
   <section class="page active" id="statsPage">
     <header class="core-page-hero stats-page-hero">
       <div>
-        <p class="eyebrow">你的 OOTie 空間</p>
-        <h1>衣櫥統計</h1>
-        <p class="intro">看看你的衣櫥裡，哪些顏色、風格與類別最常出現。</p>
+        <h1>{{ $t("衣櫥統計") }}</h1>
+        <p class="intro">{{ $t("看看你的衣櫥裡，哪些顏色、風格與類別最常出現。") }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">your closet<br />in numbers ♡</p>
     </header>
@@ -12,63 +11,55 @@
     <!-- 個人統計區塊 -->
     <section class="profile-insights" aria-labelledby="closetStatsTitle">
       <div class="profile-ootd-heading">
-        <h2 id="closetStatsTitle">個人統計</h2>
-        <span class="eyebrow">可見單品</span>
+        <h2 id="closetStatsTitle">{{ $t("個人統計") }}</h2>
+        <span class="eyebrow">{{ $t("可見單品") }}</span>
       </div>
 
       <div class="stats-grid">
         <!-- 顏色分布 -->
         <article class="stats-card">
-          <h3>顏色分布</h3>
+          <h3>{{ $t("顏色分布") }}</h3>
           <div class="chart-wrap" v-show="hasColorStats">
             <canvas ref="colorChartRef" aria-label="衣櫥顏色分布圖表"></canvas>
           </div>
-          <div v-show="!hasColorStats" class="stats-empty">
-            尚無資料，快去新增你的第一件衣服吧！
-          </div>
+          <div v-show="!hasColorStats" class="stats-empty"> {{ $t("尚無資料，快去新增你的第一件衣服吧！") }} </div>
         </article>
 
         <!-- 色系分布 -->
         <article class="stats-card">
-          <h3>色系分布</h3>
+          <h3>{{ $t("色系分布") }}</h3>
           <div class="chart-wrap" v-show="hasColorFamilyStats">
             <canvas ref="colorFamilyChartRef" aria-label="衣櫥色系分布圖表"></canvas>
           </div>
-          <div v-show="!hasColorFamilyStats" class="stats-empty">
-            尚無資料，快去新增你的第一件衣服吧！
-          </div>
+          <div v-show="!hasColorFamilyStats" class="stats-empty"> {{ $t("尚無資料，快去新增你的第一件衣服吧！") }} </div>
         </article>
 
         <!-- 風格分布 -->
         <article class="stats-card">
-          <h3>風格分布</h3>
+          <h3>{{ $t("風格分布") }}</h3>
           <div class="chart-wrap" v-show="hasStyleStats">
             <canvas ref="styleChartRef" aria-label="衣櫥風格分布圖表"></canvas>
           </div>
-          <div v-show="!hasStyleStats" class="stats-empty">
-            尚無資料，快去新增你的第一件衣服吧！
-          </div>
+          <div v-show="!hasStyleStats" class="stats-empty"> {{ $t("尚無資料，快去新增你的第一件衣服吧！") }} </div>
         </article>
 
         <!-- 類別佔比 -->
         <article class="stats-card">
-          <h3>類別佔比</h3>
+          <h3>{{ $t("類別佔比") }}</h3>
           <div class="chart-wrap" v-show="hasCategoryStats">
             <canvas ref="categoryChartRef" aria-label="衣櫥類別佔比圖表"></canvas>
           </div>
-          <div v-show="!hasCategoryStats" class="stats-empty">
-            尚無資料，快去新增你的第一件衣服吧！
-          </div>
+          <div v-show="!hasCategoryStats" class="stats-empty"> {{ $t("尚無資料，快去新增你的第一件衣服吧！") }} </div>
         </article>
 
         <!-- 我的愛用品牌 -->
         <article class="stats-card brand-stats-card">
-          <h3>我的愛用品牌</h3>
+          <h3>{{ $t("我的愛用品牌") }}</h3>
           <div class="chart-wrap" v-show="hasBrandStats">
             <canvas ref="brandChartRef" aria-label="我的愛用品牌單品數量圖表"></canvas>
           </div>
           <div v-show="!hasBrandStats" class="stats-empty">
-            {{ appStore.items.length ? '幫衣服補上品牌資訊，看看你的愛用品牌排行吧！' : '尚無資料，快去新增你的第一件衣服吧！' }}
+            {{ appStore.items.length ? '幫衣服補上品牌資訊，看看你的愛用品牌排行吧！' : $t('尚無資料，快去新增你的第一件衣服吧！') }}
           </div>
           <p v-if="brandHighlight" class="brand-stats-highlight">{{ brandHighlight }}</p>
         </article>
@@ -136,7 +127,7 @@
           <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" />
           <div class="top-worn-copy">
             <h3>{{ item.name_zh || item.name }}</h3>
-            <p>穿了 {{ item.wear_count }} 次</p>
+            <p>穿了 {{ item.wear_count }}{{ $t("次") }}</p>
           </div>
         </article>
       </div>
@@ -164,7 +155,7 @@
           <div class="cost-ranking-copy">
             <h3>{{ item.name_zh || item.name }}</h3>
             <p>
-              這件你穿了 {{ item.wear_count }} 次<br />
+              這件你穿了 {{ item.wear_count }}{{ $t("次") }}<br />
               平均穿一次只要 {{ item.cost_per_wear }} 元！
             </p>
             <span>購買價格 {{ item.price }} 元</span>
@@ -196,8 +187,7 @@
           <div class="disused-ranking-copy">
             <h3>{{ item.name_zh || item.name }}</h3>
             <p>{{ getDisusedMessage(item) }}</p>
-            <span>
-              穿著 {{ item.wear_count || 0 }} 次{{
+            <span>{{ $t("穿著") }}{{ item.wear_count || 0 }}{{ $t("次") }}{{
                 closetStore.getDaysSinceLastWorn(item.last_worn) !== null
                   ? ` · ${closetStore.getDaysSinceLastWorn(item.last_worn)} 天前`
                   : ' · 尚未穿過'
@@ -206,9 +196,7 @@
           </div>
         </article>
       </div>
-      <div v-else class="disused-empty">
-        太棒了！你的每件衣服都很常穿，衣櫥利用率很高！
-      </div>
+      <div v-else class="disused-empty">{{ $t("太棒了！你的每件衣服都很常穿，衣櫥利用率很高！") }}</div>
     </section>
   </section>
 </template>

@@ -1,3 +1,4 @@
+import { genuineContent } from './contentAuthenticity';
 import { supabase } from './supabase';
 import {
   SERVICE_ERROR_CODE,
@@ -221,7 +222,7 @@ export async function listSavedOutfits(profileId, { limit = 20 } = {}, client = 
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) throw error;
-    return data || [];
+    return genuineContent(data || []);
   } catch (error) {
     throw normalizeSavedOutfitError(error);
   }

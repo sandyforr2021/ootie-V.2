@@ -3,32 +3,31 @@
     <template v-if="authStore.isMember">
       <div class="settings-hero">
         <div>
-          <p class="eyebrow">Account & Privacy</p>
-          <h1 id="settings-title">帳號設定</h1>
-          <p>管理公開資料、私人偏好與帳號安全。私人資料不會顯示在公開個人檔案。</p>
+          <h1 id="settings-title">{{ $t("帳號設定") }}</h1>
+          <p>{{ $t("管理公開資料、私人偏好與帳號安全。私人資料不會顯示在公開個人檔案。") }}</p>
         </div>
-        <router-link class="secondary settings-profile-link" to="/profile">查看個人檔案</router-link>
+        <router-link class="secondary settings-profile-link" to="/profile">{{ $t("查看個人檔案") }}</router-link>
       </div>
 
       <div class="settings-layout">
         <section class="settings-panel" aria-labelledby="account-heading">
           <div class="settings-panel-heading">
-            <div><h2 id="account-heading">帳號</h2><p>登入身分與目前工作階段</p></div>
-            <span class="settings-security-badge">已驗證</span>
+            <div><h2 id="account-heading">{{ $t("帳號") }}</h2><p>{{ $t("登入身分與目前工作階段") }}</p></div>
+            <span class="settings-security-badge">{{ $t("已驗證") }}</span>
           </div>
           <dl class="settings-details">
-            <div><dt>電子郵件</dt><dd>{{ authStore.user?.email }}</dd></div>
-            <div><dt>登入方式</dt><dd>{{ providerLabel }}</dd></div>
-            <div><dt>最近登入</dt><dd>{{ lastSignIn }}</dd></div>
+            <div><dt>{{ $t("電子郵件") }}</dt><dd>{{ authStore.user?.email }}</dd></div>
+            <div><dt>{{ $t("登入方式") }}</dt><dd>{{ providerLabel }}</dd></div>
+            <div><dt>{{ $t("最近登入") }}</dt><dd>{{ lastSignIn }}</dd></div>
           </dl>
         </section>
 
         <section class="settings-panel" aria-labelledby="security-heading">
           <div class="settings-panel-heading">
-            <div><h2 id="security-heading">安全性</h2><p>密碼重設與登入安全</p></div>
+            <div><h2 id="security-heading">{{ $t("安全性") }}</h2><p>{{ $t("密碼重設與登入安全") }}</p></div>
           </div>
           <div class="settings-actions">
-            <button type="button" class="secondary" :disabled="authStore.loading" @click="sendReset">寄送密碼重設信</button>
+            <button type="button" class="secondary" :disabled="authStore.loading" @click="sendReset">{{ $t("寄送密碼重設信") }}</button>
             <button v-if="hasPasswordIdentity" type="button" class="text-button" @click="showPasswordForm = !showPasswordForm">{{ showPasswordForm ? '收起密碼變更' : '直接變更密碼' }}</button>
           </div>
           <form v-if="showPasswordForm" class="settings-password-form" @submit.prevent="changePassword">
@@ -55,43 +54,44 @@
         </section>
 
         <section class="settings-panel" aria-labelledby="weather-heading">
-          <div class="settings-panel-heading"><div><h2 id="weather-heading">偏好設定</h2><p>天氣城市只用於你的穿搭首頁，不公開顯示</p></div></div>
+          <div class="settings-panel-heading"><div><h2 id="weather-heading">{{ $t("偏好設定") }}</h2><p>{{ $t("你的城市偏好，不會公開顯示。") }}</p></div></div>
           <form class="settings-city-form" @submit.prevent="saveWeatherCity">
-            <label for="settingsWeatherCity">城市</label>
-            <input id="settingsWeatherCity" v-model.trim="weatherCity" maxlength="80" placeholder="例如：台北" />
-            <button type="submit" class="secondary" :disabled="savingCity">儲存城市</button>
+            <label for="settingsWeatherCity">{{ $t("城市") }}</label>
+            <input id="settingsWeatherCity" v-model.trim="weatherCity" maxlength="80" :placeholder="$t(&quot;例如：台北&quot;)" />
+            <button type="submit" class="secondary" :disabled="savingCity">{{ $t("儲存城市") }}</button>
           </form>
         </section>
 
         <section class="settings-panel settings-membership" aria-labelledby="membership-heading">
-          <div class="settings-panel-heading"><div><h2 id="membership-heading">方案與點數</h2><p>查看目前方案、點數餘額與交易紀錄</p></div></div>
-          <router-link class="primary" to="/membership">前往方案與點數</router-link>
+          <div class="settings-panel-heading"><div><h2 id="membership-heading">{{ $t("購物足跡") }}</h2><p>{{ $t("查看收藏、試穿與前往商家的紀錄。") }}</p></div></div>
+          <router-link class="primary" to="/shop?tab=activity">{{ $t("前往購物足跡") }}</router-link>
         </section>
 
+        <section class="settings-panel"><ExtensionGuide /></section>
+
         <section v-if="canInstallApp" class="settings-panel settings-install" aria-labelledby="install-heading">
-          <div class="settings-panel-heading"><div><h2 id="install-heading">安裝 OOTIE</h2><p>加入主畫面，以獨立視窗快速開啟</p></div><span class="settings-security-badge">PWA</span></div>
+          <div class="settings-panel-heading"><div><h2 id="install-heading">{{ $t("加入主畫面") }}</h2><p>{{ $t("加入主畫面，以獨立視窗快速開啟") }}</p></div><span class="settings-security-badge">PWA</span></div>
           <p class="settings-install-copy">安裝不會把私人衣櫥、AI 圖片或登入資料存進離線快取。</p>
-          <button type="button" class="secondary" @click="installApp">加入這台裝置</button>
+          <button type="button" class="secondary" @click="installApp">{{ $t("加入這台裝置") }}</button>
         </section>
 
         <section class="settings-panel settings-legal" aria-labelledby="legal-heading">
-          <div class="settings-panel-heading"><div><h2 id="legal-heading">資訊與法律</h2><p>查看隱私、使用條款與 AI 圖像說明</p></div></div>
-          <nav aria-label="資訊與法律">
-            <router-link to="/legal/privacy">隱私權說明</router-link>
-            <router-link to="/legal/terms">使用條款</router-link>
-            <router-link to="/legal/ai">AI 圖像使用說明</router-link>
+          <div class="settings-panel-heading"><div><h2 id="legal-heading">{{ $t("資訊與法律") }}</h2><p>{{ $t("查看隱私、使用條款與 AI 圖像說明") }}</p></div></div>
+          <nav :aria-label="$t(&quot;資訊與法律&quot;)">
+            <router-link to="/legal/privacy">{{ $t("隱私權說明") }}</router-link>
+            <router-link to="/legal/terms">{{ $t("使用條款") }}</router-link>
+            <router-link to="/legal/ai">{{ $t("AI 圖像使用說明") }}</router-link>
           </nav>
         </section>
       </div>
 
       <div class="settings-footer-actions">
-        <p>私人資料只在登入後顯示，登出後即停止存取。</p>
-        <button type="button" class="secondary" @click="logout">登出</button>
+        <p>{{ $t("私人資料只在登入後顯示，登出後即停止存取。") }}</p>
+        <button type="button" class="secondary" @click="logout">{{ $t("登出") }}</button>
       </div>
     </template>
 
     <div v-else class="settings-guest-state">
-      <p class="eyebrow">Member Settings</p>
       <h1 id="settings-title">登入後管理帳號設定</h1>
       <p>帳號、安全與私人偏好只對本人開放。</p>
       <button type="button" class="primary" @click="authStore.openAuthModal('login', null, '/settings')">會員登入</button>
@@ -100,6 +100,7 @@
 </template>
 
 <script setup>
+import ExtensionGuide from '@/components/bookmarks/ExtensionGuide.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';

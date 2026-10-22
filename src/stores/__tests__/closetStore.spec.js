@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useAppStore } from '../app';
@@ -11,6 +12,7 @@ describe('Closet Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
   });
 
   it('should filter items by category', () => {
@@ -160,23 +162,22 @@ describe('Closet Store', () => {
       const appStore = useAppStore();
       const closetStore = useClosetStore();
       const remoteItems = [{
-        id: 'item-uuid-remote',
+        id: '87654321-4321-4234-8234-123456789abc',
         owner_id: validProfileId,
         name: 'Remote shirt',
         category: 'Tops'
       }];
       vi.spyOn(clothingRepo, 'getCurrentUserItems').mockResolvedValue(remoteItems);
-      const toastSpy = vi.spyOn(appStore, 'showToast');
+      const updateItem = vi.spyOn(clothingRepo, 'updateClothingItem').mockRejectedValue(
+        new ServiceError(SERVICE_ERROR_CODE.REMOTE_WRITE_FAILED)
+      );
 
       await closetStore.loadRemoteItems(validProfileId);
-      const result = closetStore.toggleFavorite(remoteItems[0].id);
+      const result = await closetStore.toggleFavorite(remoteItems[0].id);
 
       expect(result.ok).toBe(false);
       expect(appStore.items).toEqual(remoteItems);
-      expect(toastSpy).toHaveBeenCalledWith(
-        '遠端衣櫥不會以本機方式修改資料。',
-        expect.objectContaining({ type: 'warning' })
-      );
+      expect(updateItem).toHaveBeenCalledWith(validProfileId, remoteItems[0].id, { favorite: true });
     });
   });
 
@@ -330,20 +331,18 @@ describe('Closet Store', () => {
       expect(appStore.items).toEqual([remoteItem]);
     });
 
-    it('blocks clearance in remote mode because the schema has no clearance field', async () => {
+    it('persists clearance in the existing notes field after the database confirms it', async () => {
       const appStore = useAppStore();
       const closetStore = useClosetStore();
       await enterRemoteMode(closetStore);
-      const toastSpy = vi.spyOn(appStore, 'showToast');
+      const updated = { ...remoteItem, notes: '[待出清]' };
+      const updateItem = vi.spyOn(clothingRepo, 'updateClothingItem').mockResolvedValue(updated);
 
       const result = await closetStore.markItemForClearance(validItemId);
 
-      expect(result.ok).toBe(false);
-      expect(appStore.items).toEqual([remoteItem]);
-      expect(toastSpy).toHaveBeenCalledWith(
-        '遠端衣櫥尚未提供正式的出清狀態欄位。',
-        expect.objectContaining({ type: 'warning' })
-      );
+      expect(result.ok).toBe(true);
+      expect(updateItem).toHaveBeenCalledWith(validProfileId, validItemId, { notes: '[待出清]' });
+      expect(appStore.items).toEqual([updated]);
     });
 
     it('blocks mutations in BLOCKED mode without calling a repository mutation', async () => {

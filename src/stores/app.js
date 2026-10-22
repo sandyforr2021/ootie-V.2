@@ -9,6 +9,7 @@ import {
   defaultSosPosts,
   defaultFollowingUsers
 } from '@/constants';
+import { genuineContent } from '@/services/contentAuthenticity';
 import { createClothingItem } from '@/services/clothingRepository';
 import {
   GUEST_CLOSET_STORAGE_KEY,
@@ -50,16 +51,16 @@ export const useAppStore = defineStore('app', () => {
     return trimmed.startsWith('@') ? trimmed.toLowerCase() : `@${trimmed.toLowerCase()}`;
   };
 
-  const items = ref(saved && saved.items ? saved.items : JSON.parse(JSON.stringify(defaultItems)));
+  const items = ref(genuineContent(saved?.items || []).filter(item => !defaultItems.some(fixture => fixture.id === item.id && fixture.photo === item.photo)));
   const cloneItems = (source) => JSON.parse(JSON.stringify(source || []));
   const localItemsSnapshot = ref(cloneItems(items.value));
   const isRemoteItemsActive = ref(false);
   const isGuestItemsActive = ref(false);
-  const profile = ref(saved && saved.profile ? saved.profile : JSON.parse(JSON.stringify(defaultProfile)));
-  const ootdPosts = ref(saved && saved.ootdPosts ? saved.ootdPosts : JSON.parse(JSON.stringify(defaultOotdPosts)));
-  const notifications = ref(saved && saved.notifications ? saved.notifications : JSON.parse(JSON.stringify(defaultNotifications)));
-  const sosPosts = ref(saved && saved.sosPosts ? saved.sosPosts : JSON.parse(JSON.stringify(defaultSosPosts)));
-  const outfitSuggestions = ref((saved && saved.outfitSuggestions) || []);
+  const profile = ref(saved?.profile?.user_id && saved.profile.user_id !== defaultProfile.user_id ? saved.profile : { id: '', name: '', username: '', initials: '', avatar_url: '', bio: '', hearts: 0, helped: 0, likes: 0, public_closet: false });
+  const ootdPosts = ref(genuineContent(saved?.ootdPosts || []));
+  const notifications = ref(genuineContent(saved?.notifications || []));
+  const sosPosts = ref(genuineContent(saved?.sosPosts || []));
+  const outfitSuggestions = ref(genuineContent(saved?.outfitSuggestions || []));
   const customBrands = ref(
     saved && Array.isArray(saved.customBrands)
       ? saved.customBrands.map((brand) => String(brand || '').trim().replace(/\s+/g, ' ')).filter(Boolean)
@@ -80,7 +81,7 @@ export const useAppStore = defineStore('app', () => {
   // Following users state
   const initialFollowing = saved && Array.isArray(saved.followingUsers)
     ? saved.followingUsers
-    : (defaultFollowingUsers || ['@minji', '@nora', '@jules']);
+    : [];
   const followingUsers = ref(initialFollowing.map(normalizeUsername).filter((u) => u !== normalizeUsername(profile.value.username)));
 
   // Sidebar collapsed state
@@ -120,7 +121,7 @@ export const useAppStore = defineStore('app', () => {
   };
 
   const setMemberProfile = (remoteProfile = {}) => {
-    const current = profile.value || {};
+    const current = remoteProfile.id && remoteProfile.id === profile.value?.id ? profile.value : {};
     profile.value = {
       ...current,
       ...remoteProfile,
@@ -135,8 +136,7 @@ export const useAppStore = defineStore('app', () => {
   };
 
   const clearMemberProfile = () => {
-    const preserved = JSON.parse(JSON.stringify(defaultProfile));
-    profile.value = preserved;
+    profile.value = { id: '', user_id: '', name: '', username: '', initials: '', avatar_url: '', bio: '', hearts: 0, helped: 0, likes: 0, public_closet: false };
   };
 
   // Toast state
@@ -167,6 +167,7 @@ export const useAppStore = defineStore('app', () => {
   const selectedItemId = ref(null);
 
   const isOotdFormOpen = ref(false);
+  const ootdDraftItemIds = ref([]);
   const isSosFormOpen = ref(false);
   const sosTargetItemId = ref(null);
   const isSuggestionFormOpen = ref(false);
@@ -383,6 +384,7 @@ export const useAppStore = defineStore('app', () => {
     isDetailOpen,
     selectedItemId,
     isOotdFormOpen,
+    ootdDraftItemIds,
     isSosFormOpen,
     sosTargetItemId,
     isSuggestionFormOpen,

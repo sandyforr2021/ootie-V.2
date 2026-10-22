@@ -11,11 +11,11 @@ describe('App Store', () => {
     vi.useFakeTimers();
   });
 
-  it('should initialize with default state', () => {
+  it('starts empty without fabricated identity, clothing or notifications', () => {
     const store = useAppStore();
-    expect(store.items.length).toBeGreaterThan(0);
-    expect(store.profile.username).toBe('@hayley');
-    expect(store.notifications.length).toBeGreaterThan(0);
+    expect(store.items).toEqual([]);
+    expect(store.profile.username).toBe('');
+    expect(store.notifications).toEqual([]);
     expect(store.toastVisible).toBe(false);
   });
 

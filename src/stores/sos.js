@@ -1,3 +1,4 @@
+import { genuineContent } from '@/services/contentAuthenticity';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from './app';
@@ -36,8 +37,8 @@ export const useSosStore = defineStore('sos', () => {
   // Sync with Supabase on mount/init
   const initFromSupabase = async () => {
     try {
-      const remotePosts = await fetchSosPostsFromSupabase();
-      if (remotePosts && remotePosts.length) {
+      const remotePosts = genuineContent(await fetchSosPostsFromSupabase());
+      if (Array.isArray(remotePosts)) {
         sosPosts.value = remotePosts.map((p) => ({
           id: p.id,
           sender_id: p.user_id || p.sender_id,
@@ -61,8 +62,8 @@ export const useSosStore = defineStore('sos', () => {
         publicClosetItems.value = await getPublicItemsByIds(referencedIds);
       }
 
-      const remoteSuggestions = await fetchOutfitSuggestionsFromSupabase();
-      if (remoteSuggestions && remoteSuggestions.length) {
+      const remoteSuggestions = genuineContent(await fetchOutfitSuggestionsFromSupabase());
+      if (Array.isArray(remoteSuggestions)) {
         outfitSuggestions.value = remoteSuggestions.map((s) => ({
           id: s.id,
           sos_id: s.sos_id,

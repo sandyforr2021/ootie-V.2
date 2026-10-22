@@ -79,3 +79,6 @@ supabase/personal_baseline.rar
 playwright-report/
 /outputs/
 /backups/
+/JUDGE_ACCESS.local.md
+/.impeccable/review/
+/unit-design-results.json

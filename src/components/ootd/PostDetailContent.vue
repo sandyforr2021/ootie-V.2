@@ -2,7 +2,7 @@
   <article class="ootd-card detail-card post-detail-card" :aria-busy="pendingInteractions.size > 0">
     <header class="post-detail-author">
       <router-link
-        v-if="authorProfileRoute"
+        v-if="authorProfileRoute && !post.editorial"
         :to="authorProfileRoute"
         class="post-detail-author-link"
         :aria-label="`查看 ${authorUsername} 的個人主頁`"
@@ -22,13 +22,13 @@
           <span v-else>{{ authorInitials }}</span>
         </span>
         <span class="post-detail-author-copy">
-          <strong>{{ authorUsername || '未提供作者' }}</strong>
+          <strong>{{ post.editorial ? $t('OOTIE 編輯精選') : authorUsername || $t('未提供作者') }}</strong>
           <small>{{ formattedDate || 'OOTD 分享' }}</small>
         </span>
       </span>
 
       <button
-        v-if="authorUsername && !isSelfAuthor"
+        v-if="authorUsername && !isSelfAuthor && !post.editorial"
         type="button"
         :class="['follow-button', { following: isFollowingAuthor }]"
         :aria-pressed="isFollowingAuthor"
@@ -70,17 +70,16 @@
         :aria-label="post.saved ? '取消收藏這套穿搭' : '收藏這套穿搭'"
         @click="runPostAction('save', () => ootdStore.toggleSave(post.id))"
       >
-        {{ post.saved ? '已收藏' : '收藏' }}
+        {{ post.saved ? '已收藏' : $t('收藏') }}
       </button>
-      <button type="button" class="ootd-action" aria-label="分享這套穿搭" @click="sharePost">分享</button>
-      <button type="button" class="ootd-action" :aria-label="`查看 ${post.comments || 0} 則留言`" @click="openComments">
-        留言 <span>{{ post.comments || 0 }}</span>
+      <button type="button" class="ootd-action" aria-label="分享這套穿搭" @click="sharePost">{{ $t("分享") }}</button>
+      <button type="button" class="ootd-action" :aria-label="`查看 ${post.comments || 0} 則留言`" @click="openComments"> {{ $t("留言") }} <span>{{ post.comments || 0 }}</span>
       </button>
     </div>
 
     <div class="ootd-body">
-      <p class="eyebrow">OOTD STORY</p>
-      <h2>{{ post.caption || '今日的穿搭' }}</h2>
+      <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
+      <h2>{{ $t(post.caption || '今日的穿搭') }}</h2>
       <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
         {{ post.hashtags.join('　') }}
       </div>
@@ -88,7 +87,7 @@
       <section v-if="taggedItems.length" class="ootd-tagged-section" aria-label="本套使用單品">
         <div class="ootd-tagged-heading">
           <h3>本套使用單品</h3>
-          <span>{{ taggedItems.length }} 件</span>
+          <span>{{ taggedItems.length }}{{ $t("件") }}</span>
         </div>
         <div class="ootd-tagged-items">
           <article v-for="item in taggedItems" :key="item.key" :class="['ootd-tagged-item', { removed: item.removed }]">
@@ -102,14 +101,16 @@
           </article>
         </div>
       </section>
-      <p v-else class="ootd-items">尚未標註衣櫥單品</p>
+      <p v-else-if="!post.editorial" class="ootd-items">{{ $t('尚未標註衣櫥單品') }}</p>
+      <p v-if="post.editorial" class="editorial-source">{{ $t('品牌穿搭圖不代表真實會員或本人試穿結果。') }}</p>
+      <router-link v-if="post.editorial" class="primary" to="/closet">{{ $t('從自己的衣櫥搭出相似風格') }}</router-link>
 
       <div class="ootd-actions post-detail-secondary-actions">
         <button type="button" class="secondary" @click="openComments">查看留言</button>
-        <router-link v-if="authorProfileRoute" :to="authorProfileRoute" class="secondary">
+        <router-link v-if="authorProfileRoute && !post.editorial" :to="authorProfileRoute" class="secondary">
           查看個人主頁
         </router-link>
-        <button v-if="isSelfAuthor" type="button" class="secondary ootd-delete-action" @click="deletePost">刪除</button>
+        <button v-if="isSelfAuthor && !post.editorial" type="button" class="secondary ootd-delete-action" @click="deletePost">刪除</button>
       </div>
     </div>
   </article>

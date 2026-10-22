@@ -6,13 +6,26 @@ import { SupabaseGateway } from './services/supabaseGateway.js';
 import { GenerationService } from './services/generationService.js';
 import { toErrorResponse } from './errors.js';
 import { ProductImportService } from './services/productImportService.js';
+import { CommerceRepository } from './commerce/repository.js';
+import { CommerceService } from './commerce/service.js';
+import { YouCamClient } from './commerce/youcamClient.js';
+import { CommerceJobWorker, startCommerceWorker } from './commerce/jobWorker.js';
 
 const config = loadConfig();
-const provider = createGoogleAiProvider(config);
+const provider = config.competitionMode
+  ? { healthCheck: async () => ({ provider: 'youcam', configured: !!config.youcam.apiKey }) }
+  : createGoogleAiProvider(config);
 const supabase = new SupabaseGateway({ config });
 const generationService = new GenerationService({ config, supabase, provider });
 const productImportService = new ProductImportService();
-const app = createGatewayApp({ config, supabase, provider, generationService, productImportService });
+const repository = new CommerceRepository(supabase);
+const commerceService = new CommerceService({ repository, storage: supabase, enabled: config.youcam.enabled && !!config.youcam.apiKey });
+const app = createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService });
+const stopWorker = config.youcam.workerEnabled && config.youcam.enabled && config.youcam.apiKey
+  ? startCommerceWorker(new CommerceJobWorker({ repository, storage: supabase, provider: new YouCamClient(config.youcam) }), {
+    onError: (error) => console.error('Commerce worker:', error?.code || 'UNAVAILABLE')
+  }) : () => {};
+process.on('SIGTERM', () => { stopWorker(); server.close(); });
 
 const server = http.createServer(async (request, response) => {
   try {

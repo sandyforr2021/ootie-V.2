@@ -1,3 +1,7 @@
+import { genuineContent } from '@/services/contentAuthenticity';
+import { listPostComments, insertPostComment } from '@/services/postComments';
+import { t } from '@/i18n';
+import { editorialLook } from '@/services/editorial';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useAppStore } from './app';
@@ -39,12 +43,15 @@ export const useOotdStore = defineStore('ootd', () => {
   const loading = ref(false);
   const loadError = ref('');
   const shareSheetPostId = ref(null);
+  const commentsLoading = ref(false);
+  const commentsError = ref('');
   let loadSequence = 0;
 
   const getWearingName = (entry) => typeof entry === 'string' ? entry : entry?.name || '';
 
   const formatPost = (remote, taggedItems = []) => ({
     id: String(remote.id),
+    editorial: Boolean(editorialLook(remote)),
     user_id: remote.user_id,
     username: remote.ootie_profiles?.username || appStore.profile.username || '@衣友',
     initials: remote.ootie_profiles?.initials || appStore.profile.initials || '衣友',
@@ -56,8 +63,8 @@ export const useOotdStore = defineStore('ootd', () => {
     item_ids: Array.isArray(remote.item_ids) ? remote.item_ids : [],
     tagged_items: taggedItems,
     hashtags: Array.isArray(remote.hashtags) ? remote.hashtags : [],
-    likes: remote.likes || 0,
-    comments: remote.comments || 0,
+    likes: remote.ootie_post_likes?.[0]?.count ?? remote.likes ?? 0,
+    comments: remote.ootie_post_comments?.[0]?.count ?? remote.comments ?? 0,
     liked: false,
     saved: false,
     following: true,
@@ -82,8 +89,8 @@ export const useOotdStore = defineStore('ootd', () => {
     loading.value = true;
     loadError.value = '';
     try {
-      const remotePosts = await fetchProfileOotdPosts(null);
-      if (!Array.isArray(remotePosts)) return false;
+      const remotePosts = genuineContent(await fetchProfileOotdPosts(null));
+      if (!Array.isArray(remotePosts)) throw new Error('FEED_UNAVAILABLE');
       const authStore = useAuthStore();
       let interactionState = { likedPostIds: new Set(), savedPostIds: new Set() };
       if (authStore.isMember && authStore.profileId) interactionState = await loadPostInteractionState(authStore.profileId);
@@ -93,7 +100,7 @@ export const useOotdStore = defineStore('ootd', () => {
       if (itemIds.length) {
         try { publicItems = await getPublicItemsByIds(itemIds); } catch (_) { /* public snapshots remain available by canonical id */ }
       }
-      if (remotePosts.length) appStore.ootdPosts = uniquePostsById(remotePosts).map((remote) => {
+      appStore.ootdPosts = uniquePostsById(remotePosts).sort((a,b) => (editorialLook(a)?.sort || 0) - (editorialLook(b)?.sort || 0)).map((remote) => {
         const taggedItems = (Array.isArray(remote.item_ids) ? remote.item_ids : [])
           .map((id) => publicItems.find((item) => String(item.id) === String(id)))
           .filter(Boolean);
@@ -128,9 +135,8 @@ export const useOotdStore = defineStore('ootd', () => {
         return false;
       }
     }
-    post.liked = !post.liked;
-    post.likes = Math.max(0, (post.likes || 0) + (post.liked ? 1 : -1));
-    return true;
+    appStore.openLoginGate('SOCIAL_AUTH_REQUIRED', `/ootd/${postId}`);
+    return false;
   };
 
   const toggleSave = async (postId) => {
@@ -149,18 +155,40 @@ export const useOotdStore = defineStore('ootd', () => {
         return false;
       }
     }
-    post.saved = !post.saved;
-    appStore.showToast(post.saved ? '已在此裝置收藏這篇穿搭' : '已在此裝置取消收藏', { type: 'info', syncStatus: 'LOCAL_ONLY' });
-    return true;
+    appStore.openLoginGate('SOCIAL_AUTH_REQUIRED', `/ootd/${postId}`);
+    return false;
   };
 
-  const addComment = (postId, text) => {
+  const loadComments = async (postId) => {
     const post = appStore.ootdPosts.find((item) => String(item.id) === String(postId));
-    if (!post || !text.trim()) return;
-    if (!post.commentList) post.commentList = [];
-    post.commentList.push({ id: `comment-${Date.now()}`, user: appStore.profile.username, text: text.trim() });
-    post.comments = (post.comments || 0) + 1;
-    appStore.showToast('留言已保存在此裝置', { type: 'warning', syncStatus: 'LOCAL_ONLY' });
+    if (!post) return false;
+    commentsLoading.value = true; commentsError.value = '';
+    try {
+      post.commentList = await listPostComments(postId);
+      post.comments = post.commentList.length;
+      return true;
+    } catch {
+      commentsError.value = t('留言暫時無法載入，請重試。');
+      return false;
+    } finally { commentsLoading.value = false; }
+  };
+
+  const addComment = async (postId, text, id = crypto.randomUUID()) => {
+    const auth = useAuthStore();
+    if (!auth.isMember || !auth.profileId) {
+      appStore.openLoginGate('SOCIAL_AUTH_REQUIRED', `/ootd/${postId}?comment=1`);
+      return false;
+    }
+    if (!text.trim()) return false;
+    try {
+      await insertPostComment({id, postId, profileId:auth.profileId, text});
+      await loadComments(postId);
+      appStore.showToast(t('留言已發布。'), {type:'success', syncStatus:'SYNCED'});
+      return true;
+    } catch {
+      appStore.showToast(t('留言未能送出，內容已保留。'), {type:'error', syncStatus:'REMOTE_FAILED'});
+      return false;
+    }
   };
 
   const resolveOwnedItems = async (selectedItemIds, profileId) => {
@@ -358,6 +386,9 @@ export const useOotdStore = defineStore('ootd', () => {
     toggleLike,
     toggleSave,
     addComment,
+    loadComments,
+    commentsLoading,
+    commentsError,
     createPost,
     updatePost,
     deletePost,

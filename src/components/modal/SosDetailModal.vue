@@ -1,7 +1,7 @@
 <template>
   <div v-if="appStore.isSosDetailOpen && targetPost" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal sos-detail-modal">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
 
       <div class="sos-detail-heading">
         <p class="eyebrow">Style SOS 詳情</p>
@@ -49,7 +49,7 @@
 
       <!-- Actions for Owner vs Responder -->
       <div style="margin: 20px 0; display:flex; gap:12px; justify-content: flex-end;">
-        <button type="button" class="secondary" @click="shareSos">分享連結</button>
+        <button type="button" class="secondary" @click="shareSos">{{ $t("分享連結") }}</button>
         <button type="button" class="secondary" @click="toggleSave">
           {{ targetPost.saved ? '▣ 已收藏' : '♡ 收藏' }}
         </button>

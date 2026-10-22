@@ -1,10 +1,10 @@
 <template>
   <div v-if="!online" class="global-status global-status--offline" role="status" aria-live="polite">
-    <strong>目前離線</strong><span>已載入的頁面仍可瀏覽；需要連線的操作會在網路恢復後才能使用。</span>
+    <strong>{{ $t("目前離線") }}</strong><span>{{ $t("已載入的頁面仍可瀏覽；需要連線的操作會在網路恢復後才能使用。") }}</span>
   </div>
   <div v-if="errorMessage" class="global-status global-status--error" role="alert">
-    <span><strong>頁面暫時無法完成操作</strong>{{ errorMessage }}</span>
-    <span class="global-status-actions"><button type="button" @click="retry">重試</button><router-link to="/">返回首頁</router-link></span>
+    <span><strong>{{ $t("頁面暫時無法完成操作") }}</strong>{{ errorMessage }}</span>
+    <span class="global-status-actions"><button type="button" @click="retry">{{ $t("重試") }}</button><router-link to="/">{{ $t("返回首頁") }}</router-link></span>
   </div>
 </template>
 

@@ -12,7 +12,7 @@
     <div v-else-if="records.length" class="help-history-list">
       <article v-for="record in records" :key="record.id" class="help-history-card">
         <p class="eyebrow">衣友求救</p>
-        <h2>{{ record.ootie_sos_posts?.title || '穿搭求救' }}</h2>
+        <h2>{{ record.ootie_sos_posts?.title || $t('穿搭求救') }}</h2>
         <p>{{ record.message }}</p>
         <small>{{ formatDate(record.created_at) }}</small>
       </article>

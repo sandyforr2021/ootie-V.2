@@ -5,8 +5,9 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import AppBottomNav from '../AppBottomNav.vue';
 import { useAppStore } from '@/stores/app';
 
-const paths = ['/', '/closet', '/explore', '/sos', '/bookmarks', '/stats', '/profile', '/ai', '/tryon', '/membership', '/settings'];
+const paths = ['/shop', '/', '/closet', '/explore', '/sos', '/bookmarks', '/stats', '/profile', '/ai', '/tryon', '/membership', '/settings'];
 const routeNames = {
+  '/shop': 'Shop',
   '/': 'Home',
   '/closet': 'Closet',
   '/explore': 'Explore',
@@ -42,9 +43,9 @@ describe('mobile navigation information architecture', () => {
   it('keeps exactly four primary destinations plus More in the bottom bar', async () => {
     const { wrapper } = await mountNav();
     const nav = wrapper.find('nav.bottom-nav');
-    expect(nav.findAll('a').map((link) => link.text())).toEqual(['⌂首頁', '✦探索', '👚衣櫥', '♡SOS']);
+    expect(nav.findAll('a').map((link) => link.text())).toEqual(['首頁', '試穿', '探索', '衣櫥']);
     expect(nav.findAll('button')).toHaveLength(1);
-    expect(nav.find('button').text()).toBe('•••更多');
+    expect(nav.find('button').text()).toBe('更多');
   });
 
   it('shows only secondary destinations in More without repeating primary destinations', async () => {
@@ -52,7 +53,7 @@ describe('mobile navigation information architecture', () => {
     await wrapper.find('.mobile-more-trigger').trigger('click');
 
     const destinationLabels = wrapper.findAll('.mobile-more-destinations .mobile-more-link strong').map((item) => item.text());
-    expect(destinationLabels).toEqual(['個人檔案', '書籤', '衣櫥統計', 'AI 助手', '虛擬試穿', '方案與點數', '帳號設定', '通知']);
+    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '書籤', '衣櫥統計', '帳號設定', '通知']);
     for (const label of ['首頁', '探索', '衣櫥', 'SOS']) {
       expect(destinationLabels).not.toContain(label);
     }
@@ -68,14 +69,14 @@ describe('mobile navigation information architecture', () => {
     expect(wrapper.find('.quick-action-grid').text()).not.toContain('虛擬試穿');
   });
 
-  it('routes to AI Assistant from secondary navigation and closes the menu', async () => {
+  it('routes to Style SOS from secondary navigation and closes the menu', async () => {
     const { router, wrapper } = await mountNav();
     await wrapper.find('.mobile-more-trigger').trigger('click');
-    const aiLink = wrapper.findAll('.mobile-more-link').find((link) => link.text().includes('AI 助手'));
+    const aiLink = wrapper.findAll('.mobile-more-link').find((link) => link.text().includes('穿搭求救'));
     await aiLink.trigger('click');
     await flushPromises();
 
-    expect(router.currentRoute.value.path).toBe('/ai');
+    expect(router.currentRoute.value.path).toBe('/sos');
     expect(wrapper.find('.quick-action-menu').exists()).toBe(false);
   });
 

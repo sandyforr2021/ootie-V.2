@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useAppStore } from '../app';
@@ -13,6 +14,7 @@ describe('Stats Store & Aizhen Features', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
     localStorage.setItem(GUEST_CLOSET_STORAGE_KEY, JSON.stringify(defaultItems));
   });
 

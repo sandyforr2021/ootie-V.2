@@ -1,22 +1,20 @@
 <template>
   <div v-if="appStore.isItemFormOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal form-modal">
-      <button class="modal-close" aria-label="關閉" :disabled="isSubmitting" @click="close">×</button>
-      <p class="eyebrow">{{ isEdit ? '編輯你的單品' : '新增單品' }}</p>
-      <h2>{{ isEdit ? '編輯單品' : '加入衣櫥' }}</h2>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" :disabled="isSubmitting" @click="close">×</button>
+      <p class="eyebrow">{{ isEdit ? $t('編輯你的單品') : $t('新增單品') }}</p>
+      <h2>{{ isEdit ? $t('編輯單品') : $t('加入衣櫥') }}</h2>
 
       <form @submit.prevent="handleSubmit">
         <div class="form-field full">
           <div class="field-label-row">
-            <label for="photoFile">上傳單品照片</label>
+            <label for="photoFile">{{ $t("上傳單品照片") }}</label>
             <button
               v-if="!isEdit && !showCaptureGuide"
               class="capture-guide-link"
               type="button"
               @click="showCaptureGuide = true"
-            >
-              拍攝指南
-            </button>
+            >{{ $t("拍攝指南") }}</button>
           </div>
 
           <section
@@ -26,28 +24,28 @@
           >
             <div class="capture-guide-heading">
               <div>
-                <h3 id="captureGuideTitle">讓衣服完整入鏡就好</h3>
-                <p>不需要棚拍，也不用整理成商品照。自然拍攝，OOTIE 會保留你的真實衣櫥。</p>
+                <h3 id="captureGuideTitle">{{ $t("讓衣服完整入鏡就好") }}</h3>
+                <p>{{ $t("不需要棚拍，也不用整理成商品照。自然拍攝，OOTIE 會保留你的真實衣櫥。") }}</p>
               </div>
-              <button type="button" class="capture-guide-skip" @click="dismissCaptureGuide">先略過</button>
+              <button type="button" class="capture-guide-skip" @click="dismissCaptureGuide">{{ $t("先略過") }}</button>
             </div>
             <ol class="capture-guide-steps">
-              <li><span>1</span><strong>整件入鏡</strong><small>領口、袖子和下擺都留一點空間</small></li>
-              <li><span>2</span><strong>光線均勻</strong><small>靠近窗邊，避免強烈背光或陰影</small></li>
-              <li><span>3</span><strong>一次一件</strong><small>平放、掛起或放在椅面都可以</small></li>
+              <li><span>1</span><strong>{{ $t("整件入鏡") }}</strong><small>{{ $t("領口、袖子和下擺都留一點空間") }}</small></li>
+              <li><span>2</span><strong>{{ $t("光線均勻") }}</strong><small>{{ $t("靠近窗邊，避免強烈背光或陰影") }}</small></li>
+              <li><span>3</span><strong>{{ $t("一次一件") }}</strong><small>{{ $t("平放、掛起或放在椅面都可以") }}</small></li>
             </ol>
             <div class="capture-guide-actions">
-              <button type="button" class="primary" @click="openCameraInput">開始拍照</button>
-              <button type="button" class="secondary" @click="openGalleryInput">從相簿選擇</button>
+              <button type="button" class="primary" @click="openCameraInput">{{ $t("開始拍照") }}</button>
+              <button type="button" class="secondary" @click="openGalleryInput">{{ $t("從相簿選擇") }}</button>
             </div>
           </section>
 
           <div class="upload-zone">
-            <strong>{{ photoPreview ? '已選擇照片' : '加入一張單品照片' }}</strong>
-            <span>可直接拍照或選擇既有照片，支援 JPEG、PNG、WebP；單檔上限 20 MB</span>
+            <strong>{{ photoPreview ? $t('已選擇照片') : $t('加入一張單品照片') }}</strong>
+            <span>{{ $t("可直接拍照或選擇既有照片，支援 JPEG、PNG、WebP；單檔上限 20 MB") }}</span>
             <div class="upload-choice-row">
-              <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openCameraInput">{{ photoPreview ? '重新拍攝' : '拍照' }}</button>
-              <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openGalleryInput">{{ photoPreview ? '重新選擇' : '從相簿選擇' }}</button>
+              <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openCameraInput">{{ photoPreview ? $t('重新拍攝') : $t('拍照') }}</button>
+              <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openGalleryInput">{{ photoPreview ? $t('重新選擇') : $t('從相簿選擇') }}</button>
             </div>
             <input
               id="photoFile"
@@ -62,7 +60,7 @@
               type="file"
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
               capture="environment"
-              aria-label="使用相機拍攝單品"
+              :aria-label="$t(&quot;使用相機拍攝單品&quot;)"
               :disabled="mediaBusy || isSubmitting"
               @change="handleFileChange"
             />
@@ -81,12 +79,12 @@
             <div v-if="mediaError" class="media-error" role="alert">
               <strong>{{ mediaErrorTitle }}</strong>
               <p>{{ mediaError }}</p>
-              <button type="button" class="secondary" @click="openGalleryInput">重新選擇</button>
+              <button type="button" class="secondary" @click="openGalleryInput">{{ $t("重新選擇") }}</button>
             </div>
             <section v-if="preparedMedia" class="capture-review" aria-labelledby="captureReviewTitle">
               <div class="capture-review-heading">
                 <div>
-                  <h3 id="captureReviewTitle">照片檢查</h3>
+                  <h3 id="captureReviewTitle">{{ $t("照片檢查") }}</h3>
                   <p>{{ preparedMedia.width }} × {{ preparedMedia.height }} · {{ formattedSourceSize }}</p>
                 </div>
                 <span :class="['quality-badge', { 'has-warning': qualityWarnings.length }]">
@@ -96,54 +94,50 @@
               <ul v-if="qualityWarnings.length" class="quality-warning-list">
                 <li v-for="warning in qualityWarnings" :key="warning.code">{{ warning.message }}</li>
               </ul>
-              <p v-else class="quality-pass">亮度、清晰度與解析度的初步檢查均可使用。</p>
+              <p v-else class="quality-pass">{{ $t("亮度、清晰度與解析度的初步檢查均可使用。") }}</p>
               <label class="single-item-check">
                 <input v-model="singleItemConfirmed" type="checkbox" />
-                <span>我已確認畫面以一件主要衣物為主</span>
+                <span>{{ $t("我已確認畫面以一件主要衣物為主") }}</span>
               </label>
               <button
                 v-if="qualityWarnings.length && !warningsAcknowledged"
                 type="button"
                 class="text-button media-continue"
                 @click="warningsAcknowledged = true"
-              >
-                繼續使用原圖
-              </button>
+              >{{ $t("繼續使用原圖") }}</button>
             </section>
           </div>
 
-          <div v-if="preparedMedia" class="background-choice" aria-label="圖片處理方式">
-            <span class="background-choice-option is-active">保留原圖</span>
-            <span class="background-choice-option is-disabled" aria-disabled="true">整理背景（尚未提供）</span>
+          <div v-if="preparedMedia" class="background-choice" :aria-label="$t(&quot;圖片處理方式&quot;)">
+            <span class="background-choice-option is-active">{{ $t("保留原圖") }}</span>
+            <span class="background-choice-option is-disabled" aria-disabled="true">{{ $t("整理背景（尚未提供）") }}</span>
           </div>
-          <p class="capture-privacy-note">
-            上傳不會自動發布。會員照片會保留私有原檔，顯示用版本只做方向校正、縮放與適度壓縮，不會套用改色濾鏡。
-          </p>
+          <p class="capture-privacy-note">{{ $t("上傳不會自動發布。會員照片會保留私有原檔，顯示用版本只做方向校正、縮放與適度壓縮，不會套用改色濾鏡。") }}</p>
         </div>
 
         <div class="form-grid">
           <div class="form-field">
-            <label for="name">單品名稱</label>
-            <input id="name" v-model="form.name" required placeholder="例如：亞麻襯衫" />
+            <label for="name">{{ $t("單品名稱") }}</label>
+            <input id="name" v-model="form.name" required :placeholder="$t(&quot;例如：亞麻襯衫&quot;)" />
           </div>
           <div class="form-field">
-            <label for="category">分類</label>
+            <label for="category">{{ $t("分類") }}</label>
             <select id="category" v-model="form.category">
-              <option value="Tops">上衣</option>
-              <option value="Bottoms">下身</option>
-              <option value="Dress">洋裝</option>
-              <option value="Outerwear">外套</option>
-              <option value="Shoes">鞋履</option>
-              <option value="Bags">包款</option>
-              <option value="Accessories">配件</option>
+              <option value="Tops">{{ $t("上衣") }}</option>
+              <option value="Bottoms">{{ $t("下身") }}</option>
+              <option value="Dress">{{ $t("洋裝") }}</option>
+              <option value="Outerwear">{{ $t("外套") }}</option>
+              <option value="Shoes">{{ $t("鞋履") }}</option>
+              <option value="Bags">{{ $t("包款") }}</option>
+              <option value="Accessories">{{ $t("配件") }}</option>
             </select>
           </div>
 
           <div class="form-field full brand-form-field">
-            <label for="brand">品牌</label>
+            <label for="brand">{{ $t("品牌") }}</label>
             <div class="brand-input-row">
-              <input id="brand" v-model="form.brand" placeholder="選填" />
-              <div class="favorite-brand-options" aria-label="愛用品牌快速選擇">
+              <input id="brand" v-model="form.brand" :placeholder="$t(&quot;選填&quot;)" />
+              <div class="favorite-brand-options" :aria-label="$t(&quot;愛用品牌快速選擇&quot;)">
                 <button
                   v-for="brand in brandShortcuts"
                   :key="brand"
@@ -157,61 +151,57 @@
                   type="button"
                   class="favorite-brand-option favorite-brand-add"
                   @click="isAddingBrand = !isAddingBrand"
-                >
-                  ＋ 新增品牌
-                </button>
+                >{{ $t("＋ 新增品牌") }}</button>
               </div>
             </div>
             <div v-if="isAddingBrand" class="custom-brand-row">
               <input
                 id="customBrandName"
                 v-model="newBrandName"
-                aria-label="新增品牌名稱"
-                placeholder="輸入品牌名稱"
+                :aria-label="$t(&quot;新增品牌名稱&quot;)"
+                :placeholder="$t(&quot;輸入品牌名稱&quot;)"
                 @keyup.enter="addCustomBrand"
               />
-              <button type="button" class="secondary" @click="addCustomBrand">加入</button>
-              <button type="button" class="text-button" @click="isAddingBrand = false">取消</button>
+              <button type="button" class="secondary" @click="addCustomBrand">{{ $t("加入") }}</button>
+              <button type="button" class="text-button" @click="isAddingBrand = false">{{ $t("取消") }}</button>
             </div>
             <p v-if="brandError" class="form-hint form-hint-error">{{ brandError }}</p>
           </div>
 
           <div class="form-field">
-            <label for="primary_color">主要顏色</label>
+            <label for="primary_color">{{ $t("主要顏色") }}</label>
             <select id="primary_color" v-model="form.primary_color" required @change="handleColorChange">
-              <option value="">請選擇主要顏色</option>
+              <option value="">{{ $t("請選擇主要顏色") }}</option>
               <option v-for="color in availableColors" :key="color" :value="color">{{ color }}</option>
             </select>
           </div>
           <div class="form-field">
-            <label for="secondary_color">色系</label>
-            <input id="secondary_color" v-model="form.secondary_color" readonly placeholder="選擇主要顏色後自動帶入" />
+            <label for="secondary_color">{{ $t("色系") }}</label>
+            <input id="secondary_color" v-model="form.secondary_color" readonly :placeholder="$t(&quot;選擇主要顏色後自動帶入&quot;)" />
           </div>
 
           <div v-if="colorAnalysisState !== 'idle'" class="image-intelligence-status" aria-live="polite">
-            <span v-if="colorAnalysisState === 'loading'">正在分析圖片主色…</span>
-            <span v-else-if="colorAnalysisState === 'success'">
-              圖片主色建議：{{ colorSuggestion.primaryColor }}（{{ colorSuggestion.colorFamily }}），可手動修改
-            </span>
-            <span v-else>無法自動辨識主色，請使用上方手動選擇。</span>
+            <span v-if="colorAnalysisState === 'loading'">{{ $t("正在分析圖片主色…") }}</span>
+            <span v-else-if="colorAnalysisState === 'success'">{{ $t("圖片主色建議：") }}{{ colorSuggestion.primaryColor }}（{{ colorSuggestion.colorFamily }}{{ $t("），可手動修改") }}</span>
+            <span v-else>{{ $t("無法自動辨識主色，請使用上方手動選擇。") }}</span>
           </div>
 
           <div class="form-field">
-            <label for="shape">版型／款式</label>
-            <input id="shape" v-model="form.shape" placeholder="例如：寬鬆版型" />
+            <label for="shape">{{ $t("版型／款式") }}</label>
+            <input id="shape" v-model="form.shape" :placeholder="$t(&quot;例如：寬鬆版型&quot;)" />
           </div>
           <div class="form-field">
-            <label for="style">風格</label>
+            <label for="style">{{ $t("風格") }}</label>
             <select id="style" v-model="form.style">
-              <option value="Minimal">極簡</option>
-              <option value="Casual">休閒</option>
-              <option value="Smart Casual">簡約正式</option>
-              <option value="Chic">時髦</option>
+              <option value="Minimal">{{ $t("極簡") }}</option>
+              <option value="Casual">{{ $t("休閒") }}</option>
+              <option value="Smart Casual">{{ $t("簡約正式") }}</option>
+              <option value="Chic">{{ $t("時髦") }}</option>
             </select>
           </div>
 
           <div class="form-field">
-            <label for="price">購買價格（選填）</label>
+            <label for="price">{{ $t("購買價格（選填）") }}</label>
             <input
               id="price"
               v-model="form.price"
@@ -219,30 +209,30 @@
               min="0.01"
               step="0.01"
               inputmode="decimal"
-              placeholder="例如：1280"
+              :placeholder="$t(&quot;例如：1280&quot;)"
             />
           </div>
 
           <div class="form-field">
-            <label for="season">適合季節</label>
+            <label for="season">{{ $t("適合季節") }}</label>
             <select id="season" v-model="form.season">
-              <option value="Spring / Summer">春夏</option>
-              <option value="Autumn / Winter">秋冬</option>
-              <option value="All year">四季</option>
+              <option value="Spring / Summer">{{ $t("春夏") }}</option>
+              <option value="Autumn / Winter">{{ $t("秋冬") }}</option>
+              <option value="All year">{{ $t("四季") }}</option>
             </select>
           </div>
 
           <div class="form-field full">
-            <label for="notes">備註</label>
-            <textarea id="notes" v-model="form.notes" placeholder="寫下這件單品的小筆記"></textarea>
+            <label for="notes">{{ $t("備註") }}</label>
+            <textarea id="notes" v-model="form.notes" :placeholder="$t(&quot;寫下這件單品的小筆記&quot;)"></textarea>
           </div>
 
         </div>
 
         <div class="form-actions">
-          <button v-if="isSubmitting && mediaStatus === 'uploading'" type="button" class="secondary" @click="requestUploadCancel">取消上傳</button>
-          <button v-else-if="isSubmitting" type="button" class="secondary" disabled>完成儲存中</button>
-          <button v-else type="button" class="secondary" @click="close">取消</button>
+          <button v-if="isSubmitting && mediaStatus === 'uploading'" type="button" class="secondary" @click="requestUploadCancel">{{ $t("取消上傳") }}</button>
+          <button v-else-if="isSubmitting" type="button" class="secondary" disabled>{{ $t("完成儲存中") }}</button>
+          <button v-else type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
           <button type="submit" class="primary" :disabled="isSubmitting || mediaBusy || (!!mediaError && !preparedMedia)">
             {{ submitButtonText }}
           </button>

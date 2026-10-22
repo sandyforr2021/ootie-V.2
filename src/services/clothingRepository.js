@@ -1,3 +1,4 @@
+import { genuineContent } from './contentAuthenticity';
 import { supabase } from './supabase';
 import {
   SERVICE_ERROR_CODE,
@@ -21,6 +22,7 @@ const isUuid = (str) =>
 
 const CLOTHING_MUTABLE_COLUMNS = Object.freeze([
   'brand',
+  'favorite',
   'category',
   'color_hex',
   'last_worn',
@@ -63,6 +65,7 @@ const cleanClothingPayload = (payload, { requireName = false } = {}) => {
       userMessage: '請輸入單品名稱。'
     });
   }
+  if (clean.favorite !== undefined && typeof clean.favorite !== 'boolean') throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR);
   if (typeof clean.name === 'string') clean.name = clean.name.trim();
   if (clean.price === '') {
     clean.price = null;
@@ -115,7 +118,7 @@ export async function getCurrentUserItems(profileId, client = supabase) {
       throw normalizeServiceError(error);
     }
 
-    return await hydratePrivateClothingPhotos(data || [], client);
+    return await hydratePrivateClothingPhotos(genuineContent(data || []), client);
   } catch (err) {
     throw normalizeServiceError(err);
   }
@@ -139,7 +142,7 @@ export async function getPublicItemsByIds(itemIds, client = supabase) {
       .select('id,owner_id,name,name_zh,brand,category,primary_color,photo')
       .in('id', ids);
     if (error) throw normalizeServiceError(error);
-    return data || [];
+    return genuineContent(data || []);
   } catch (err) {
     throw normalizeServiceError(err);
   }

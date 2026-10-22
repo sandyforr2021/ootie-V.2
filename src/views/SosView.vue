@@ -3,7 +3,7 @@
     <header class="core-page-hero sos-page-hero">
       <div>
         <p class="eyebrow">Style SOS</p>
-        <h1>穿搭求救</h1>
+        <h1>{{ $t("穿搭求救") }}</h1>
         <p class="intro">衣友正在求救，從她真正擁有的衣櫥裡幫她搭一套。</p>
       </div>
       <p class="core-page-note" aria-hidden="true">real people<br />real style ♡</p>
@@ -58,9 +58,7 @@
             <div class="sos-feed-avatar">{{ post.initials }}</div>
             <div>
               <strong>{{ post.username }}</strong>
-              <span>
-                穿搭求救
-                <em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
+              <span>{{ $t("穿搭求救") }}<em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
                   {{ post.status }}
                 </em>
               </span>
@@ -95,8 +93,7 @@
                 :aria-label="`查看 ${getPublicItemThumbs(post).length - 5} 件更多公開衣物並幫她搭配`"
                 @click="openSuggestion(post.id)"
               >
-                ＋{{ getPublicItemThumbs(post).length - 5 }} 更多
-              </button>
+                ＋{{ getPublicItemThumbs(post).length - 5 }} {{ $t("更多") }}</button>
             </div>
           </div>
 

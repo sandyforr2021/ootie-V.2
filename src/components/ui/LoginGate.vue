@@ -9,8 +9,8 @@
     <h2 id="login-gate-title">{{ copy.title }}</h2>
     <p class="login-gate-copy">{{ copy.body }}</p>
     <div class="login-gate-actions">
-      <button type="button" class="primary" @click="openLogin">登入／註冊</button>
-      <button type="button" class="secondary" @click="appStore.closeLoginGate()">稍後</button>
+      <button type="button" class="primary" @click="openLogin">{{ $t("登入／註冊") }}</button>
+      <button type="button" class="secondary" @click="appStore.closeLoginGate()">{{ $t("稍後") }}</button>
     </div>
   </BaseModal>
 </template>

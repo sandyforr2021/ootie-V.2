@@ -21,7 +21,7 @@ describe('shared navigation information architecture', () => {
 
   it('keeps primary and secondary mobile destinations mutually exclusive', () => {
     const primaryNames = new Set(MOBILE_PRIMARY_ITEMS.map((item) => item.routeName));
-    expect(MOBILE_PRIMARY_ITEMS.map((item) => item.shortLabel)).toEqual(['首頁', '探索', '衣櫥', 'SOS']);
+    expect(MOBILE_PRIMARY_ITEMS.map((item) => item.shortLabel)).toEqual(['首頁', '試穿', '探索', '衣櫥']);
     expect(MOBILE_MORE_ITEMS.every((item) => !primaryNames.has(item.routeName))).toBe(true);
   });
 

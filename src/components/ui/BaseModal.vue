@@ -11,7 +11,7 @@
       tabindex="-1"
       @keydown="handleKeydown"
     >
-      <button v-if="showClose" type="button" class="modal-close" aria-label="關閉" @click="requestClose">×</button>
+      <button v-if="showClose" type="button" class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="requestClose">×</button>
       <slot />
     </component>
   </div>

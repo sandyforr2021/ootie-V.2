@@ -1,9 +1,9 @@
 <template>
   <div v-if="appStore.isOotdFormOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal ootd-form-modal">
-      <button class="modal-close" aria-label="關閉" @click="close">×</button>
+      <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <p class="eyebrow">分享今天的穿搭</p>
-      <h2>{{ isEditing ? '編輯 OOTD' : '發布 OOTD' }}</h2>
+      <h2>{{ isEditing ? '編輯 OOTD' : $t('發布 OOTD') }}</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-field">
           <label for="ootdPhotoFile">穿搭照片</label>
@@ -72,9 +72,9 @@
         <p v-if="submitError" class="ootd-form-error" role="alert">{{ submitError }}</p>
 
         <div class="form-actions">
-          <button type="button" class="secondary" :disabled="ootdStore.publishing" @click="close">取消</button>
+          <button type="button" class="secondary" :disabled="ootdStore.publishing" @click="close">{{ $t("取消") }}</button>
           <button type="submit" class="primary" :disabled="ootdStore.publishing || imageStatus === 'loading'">
-            {{ ootdStore.publishing ? '正在發布…' : (isEditing ? '儲存修改' : '發布 OOTD') }}
+            {{ ootdStore.publishing ? '正在發布…' : (isEditing ? '儲存修改' : $t('發布 OOTD')) }}
           </button>
         </div>
       </form>
@@ -147,7 +147,8 @@ watch(
     photoPreview.value = '';
     caption.value = '';
     hashtags.value = '';
-    selectedItemIds.value = [];
+    selectedItemIds.value = (appStore.ootdDraftItemIds || []).filter(id => remoteClosetItems.value.some(item => item.id === id));
+    appStore.ootdDraftItemIds = [];
     imageStatus.value = 'empty';
   }
 );

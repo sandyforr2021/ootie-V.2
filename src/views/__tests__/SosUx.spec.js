@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../tests/localInteractionFixtures.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
@@ -35,6 +36,7 @@ describe('SOS clothing preview and selection UX', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
   });
 
   it('shows all public items up to five without a more button', async () => {

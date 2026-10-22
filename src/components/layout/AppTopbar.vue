@@ -2,7 +2,8 @@
   <header class="topbar">
     <BrandMark class="mobile-brand" />
     <div class="top-actions">
-      <button class="icon-button" aria-label="通知" :disabled="!authStore.initialized" :aria-busy="!authStore.initialized" @click="openNotifications">
+      <LanguageSelect />
+      <button class="icon-button" :aria-label="$t(&quot;通知&quot;)" :disabled="!authStore.initialized" :aria-busy="!authStore.initialized" @click="openNotifications">
         <svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
         </svg>
@@ -13,9 +14,7 @@
       </button>
 
       <!-- Auth State Indicator -->
-      <button v-if="authStore.initialized && !authStore.isLoggedIn" class="btn-primary auth-btn-sm" @click="authStore.openAuthModal('login')">
-        登入 / 註冊
-      </button>
+      <button v-if="authStore.initialized && !authStore.isLoggedIn" class="btn-primary auth-btn-sm" @click="authStore.openAuthModal('login')">{{ $t("登入 / 註冊") }}</button>
 
       <div v-else-if="authStore.isLoggedIn" class="avatar-group">
         <button
@@ -23,14 +22,14 @@
           class="account-trigger"
           :aria-expanded="isProfileMenuOpen"
           aria-haspopup="dialog"
-          aria-label="會員功能"
+          :aria-label="$t(&quot;會員功能&quot;)"
           @click="toggleProfileMenu"
         >
           <span class="avatar is-logged-in" :class="{ 'has-image': appStore.profile.avatar_url }">
             <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="`${appStore.profile.name} 的大頭貼`" />
-            <span v-else>{{ appStore.profile.initials || 'HL' }}</span>
+            <span v-else>{{ appStore.profile.initials || 'O' }}</span>
           </span>
-          <span class="account-name">{{ appStore.profile.name || appStore.profile.username || '我的帳號' }}</span>
+          <span class="account-name">{{ appStore.profile.name || appStore.profile.username || $t('我的帳號') }}</span>
           <svg class="account-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
         </button>
       </div>
@@ -39,14 +38,14 @@
     <!-- Profile Popover Menu (legacy/qingnian integration) -->
     <div v-if="isProfileMenuOpen" class="popover-backdrop open" @click.self="closeProfileMenu">
       <section class="popover profile-popover">
-        <button class="popover-close" aria-label="關閉" @click="closeProfileMenu">×</button>
+        <button class="popover-close" :aria-label="$t(&quot;關閉&quot;)" @click="closeProfileMenu">×</button>
         <div class="popover-avatar">
           <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="appStore.profile.name" />
-          <template v-else>{{ appStore.profile.initials || 'HL' }}</template>
+          <template v-else>{{ appStore.profile.initials || 'O' }}</template>
         </div>
         <div class="popover-copy">
-          <strong>{{ appStore.profile.name || 'Hayley Lin' }}</strong>
-          <span>{{ appStore.profile.username || '@hayley' }}</span>
+          <strong>{{ appStore.profile.name || $t('我的帳號') }}</strong>
+          <span>{{ appStore.profile.username || '' }}</span>
         </div>
         <div class="popover-stats">
           <div class="popover-stat">
@@ -55,23 +54,17 @@
           </div>
           <div class="popover-stat">
             <strong>{{ appStore.profile.helped || 0 }}</strong>
-            <span>幫助衣友</span>
+            <span>{{ $t("幫助衣友") }}</span>
           </div>
           <div class="popover-stat">
             <strong>{{ appStore.profile.likes || 0 }}</strong>
-            <span>獲得讚數</span>
+            <span>{{ $t("獲得讚數") }}</span>
           </div>
         </div>
         <div class="popover-actions">
-          <router-link to="/profile" class="btn-primary popover-btn" @click="closeProfileMenu">
-            前往個人檔案
-          </router-link>
-          <router-link to="/settings" class="btn-secondary popover-btn" @click="closeProfileMenu">
-            帳號設定
-          </router-link>
-          <button class="btn-secondary popover-btn" @click="handleLogout">
-            登出
-          </button>
+          <router-link to="/profile" class="btn-primary popover-btn" @click="closeProfileMenu">{{ $t("前往個人檔案") }}</router-link>
+          <router-link to="/settings" class="btn-secondary popover-btn" @click="closeProfileMenu">{{ $t("帳號設定") }}</router-link>
+          <button class="btn-secondary popover-btn" @click="handleLogout">{{ $t("登出") }}</button>
         </div>
       </section>
     </div>
@@ -85,6 +78,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useSocialStore } from '@/stores/social';
 import BrandMark from './BrandMark.vue';
+import LanguageSelect from './LanguageSelect.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();

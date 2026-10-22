@@ -1,3 +1,4 @@
+import { installLocalInteractionFixtures } from '../../../../tests/localInteractionFixtures.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
@@ -17,6 +18,7 @@ describe('Comment author profile navigation', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    installLocalInteractionFixtures();
   });
 
   it('makes other-user and self comment avatar/name links point to their own profiles', () => {

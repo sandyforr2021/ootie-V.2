@@ -18,7 +18,7 @@
         <h2>登入後啟用私人 AI 穿搭助理</h2>
         <p>Gateway 會以你的 Supabase 身份重新確認衣物擁有權，訪客不會觸發付費 AI Request。</p>
       </div>
-      <button type="button" class="primary-action" @click="openLoginGate">登入／註冊</button>
+      <button type="button" class="primary-action" @click="openLoginGate">{{ $t("登入／註冊") }}</button>
     </section>
 
     <div v-else class="workspace">
@@ -54,7 +54,7 @@
         <label class="field-label" for="request">其他穿搭需求</label>
         <textarea id="request" v-model.trim="form.userRequest" class="field-control request-field" maxlength="600" placeholder="例如：下午有簡報，晚上要直接去約會；希望看起來俐落但不過度正式。"></textarea>
 
-        <label class="field-label" for="item-limit">建議單品數：{{ form.itemLimit }} 件</label>
+        <label class="field-label" for="item-limit">建議單品數：{{ form.itemLimit }}{{ $t("件") }}</label>
         <input id="item-limit" v-model.number="form.itemLimit" type="range" min="1" max="5" />
 
         <button type="submit" class="primary-action submit-action" :disabled="isLoading || appStore.items.length === 0">

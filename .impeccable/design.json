@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T12:55:53.355Z",
+  "title": "Design System: OOTIE Atelier",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Berry",
+        "tonalRamp": [
+          "oklch(15.00% 0.1794 1.19)",
+          "oklch(26.43% 0.1794 1.19)",
+          "oklch(37.86% 0.1794 1.19)",
+          "oklch(49.29% 0.1794 1.19)",
+          "oklch(60.71% 0.1794 1.19)",
+          "oklch(72.14% 0.1794 1.19)",
+          "oklch(83.57% 0.1794 1.19)",
+          "oklch(95.00% 0.1794 1.19)"
+        ]
+      },
+      "accent-pink": {
+        "role": "primary",
+        "displayName": "Petal Pink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0919 353.49)",
+          "oklch(26.43% 0.0919 353.49)",
+          "oklch(37.86% 0.0919 353.49)",
+          "oklch(49.29% 0.0919 353.49)",
+          "oklch(60.71% 0.0919 353.49)",
+          "oklch(72.14% 0.0919 353.49)",
+          "oklch(83.57% 0.0919 353.49)",
+          "oklch(95.00% 0.0919 353.49)"
+        ]
+      },
+      "accent-pink-soft": {
+        "role": "primary",
+        "displayName": "Petal Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0329 351.17)",
+          "oklch(26.43% 0.0329 351.17)",
+          "oklch(37.86% 0.0329 351.17)",
+          "oklch(49.29% 0.0329 351.17)",
+          "oklch(60.71% 0.0329 351.17)",
+          "oklch(72.14% 0.0329 351.17)",
+          "oklch(83.57% 0.0329 351.17)",
+          "oklch(95.00% 0.0329 351.17)"
+        ]
+      },
+      "accent-yellow": {
+        "role": "secondary",
+        "displayName": "Butter Yellow",
+        "tonalRamp": [
+          "oklch(15.00% 0.1326 94.15)",
+          "oklch(26.43% 0.1326 94.15)",
+          "oklch(37.86% 0.1326 94.15)",
+          "oklch(49.29% 0.1326 94.15)",
+          "oklch(60.71% 0.1326 94.15)",
+          "oklch(72.14% 0.1326 94.15)",
+          "oklch(83.57% 0.1326 94.15)",
+          "oklch(95.00% 0.1326 94.15)"
+        ]
+      },
+      "accent-yellow-soft": {
+        "role": "secondary",
+        "displayName": "Butter Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0731 95.71)",
+          "oklch(26.43% 0.0731 95.71)",
+          "oklch(37.86% 0.0731 95.71)",
+          "oklch(49.29% 0.0731 95.71)",
+          "oklch(60.71% 0.0731 95.71)",
+          "oklch(72.14% 0.0731 95.71)",
+          "oklch(83.57% 0.0731 95.71)",
+          "oklch(95.00% 0.0731 95.71)"
+        ]
+      },
+      "accent-mint": {
+        "role": "secondary",
+        "displayName": "Mint",
+        "tonalRamp": [
+          "oklch(15.00% 0.0390 160.73)",
+          "oklch(26.43% 0.0390 160.73)",
+          "oklch(37.86% 0.0390 160.73)",
+          "oklch(49.29% 0.0390 160.73)",
+          "oklch(60.71% 0.0390 160.73)",
+          "oklch(72.14% 0.0390 160.73)",
+          "oklch(83.57% 0.0390 160.73)",
+          "oklch(95.00% 0.0390 160.73)"
+        ]
+      },
+      "sage-dark": {
+        "role": "secondary",
+        "displayName": "Leaf Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0777 161.74)",
+          "oklch(26.43% 0.0777 161.74)",
+          "oklch(37.86% 0.0777 161.74)",
+          "oklch(49.29% 0.0777 161.74)",
+          "oklch(60.71% 0.0777 161.74)",
+          "oklch(72.14% 0.0777 161.74)",
+          "oklch(83.57% 0.0777 161.74)",
+          "oklch(95.00% 0.0777 161.74)"
+        ]
+      },
+      "accent-lavender": {
+        "role": "tertiary",
+        "displayName": "Lilac",
+        "tonalRamp": [
+          "oklch(15.00% 0.0842 298.48)",
+          "oklch(26.43% 0.0842 298.48)",
+          "oklch(37.86% 0.0842 298.48)",
+          "oklch(49.29% 0.0842 298.48)",
+          "oklch(60.71% 0.0842 298.48)",
+          "oklch(72.14% 0.0842 298.48)",
+          "oklch(83.57% 0.0842 298.48)",
+          "oklch(95.00% 0.0842 298.48)"
+        ]
+      },
+      "accent-lavender-soft": {
+        "role": "tertiary",
+        "displayName": "Lilac Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0306 302.30)",
+          "oklch(26.43% 0.0306 302.30)",
+          "oklch(37.86% 0.0306 302.30)",
+          "oklch(49.29% 0.0306 302.30)",
+          "oklch(60.71% 0.0306 302.30)",
+          "oklch(72.14% 0.0306 302.30)",
+          "oklch(83.57% 0.0306 302.30)",
+          "oklch(95.00% 0.0306 302.30)"
+        ]
+      },
+      "accent-blue-soft": {
+        "role": "tertiary",
+        "displayName": "Powder Blue",
+        "tonalRamp": [
+          "oklch(15.00% 0.0155 247.99)",
+          "oklch(26.43% 0.0155 247.99)",
+          "oklch(37.86% 0.0155 247.99)",
+          "oklch(49.29% 0.0155 247.99)",
+          "oklch(60.71% 0.0155 247.99)",
+          "oklch(72.14% 0.0155 247.99)",
+          "oklch(83.57% 0.0155 247.99)",
+          "oklch(95.00% 0.0155 247.99)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.0084 56.32)",
+          "oklch(26.43% 0.0084 56.32)",
+          "oklch(37.86% 0.0084 56.32)",
+          "oklch(49.29% 0.0084 56.32)",
+          "oklch(60.71% 0.0084 56.32)",
+          "oklch(72.14% 0.0084 56.32)",
+          "oklch(83.57% 0.0084 56.32)",
+          "oklch(95.00% 0.0084 56.32)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Porcelain",
+        "tonalRamp": [
+          "oklch(15.00% 0.0034 67.78)",
+          "oklch(26.43% 0.0034 67.78)",
+          "oklch(37.86% 0.0034 67.78)",
+          "oklch(49.29% 0.0034 67.78)",
+          "oklch(60.71% 0.0034 67.78)",
+          "oklch(72.14% 0.0034 67.78)",
+          "oklch(83.57% 0.0034 67.78)",
+          "oklch(95.00% 0.0034 67.78)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Plum Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0408 315.48)",
+          "oklch(26.43% 0.0408 315.48)",
+          "oklch(37.86% 0.0408 315.48)",
+          "oklch(49.29% 0.0408 315.48)",
+          "oklch(60.71% 0.0408 315.48)",
+          "oklch(72.14% 0.0408 315.48)",
+          "oklch(83.57% 0.0408 315.48)",
+          "oklch(95.00% 0.0408 315.48)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Plum",
+        "tonalRamp": [
+          "oklch(15.00% 0.0337 326.06)",
+          "oklch(26.43% 0.0337 326.06)",
+          "oklch(37.86% 0.0337 326.06)",
+          "oklch(49.29% 0.0337 326.06)",
+          "oklch(60.71% 0.0337 326.06)",
+          "oklch(72.14% 0.0337 326.06)",
+          "oklch(83.57% 0.0337 326.06)",
+          "oklch(95.00% 0.0337 326.06)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Rose Line",
+        "tonalRamp": [
+          "oklch(15.00% 0.0177 339.95)",
+          "oklch(26.43% 0.0177 339.95)",
+          "oklch(37.86% 0.0177 339.95)",
+          "oklch(49.29% 0.0177 339.95)",
+          "oklch(60.71% 0.0177 339.95)",
+          "oklch(72.14% 0.0177 339.95)",
+          "oklch(83.57% 0.0177 339.95)",
+          "oklch(95.00% 0.0177 339.95)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Home display",
+        "purpose": "Latin editorial home headline; locale and viewport overrides apply."
+      },
+      "headline": {
+        "displayName": "Page headline",
+        "purpose": "Default page heading in the Atelier layer."
+      },
+      "section-title": {
+        "displayName": "Editorial section title",
+        "purpose": "Home section headings, reduced to 26px on phones."
+      },
+      "studio-title": {
+        "displayName": "Working section title",
+        "purpose": "Sans-serif studio section headings, reduced to 22px on narrow phones."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading family; leads and localized paragraphs use more open leading."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Shared actions and desktop navigation labels."
+      },
+      "display-cjk": {
+        "displayName": "CJK home display",
+        "purpose": "Traditional Chinese and Japanese headings; mobile sizing is recorded in DESIGN.md. Named CJK faces depend on device availability."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow",
+        "value": "0 16px 42px #29271e0c",
+        "purpose": "Existing shared custom property; refreshed working panels explicitly remove their shadows."
+      },
+      {
+        "name": "shadow-soft",
+        "value": "0 4px 18px #29271e07",
+        "purpose": "Existing low-elevation custom property."
+      },
+      {
+        "name": "shadow-hover",
+        "value": "0 15px 35px #29271e12",
+        "purpose": "Existing shared hover custom property, not a default for all panels."
+      },
+      {
+        "name": "photograph",
+        "value": "0 16px 40px #30231a16",
+        "purpose": "EditorialVisual photograph frame."
+      },
+      {
+        "name": "editorial-note",
+        "value": "0 12px 35px #30231a22",
+        "purpose": "Foreground butter-yellow editorial note."
+      },
+      {
+        "name": "overlay",
+        "value": "0 24px 80px #27251f25",
+        "purpose": "Common Atelier modals and popovers."
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "0 -5px 30px #29271e08",
+        "purpose": "Floating bottom navigation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "motion-fast",
+        "value": "160ms",
+        "purpose": "Shared button state transitions inherited from main.css and studio state changes."
+      },
+      {
+        "name": "motion-standard",
+        "value": "240ms",
+        "purpose": "Existing main.css token and journal hover movement."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.23,1,.32,1)",
+        "purpose": "Atelier override for shared easing."
+      },
+      {
+        "name": "editorial-tilt",
+        "value": "280ms ease-out",
+        "purpose": "Pointer-only photograph frame transition; skipped under reduced motion."
+      },
+      {
+        "name": "opening-duration",
+        "value": "2400ms",
+        "purpose": "Original wardrobe welcome, session-limited and replayable; omitted for reduced motion."
+      },
+      {
+        "name": "opening-door-ease",
+        "value": "cubic-bezier(.7,0,.18,1)",
+        "purpose": "Paired wardrobe-door opening."
+      },
+      {
+        "name": "opening-identity-ease",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Welcome identity and line animation."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "900px"
+      },
+      {
+        "name": "opening-mobile",
+        "value": "760px"
+      },
+      {
+        "name": "studio-single-column",
+        "value": "700px"
+      },
+      {
+        "name": "home-single-column",
+        "value": "600px"
+      },
+      {
+        "name": "studio-narrow",
+        "value": "430px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared Atelier action from main.css plus atelier.css. The home call to action has its own larger padding.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Start trying on</button>",
+      "css": ".ds-primary{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:44px;border:1px solid var(--accent,#af235e);border-radius:7px;padding:12px 18px;background:var(--accent,#af235e);color:var(--white,#fffdfb);font-size:13px;font-weight:550;line-height:1.6;box-shadow:none;cursor:pointer;transition:transform var(--motion-fast,160ms) var(--ease-out,cubic-bezier(.23,1,.32,1)),background var(--motion-fast,160ms) ease,border-color var(--motion-fast,160ms) ease}.ds-primary:hover{background:#8e184a;border-color:#8e184a;transform:translateY(-2px)}.ds-primary:active:not(:disabled){transform:translateY(1px) scale(.99)}.ds-primary:disabled{cursor:not-allowed}.ds-primary:focus-visible,.ds-secondary:focus-visible{outline:2px solid var(--accent,#af235e);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover,.ds-primary:active:not(:disabled){transform:none}}"
+    },
+    {
+      "name": "Secondary Action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined Atelier action; compact working areas use nearby studio-specific padding.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Open my wardrobe</button>",
+      "css": ".ds-secondary{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:12px 18px;border:1px solid #c9cbbf;border-radius:7px;background:transparent;color:var(--ink,#302236);font-size:13px;font-weight:650;line-height:1.6;cursor:pointer;transition:transform var(--motion-fast,160ms) var(--ease-out,cubic-bezier(.23,1,.32,1)),background var(--motion-fast,160ms) ease,border-color var(--motion-fast,160ms) ease}.ds-secondary:hover{background:var(--surface-raised,#fffdfb);border-color:#cfc8cc;transform:translateY(-2px)}.ds-secondary:active:not(:disabled){transform:translateY(1px) scale(.99)}.ds-secondary:disabled{cursor:not-allowed}.ds-primary:focus-visible,.ds-secondary:focus-visible{outline:2px solid var(--accent,#af235e);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:hover,.ds-secondary:active:not(:disabled){transform:none}}"
+    },
+    {
+      "name": "Studio Field",
+      "kind": "input",
+      "refersTo": "input-studio",
+      "description": "Product field extracted from ShopView.vue and shop-studio.css. Its existing blue scoped focus ring is shown truthfully; it is documented drift, not the global focus standard.",
+      "html": "<label class=\"ds-field\">Product name<input class=\"ds-field-input\" type=\"text\" placeholder=\"Butter-yellow cardigan\" /></label>",
+      "css": ".ds-field{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:block;color:var(--ink,#302236);font-size:12px;font-weight:500;line-height:1.6;max-width:360px}.ds-field-input{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:block;width:100%;margin-top:7px;padding:12px;border:1px solid #cfb8c9;border-radius:6px;min-height:46px;background:var(--white,#fffdfb);color:var(--ink,#302236);font-size:14px;caret-color:var(--accent,#af235e)}.ds-field-input::placeholder{color:var(--muted,#716071)}.ds-field-input:focus-visible{outline:3px solid #6d8d9c;outline-offset:3px}@media(max-width:430px){.ds-field-input{font-size:16px}}"
+    },
+    {
+      "name": "Category Filter",
+      "kind": "chip",
+      "refersTo": "chip-category",
+      "description": "A category and its active state, combining the base category spacing with Atelier's compact corners and ink selection.",
+      "html": "<div class=\"ds-filters\" role=\"group\" aria-label=\"Category\"><button class=\"ds-category ds-category-active\" aria-pressed=\"true\" type=\"button\">All items</button><button class=\"ds-category\" aria-pressed=\"false\" type=\"button\">Tops</button></div>",
+      "css": ".ds-filters{display:flex;gap:8px;flex-wrap:wrap}.ds-category{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;white-space:nowrap;border:0;border-radius:6px;padding:9px 16px;background:transparent;color:var(--muted,#716071);font-size:13px;line-height:1.6;cursor:pointer}.ds-category-active{background:var(--ink,#302236);color:var(--white,#fffdfb);font-weight:600;box-shadow:none}.ds-category:focus-visible{outline:2px solid var(--accent,#af235e);outline-offset:4px}.ds-category:active:not(:disabled){transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-category:active:not(:disabled){transform:none}}"
+    },
+    {
+      "name": "Working Panel",
+      "kind": "card",
+      "refersTo": "panel-studio",
+      "description": "Flat shopping-studio container with a rose border and responsive internal padding.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Add your next find</h2><p class=\"ds-panel-copy\">Save a product, choose your photo, and find the result in your private album.</p></section>",
+      "css": ".ds-panel{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;max-width:440px;border:1px solid var(--line,#e9dce4);border-radius:10px;padding:28px;background:var(--white,#fffdfb);color:var(--ink,#302236);box-shadow:none}.ds-panel-title{font-size:24px;font-weight:550;line-height:1.3;letter-spacing:-.03em;margin:0 0 12px}.ds-panel-copy{font-size:13px;line-height:1.75;color:var(--muted,#716071);margin:0}@media(max-width:1100px){.ds-panel{padding:24px}}@media(max-width:430px){.ds-panel{padding:20px}.ds-panel-title{font-size:22px}}"
+    },
+    {
+      "name": "Desktop Navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Text-and-state excerpt of the desktop rail; the application adds SVG line icons through AppIcon.vue.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Primary\"><a class=\"ds-nav-link ds-nav-current\" href=\"#home\" aria-current=\"page\">Home</a><a class=\"ds-nav-link\" href=\"#shop\">Shopping studio</a><a class=\"ds-nav-link\" href=\"#wardrobe\">My wardrobe</a></nav>",
+      "css": ".ds-nav{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:flex;flex-direction:column;gap:5px;width:218px;padding:18px;background:#f5e6ef}.ds-nav-link{display:flex;align-items:center;gap:12px;min-height:46px;border-radius:7px;padding:12px 14px;color:#685267;text-decoration:none;font-size:13px;line-height:1.6;font-weight:500}.ds-nav-link:hover{background:#ecd4e2;transform:none}.ds-nav-current{background:var(--accent,#af235e);color:#fff;font-weight:650;box-shadow:none}.ds-nav-current:hover{background:#8e184a;color:#fff}.ds-nav-link:focus-visible{outline:2px solid var(--accent,#af235e);outline-offset:4px}"
+    },
+    {
+      "name": "Studio Stepper",
+      "kind": "custom",
+      "refersTo": "step-active",
+      "description": "Three workflow steps with the active pink area and berry baseline. The final step is disabled until a product is selected.",
+      "html": "<nav class=\"ds-steps\" aria-label=\"Shopping steps\"><button class=\"ds-step ds-step-current\" type=\"button\" aria-current=\"step\"><span class=\"ds-step-number\">01</span>Add product</button><button class=\"ds-step\" type=\"button\"><span class=\"ds-step-number\">02</span>Choose pieces</button><button class=\"ds-step\" type=\"button\" disabled><span class=\"ds-step-number\">03</span>Photo &amp; try-on</button></nav>",
+      "css": ".ds-steps{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line,#e9dce4);border-radius:10px;overflow:hidden;max-width:650px}.ds-step{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;position:relative;display:inline-flex;align-items:center;justify-content:start;gap:8px;min-height:62px;border:0;border-radius:0;padding:12px 16px;background:transparent;color:var(--muted,#716071);font-size:13px;line-height:1.6;cursor:pointer;transition:background 160ms ease,color 160ms ease,transform 160ms var(--ease-out,cubic-bezier(.23,1,.32,1))}.ds-step-number{font-size:15px;font-variant-numeric:tabular-nums;color:#87506c;margin-right:3px}.ds-step-current{color:var(--ink,#302236);font-weight:600;background:var(--accent-pink-soft,#fbe0eb)}.ds-step-current:after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--accent,#af235e)}.ds-step:hover:not(:disabled){background:var(--accent-yellow-soft,#fff1b9)}.ds-step:active:not(:disabled){transform:scale(.98)}.ds-step:focus-visible{outline:3px solid #6d8d9c;outline-offset:3px}.ds-step:disabled{opacity:.48;cursor:not-allowed}@media(max-width:430px){.ds-step{flex-direction:column;align-items:start;min-height:80px;padding:10px 9px;gap:2px;font-size:12px;line-height:1.5}}@media(prefers-reduced-motion:reduce){.ds-step{transition:none}.ds-step:active:not(:disabled){transform:none}}"
+    },
+    {
+      "name": "Editorial Note",
+      "kind": "custom",
+      "description": "The photograph's butter-yellow foreground note, isolated from its image context. No placeholder or generated customer photo is included in this preview.",
+      "html": "<aside class=\"ds-note\"><strong class=\"ds-note-title\">New finds. Old favorites.</strong><span class=\"ds-note-copy\">More ways to wear what you own</span></aside>",
+      "css": ".ds-note{font-family:'DM Sans','Noto Sans TC','Yu Gothic',system-ui,sans-serif;display:inline-block;max-width:320px;background:var(--accent-yellow,#f6d86b);color:var(--ink,#302236);padding:19px 22px;box-shadow:0 12px 35px #30231a22;transform:rotate(-3deg);line-height:1.6}.ds-note-title,.ds-note-copy{display:block}.ds-note-title{font-size:15px;font-weight:600}.ds-note-copy{font-size:11px;color:var(--muted,#716071);margin-top:5px}@media(prefers-reduced-motion:reduce){.ds-note{transform:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cheerful Fashion Atelier",
+    "overview": "OOTIE combines an editorial fashion voice with an approachable personal wardrobe. Warm paper, berry actions, generous photography and pastel working areas make the product colorful without sacrificing the clarity of forms and navigation. The Latin serif headlines supply the fashion character; compact sans-serif controls keep the application usable.\n\nThe original wardrobe-door opening remains a signature welcome. English is the default, with Traditional Chinese, Japanese and Spanish treated as complete layouts: type size, line height, wrapping and emphasis change with the language. Product photography and editorial imagery retain distinct roles and source labels.",
+    "keyCharacteristics": [
+      "Berry actions on warm paper, with butter yellow, mint, pink and lilac surfaces.",
+      "Editorial serif headlines paired with concise sans-serif controls.",
+      "Quiet bordered panels, visible garment silhouettes and selective photographic depth.",
+      "Locale-aware typography and a reduced-motion alternative to the wardrobe entrance."
+    ],
+    "rules": [
+      {
+        "name": "The Color Has a Job Rule",
+        "body": "Use the existing pastel families to distinguish working areas; keep the berry treatment for actions, selection and intentional emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Locale Shapes Type Rule",
+        "body": "Preserve each locale's wrapping, upright CJK emphasis and expanded line height; do not force translated headings into the English geometry.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Working Surface Rule",
+        "body": "Keep forms and browsing panels flat; use depth for photographic composition and floating layers.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** reuse berry actions and the existing pastel surface families to make state and destination legible.",
+      "**Do** keep the original wardrobe opening, replay action and reduced-motion behavior.",
+      "**Do** preserve locale-specific type rules for English, Traditional Chinese, Japanese and Spanish.",
+      "**Do** contain garment and full-body editorial images, and preserve their source or editorial labels.",
+      "**Do** keep visible labels, keyboard states, privacy language and actual service status alongside the visual refinement."
+    ],
+    "donts": [
+      "**Don't** apply the hero photograph's crop to merchant product images or full-body editorial posts.",
+      "**Don't** expand the arched hero silhouette or photographic shadows into every working panel.",
+      "**Don't** present prepared editorial posts, private merchant photos or pending jobs as verified customer activity or live YouCam output.",
+      "**Don't** use the generated sidecar tonal ramps as new production colors without a deliberate design change."
+    ]
+  }
+}

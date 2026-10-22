@@ -6,7 +6,7 @@
       <h1 id="not-found-title">這一頁不在衣櫥裡</h1>
       <p>連結可能已更新或內容已移除。你可以回到首頁，或繼續探索公開穿搭。</p>
       <div class="not-found-actions">
-        <router-link class="primary" to="/">返回首頁</router-link>
+        <router-link class="primary" to="/">{{ $t("返回首頁") }}</router-link>
         <router-link class="secondary" to="/explore">探索 OOTD</router-link>
       </div>
     </div>

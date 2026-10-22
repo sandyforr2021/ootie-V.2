@@ -1,10 +1,12 @@
-const DEFAULT_DESCRIPTION = 'OOTIE 整合數位衣櫥、穿搭靈感、Style SOS 與 AI 視覺預覽，陪你找到每天想穿的樣子。';
+import { t } from '@/i18n';
+
+const DEFAULT_DESCRIPTION = 'OOTIE 整合數位衣櫥、商品收藏、YouCam 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。';
 const ROUTE_TITLES = {
   Home: 'OOTIE｜你的衣櫥，更多穿搭可能', Explore: '探索 OOTD｜OOTIE', Closet: '我的衣櫥｜OOTIE',
   Bookmarks: '書籤與收藏穿搭｜OOTIE', Stats: '衣櫥統計｜OOTIE', Sos: '穿搭 SOS｜OOTIE',
   Ai: 'AI 穿搭助理｜OOTIE', Tryon: '虛擬試穿｜OOTIE', Profile: '個人檔案｜OOTIE',
   Membership: '方案與點數｜OOTIE', Settings: '帳號設定｜OOTIE', Legal: '資訊與條款｜OOTIE',
-  OotdDetail: 'OOTD 詳情｜OOTIE', NotFound: '找不到頁面｜OOTIE'
+  Shop: '購物試穿｜OOTIE', OotdDetail: 'OOTD 詳情｜OOTIE', NotFound: '找不到頁面｜OOTIE'
 };
 
 const upsertMeta = (selector, attributes) => {
@@ -27,8 +29,8 @@ const upsertCanonical = (href) => {
 };
 
 export const updatePublicContentMeta = ({ title, description, image, url }) => {
-  const safeTitle = title || 'OOTIE｜數位衣櫥與穿搭社群';
-  const safeDescription = description || DEFAULT_DESCRIPTION;
+  const safeTitle = title || t('OOTIE｜數位衣櫥與穿搭社群');
+  const safeDescription = description || t(DEFAULT_DESCRIPTION);
   const safeUrl = url || window.location.href;
   document.title = safeTitle;
   upsertMeta('meta[property="og:title"]', { property: 'og:title', content: safeTitle });
@@ -39,11 +41,11 @@ export const updatePublicContentMeta = ({ title, description, image, url }) => {
 };
 
 export const updateDocumentMeta = (route) => {
-  const title = ROUTE_TITLES[route?.name] || 'OOTIE｜數位衣櫥與穿搭社群';
+  const title = t(ROUTE_TITLES[route?.name] || 'OOTIE｜數位衣櫥與穿搭社群');
   document.title = title;
-  upsertMeta('meta[name="description"]', { name: 'description', content: DEFAULT_DESCRIPTION });
+  upsertMeta('meta[name="description"]', { name: 'description', content: t(DEFAULT_DESCRIPTION) });
   upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title });
-  upsertMeta('meta[property="og:description"]', { property: 'og:description', content: DEFAULT_DESCRIPTION });
+  upsertMeta('meta[property="og:description"]', { property: 'og:description', content: t(DEFAULT_DESCRIPTION) });
   upsertMeta('meta[property="og:url"]', { property: 'og:url', content: window.location.href });
   upsertCanonical(window.location.href);
 };

@@ -2,7 +2,7 @@
   <div v-if="isVisible" class="brand-opening" aria-hidden="true">
     <div class="brand-opening__veil"></div>
     <div class="brand-opening__identity">
-      <span class="brand-opening__eyebrow">YOUR STYLE, A KINDER YOU.</span>
+      <span class="brand-opening__eyebrow">{{ $t('每天，都更像自己。') }}</span>
       <BrandMark class="brand-opening__mark" />
       <span class="brand-opening__line"></span>
     </div>
@@ -16,7 +16,7 @@
         <span class="brand-opening__handle"></span>
       </div>
     </div>
-    <p class="brand-opening__enter">OPEN YOUR WARDROBE</p>
+    <p class="brand-opening__enter">{{ $t('打開衣櫥，遇見更多可能。') }}</p>
   </div>
 </template>
 
@@ -24,27 +24,35 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import BrandMark from '@/components/layout/BrandMark.vue';
 
-const BRAND_OPENING_DURATION_MS = 2850;
+const BRAND_OPENING_DURATION_MS = 2400;
 const BRAND_OPENING_SESSION_KEY = 'ootie:brand-opening:v2';
 
 const isVisible = ref(false);
 let hideTimer;
 
+const playOpening = () => {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  window.clearTimeout(hideTimer);
+  isVisible.value = true;
+  hideTimer = window.setTimeout(() => { isVisible.value = false; }, BRAND_OPENING_DURATION_MS);
+};
 onMounted(() => {
+  window.addEventListener('ootie:replay-opening', playOpening);
   const isHomeEntry = window.location.pathname === '/';
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const hasPlayed = window.sessionStorage.getItem(BRAND_OPENING_SESSION_KEY) === 'played';
+  let hasPlayed = false;
+  try { hasPlayed = window.sessionStorage.getItem(BRAND_OPENING_SESSION_KEY) === 'played'; } catch { /* Storage may be restricted. */ }
 
   if (!isHomeEntry || prefersReducedMotion || hasPlayed) return;
 
-  window.sessionStorage.setItem(BRAND_OPENING_SESSION_KEY, 'played');
+  try { window.sessionStorage.setItem(BRAND_OPENING_SESSION_KEY, 'played'); } catch { /* The timed exit still works. */ }
   isVisible.value = true;
   hideTimer = window.setTimeout(() => {
     isVisible.value = false;
   }, BRAND_OPENING_DURATION_MS);
 });
 
-onBeforeUnmount(() => window.clearTimeout(hideTimer));
+onBeforeUnmount(() => { window.clearTimeout(hideTimer); window.removeEventListener('ootie:replay-opening', playOpening); });
 </script>
 
 <style scoped>
@@ -55,17 +63,15 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
   overflow: hidden;
   pointer-events: none;
   perspective: 1400px;
-  animation: opening-shell 2.85s linear both;
+  animation: opening-shell 2.4s linear both;
 }
 
 .brand-opening__veil {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 18%, rgba(247, 221, 105, .38), transparent 30%),
-    radial-gradient(circle at 82% 78%, rgba(169, 216, 242, .38), transparent 32%),
-    #fffaf5;
-  animation: opening-veil 2.85s linear both;
+    var(--paper);
+  animation: opening-veil 2.4s linear both;
 }
 
 .brand-opening__identity {
@@ -76,29 +82,29 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
   place-content: center;
   justify-items: center;
   gap: 13px;
-  animation: opening-identity 2.85s cubic-bezier(.16, 1, .3, 1) both;
+  animation: opening-identity 2.4s cubic-bezier(.16, 1, .3, 1) both;
 }
 
 .brand-opening__eyebrow {
-  color: #706b73;
+  color: var(--muted);
   font-size: 10px;
   font-weight: 750;
   letter-spacing: .24em;
 }
 
 .brand-opening__mark {
-  font-size: clamp(50px, 7.5vw, 82px);
+  font-size: clamp(64px, 9vw, 100px) !important;
   font-weight: 800;
   letter-spacing: .15em;
 }
 
 .brand-opening__line {
   width: 76px;
-  height: 5px;
+  height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f4a9bd, #f7dd69, #a9d8f2, #c8b7ef);
+  background: var(--accent);
   transform-origin: center;
-  animation: opening-line 2.85s cubic-bezier(.16, 1, .3, 1) both;
+  animation: opening-line 2.4s cubic-bezier(.16, 1, .3, 1) both;
 }
 
 .brand-opening__doors {
@@ -115,7 +121,7 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
   border: 1px solid rgba(70, 62, 61, .13);
   background:
     linear-gradient(90deg, rgba(255,255,255,.38), transparent 18%, rgba(85,67,61,.06) 50%, transparent 82%, rgba(255,255,255,.32)),
-    #eadfd7;
+    #e5e2d6;
   box-shadow: inset 0 0 0 12px rgba(255,255,255,.18), 0 0 42px rgba(53,45,52,.16);
   backface-visibility: hidden;
   will-change: transform;
@@ -131,8 +137,8 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
 }
 
 .brand-opening__door::after { inset: 53% 9% 7.5%; }
-.brand-opening__door--left { transform-origin: left center; animation: opening-left-door 2.85s cubic-bezier(.7, 0, .18, 1) both; }
-.brand-opening__door--right { transform-origin: right center; animation: opening-right-door 2.85s cubic-bezier(.7, 0, .18, 1) both; }
+.brand-opening__door--left { transform-origin: left center; animation: opening-left-door 2.4s cubic-bezier(.7, 0, .18, 1) both; }
+.brand-opening__door--right { transform-origin: right center; animation: opening-right-door 2.4s cubic-bezier(.7, 0, .18, 1) both; }
 
 .brand-opening__door-line {
   position: absolute;
@@ -169,7 +175,7 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
   font-weight: 750;
   letter-spacing: .28em;
   white-space: nowrap;
-  animation: opening-enter 2.85s ease both;
+  animation: opening-enter 2.4s ease both;
 }
 
 @keyframes opening-shell {
@@ -213,7 +219,7 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
 }
 
 @media (max-width: 760px) {
-  .brand-opening__mark { font-size: clamp(42px, 14vw, 58px); }
+  .brand-opening__mark { font-size: clamp(56px, 16vw, 76px) !important; }
   .brand-opening__door::before { inset: 7% 12%; }
   .brand-opening__door::after { inset: 53% 12% 7%; }
   .brand-opening__door--left .brand-opening__handle { right: 14px; }
@@ -223,4 +229,6 @@ onBeforeUnmount(() => window.clearTimeout(hideTimer));
 @media (prefers-reduced-motion: reduce) {
   .brand-opening { display: none; }
 }
+.brand-opening__door--right{background:var(--accent-lavender-soft)}
+:lang(zh-TW) .brand-opening__eyebrow,:lang(ja) .brand-opening__eyebrow{letter-spacing:.08em;font-size:13px}
 </style>
