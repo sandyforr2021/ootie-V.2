@@ -5,7 +5,7 @@ The reviewed configuration is `render.yaml`: one **Free Node Web Service**, no n
 ## Configure
 
 - Repository: sandyforr2021/ootie-V.2, branch `codex/youcam-commerce-checkpoint-20261022`.
-- Build: `npm ci && npm ci --prefix gateway && node scripts/build-free-deploy.mjs`
+- Build: `npm ci --include=dev && npm ci --prefix gateway --omit=dev && node scripts/build-free-deploy.mjs`
 - Start: `node gateway/src/server.js`
 - Plan: **Free**, workspace without a payment method. Do not select Starter or a paid workspace upgrade.
 - Health path: `/healthz`. Node 22.22.0. `SERVE_WEB_APP=true`.

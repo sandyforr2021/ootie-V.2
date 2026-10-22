@@ -127,9 +127,13 @@
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
+import { useAuthStore } from '@/stores/auth';
+import { useClosetStore } from '@/stores/closet';
 
 const appStore = useAppStore();
 const sosStore = useSosStore();
+const authStore = useAuthStore();
+const closetStore = useClosetStore();
 
 const availableVibes = ['Soft', 'Elegant', 'Smart Casual', 'Relaxed', 'Confident', 'Playful'];
 
@@ -148,8 +152,11 @@ const contextItem = computed(() => {
 
 watch(
   () => appStore.isSosFormOpen,
-  (open) => {
+  async (open) => {
     if (!open) return;
+    const profileId = authStore.profileId;
+    if (authStore.isMember && profileId) await closetStore.loadRemoteItems(profileId);
+    if (!appStore.isSosFormOpen || profileId !== authStore.profileId) return;
     title.value = '';
     details.value = '';
     occasion.value = '約會';
