@@ -233,7 +233,6 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
   <div class="shop-view">
     <header class="shop-studio-heading">
       <div><h1>{{ t('試穿工作室') }}</h1><p>{{ t('先收藏商品，再選照片。完成的試穿會留在私人相簿。') }}</p></div>
-      <span class="shop-powered"><AppIcon name="sparkle" :size="16" /> YouCam AI</span>
     </header>
 
     <nav class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>

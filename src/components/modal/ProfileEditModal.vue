@@ -2,31 +2,32 @@
   <div v-if="appStore.isProfileEditOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal profile-edit-modal">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
-      <p class="eyebrow">Profile</p><h2>編輯個人資料</h2>
+      <p class="eyebrow">Profile</p><h2>{{ t("編輯個人資料") }}</h2>
       <form @submit.prevent="handleSubmit">
-        <h3>公開個人資料</h3>
+        <h3>{{ t("公開個人資料") }}</h3>
         <div class="form-grid">
-          <div class="form-field"><label for="editProfileName">顯示暱稱</label><input id="editProfileName" v-model="form.display_name" :disabled="cooldown.locked" required maxlength="30" /><small v-if="cooldown.locked">下次可修改：{{ formatDate(cooldown.nextChangeAt) }}（還需等待 {{ cooldown.daysRemaining }} 天）</small></div>
-          <div class="form-field"><label for="editProfileUsername">帳號 ID</label><input id="editProfileUsername" v-model="form.username" required placeholder="@yourname" /></div>
-          <div class="form-field full"><label for="editProfileBio">個人 Slogan</label><textarea id="editProfileBio" v-model="form.slogan" maxlength="120" placeholder="用衣櫥記錄日常，也和衣友分享穿搭靈感。"></textarea></div>
-          <div class="form-field full"><label>大頭貼</label><div class="avatar-upload-wrap"><label class="avatar-upload" for="avatarUploadFile"><span>上傳大頭貼</span><input id="avatarUploadFile" type="file" accept="image/jpeg,image/png,image/webp" @change="handleAvatarFileSelect" /></label><div class="avatar-preview-shell"><img v-if="avatarPreview.value" class="avatar-preview visible" :src="avatarPreview.value" alt="大頭貼預覽" /></div></div><div v-if="avatarPreview.value" class="avatar-crop-controls"><span>已選擇圖片，可在儲存前確認預覽。</span></div></div>
+          <div class="form-field"><label for="editProfileName">{{ t("顯示暱稱") }}</label><input id="editProfileName" v-model="form.display_name" :disabled="cooldown.locked" required maxlength="30" /><small v-if="cooldown.locked">{{ tf('下次可修改：{date}（還需等待 {days} 天）', { date: formatDate(cooldown.nextChangeAt), days: cooldown.daysRemaining }) }}</small></div>
+          <div class="form-field"><label for="editProfileUsername">{{ t("帳號 ID") }}</label><input id="editProfileUsername" v-model="form.username" required placeholder="@yourname" /></div>
+          <div class="form-field full"><label for="editProfileBio">{{ t("個人 Slogan") }}</label><textarea id="editProfileBio" v-model="form.slogan" maxlength="120" :placeholder="t('用衣櫥記錄日常，也和衣友分享穿搭靈感。')"></textarea></div>
+          <div class="form-field full"><label>{{ t("大頭貼") }}</label><div class="avatar-upload-wrap"><label class="avatar-upload" for="avatarUploadFile"><span>{{ t("上傳大頭貼") }}</span><input id="avatarUploadFile" type="file" accept="image/jpeg,image/png,image/webp" @change="handleAvatarFileSelect" /></label><div class="avatar-preview-shell"><img v-if="avatarPreview.value" class="avatar-preview visible" :src="avatarPreview.value" :alt="t('大頭貼預覽')" /></div></div><div v-if="avatarPreview.value" class="avatar-crop-controls"><span>{{ t("已選擇圖片，可在儲存前確認預覽。") }}</span></div></div>
         </div>
-        <h3>私人帳號資料</h3>
+        <h3>{{ t("私人帳號資料") }}</h3>
         <div class="form-grid">
-          <div class="form-field"><label for="editProfileFullName">姓名</label><input id="editProfileFullName" v-model="form.full_name" :disabled="privateDataPending" /></div>
-          <div class="form-field"><label for="editProfileBirthDate">生日</label><input id="editProfileBirthDate" v-model="form.birth_date" type="date" :disabled="privateDataPending" /></div>
-          <div class="form-field"><label for="editProfilePhone">電話</label><input id="editProfilePhone" v-model="form.phone" inputmode="tel" :disabled="privateDataPending" /></div>
+          <div class="form-field"><label for="editProfileFullName">{{ t("姓名") }}</label><input id="editProfileFullName" v-model="form.full_name" :disabled="privateDataPending" /></div>
+          <div class="form-field"><label for="editProfileBirthDate">{{ t("生日") }}</label><input id="editProfileBirthDate" v-model="form.birth_date" type="date" :disabled="privateDataPending" /></div>
+          <div class="form-field"><label for="editProfilePhone">{{ t("電話") }}</label><input id="editProfilePhone" v-model="form.phone" inputmode="tel" :disabled="privateDataPending" /></div>
           <div class="form-field"><label for="editProfileEmail">Email</label><input id="editProfileEmail" :value="authStore.user?.email || ''" readonly /></div>
         </div>
-        <p v-if="authStore.errorMsg" class="form-error" role="alert">{{ authStore.errorMsg }}</p>
-        <p v-if="authStore.accountPrivateError" class="form-error" role="alert">{{ authStore.accountPrivateError }} 請重新開啟編輯後再試。</p>
-        <div class="form-actions"><button type="button" class="secondary" @click="close">{{ $t("取消") }}</button><button type="submit" class="primary" :disabled="authStore.loading || privateDataPending || !!authStore.accountPrivateError">{{ privateDataPending ? '讀取資料中…' : '儲存資料' }}</button></div>
+        <p v-if="authStore.errorMsg" class="form-error" role="alert">{{ t(authStore.errorMsg) }}</p>
+        <p v-if="authStore.accountPrivateError" class="form-error" role="alert">{{ t(authStore.accountPrivateError) }} {{ t('請重新開啟編輯後再試。') }}</p>
+        <div class="form-actions"><button type="button" class="secondary" @click="close">{{ $t("取消") }}</button><button type="submit" class="primary" :disabled="authStore.loading || privateDataPending || !!authStore.accountPrivateError">{{ t(privateDataPending ? '讀取資料中…' : '儲存資料') }}</button></div>
       </form>
     </section>
   </div>
 </template>
 
 <script setup>
+import { t, tf, formatDate } from '@/i18n';
 import { reactive, ref, computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
@@ -70,7 +71,6 @@ const handleAvatarFileSelect = (event) => {
   reader.readAsDataURL(file);
 };
 
-const formatDate = (value) => value ? new Date(value).toLocaleDateString('zh-TW') : '';
 const close = () => { appStore.isProfileEditOpen = false; };
 
 const handleSubmit = async () => {
@@ -81,7 +81,7 @@ const handleSubmit = async () => {
     appStore.profile.name = form.display_name;
     appStore.profile.bio = form.slogan || DEFAULT_PROFILE_SLOGAN;
     appStore.profile.username = form.username.trim().startsWith('@') ? form.username.trim() : `@${form.username.trim()}`;
-    appStore.showToast('個人資料已更新', { type: 'success', syncStatus: 'SYNCED' });
+    appStore.showToast(t('個人資料已更新'), { type: 'success', syncStatus: 'SYNCED' });
     close();
   }
 };

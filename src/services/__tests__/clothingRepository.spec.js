@@ -189,12 +189,19 @@ describe('clothingRepository (READ-ONLY)', () => {
       expect(fromFn).not.toHaveBeenCalled();
     });
 
-    it('rejects a decimal price because the existing schema only accepts bigint', async () => {
+    it('rejects amounts with precision exceeding the selected currency', async () => {
       const fromFn = vi.fn();
 
-      await expect(createClothingItem(mockProfileId, { name: 'Fractional price', price: 99.5 }, { from: fromFn }))
+      await expect(createClothingItem(mockProfileId, { name: 'Fractional price', price: 99.5, currency: 'JPY' }, { from: fromFn }))
         .rejects.toMatchObject({ code: SERVICE_ERROR_CODE.VALIDATION_ERROR });
       expect(fromFn).not.toHaveBeenCalled();
+    });
+
+    it('saves decimal purchase amounts together with their original currency', async () => {
+      const payload = { name: 'Cotton shirt', price: 99.5, currency: 'USD' };
+      const insert = vi.fn().mockReturnValue({ select: () => ({ single: async () => ({ data: { id: mockItemId, ...payload }, error: null }) }) });
+      await createClothingItem(mockProfileId, payload, { from: () => ({ insert }) });
+      expect(insert).toHaveBeenCalledWith(expect.objectContaining({ ...payload, owner_id: mockProfileId }));
     });
 
     it('updates only the specified item owned by the verified profile and strips system fields', async () => {

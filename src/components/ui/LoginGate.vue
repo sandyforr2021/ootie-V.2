@@ -21,6 +21,7 @@ import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import BaseModal from './BaseModal.vue';
+import { t } from '@/i18n';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -49,7 +50,8 @@ const copy = computed(() => {
       body: '登入會員即可保留你的個人資料並使用這項功能。'
     }
   };
-  return messages[appStore.loginGateReason] || messages.AUTH_REQUIRED;
+  const selected = messages[appStore.loginGateReason] || messages.AUTH_REQUIRED;
+  return { title: t(selected.title), body: t(selected.body) };
 });
 
 const openLogin = () => {
@@ -60,9 +62,10 @@ const openLogin = () => {
 </script>
 
 <style scoped>
-.login-gate-modal {
+:deep(.login-gate-modal) {
   width: min(440px, calc(100vw - 32px));
   padding: 30px;
+  max-width: 100%;
 }
 
 .login-gate-modal h2 {
@@ -80,9 +83,11 @@ const openLogin = () => {
 .login-gate-actions {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .login-gate-actions button {
   flex: 1;
+  min-width: 120px;
 }
 </style>

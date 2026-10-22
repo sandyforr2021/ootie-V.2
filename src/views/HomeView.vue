@@ -8,6 +8,8 @@ import { useClosetStore } from '@/stores/closet';
 import { uniquePostsById, useOotdStore } from '@/stores/ootd';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import EditorialVisual from '@/components/ui/EditorialVisual.vue';
+import { itemName } from '@/services/itemPresentation';
+import WeatherWardrobe from '@/components/closet/WeatherWardrobe.vue';
 const router = useRouter();
 const replayOpening = () => window.dispatchEvent(new Event('ootie:replay-opening'));
 const appStore = useAppStore();
@@ -45,9 +47,11 @@ onMounted(() => { void ootdStore.loadRemotePosts(); });
       <router-link to="/closet"><span>03</span><div><strong>{{ $t('配上衣櫥舊愛') }}</strong><small>{{ $t('找到更多穿法，再做決定') }}</small></div><AppIcon name="arrow" :size="18" /></router-link>
     </nav>
 
+    <WeatherWardrobe />
+
     <section v-if="isMember" class="home-section">
       <div class="section-heading"><div><h2>{{ $t('最近加入衣櫥') }}</h2></div><router-link class="atelier-text-link" to="/closet">{{ $t('查看全部 →') }}</router-link></div>
-      <div v-if="recentItems.length" class="atelier-recent"><button v-for="item in recentItems" :key="item.id" class="recent-card" @click="openDetail(item.id)"><div class="item-image"><img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" /></div><h3>{{ item.name_zh || item.name }}</h3></button></div>
+      <div v-if="recentItems.length" class="atelier-recent"><button v-for="item in recentItems" :key="item.id" class="recent-card" @click="openDetail(item.id)"><div class="item-image"><img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" /></div><h3>{{ itemName(item) }}</h3></button></div>
       <div v-else class="atelier-wardrobe-empty"><AppIcon name="Closet" :size="36" /><div><h3>{{ $t('從你已經擁有的衣服開始。') }}</h3><p>{{ $t('加入幾件常穿的衣服，讓每件新衣都有搭配的可能。') }}</p></div><router-link class="secondary" to="/closet?quick=add-item">{{ $t('加入第一件衣服') }}<AppIcon name="plus" :size="17" /></router-link></div>
     </section>
 

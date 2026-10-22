@@ -100,3 +100,8 @@ watch(
 
 onBeforeUnmount(restoreFocus);
 </script>
+
+<style scoped>
+.modal { padding: 32px; }
+@media (max-width: 600px) { .modal { padding: 28px 20px 22px; } }
+</style>

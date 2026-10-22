@@ -1,3 +1,4 @@
+import { mergePublicPostCounts } from './publicPostCounts';
 import { createClient } from '@supabase/supabase-js';
 import { assertOotieProject } from '@/contracts/projectBoundary';
 
@@ -218,7 +219,7 @@ export async function fetchProfileOotdPosts(userId) {
       console.error('Supabase OOTD fetch error:', error);
       return null;
     }
-    return data;
+    return await mergePublicPostCounts(data, supabase);
   } catch (err) {
     console.error('Supabase OOTD fetch failed:', err);
     return null;

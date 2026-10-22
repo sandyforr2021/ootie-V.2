@@ -28,7 +28,7 @@ describe('OOTD member save contract', () => {
     const appStore = useAppStore();
     const authStore = useAuthStore();
     const ootdStore = useOotdStore();
-    const post = { ...appStore.ootdPosts[0], id: postId, saved: false };
+    const post = { ...appStore.ootdPosts[0], id: postId, saved: false, saves: 2 };
     appStore.ootdPosts.splice(0, 1, post);
     authStore.session = { user: { id: 'auth-user-id' } };
     authStore.user = authStore.session.user;
@@ -39,5 +39,10 @@ describe('OOTD member save contract', () => {
 
     expect(socialMetrics.createSavedOutfit).toHaveBeenCalledWith(profileId, { target_type: 'OOTD', target_id: postId });
     expect(post.saved).toBe(true);
+    expect(post.saves).toBe(3);
+    socialMetrics.deleteSavedOutfit.mockRejectedValue(new Error('offline'));
+    await ootdStore.toggleSave(postId);
+    expect(post.saved).toBe(true);
+    expect(post.saves).toBe(3);
   });
 });

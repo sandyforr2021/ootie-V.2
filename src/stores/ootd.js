@@ -53,6 +53,8 @@ export const useOotdStore = defineStore('ootd', () => {
   const formatPost = (remote, taggedItems = []) => ({
     id: String(remote.id),
     editorial: Boolean(editorialLook(remote)),
+    curated: (remote.hashtags || []).includes('#OOTIEStyleCrew'),
+    saves: remote.saves ?? null,
     user_id: remote.user_id,
     username: remote.ootie_profiles?.username || appStore.profile.username || '@衣友',
     initials: remote.ootie_profiles?.initials || appStore.profile.initials || '衣友',
@@ -160,6 +162,7 @@ export const useOotdStore = defineStore('ootd', () => {
         else await createSavedOutfit(authStore.profileId, { target_type: 'OOTD', target_id: postId });
         if (profileId !== authStore.profileId) return false;
         post.saved = !post.saved;
+        if (post.saves != null) post.saves = Math.max(0, Number(post.saves) + (post.saved ? 1 : -1));
         appStore.showToast(post.saved ? '已收藏這篇穿搭' : '已取消收藏', { type: 'success', syncStatus: 'SYNCED' });
         return true;
       } catch (error) {

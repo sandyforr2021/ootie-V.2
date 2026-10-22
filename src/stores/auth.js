@@ -46,7 +46,10 @@ export const useAuthStore = defineStore('auth', () => {
     });
     let resolved = await resolver.resolve(currentSession);
     if (!isCurrentResolution()) return profileIdentity.value;
-    if (resolved.status === IDENTITY_STATUS.PROFILE_MISSING && currentSession?.user) {
+    const newGoogleProfile = resolved.status === IDENTITY_STATUS.PROFILE_READY
+      && !resolved.profile?.username?.trim()
+      && currentSession?.user?.app_metadata?.provider === 'google';
+    if ((resolved.status === IDENTITY_STATUS.PROFILE_MISSING || newGoogleProfile) && currentSession?.user) {
       try {
         await bootstrapOAuthProfile(currentSession);
         if (!isCurrentResolution()) return profileIdentity.value;
@@ -272,6 +275,7 @@ export const useAuthStore = defineStore('auth', () => {
         email,
         password,
         options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined,
           data: {
             full_name: fullName
           }

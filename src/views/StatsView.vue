@@ -8,6 +8,8 @@
       <p class="core-page-note" aria-hidden="true">your closet<br />in numbers ♡</p>
     </header>
 
+    <WardrobeCosts />
+
     <!-- 個人統計區塊 -->
     <section class="profile-insights" aria-labelledby="closetStatsTitle">
       <div class="profile-ootd-heading">
@@ -136,38 +138,6 @@
       </div>
     </section>
 
-    <!-- 最划算單品 CP 值排行 -->
-    <section class="profile-insights cost-ranking-section" aria-labelledby="costRankingTitle">
-      <div class="profile-ootd-heading">
-        <h2 id="costRankingTitle">最划算單品</h2>
-        <span class="eyebrow">衣櫃 CP 值排行</span>
-      </div>
-      <div class="cost-ranking" v-if="costRanking.length">
-        <article
-          v-for="(item, index) in costRanking"
-          :key="item.id"
-          class="cost-ranking-item"
-        >
-          <span :class="['cost-ranking-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="`第 ${index + 1} 名`">
-            {{ index === 0 ? '♛' : index + 1 }}
-          </span>
-          <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" />
-          <div class="cost-ranking-copy">
-            <h3>{{ item.name_zh || item.name }}</h3>
-            <p>
-              這件你穿了 {{ item.wear_count }}{{ $t("次") }}<br />
-              平均穿一次只要 {{ item.cost_per_wear }} 元！
-            </p>
-            <span>購買價格 {{ item.price }} 元</span>
-          </div>
-        </article>
-      </div>
-      <div v-else class="cost-ranking-empty">
-        還沒有單品填寫購買價格，去衣櫥補上價格，看看你最划算的衣服是哪一件！<br />
-        <router-link to="/closet">前往衣櫥編輯 →</router-link>
-      </div>
-    </section>
-
     <!-- 冷宮衣物排名 完整清單 -->
     <section class="profile-insights disused-ranking-section" aria-labelledby="disusedRankingTitle">
       <div class="profile-ootd-heading">
@@ -204,6 +174,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import Chart from 'chart.js/auto';
+import WardrobeCosts from '@/components/closet/WardrobeCosts.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';

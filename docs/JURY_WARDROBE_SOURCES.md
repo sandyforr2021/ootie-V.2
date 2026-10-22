@@ -20,3 +20,8 @@ Original product pixels were preserved, with no generative replacement or croppi
 No price, purchase date, wear history or affiliate relationship was invented. Product pages are provenance, not evidence of a commercial image license, endorsement or merchant partnership. Before using these images in public promotional materials, confirm the relevant permission or replace them with team-owned product photography. Do not publish the private wardrobe or credentials to GitHub.
 
 `scripts/provision-judge-account.mjs` provisions the explicitly requested jury account and checks sign-in and anonymous isolation. `scripts/refresh-judge-wardrobe.mjs` updates only its eight deterministic item IDs, backing up prior rows under the ignored `backups/` directory. Both refuse a Supabase hostname other than the OOTIE project.
+
+
+## 2026-10-23 extension
+
+Twelve additional distinct catalog pieces are recorded in `src/data/juryWardrobeExtras.json`, from the merchant's public product catalog, checked 2026-10-23. The jury wardrobe now contains twenty items. Originals/favorites/history were preserved; new purchase prices and dates are unknown. Photos are private for the jury, except the previously approved SOS selection. This source record does not assert a redistribution license.

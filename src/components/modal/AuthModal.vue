@@ -13,48 +13,40 @@
       </div>
 
       <div class="auth-tabs">
-        <button 
-          type="button" 
-          class="auth-tab" 
-          :class="{ active: isLoginMode }" 
+        <button
+          type="button"
+          class="auth-tab"
+          :class="{ active: isLoginMode }"
           @click="switchMode('login')"
         >{{ $t("登入") }}</button>
-        <button 
-          type="button" 
-          class="auth-tab" 
-          :class="{ active: !isLoginMode }" 
+        <button
+          type="button"
+          class="auth-tab"
+          :class="{ active: !isLoginMode }"
           @click="switchMode('register')"
         >{{ $t("註冊") }}</button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="auth-form">
         <div v-if="authStore.errorMsg" class="auth-error-alert" role="alert" aria-live="assertive">
-          <span>{{ authStore.errorMsg }}</span>
+          <span>{{ $t(authStore.errorMsg) }}</span>
         </div>
 
         <div class="oauth-actions" :aria-label="$t(&quot;第三方登入&quot;)">
-          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" :aria-label="$t(&quot;使用 Google 帳號登入&quot;)" @click="handleProviderLogin('google')">
+          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" :aria-label="isLoginMode ? $t('使用 Google 帳號登入') : $t('使用 Google 建立帳號')" @click="handleProviderLogin('google')">
             <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.19-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"/>
               <path fill="#34A853" d="M12 22c2.7 0 4.98-.9 6.64-2.43l-3.24-2.53c-.9.6-2.05.96-3.4.96-2.61 0-4.82-1.76-5.61-4.13H3.05v2.62A10 10 0 0 0 12 22Z"/>
               <path fill="#FBBC05" d="M6.39 13.87A6.02 6.02 0 0 1 6.08 12c0-.65.11-1.28.31-1.87V7.51H3.05A10 10 0 0 0 2 12c0 1.61.39 3.13 1.05 4.49l3.34-2.62Z"/>
               <path fill="#EA4335" d="M12 6c1.47 0 2.79.5 3.82 1.49l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.95 5.51l3.34 2.62C7.18 7.76 9.39 6 12 6Z"/>
             </svg>
-            <span>{{ $t("使用 Google 登入") }}</span>
+            <span>{{ isLoginMode ? $t('使用 Google 登入') : $t('使用 Google 建立帳號') }}</span>
           </BaseButton>
         </div>
 
+        <p v-if="!isLoginMode" class="auth-subtitle">{{ $t('使用 Google 即可建立帳號。已有帳號可切換至登入。') }}</p>
+        <template v-if="isLoginMode">
         <div class="auth-divider"><span>{{ $t("或使用電子郵件") }}</span></div>
-
-        <BaseInput
-          v-if="!isLoginMode"
-            id="authFullName"
-            v-model="form.fullName"
-            :label="$t(&quot;全名 / 暱稱&quot;)"
-            type="text"
-            required
-            :placeholder="$t(&quot;例如：Alex Chen&quot;)"
-        />
 
         <BaseInput
             id="authEmail"
@@ -81,11 +73,13 @@
             {{ isLoginMode ? $t('立即登入') : $t('完成註冊') }}
           </BaseButton>
         </div>
+        </template>
       </form>
   </BaseModal>
 </template>
 
 <script setup>
+import { t } from '@/i18n';
 import { reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -102,8 +96,7 @@ const isLoginMode = computed(() => authStore.authMode === 'login');
 
 const form = reactive({
   email: '',
-  password: '',
-  fullName: ''
+  password: ''
 });
 
 const switchMode = (mode) => {
@@ -116,22 +109,18 @@ const close = () => {
 };
 
 const handleSubmit = async () => {
+  if (!isLoginMode.value) return;
   if (isLoginMode.value) {
     const success = await authStore.login(form.email, form.password);
     if (success) {
-      appStore.showToast('登入成功！歡迎回來', { type: 'success' });
-    }
-  } else {
-    const success = await authStore.register(form.email, form.password, form.fullName);
-    if (success) {
-      appStore.showToast('註冊成功！已正式登入', { type: 'success' });
+      appStore.showToast(t('登入成功！歡迎回來'), { type: 'success' });
     }
   }
 };
 
 const handleProviderLogin = async (provider) => {
   const success = await authStore.signInWithProvider(provider, authStore.oauthReturnTo || route.fullPath || '/');
-  if (success) appStore.showToast('正在前往登入服務…', { type: 'info' });
+  if (success) appStore.showToast(t('正在前往登入服務…'), { type: 'info' });
 };
 </script>
 

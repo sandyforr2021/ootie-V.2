@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { WeatherError, fetchWeatherForCity, getBrowserPosition } from '../weather';
+import { WeatherError, fetchWeatherForCity, fetchWeatherAt, searchWeatherPlaces, weatherWardrobeAdvice, getBrowserPosition } from '../weather';
 
 describe('weather service', () => {
   it('resolves a city through geocoding and returns provider weather', async () => {
@@ -13,5 +13,29 @@ describe('weather service', () => {
     const geolocation = { getCurrentPosition: (_success, failure) => failure({ code: 1 }) };
     await expect(getBrowserPosition(geolocation)).rejects.toMatchObject({ name: 'WeatherError', code: 'PERMISSION_DENIED' });
     await expect(getBrowserPosition(null)).rejects.toBeInstanceOf(WeatherError);
+  });
+
+  it('offers distinct city choices instead of silently choosing an ambiguous place', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok:true, json:async()=>({results:[
+      {id:1,name:'Paris',admin1:'Île-de-France',country:'France',latitude:48.8,longitude:2.3},
+      {id:2,name:'Paris',admin1:'Texas',country:'United States',latitude:33.6,longitude:-95.5}
+    ]}) });
+    const places = await searchWeatherPlaces('Paris','es',fetchImpl);
+    expect(places).toHaveLength(2);
+    expect(places[0].label).toContain('France');
+    expect(places[1].label).toContain('Texas');
+    expect(String(fetchImpl.mock.calls[0][0])).toContain('language=es');
+  });
+
+  it('uses actual forecast fields for layers and rain without fabricating missing values', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ok:true,json:async()=>({current:{temperature_2m:17,apparent_temperature:15,weather_code:3,time:'2026-10-23T10:00'},daily:{temperature_2m_min:[12],temperature_2m_max:[24],precipitation_probability_max:[70]},timezone:'Asia/Taipei'})});
+    const weather = await fetchWeatherAt({latitude:25,longitude:121,city:'Taipei'},fetchImpl);
+    expect(weather).toMatchObject({temperature:17,apparent:15,min:12,max:24,rain:70});
+    expect(weatherWardrobeAdvice(weather)).toHaveLength(3);
+    expect(weatherWardrobeAdvice(null)).toEqual([]);
+  });
+
+  it('rejects missing temperatures instead of interpreting null as zero degrees', async () => {
+    await expect(fetchWeatherAt({latitude:25,longitude:121,city:'Taipei'},async()=>({ok:true,json:async()=>({current:{temperature_2m:null}})}))).rejects.toBeInstanceOf(WeatherError);
   });
 });

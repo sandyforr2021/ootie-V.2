@@ -10,9 +10,9 @@
     <h2 :id="titleId">{{ title }}</h2>
     <p class="confirm-dialog__message">{{ message }}</p>
     <div class="form-actions">
-      <BaseButton variant="secondary" :disabled="busy" @click="cancel">{{ cancelLabel }}</BaseButton>
+      <BaseButton variant="secondary" :disabled="busy" @click="cancel">{{ $t(cancelLabel) }}</BaseButton>
       <BaseButton :variant="destructive ? 'danger' : 'primary'" :loading="busy" @click="$emit('confirm')">
-        {{ confirmLabel }}
+        {{ $t(confirmLabel) }}
       </BaseButton>
     </div>
   </BaseModal>

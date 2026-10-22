@@ -1,4 +1,5 @@
 import { genuineContent } from './contentAuthenticity';
+import { CURRENCIES, validPurchaseAmount } from './money';
 import { supabase } from './supabase';
 import {
   SERVICE_ERROR_CODE,
@@ -39,6 +40,7 @@ const CLOTHING_MUTABLE_COLUMNS = Object.freeze([
   'photo_processing_status',
   'photo_updated_at',
   'price',
+  'currency',
   'primary_color',
   'purchase_date',
   'season',
@@ -71,12 +73,15 @@ const cleanClothingPayload = (payload, { requireName = false } = {}) => {
     clean.price = null;
   } else if (clean.price !== undefined && clean.price !== null) {
     const price = Number(clean.price);
-    if (!Number.isFinite(price) || price < 0 || !Number.isInteger(price)) {
+    if (!validPurchaseAmount(price, clean.currency || 'TWD')) {
       throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, {
-        userMessage: '價格必須是零或正整數。'
+        userMessage: '請輸入符合幣別的小數位數及非負金額。'
       });
     }
     clean.price = price;
+  }
+  if (clean.currency !== undefined && !CURRENCIES.includes(clean.currency)) {
+    throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, { userMessage: '請選擇有效幣別。' });
   }
   if (Object.keys(clean).length === 0) {
     throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, {

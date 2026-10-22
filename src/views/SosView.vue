@@ -6,7 +6,7 @@
         <h1>{{ $t("穿搭求救") }}</h1>
         <p class="intro">{{ t("衣友正在求救，從她真正擁有的衣櫥裡幫她搭一套。") }}</p>
       </div>
-      <p class="core-page-note" aria-hidden="true">real people<br />real style ♡</p>
+      <p class="core-page-note" aria-hidden="true">more ideas<br />more possibilities ♡</p>
     </header>
 
     <!-- Toolbar & Search -->
@@ -65,6 +65,7 @@
             </div>
           </div>
 
+          <p v-if="post.username?.includes('ootie_edit_')" class="editorial-source">{{ t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
           <h2>{{ post.title }}</h2>
 
           <div class="sos-meta">

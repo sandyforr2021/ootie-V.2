@@ -374,7 +374,7 @@ export const useClosetStore = defineStore('closet', () => {
       price: rawPrice,
       wear_count: Number(itemData.wear_count || 0),
       last_worn: itemData.last_worn || '',
-      purchase_date: itemData.purchase_date || new Date().toISOString().slice(0, 10),
+      purchase_date: itemData.purchase_date || null,
       favorite: itemData.favorite || false,
       hidden: false,
       notes: itemData.notes || '',

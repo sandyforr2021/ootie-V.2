@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   onAuthStateChange: vi.fn(),
   loadProfile: vi.fn(),
+  bootstrapProfile: vi.fn(),
   setMemberProfile: vi.fn(),
   clearMemberProfile: vi.fn(),
   prepareGuestImport: vi.fn()
@@ -15,7 +16,7 @@ vi.mock('@/services/supabase', () => ({
 }));
 vi.mock('@/services/profileRepository', () => ({
   loadProfileByAuthUserId: mocks.loadProfile,
-  bootstrapOAuthProfile: vi.fn(),
+  bootstrapOAuthProfile: mocks.bootstrapProfile,
   getPrivateProfile: vi.fn(),
   updatePublicProfile: vi.fn(),
   upsertPrivateProfile: vi.fn()
@@ -42,6 +43,26 @@ describe('Auth session event lifecycle', () => {
     mocks.loadProfile.mockResolvedValue(profile);
   });
   afterEach(() => vi.useRealTimers());
+
+  it('initializes a Google profile left blank by the new-user database trigger', async () => {
+    const store = useAuthStore();
+    const googleSession = { ...session, user: { ...session.user, app_metadata: { provider: 'google' } } };
+    const completed = { ...profile, username: 'new_style_member' };
+    mocks.loadProfile.mockResolvedValueOnce({ ...profile, username: null }).mockResolvedValueOnce(completed);
+    mocks.bootstrapProfile.mockResolvedValue(completed);
+    await store.resolveProfileIdentity(googleSession);
+    expect(mocks.bootstrapProfile).toHaveBeenCalledWith(googleSession);
+    expect(store.profile.username).toBe('new_style_member');
+    expect(mocks.setMemberProfile).toHaveBeenCalledWith(completed);
+  });
+
+  it('preserves an established Google profile without bootstrapping it again', async () => {
+    const store = useAuthStore();
+    mocks.loadProfile.mockResolvedValue({ ...profile, username: 'established_member' });
+    await store.resolveProfileIdentity({ ...session, user: { ...session.user, app_metadata: { provider: 'google' } } });
+    expect(mocks.bootstrapProfile).not.toHaveBeenCalled();
+    expect(store.profile.username).toBe('established_member');
+  });
 
   it('releases the SDK auth callback before querying a profile, allowing later remote operations', async () => {
     const store = useAuthStore();

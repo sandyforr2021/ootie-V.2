@@ -35,7 +35,7 @@ const appStore = useAppStore();
 </script>
 
 <style scoped>
-.guest-import-modal {
+:deep(.guest-import-modal) {
   width: min(480px, calc(100vw - 32px));
   padding: 30px;
 }

@@ -121,7 +121,7 @@ onBeforeUnmount(() => { window.clearTimeout(hideTimer); window.removeEventListen
   border: 1px solid rgba(70, 62, 61, .13);
   background:
     linear-gradient(90deg, rgba(255,255,255,.38), transparent 18%, rgba(85,67,61,.06) 50%, transparent 82%, rgba(255,255,255,.32)),
-    #e5e2d6;
+    #eadfd7;
   box-shadow: inset 0 0 0 12px rgba(255,255,255,.18), 0 0 42px rgba(53,45,52,.16);
   backface-visibility: hidden;
   will-change: transform;
@@ -229,6 +229,5 @@ onBeforeUnmount(() => { window.clearTimeout(hideTimer); window.removeEventListen
 @media (prefers-reduced-motion: reduce) {
   .brand-opening { display: none; }
 }
-.brand-opening__door--right{background:var(--accent-lavender-soft)}
 :lang(zh-TW) .brand-opening__eyebrow,:lang(ja) .brand-opening__eyebrow{letter-spacing:.08em;font-size:13px}
 </style>

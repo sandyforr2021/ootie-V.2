@@ -23,3 +23,8 @@ Photorealistic natural fashion editorial for OOTIE, an original fictional adult 
 Built-in imagegen edit of Look 1, saved as `public/images/editorial/portrait-1.png`. Fictional adult; used only to validate YouCam API flow, not real-person color accuracy. The original full-body photo is preserved.
 
 Prompt: Create a companion close-up portrait of the same original fictional adult woman in Look 1. Preserve her identity and natural facial features. Head and shoulders facing straight at camera, both eyes visible, relaxed closed mouth, even diffuse neutral daylight and ivory background. Ivory tee and raspberry blazer. No text, logo, beauty retouch, skin classification, or comparison.
+
+
+## 2026-10-23 Style Crew scenarios
+
+Six built-in ImageGen original PNGs cover office, rain, rail commute, gallery, flower market and coast, with diverse adult fictional characters and distinct poses/backgrounds. Originals are preserved. See STYLE_CREW_COLLECTION.md for provenance, attribution and persisted interaction records. These are not customer photographs or YouCam-generated results.

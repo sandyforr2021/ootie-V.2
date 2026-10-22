@@ -66,7 +66,7 @@
               :disabled="!canFollow(post) || socialStore.pendingProfileIds.includes(post.user_id)"
               @click="toggleFollow(post)"
             >
-              {{ isFollowing(post) ? '已追蹤' : '追蹤' }}
+                {{ $t(isFollowing(post) ? '已追蹤' : '追蹤') }}
             </button>
           </header>
 
@@ -89,7 +89,7 @@
                 :disabled="isInteractionPending(post.id, 'like')"
                 @click="runPostAction(post.id, 'like', () => ootdStore.toggleLike(post.id))"
               >
-                {{ post.liked ? '已喜歡' : '喜歡' }} <span>{{ post.likes }}</span>
+                {{ $t(post.liked ? '已喜歡' : '喜歡') }} <span>{{ post.likes }}</span>
               </button>
               <button
                 class="ootd-action"
@@ -104,7 +104,7 @@
                 :disabled="isInteractionPending(post.id, 'save')"
                 @click="runPostAction(post.id, 'save', () => ootdStore.toggleSave(post.id))"
               >
-                {{ post.saved ? '已收藏' : $t('收藏') }}
+                {{ $t(post.saved ? '已收藏' : '收藏') }} <span v-if="post.saves != null">{{ post.saves }}</span>
               </button>
               <button class="ootd-action" :aria-label="`分享 ${post.username} 的穿搭`" @click="ootdStore.sharePost(post.id)">{{ $t("分享") }}</button>
             </div>
@@ -116,6 +116,7 @@
               @keydown.enter="openPostDetail(post.id)"
             >
               <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
+              <p v-if="post.curated" class="editorial-source">{{ $t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
               <p class="ootd-caption">{{ $t(post.caption) }}</p>
               <div class="ootd-tags">{{ (post.hashtags || []).join('　') }}</div>
             </div>

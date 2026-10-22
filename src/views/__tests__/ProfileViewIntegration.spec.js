@@ -22,6 +22,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
+import * as profileRepository from '@/services/profileRepository';
 
 enableAutoUnmount(afterEach);
 
@@ -37,6 +38,7 @@ const router = createRouter({
 describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
   let pinia;
   beforeEach(async () => {
+    vi.restoreAllMocks();
     ootdMedia.validateOotdImage.mockImplementation((file) => file);
     ootdMedia.uploadOotdImage.mockRejectedValue(Object.assign(new Error('storage unavailable'), {
       userMessage: 'OOTD 圖片儲存空間尚未啟用，暫時無法發布。'
@@ -144,15 +146,31 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
     });
 
     const initialStatus = appStore.profile.public_closet;
+    const save = vi.spyOn(profileRepository, 'updatePublicProfile')
+      .mockImplementation(async (_id, values) => values);
     const switchBtn = wrapper.find('.switch');
 
     await switchBtn.trigger('click');
+    await flushPromises();
     expect(appStore.profile.public_closet).toBe(!initialStatus);
-    expect(appStore.toastMessage).toBe(appStore.profile.public_closet ? '衣櫥已在此裝置設為公開' : '衣櫥已在此裝置設為私人');
-    expect(appStore.toastSyncStatus).toBe('LOCAL_ONLY');
+    expect(save).toHaveBeenCalledWith(useAuthStore().profileId, { public_closet: !initialStatus });
+    expect(appStore.toastSyncStatus).toBe('SYNCED');
 
     await switchBtn.trigger('click');
+    await flushPromises();
     expect(appStore.profile.public_closet).toBe(initialStatus);
+  });
+
+  it('keeps the wardrobe private when the server rejects sharing', async () => {
+    const appStore = useAppStore();
+    appStore.profile.public_closet = false;
+    vi.spyOn(profileRepository, 'updatePublicProfile').mockRejectedValue(new Error('offline'));
+    const wrapper = mount(ProfileView, { global: { plugins: [pinia, router] } });
+    await wrapper.find('.switch').trigger('click');
+    await flushPromises();
+    expect(appStore.profile.public_closet).toBe(false);
+    expect(appStore.toastSyncStatus).toBe('REMOTE_FAILED');
+    expect(wrapper.find('.switch').attributes('disabled')).toBeUndefined();
   });
 
   it('3. OOTD publish failure keeps the draft open and does not create a local-only post', async () => {

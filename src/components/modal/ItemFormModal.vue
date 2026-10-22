@@ -206,11 +206,22 @@
               id="price"
               v-model="form.price"
               type="number"
-              min="0.01"
-              step="0.01"
+              min="0"
+              :step="currencyDigits(form.currency) === 0 ? '1' : '0.01'"
               inputmode="decimal"
               :placeholder="$t(&quot;例如：1280&quot;)"
             />
+          </div>
+
+          <div class="form-field">
+            <label for="purchaseCurrency">{{ $t('購買幣別') }}</label>
+            <select id="purchaseCurrency" v-model="form.currency">
+              <option v-for="currency in CURRENCIES" :key="currency" :value="currency">{{ currency }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="purchaseDate">{{ $t('購買日期') }}</label>
+            <input id="purchaseDate" v-model="form.purchase_date" type="date" />
           </div>
 
           <div class="form-field">
@@ -244,6 +255,8 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onUnmounted } from 'vue';
+import { CURRENCIES, defaultCurrency, currencyDigits, validPurchaseAmount } from '@/services/money';
+import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
 import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
 import { getColorFamilyForPrimaryColor, legacyColorNames } from '@/constants';
@@ -308,6 +321,8 @@ const form = reactive({
   shape: '',
   style: 'Casual',
   price: '',
+  currency: defaultCurrency(),
+  purchase_date: '',
   season: 'All year',
   notes: '',
   photo: ''
@@ -451,6 +466,8 @@ watch(
           shape: item.shape || '',
           style: item.style || 'Casual',
           price: item.price !== null && item.price !== undefined ? item.price : '',
+          currency: item.currency || 'TWD',
+          purchase_date: item.purchase_date || '',
           season: item.season || 'All year',
           notes: item.notes || '',
           photo: item.photo || ''
@@ -467,6 +484,8 @@ watch(
         shape: '',
         style: 'Casual',
         price: '',
+        currency: defaultCurrency(),
+        purchase_date: '',
         season: 'All year',
         notes: '',
         photo: ''
@@ -535,8 +554,8 @@ const handleSubmit = async () => {
   }
   if (form.price !== '' && form.price !== null) {
     const numPrice = Number(form.price);
-    if (!Number.isFinite(numPrice) || numPrice <= 0) {
-      appStore.showToast('購買價格請輸入正數');
+    if (!validPurchaseAmount(numPrice, form.currency)) {
+      appStore.showToast(t('請輸入符合幣別的小數位數及非負金額。'));
       return;
     }
   }
