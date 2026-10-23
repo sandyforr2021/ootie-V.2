@@ -150,7 +150,8 @@ watch(
     selectedItemIds.value = (appStore.ootdDraftItemIds || []).filter(id => remoteClosetItems.value.some(item => item.id === id));
     appStore.ootdDraftItemIds = [];
     imageStatus.value = 'empty';
-  }
+  },
+  { immediate: true }
 );
 
 const handleFileChange = (e) => {

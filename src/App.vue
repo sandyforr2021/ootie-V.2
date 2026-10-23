@@ -27,20 +27,20 @@
   <AppBottomNav />
 
   <!-- Modals -->
-  <AuthModal />
-  <ItemDetailModal />
-  <ItemFormModal />
-  <OotdFormModal />
-  <SosFormModal />
-  <SuggestionModal />
-  <SosDetailModal />
-  <SosCloseConfirmModal />
-  <CommentModal />
-  <ProfileEditModal />
-  <NotificationModal />
-  <LoginGate />
-  <GuestImportPrompt />
-  <OotdShareSheet />
+  <DeferredModal :active="authStore.isAuthModalOpen" :loader="modalLoaders.auth" />
+  <DeferredModal :active="appStore.isDetailOpen" :loader="modalLoaders.itemDetail" />
+  <DeferredModal :active="appStore.isItemFormOpen" :loader="modalLoaders.itemForm" />
+  <DeferredModal :active="appStore.isOotdFormOpen" :loader="modalLoaders.ootdForm" />
+  <DeferredModal :active="appStore.isSosFormOpen" :loader="modalLoaders.sosForm" />
+  <DeferredModal :active="appStore.isSuggestionFormOpen" :loader="modalLoaders.suggestion" />
+  <DeferredModal :active="appStore.isSosDetailOpen" :loader="modalLoaders.sosDetail" />
+  <DeferredModal :active="appStore.isSosCloseConfirmOpen" :loader="modalLoaders.sosClose" />
+  <DeferredModal :active="appStore.isCommentOpen" :loader="modalLoaders.comment" />
+  <DeferredModal :active="appStore.isProfileEditOpen" :loader="modalLoaders.profileEdit" />
+  <DeferredModal :active="appStore.isNotificationOpen" :loader="modalLoaders.notification" />
+  <DeferredModal :active="appStore.isLoginGateOpen" :loader="modalLoaders.loginGate" />
+  <DeferredModal :active="appStore.isGuestImportOpen" :loader="modalLoaders.guestImport" />
+  <DeferredModal :active="Boolean(ootdStore.shareSheetPostId)" :loader="modalLoaders.ootdShare" />
 
   <!-- Toast Message -->
   <BaseToast />
@@ -53,20 +53,29 @@ import AppBottomNav from '@/components/layout/AppBottomNav.vue';
 import BrandOpening from '@/components/layout/BrandOpening.vue';
 import GlobalStatus from '@/components/ui/GlobalStatus.vue';
 
-import AuthModal from '@/components/modal/AuthModal.vue';
-import ItemDetailModal from '@/components/modal/ItemDetailModal.vue';
-import ItemFormModal from '@/components/modal/ItemFormModal.vue';
-import OotdFormModal from '@/components/modal/OotdFormModal.vue';
-import SosFormModal from '@/components/modal/SosFormModal.vue';
-import SuggestionModal from '@/components/modal/SuggestionModal.vue';
-import SosDetailModal from '@/components/modal/SosDetailModal.vue';
-import SosCloseConfirmModal from '@/components/modal/SosCloseConfirmModal.vue';
-import CommentModal from '@/components/modal/CommentModal.vue';
-import ProfileEditModal from '@/components/modal/ProfileEditModal.vue';
-import NotificationModal from '@/components/modal/NotificationModal.vue';
-import LoginGate from '@/components/ui/LoginGate.vue';
-import GuestImportPrompt from '@/components/ui/GuestImportPrompt.vue';
-import OotdShareSheet from '@/components/ootd/OotdShareSheet.vue';
-
+import DeferredModal from '@/components/ui/DeferredModal.vue';
 import BaseToast from '@/components/ui/BaseToast.vue';
+import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useOotdStore } from '@/stores/ootd';
+
+const appStore = useAppStore();
+const authStore = useAuthStore();
+const ootdStore = useOotdStore();
+const modalLoaders = {
+  auth: () => import('@/components/modal/AuthModal.vue'),
+  itemDetail: () => import('@/components/modal/ItemDetailModal.vue'),
+  itemForm: () => import('@/components/modal/ItemFormModal.vue'),
+  ootdForm: () => import('@/components/modal/OotdFormModal.vue'),
+  sosForm: () => import('@/components/modal/SosFormModal.vue'),
+  suggestion: () => import('@/components/modal/SuggestionModal.vue'),
+  sosDetail: () => import('@/components/modal/SosDetailModal.vue'),
+  sosClose: () => import('@/components/modal/SosCloseConfirmModal.vue'),
+  comment: () => import('@/components/modal/CommentModal.vue'),
+  profileEdit: () => import('@/components/modal/ProfileEditModal.vue'),
+  notification: () => import('@/components/modal/NotificationModal.vue'),
+  loginGate: () => import('@/components/ui/LoginGate.vue'),
+  guestImport: () => import('@/components/ui/GuestImportPrompt.vue'),
+  ootdShare: () => import('@/components/ootd/OotdShareSheet.vue')
+};
 </script>

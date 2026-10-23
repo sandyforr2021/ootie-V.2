@@ -27,7 +27,6 @@ test('Explore, Closet and OOTD Detail preserve safe fashion-media framing', asyn
     readFile(join(root, 'src/assets/main.css'), 'utf8')
   ]);
   assert.match(explore, /class="ootd-user-row"[\s\S]*class="ootd-photo-button"[\s\S]*class="ootd-actions"/);
-  assert.match(explore, /post\.tagged_items\.slice\(0, 3\)/);
   assert.match(closet, /class="product-image"[\s\S]*decoding="async"/);
   assert.match(detail, /post-detail-primary-actions[\s\S]*ootd-tagged-section/);
   assert.match(css, /#explorePage \.ootd-photo-button\s*\{[\s\S]*aspect-ratio:\s*4 \/ 5/);

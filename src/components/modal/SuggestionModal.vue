@@ -108,7 +108,8 @@ watch(
     if (!open) return;
     selectedIds.value = [];
     message.value = '';
-  }
+  },
+  { immediate: true }
 );
 
 const close = () => {
