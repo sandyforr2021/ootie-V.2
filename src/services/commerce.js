@@ -2,12 +2,12 @@ import { AiGatewayError } from './aiGateway';
 import { colorHexValues } from '@/constants';
 
 export function createCommerceClient({ baseUrl = import.meta.env.VITE_OOTIE_AI_GATEWAY_URL, fetchImpl = fetch } = {}) {
-  const request = async (path, token, body) => {
+  const request = async (path, token, body, options = {}) => {
     if (!baseUrl) throw new AiGatewayError('GATEWAY_NOT_CONFIGURED', '購物服務尚未連線，請稍後再試。');
     let response;
     try {
       response = await fetchImpl(`${String(baseUrl).replace(/\/$/, '')}/v1/shop/${path}`, {
-        method: body ? 'POST' : 'GET', signal: AbortSignal.timeout(30000),
+        method: options.method || (body ? 'POST' : 'GET'), signal: AbortSignal.timeout(30000),
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
         ...(body ? { body: JSON.stringify(body) } : {})
       });
@@ -25,6 +25,8 @@ export function safeCommerceUrl(value) {
 }
 
 export function colorHsl(hex) {
+  const hsl = /^hsl\(\s*(-?[\d.]+)(?:deg)?\s+([\d.]+)%\s+([\d.]+)%\s*\)$/i.exec(hex || '');
+  if (hsl) return { h: ((Number(hsl[1]) % 360) + 360) % 360, s: Number(hsl[2]) / 100, l: Number(hsl[3]) / 100 };
   if (!/^#[\da-f]{6}$/i.test(hex || '')) return null;
   const rgb = [1,3,5].map((i) => parseInt(hex.slice(i,i+2),16)/255);
   const [r,g,b] = rgb; const max = Math.max(...rgb); const min = Math.min(...rgb); const d = max-min;
@@ -43,8 +45,9 @@ export function categoryFamily(value) {
   return 'accessory';
 }
 
-export function wardrobeMatches(product, items, profileId) {
+export function wardrobeMatches(product, items, profileId, { palette = [] } = {}) {
   const main = colorHsl(product.color);
+  const inspirationColors = palette.map((entry) => colorHsl(entry.color)).filter(Boolean);
   return items.filter((item) => item.owner_id === profileId && !item.hidden && item.id !== product.closet_item_id)
     .filter((item) => {
       const family = categoryFamily(item.category);
@@ -55,7 +58,11 @@ export function wardrobeMatches(product, items, profileId) {
       const distance = main && color ? Math.min(Math.abs(main.h-color.h),360-Math.abs(main.h-color.h)) : null;
       const similar = distance !== null && distance < 40;
       const contrast = distance !== null && distance > 140;
-      return { item, score: neutral ? 3 : similar || contrast ? 2 : 1, reason: neutral ? 'neutral' : similar ? 'tonal' : contrast ? 'contrast' : 'category' };
+      const personal = !!color && inspirationColors.some((suggestion) => {
+        const hueDistance = Math.min(Math.abs(suggestion.h - color.h), 360 - Math.abs(suggestion.h - color.h));
+        return hueDistance < 35 && Math.abs(suggestion.l - color.l) < 0.28;
+      });
+      return { item, score: personal ? 4 : neutral ? 3 : similar || contrast ? 2 : 1, reason: personal ? 'personal' : neutral ? 'neutral' : similar ? 'tonal' : contrast ? 'contrast' : 'category' };
     }).sort((a,b) => b.score-a.score || String(a.item.id).localeCompare(String(b.item.id))).slice(0,3);
 }
 

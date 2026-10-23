@@ -5,18 +5,18 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { setLocale } from '@/i18n';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), credits: 100, products: [] }));
+const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, products: [], jobs: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
-  aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ path: 'person/unit/photo.jpg' }] })), loadPrivateImage: vi.fn(async () => 'blob:unit-only') }
+  aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ id: 'photo-unit', path: 'person/unit/photo.jpg' }] })), deletePersonPhoto: fixture.deletePhoto, loadPrivateImage: vi.fn(async () => 'blob:unit-only') }
 }));
 vi.mock('@/stores/closet', () => ({ useClosetStore: () => ({ loadRemoteItems: vi.fn() }) }));
 import ShopView from '../ShopView.vue';
 let wrapper;
-async function render() {
+async function render(path = '/shop?quick=add-product') {
   const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/shop', component: ShopView }] });
-  await router.push('/shop');
+  await router.push(path);
   wrapper = mount(ShopView, { global: { plugins: [router] } });
   await flushPromises();
   return wrapper;
@@ -28,21 +28,28 @@ async function selectPiece() {
 }
 describe('Shopping studio workflow', () => {
   beforeEach(() => {
-    localStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
+    localStorage.clear(); sessionStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
     const auth = useAuthStore();
     auth.session = { access_token: 'unit-only', user: { id: 'user-unit' } }; auth.user = auth.session.user;
     auth.profileIdentity = { status: 'PROFILE_READY', profileId: 'profile-unit', profile: { id: 'profile-unit' } };
     fixture.credits = 100;
+    fixture.jobs = [];
     fixture.products = [{ id: 'product-unit', title: 'Cotton shirt', state: 'wishlist', image_path: 'products/unit.jpg' }];
     fixture.request.mockReset().mockImplementation(async (path, token, body) => {
       if (path === 'products') return body ? { product: { ...fixture.products[0], id: 'new-product', title: body.title } } : { products: fixture.products };
       if (path === 'capabilities') return { enabled: true, remainingUnits: fixture.credits, costs: { try_on: 2, skin_tone: 20 } };
-      if (path === 'jobs') return { jobs: [] };
+      if (path === 'jobs') return { jobs: fixture.jobs };
       if (path === 'posts') return { posts: [] };
       return {};
     });
   });
-  afterEach(() => wrapper?.unmount());
+  afterEach(() => { wrapper?.unmount(); vi.restoreAllMocks(); });
+  it('opens existing products on the shortlist and offers seeded results', async () => {
+    fixture.jobs = [{ id: 'job-unit', batch_id: 'batch-old', kind: 'try_on', status: 'succeeded', product_id: 'product-unit', person_path: 'person/unit/photo.jpg', product_path: 'products/unit.jpg', result_path: 'results/unit.jpg', created_at: new Date().toISOString() }];
+    await render('/shop');
+    expect(wrapper.find('.studio-shortlist').exists()).toBe(true);
+    expect(wrapper.text()).toContain('查看範例成果與試穿相簿');
+  });
   it('opens the photo step without a product but never permits an empty try-on batch', async () => {
     await render();
     await wrapper.findAll('.studio-steps button')[2].trigger('click');
@@ -90,5 +97,14 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.studio-shortlist').exists()).toBe(true);
     expect(wrapper.find('.shop-product.selected h3').text()).toBe('Linen shirt');
     expect(fixture.request.mock.calls.filter(([path,,body]) => path === 'jobs' && body)).toEqual([]);
+  });
+  it('lets a member remove a person photo from the current studio flow', async () => {
+    fixture.deletePhoto.mockResolvedValue({ id: 'photo-unit', path: 'person/unit/photo.jpg' });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await render('/shop');
+    await wrapper.findAll('.studio-steps button')[2].trigger('click');
+    await wrapper.find('.shop-photo-delete').trigger('click');
+    await flushPromises();
+    expect(fixture.deletePhoto).toHaveBeenCalledWith('unit-only', 'photo-unit');
   });
 });

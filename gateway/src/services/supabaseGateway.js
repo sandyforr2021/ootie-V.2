@@ -40,12 +40,18 @@ export class SupabaseGateway {
     }
     const body = await parseResponseBody(response);
     if (!response.ok) {
-      const commerceCodes = ['FREE_BUDGET_EXHAUSTED','BATCH_CONFLICT','PRODUCT_NOT_OWNED','INVALID_BATCH','PERSON_IMAGE_NOT_OWNED'];
+      const commerceCodes = ['FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT',
+        'BATCH_CONFLICT','PRODUCT_NOT_OWNED','INVALID_BATCH','PERSON_IMAGE_NOT_OWNED','PERSON_IMAGE_IN_USE','PERSON_IMAGE_DELETING'];
       const commerceCode = commerceCodes.find((code) => body?.message === code);
-      if (commerceCode) throw new GatewayError(commerceCode, commerceCode === 'FREE_BUDGET_EXHAUSTED' ? 429 : 409, {
+      if (commerceCode) throw new GatewayError(commerceCode, ['FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT'].includes(commerceCode) ? 429 : 409, {
         FREE_BUDGET_EXHAUSTED: '可用免費額度不足或已到期，本次沒有送出生成。',
+        REVIEWER_RESERVE_PROTECTED: '這些點數已保留給評審使用，本次沒有送出生成。',
+        USER_DAILY_LIMIT: '已達今日試穿額度上限，請明天再試。',
+        USER_ACTIVE_LIMIT: '目前有太多等待中的工作，完成或核對後再提交。',
         BATCH_CONFLICT: '此提交編號已使用，請重新選擇商品。',
-        PRODUCT_NOT_OWNED: '請選擇自己收藏的商品。'
+        PRODUCT_NOT_OWNED: '請選擇自己收藏的商品。',
+        PERSON_IMAGE_IN_USE: '這張照片仍被等待中或待核對的工作使用，完成後再刪除。',
+        PERSON_IMAGE_DELETING: '照片正在刪除，請稍後重新整理再試。'
       }[commerceCode] || '請重新確認照片與商品。');
       throw new GatewayError('SUPABASE_ERROR', 502, 'Supabase operation failed', {
         status: response.status,
@@ -256,6 +262,18 @@ export class SupabaseGateway {
     });
     return target;
   }
+
+  async deleteObject(bucket, path) {
+    assert(/^[a-z0-9-]+$/.test(bucket) && typeof path === 'string'
+      && path.split('/').every((part) => part && part !== '.' && part !== '..' && !/[%\\?#]/.test(part)),
+    'INVALID_STORAGE_PATH', 400, 'Storage path is invalid');
+    return this.serviceRequest(`/storage/v1/object/${encodeURIComponent(bucket)}`, {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prefixes: [path] })
+    });
+  }
+
+  deletePrivate(path) { return this.deleteObject(this.bucket, path); }
 
   storagePathFromSupabaseUrl(value) {
     let url;

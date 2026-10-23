@@ -12,6 +12,8 @@ export class YouCamClient {
     this.download = download;
     this.freeCreditExpiry = freeCreditExpiry;
     this.now = now;
+    this.balanceCache = null;
+    this.balanceCacheAt = 0;
   }
 
   async request(path, body, version = 'v2.0') {
@@ -45,6 +47,14 @@ export class YouCamClient {
       .reduce((total, credit) => total + (Number.isFinite(credit.amount_dec) && credit.amount_dec > 0 ? credit.amount_dec : 0), 0);
   }
 
+  async balanceSnapshot(maxAgeMs = 30000) {
+    if (this.balanceCache !== null && this.now() - this.balanceCacheAt < maxAgeMs) return this.balanceCache;
+    const balance = await this.freeBalance();
+    this.balanceCache = balance;
+    this.balanceCacheAt = this.now();
+    return balance;
+  }
+
   async verifyCost(kind) {
     const feature = YOUCAM_FEATURES[kind];
     let token;
@@ -66,10 +76,10 @@ export class YouCamClient {
     throw new GatewayError('YOUCAM_COST_CHANGED', 503, '無法確認這項功能的點數。');
   }
 
-  async preflight(kind) {
+  async preflight(kind, reviewerReserveUnits = 0) {
     try {
       const [balance, units] = await Promise.all([this.freeBalance(), this.verifyCost(kind)]);
-      if (balance < units) throw new GatewayError('YOUCAM_FREE_CREDITS_UNAVAILABLE', 503, '免費贈點餘額不足，沒有送出產圖。');
+      if (balance < units + Math.max(0, Number(reviewerReserveUnits) || 0)) throw new GatewayError('YOUCAM_FREE_CREDITS_UNAVAILABLE', 503, '保留評審額度後的可用點數不足，沒有送出產圖。');
       return { balance, units };
     } catch (error) {
       // Explicitly distinguish a failed GET preflight from an uncertain task POST.
@@ -96,7 +106,7 @@ export class YouCamClient {
   async submit(job, sourceId, referenceId) {
     const feature = YOUCAM_FEATURES[job.kind];
     if (!feature) throw new GatewayError('INVALID_JOB_KIND', 400);
-    await this.preflight(job.kind);
+    await this.preflight(job.kind, job.is_reviewer ? 0 : job.reviewer_reserve_units);
     const body = job.kind === 'skin_tone'
       ? { src_file_id: sourceId, face_angle_strictness_level: 'high' }
       : { src_file_id: sourceId, ref_file_id: referenceId, garment_category: job.garment_category, change_shoes: false };

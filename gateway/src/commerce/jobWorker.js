@@ -23,13 +23,13 @@ export class CommerceJobWorker {
         await update({ status: 'submitting' });
         submitting = true;
         const taskId = await this.provider.submit(job, src, ref);
-        await update({ status: 'processing', provider_task_id: taskId, lease_token: null, lease_until: null, next_poll_at: new Date(+this.now() + 10000).toISOString() });
+        await update({ status: 'processing', credit_state: 'submitted', provider_task_id: taskId, lease_token: null, lease_until: null, next_poll_at: new Date(+this.now() + 10000).toISOString() });
         return true;
       }
       const result = await this.provider.poll(job);
       if (result?.task_status === 'error') {
         const noFace = /no face was detected/i.test(String(result.error_message || result.error || ''));
-        await update({ status: 'failed', error_code: noFace ? 'YOUCAM_FACE_NOT_DETECTED' : 'YOUCAM_TASK_FAILED', completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
+        await update({ status: 'failed', credit_state: 'uncertain', error_code: noFace ? 'YOUCAM_FACE_NOT_DETECTED' : 'YOUCAM_TASK_FAILED', completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
       } else if (result?.task_status === 'success') {
         let resultPath = null;
         let resultData = null;
@@ -42,7 +42,7 @@ export class CommerceJobWorker {
           if (!/^#[\da-f]{6}$/i.test(colors?.skin_color || '')) throw new Error('Invalid skin-tone result');
           resultData = Object.fromEntries(['skin_color','hair_color','eye_color','lip_color','eyebrow_color'].filter((key) => /^#[\da-f]{6}$/i.test(colors[key] || '')).map((key) => [key, colors[key]]));
         }
-        await update({ status: 'succeeded', result_path: resultPath, result_data: resultData, completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
+        await update({ status: 'succeeded', credit_state: 'consumed', result_path: resultPath, result_data: resultData, completed_at: this.now().toISOString(), lease_token: null, lease_until: null });
       } else {
         if (!['running','pending','queued'].includes(result?.task_status)) throw new Error('Unknown task state');
         if (+this.now() - Date.parse(job.created_at) > 86400000) throw new Error('Task exceeded review window');
@@ -50,16 +50,22 @@ export class CommerceJobWorker {
       }
     } catch (error) {
       if (submitting && error?.requestNotSent === true) {
-        await update({ status: 'failed', error_code: error.code, completed_at: this.now().toISOString(), lease_token: null, lease_until: null }).catch(() => {});
+        const code = error.code || 'PREFLIGHT_FAILED';
+        await update({ error_code: code }).catch(() => {});
+        await this.repository.releaseReservation(job.id, lease, code)
+          .catch(() => this.repository.releaseReservation(job.id, lease, code).catch(() => {}));
       } else if (submitting) {
         // Includes task-ID persistence failures: never submit this job again.
-        await update({ status: 'needs_review', error_code: 'SUBMISSION_UNCERTAIN', lease_token: null, lease_until: null }).catch(() => {});
+        await update({ status: 'needs_review', credit_state: 'uncertain', error_code: 'SUBMISSION_UNCERTAIN', lease_token: null, lease_until: null }).catch(() => {});
       } else if (job.provider_task_id) {
         const failures = job.poll_errors + 1;
         await update({ status: failures >= 20 ? 'needs_review' : 'processing', error_code: 'RESULT_CHECK_PENDING', poll_errors: failures,
           next_poll_at: new Date(+this.now() + Math.min(60000, failures * 10000)).toISOString(), lease_token: null, lease_until: null }).catch(() => {});
       } else {
-        await update({ status: 'failed', error_code: error?.code || 'IMAGE_PREPARATION_FAILED', completed_at: this.now().toISOString(), lease_token: null, lease_until: null }).catch(() => {});
+        const code = error?.code || 'IMAGE_PREPARATION_FAILED';
+        await update({ error_code: code }).catch(() => {});
+        await this.repository.releaseReservation(job.id, lease, code)
+          .catch(() => this.repository.releaseReservation(job.id, lease, code).catch(() => {}));
       }
     }
     return true;

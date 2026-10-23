@@ -9,6 +9,7 @@ config.global.config = { ...(config.global.config || {}), globalProperties: { $t
 vi.stubEnv('VITE_SUPABASE_URL', 'https://unit-test.supabase.co');
 vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-only-public-key');
 vi.stubEnv('VITE_OOTIE_SUPABASE_PROJECT_REF', 'unit-test');
+if (typeof window.confirm !== 'function') window.confirm = vi.fn(() => false);
 
 config.global.directives = {
   ...(config.global.directives || {}),

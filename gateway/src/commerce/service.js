@@ -11,14 +11,28 @@ const validPath = (path, prefix) => typeof path === 'string' && path.startsWith(
 const categories = new Set(['upper_body','lower_body','full_body','shoes','auto']);
 
 export class CommerceService {
-  constructor({ repository, storage, enabled = false, download = safeDownload }) {
-    this.repository = repository; this.storage = storage; this.enabled = enabled; this.download = download;
+  constructor({ repository, storage, provider, enabled = false, reviewerUserIds = [], download = safeDownload }) {
+    this.repository = repository; this.storage = storage; this.provider = provider; this.enabled = enabled;
+    this.reviewerUserIds = new Set(reviewerUserIds); this.download = download;
   }
-  async capabilities() {
-    const budget = await this.repository.budget();
-    const remaining = Math.max(0, (budget?.unit_limit || 0) - (budget?.allocated_units || 0));
+  async capabilities(user) {
+    const [budget, quota, providerBalance] = await Promise.all([
+      this.repository.budget(),
+      user ? this.repository.userQuota(user.id) : null,
+      this.provider?.balanceSnapshot ? this.provider.balanceSnapshot().catch(() => null) : null
+    ]);
+    const isReviewer = !!user && this.reviewerUserIds.has(user.id);
+    const dbRemaining = Math.max(0, (budget?.unit_limit || 0) - (budget?.allocated_units || 0));
+    const reserve = isReviewer ? 0 : Number(budget?.reviewer_reserve_units || 0);
+    const quotaRemaining = Math.max(0, Number(quota?.dailyLimit || 0) - Number(quota?.dailyUsed || 0));
+    const underConcurrencyLimit = Number(quota?.activeCount || 0) < Number(quota?.activeLimit || 0);
+    const providerRemaining = providerBalance === null ? 0 : Math.max(0, providerBalance - reserve);
+    const remaining = Math.min(Math.max(0, dbRemaining - reserve), providerRemaining, quotaRemaining);
     const active = !!budget?.expires_at && Date.parse(budget.expires_at) > Date.now();
-    return { enabled: this.enabled && active && remaining >= 2, remainingUnits: active ? remaining : 0,
+    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= 2,
+      remainingUnits: active && underConcurrencyLimit ? remaining : 0, dailyRemainingUnits: quotaRemaining,
+      activeJobs: Number(quota?.activeCount || 0), activeJobLimit: Number(quota?.activeLimit || 0),
+      providerBalance, balanceVerified: providerBalance !== null, reviewerReserveUnits: Number(budget?.reviewer_reserve_units || 0),
       costs: { try_on: 2, skin_tone: 20 }, expiresAt: budget?.expires_at || null, provider: 'youcam', automaticTopUp: false };
   }
   async withPublicAuthors(posts) {
@@ -69,7 +83,7 @@ export class CommerceService {
       && (body.kind === 'try_on' ? ids.length >= 1 && ids.length <= 3 : ids.length === 0), 'INVALID_BATCH', 400, '每批請選擇 1–3 件不同商品。');
     // Validate existence before reserving any credits. Ownership is checked again in SQL.
     await this.storage.downloadPrivate(body.personPath);
-    return this.repository.rpc('enqueue_ootie_youcam', { p_batch_id: body.batchId, p_user_id: user.id, p_person_path: body.personPath, p_product_ids: ids, p_kind: body.kind });
+    return this.repository.rpc('enqueue_ootie_youcam', { p_batch_id: body.batchId, p_user_id: user.id, p_person_path: body.personPath, p_product_ids: ids, p_kind: body.kind, p_is_reviewer: this.reviewerUserIds.has(user.id) });
   }
   async privateImage(user, path) {
     assert(validPath(path, `shop/${user.id}/`), 'PRIVATE_IMAGE_NOT_OWNED', 403, '無法讀取其他人的商品圖片。');
@@ -87,6 +101,39 @@ export class CommerceService {
     const cancelled = await this.repository.rpc('cancel_ootie_youcam_job', { p_id: id, p_user_id: user.id });
     assert(cancelled, 'JOB_ALREADY_STARTED', 409, '工作已開始，請等待結果。');
     return { cancelled };
+  }
+  async deletePersonPhoto(user, photoId) {
+    const photos = await this.storage.listPersonPhotos(user.id);
+    const target = photos.find((photo) => photo.id === photoId);
+    assert(target, 'PERSON_IMAGE_NOT_FOUND', 404, '找不到這張人物照片。');
+    const lease = randomUUID();
+    await this.repository.beginPhotoDeletion(user.id, target.path, lease);
+    try {
+      return await this.storage.deletePersonPhoto(user.id, photoId);
+    } finally {
+      await this.repository.finishPhotoDeletion(user.id, target.path, lease).catch(() => {});
+    }
+  }
+  async retract(user, id) {
+    assert(isUuid(id), 'INVALID_POST', 400);
+    const post = await this.repository.ownedPost(id, user.id);
+    assert(post, 'POST_NOT_FOUND', 404, '找不到你發布的分享。');
+    await this.storage.deleteObject('ootie-shop-shares', `${user.id}/${post.job_id}.jpg`);
+    const removed = await this.repository.removePost(id, user.id);
+    assert(removed === true, 'POST_NOT_FOUND', 404, '分享已撤回或不存在。');
+    return { retracted: true };
+  }
+  async deleteResult(user, id) {
+    assert(isUuid(id), 'INVALID_JOB', 400);
+    const job = await this.repository.job(id, user.id);
+    assert(job, 'JOB_NOT_FOUND', 404, '找不到這筆工作。');
+    assert(!['queued','preparing','submitting','processing'].includes(job.status), 'JOB_STILL_ACTIVE', 409, '工作完成或核對後才能刪除結果。');
+    const post = await this.repository.ownedPost(job.id, user.id);
+    if (post) await this.storage.deleteObject('ootie-shop-shares', `${user.id}/${post.job_id}.jpg`);
+    const removed = await this.repository.removeJobResult(id, user.id);
+    assert(removed === true, 'JOB_NOT_FOUND', 404, '找不到可刪除的結果。');
+    if (job.result_path) await this.storage.deletePrivate(job.result_path);
+    return { deleted: true };
   }
   async publish(user, body) {
     assert(isUuid(body?.jobId) && body?.consent === true, 'SHARE_CONSENT_REQUIRED', 400, '請確認公開分享這張試穿結果。');

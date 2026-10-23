@@ -7,7 +7,7 @@ import { isPublicAddress, publicHttpUrl, safeDownload } from '../src/commerce/sa
 function workerFixture(overrides={}) {
   const job={id:'job',user_id:'owner',kind:'try_on',person_path:'person/owner/a.jpg',product_path:'shop/owner/b.jpg',status:'preparing',poll_errors:0,created_at:new Date().toISOString(),...overrides};
   const calls=[];
-  const repository={claim:async()=>['preparing','processing'].includes(job.status)?job:null,updateJob:async(_id,_lease,patch)=>{calls.push(['update',patch]);Object.assign(job,patch);}};
+  const repository={claim:async()=>['preparing','processing'].includes(job.status)?job:null,updateJob:async(_id,_lease,patch)=>{calls.push(['update',patch]);Object.assign(job,patch);},releaseReservation:async(_id,_lease,code)=>{calls.push(['release',code]);Object.assign(job,{status:'failed',credit_state:'released',error_code:code});return true;}};
   const storage={downloadPrivate:async()=>({buffer:Buffer.from('image'),mimeType:'image/jpeg'}),uploadPrivate:async(path)=>calls.push(['save',path])};
   const provider={upload:async(_image,name)=>name,submit:async()=>{calls.push(['submit']);return 'task';},poll:async()=>({task_status:'success',results:{url:'https://image.example/result.jpg'}}),resultImage:async()=>({buffer:Buffer.from('result'),mimeType:'image/jpeg'})};
   return {job,calls,repository,storage,provider,worker:new CommerceJobWorker({repository,storage,provider})};
@@ -21,6 +21,12 @@ test('worker stores task ID and saves results before reporting success; polling 
 test('uncertain paid POST moves to review and cannot automatically submit twice',async()=>{
   const f=workerFixture();let attempts=0;f.provider.submit=async()=>{attempts++;throw new Error('timeout after acceptance');};
   await f.worker.tick();await f.worker.tick();assert.equal(f.job.status,'needs_review');assert.equal(attempts,1);
+});
+test('a preflight failure releases its reservation without retrying the provider task',async()=>{
+  const f=workerFixture();f.provider.submit=async()=>{const error=new Error('no verified credits');error.code='YOUCAM_FREE_CREDITS_UNAVAILABLE';error.requestNotSent=true;throw error;};
+  await f.worker.tick();
+  assert.equal(f.job.status,'failed');assert.equal(f.job.credit_state,'released');
+  assert.equal(f.calls.filter(c=>c[0]==='release').length,1);
 });
 test('storage failure retries existing result without generating another image',async()=>{
   const f=workerFixture({provider_task_id:'existing-task',status:'processing'});let uploads=0;

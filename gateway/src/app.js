@@ -51,7 +51,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
       if (commerceService && path.startsWith('/v1/shop/')) {
         const user = identity.user;
         const repo = commerceService.repository;
-        if (method === 'GET' && path === '/v1/shop/capabilities') return ok(await commerceService.capabilities());
+        if (method === 'GET' && path === '/v1/shop/capabilities') return ok(await commerceService.capabilities(user));
         if (method === 'GET' && path === '/v1/shop/products') return ok({ products: await repo.listProducts(user.id) });
         if (method === 'GET' && path === '/v1/shop/jobs') return ok({ jobs: await repo.listJobs(user.id) });
         if (method === 'GET' && path === '/v1/shop/metrics') return ok(await commerceService.metrics(user));
@@ -60,6 +60,10 @@ export function createGatewayApp({ config, supabase, provider, generationService
         if (method === 'POST' && path === '/v1/shop/jobs') return ok({ jobs: await commerceService.enqueue(user, body) }, 202);
         if (method === 'POST' && path === '/v1/shop/posts') return ok({ post: await commerceService.publish(user, body) }, 201);
         if (method === 'POST' && path === '/v1/shop/events') return ok(await commerceService.recordEvent(user, body));
+        const deleteResult = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/result$/i.exec(path);
+        if (method === 'DELETE' && deleteResult) return ok(await commerceService.deleteResult(user, deleteResult[1]));
+        const deletePost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
+        if (method === 'DELETE' && deletePost) return ok(await commerceService.retract(user, deletePost[1]));
         const product = /^\/v1\/shop\/products\/([\da-f-]{36})\/state$/i.exec(path);
         if (method === 'POST' && product) return ok({ product: await commerceService.updateProduct(user, product[1], body) });
         const cancel = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/cancel$/i.exec(path);
@@ -120,7 +124,9 @@ export function createGatewayApp({ config, supabase, provider, generationService
         return {
           status: 200,
           headers: { ...JSON_HEADERS, ...corsHeaders },
-          body: await generationService.deletePersonPhoto(identity.user, photoId)
+          body: commerceService
+            ? await commerceService.deletePersonPhoto(identity.user, photoId)
+            : await generationService.deletePersonPhoto(identity.user, photoId)
         };
       }
       if (method === 'GET' && path === '/v1/generations') {
