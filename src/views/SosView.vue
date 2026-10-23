@@ -100,7 +100,8 @@
 
           <div class="sos-card-footer">
             <span class="sos-available">
-              {{ tf('{count} 件公開衣物 · {helpers} 位衣友建議', { count: (post.closet_item_ids || []).length, helpers: sosStore.getHelperCountForSos(post.id) }) }}
+              <template v-if="authStore.isMember">{{ tf('{count} 件公開衣物 · {helpers} 位衣友建議', { count: (post.closet_item_ids || []).length, helpers: sosStore.getHelperCountForSos(post.id) }) }}</template>
+              <template v-else>{{ tf('{count} 件公開衣物 · 登入查看搭配建議', { count: (post.closet_item_ids || []).length }) }}</template>
             </span>
 
             <div class="sos-card-actions">
@@ -152,9 +153,11 @@ import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
+import { useAuthStore } from '@/stores/auth';
 
 const appStore = useAppStore();
 const sosStore = useSosStore();
+const authStore = useAuthStore();
 const route = useRoute();
 
 const getPublicItemThumbs = (post) => sosStore.getPublicItemsForSos(post);
