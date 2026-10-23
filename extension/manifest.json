@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "OOTIE — Shopping Companion",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Review a product from the current page and bring it into your OOTIE shopping studio.",
   "permissions": [
     "activeTab",

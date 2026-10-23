@@ -2,11 +2,12 @@ import { supabase } from './supabase';
 
 export async function listPostComments(postId, client = supabase) {
   const { data, error } = await client.from('ootie_post_comments')
-    .select('id,post_id,profile_id,body,created_at,ootie_profiles!ootie_post_comments_profile_id_fkey(username,initials)')
+    .select('id,post_id,profile_id,body,created_at,ootie_profiles!ootie_post_comments_profile_id_fkey(username,display_name,initials,avatar_url)')
     .eq('post_id', postId).order('created_at', {ascending:true});
   if (error) throw error;
   return (data || []).map(row => ({id:row.id, profile_id:row.profile_id, text:row.body,
-    user:row.ootie_profiles?.username || 'OOTIE', created_at:row.created_at}));
+    user:row.ootie_profiles?.username || 'OOTIE', display_name:row.ootie_profiles?.display_name || '',
+    avatar_url:row.ootie_profiles?.avatar_url || '', created_at:row.created_at}));
 }
 export async function insertPostComment({id, postId, profileId, text}, client = supabase) {
   const body = String(text || '').trim();

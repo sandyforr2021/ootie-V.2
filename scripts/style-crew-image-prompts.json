@@ -1,0 +1,380 @@
+[
+  {
+    "key": "office-01",
+    "image": "/images/style-crew/office-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of an emerald green softly structured blazer, creased sleeves, on a wooden hanger against a warm apartment door. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "garment"
+  },
+  {
+    "key": "office-02",
+    "image": "/images/style-crew/office-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a lilac fine knit crew neck top loosely spread on an oatmeal bedspread, slightly diagonal smartphone view. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "garment"
+  },
+  {
+    "key": "office-03",
+    "image": "/images/style-crew/office-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of ivory wide leg trousers folded at one ankle on a honey oak floor, casual overhead phone photo. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "garment"
+  },
+  {
+    "key": "office-avatar",
+    "image": "/images/style-crew/office-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "office-story-1",
+    "image": "/images/style-crew/office-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman in her early thirties with auburn bob hair, emerald blazer and ivory trousers, laughing while seated on an outdoor cafe chair, side view, warm Copenhagen street. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "story"
+  },
+  {
+    "key": "office-story-2",
+    "image": "/images/style-crew/office-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman in her early thirties with auburn bob hair, lilac knit top and ivory wide leg trousers, walking down a colorful bookstore aisle holding a book, full body candid. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-office.png",
+    "kind": "story"
+  },
+  {
+    "key": "rain-01",
+    "image": "/images/style-crew/rain-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a cobalt blue raincoat on a metal hanger on a hallway hook, pale grey wall, rainy window light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "garment"
+  },
+  {
+    "key": "rain-02",
+    "image": "/images/style-crew/rain-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a cream knit sweater with navy horizontal stripes laid casually on a blue checked duvet, rippled fabric. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "garment"
+  },
+  {
+    "key": "rain-03",
+    "image": "/images/style-crew/rain-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of faded blue wide leg jeans laid on a small woven rug, off-axis phone photo, natural wear creases. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "garment"
+  },
+  {
+    "key": "rain-04",
+    "image": "/images/style-crew/rain-04.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of burgundy leather ankle boots angled beside a wooden shoe rack, soft overcast light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "garment"
+  },
+  {
+    "key": "rain-avatar",
+    "image": "/images/style-crew/rain-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "rain-story-1",
+    "image": "/images/style-crew/rain-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman in her thirties with short curly brown hair, cobalt raincoat and blue jeans, leaning slightly to inspect a flower stand under a clear umbrella in Paris, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "story"
+  },
+  {
+    "key": "rain-story-2",
+    "image": "/images/style-crew/rain-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman in her thirties with short curly brown hair, navy striped tee and burgundy boots with denim, crouching gently beside a canal to photograph the view, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-rain.png",
+    "kind": "story"
+  },
+  {
+    "key": "train-01",
+    "image": "/images/style-crew/train-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a coral red knit cardigan draped over a light wood chair, a small Japanese apartment, honest knit texture. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "garment"
+  },
+  {
+    "key": "train-02",
+    "image": "/images/style-crew/train-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a cream cotton crew neck tee laid on a tatami mat, slight fabric wrinkles, angled overhead phone shot. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "garment"
+  },
+  {
+    "key": "train-03",
+    "image": "/images/style-crew/train-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of charcoal relaxed trousers on a plastic hanger against a sliding closet door, morning light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "garment"
+  },
+  {
+    "key": "train-04",
+    "image": "/images/style-crew/train-04.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a teal canvas tote hanging from a chair corner, visible soft fabric folds, a lived in room. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "garment"
+  },
+  {
+    "key": "train-05",
+    "image": "/images/style-crew/train-05.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of worn white low top sneakers on a tiled entryway floor, shot obliquely on a phone. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "garment"
+  },
+  {
+    "key": "train-avatar",
+    "image": "/images/style-crew/train-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "train-story-1",
+    "image": "/images/style-crew/train-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of Petite East Asian Japanese woman in her twenties with straight shoulder length dark hair, coral cardigan and charcoal trousers, seated sideways on a sunny cafe terrace with a teal tote. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "story"
+  },
+  {
+    "key": "train-story-2",
+    "image": "/images/style-crew/train-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of Petite East Asian Japanese woman in her twenties with straight shoulder length dark hair, cream tee and charcoal trousers, stretching her arms on a leafy riverside path, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-train.png",
+    "kind": "story"
+  },
+  {
+    "key": "gallery-01",
+    "image": "/images/style-crew/gallery-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a lilac cotton overshirt casually hung on a black hanger against a light blue bedroom wall. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-02",
+    "image": "/images/style-crew/gallery-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a white crew neck t-shirt on a rumpled grey bedspread, off centre but completely in frame. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-03",
+    "image": "/images/style-crew/gallery-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of olive green chinos laid diagonally on a parquet floor, creased knees and cuffs. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-04",
+    "image": "/images/style-crew/gallery-04.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of cream leather trainers photographed beside a dark wood bench, slight signs of use. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-05",
+    "image": "/images/style-crew/gallery-05.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a navy canvas baseball cap on a wooden desk, soft afternoon window light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-06",
+    "image": "/images/style-crew/gallery-06.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a small sand colored canvas crossbody bag hanging on a coat peg, imperfect casual composition. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "garment"
+  },
+  {
+    "key": "gallery-avatar",
+    "image": "/images/style-crew/gallery-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "gallery-story-1",
+    "image": "/images/style-crew/gallery-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of East Asian Taiwanese man in his late twenties with wavy dark hair and round wire glasses, lilac overshirt and olive chinos, seated on a museum courtyard bench sketching, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "story"
+  },
+  {
+    "key": "gallery-story-2",
+    "image": "/images/style-crew/gallery-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of East Asian Taiwanese man in his late twenties with wavy dark hair and round wire glasses, white crew neck tee and olive chinos, walking up a brick city stairway carrying a sand canvas crossbody, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-gallery.png",
+    "kind": "story"
+  },
+  {
+    "key": "market-01",
+    "image": "/images/style-crew/market-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a sunshine yellow cotton wrap dress on a wooden hanger against a terracotta painted door, entire dress visible. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-02",
+    "image": "/images/style-crew/market-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a lavender chunky cardigan draped on a wicker chair, creased sleeves and soft sunlight. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-03",
+    "image": "/images/style-crew/market-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a natural woven market tote on warm stone floor, top down handheld phone photo. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-04",
+    "image": "/images/style-crew/market-04.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of tan leather flat sandals casually placed on a woven doormat, warm daylight. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-05",
+    "image": "/images/style-crew/market-05.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a washed denim jacket laid on a floral duvet, one sleeve bent naturally, overhead phone photo. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-06",
+    "image": "/images/style-crew/market-06.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pink and white striped shirt on a yellow plastic hanger on a wardrobe handle. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-07",
+    "image": "/images/style-crew/market-07.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a rust orange midi skirt laid in a relaxed arc on a pale wood floor, soft wrinkles. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-08",
+    "image": "/images/style-crew/market-08.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a forest green lightweight scarf loosely curled on a chair seat, subtle fabric texture. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "garment"
+  },
+  {
+    "key": "market-avatar",
+    "image": "/images/style-crew/market-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "market-story-1",
+    "image": "/images/style-crew/market-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of Curvy Black woman in her thirties with short natural curly hair, yellow wrap dress with lavender cardigan, sitting on a park picnic blanket arranging flowers, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "story"
+  },
+  {
+    "key": "market-story-2",
+    "image": "/images/style-crew/market-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of Curvy Black woman in her thirties with short natural curly hair, striped pink shirt and rust midi skirt with denim jacket, dancing lightly on a city rooftop at golden hour, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-market.png",
+    "kind": "story"
+  },
+  {
+    "key": "coast-01",
+    "image": "/images/style-crew/coast-01.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a teal linen shirt on a wooden hanger against a cream bedroom door, naturally wrinkled linen. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-02",
+    "image": "/images/style-crew/coast-02.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of cream linen wide leg trousers laid across a muted blue quilt, soft wrinkles and daylight. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-03",
+    "image": "/images/style-crew/coast-03.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of raspberry pink canvas sneakers beside a cottage doorway, diagonal phone shot. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-04",
+    "image": "/images/style-crew/coast-04.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a sand colored cotton knit sweater loosely folded on an old pine chair, cloudy coastal light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-05",
+    "image": "/images/style-crew/coast-05.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a navy lightweight windbreaker hanging from a wall hook, slight sleeves twist, simple apartment. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-06",
+    "image": "/images/style-crew/coast-06.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a blue and cream striped linen midi dress spread on an oatmeal bed with hem slightly curved. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-07",
+    "image": "/images/style-crew/coast-07.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a natural straw sun hat on a dark wooden table, handheld oblique view. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-08",
+    "image": "/images/style-crew/coast-08.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of blue denim knee length shorts laid on a woven rug with realistic creases. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-09",
+    "image": "/images/style-crew/coast-09.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a pair of cognac flat leather sandals on grey stone floor, shot from above at an angle. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-10",
+    "image": "/images/style-crew/coast-10.png",
+    "prompt": "Use case: photorealistic-natural. Asset: one user's personal wardrobe record for a fashion web app. Photograph of a coral canvas shoulder bag draped on a chair back, realistic rumpled fabric and window light. Show exactly one garment or one pair of shoes, completely inside the frame with breathing room, recognizable construction and true fabric texture. A normal phone camera record made at home, natural daylight, subtle asymmetry, realistic folds and shadows. Portrait 4:5 composition. No person, no hands, no other clothing, no logos, no words, no price tags, no collage, no studio white background, no flat vector illustration. This is a fictional garment, no brand imitation.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "garment"
+  },
+  {
+    "key": "coast-avatar",
+    "image": "/images/style-crew/coast-avatar.png",
+    "prompt": "Identity-preserving edit of the fictional adult person in the reference. Create a NEW photograph, a friendly relaxed head and shoulders portrait with a different pose, expression and background than the reference. Preserve the same facial structure, age, ethnicity, hair texture and hair color; preserve glasses for Kai. Natural daylight in a quiet softly blurred home interior, candid smile, face clear, square composition, generous space for a circular avatar crop, no text, no watermark. Do not crop or reuse the reference photograph.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "avatar"
+  },
+  {
+    "key": "coast-story-1",
+    "image": "/images/style-crew/coast-story-1.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman around fifty with short silver hair, teal linen shirt and cream trousers with raspberry sneakers, standing at a coastal lookout holding her straw hat, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "story"
+  },
+  {
+    "key": "coast-story-2",
+    "image": "/images/style-crew/coast-story-2.png",
+    "prompt": "Use case: photorealistic-natural. Asset: a fictional styling story photograph for OOTIE. A candid natural lifestyle photograph of European woman around fifty with short silver hair, striped blue linen dress and flat sandals, seated at a small garden table reading, full body. Entire outfit with hands and feet fully in frame and breathing room around the figure. Realistic anatomy, expressive unposed movement, honest skin and fabric texture, sophisticated joyful color, varied environmental composition, natural available light, portrait 4:5. No words, no watermark, no branding, no collage, no catalogue pose. Fictional adult person. Preserve exactly the identity, face, age, hair and glasses of the person in the reference. Change their pose and location as described.",
+    "reference": "/images/editorial/scene-coast.png",
+    "kind": "story"
+  }
+]

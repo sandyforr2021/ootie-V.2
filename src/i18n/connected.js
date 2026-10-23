@@ -140,4 +140,7 @@ AI 輔助製作的品牌穿搭靈感|Brand styling inspiration created with AI|A
 目前沒有冷宮單品|No unworn pieces|着ていない服はありません|No hay prendas sin usar
 到工作室確認入櫥|Review in studio for wardrobe|スタジオで確認して追加|Revisar en estudio para el armario
 請改用光線均勻、臉部清晰的正面近照。|Use a well-lit, front-facing close-up with a clearly visible face.|明るい場所で顔がはっきり見える正面の顔写真をお使いください。|Usa un primer plano frontal bien iluminado con el rostro visible.
+安裝瀏覽器收藏助手|Install shopping companion|ブラウザー取り込みツールをインストール|Instalar asistente de compras
+商家限制自動讀取。請使用瀏覽器收藏助手，或上傳商品照片；購買連結會保留。|This store limits automatic imports. Use the browser companion or upload a product photo; your shopping link stays saved in the form.|このショップは自動取得を制限しています。ブラウザーツールか商品写真のアップロードをお使いください。購入リンクは入力欄に保持されます。|La tienda limita la importación automática. Usa el asistente o sube una foto; el enlace se conserva en el formulario.
+AI 試穿模擬|AI try-on preview|AI試着イメージ|Vista previa de prueba con IA
 `;

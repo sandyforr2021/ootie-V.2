@@ -1,5 +1,6 @@
 import { t } from '@/i18n';
 import { genuineContent } from '@/services/contentAuthenticity';
+import { isStyleCrew } from '@/services/styleCrew';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from './app';
@@ -80,6 +81,8 @@ export const useSosStore = defineStore('sos', () => {
           sender_id: p.user_id || p.sender_id,
           closet_owner_id: p.closet_owner_id || p.user_id,
           username: p.ootie_profiles?.username || p.username || '@衣友',
+          display_name: p.ootie_profiles?.display_name || p.ootie_profiles?.username || '',
+          curated: isStyleCrew(p.ootie_profiles),
           initials: p.ootie_profiles?.initials || p.initials || '衣友',
           avatar_url: p.ootie_profiles?.avatar_url || '',
           title: p.title || '穿搭求救',
@@ -108,6 +111,8 @@ export const useSosStore = defineStore('sos', () => {
           sos_id: s.sos_id,
           responder_id: s.user_id || s.responder_id,
           username: s.ootie_profiles?.username || '@衣友',
+          display_name: s.ootie_profiles?.display_name || s.ootie_profiles?.username || '',
+          avatar_url: s.ootie_profiles?.avatar_url || '',
           initials: s.ootie_profiles?.initials || '衣友',
           item_ids: Array.isArray(s.item_ids) ? s.item_ids : [],
           message: s.message || '',

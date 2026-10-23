@@ -5356,10 +5356,33 @@ h1 {
 
 .explore-tagged-items {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
   min-height: 42px;
 }
+
+.explore-tagged-piece {
+  display: grid;
+  gap: 5px;
+  width: 66px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.explore-tagged-items .explore-tagged-piece .product-image { width: 66px; height: 80px; object-fit: contain; }
+.comment-avatar { overflow: hidden; }
+.comment-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.explore-tagged-piece:focus-visible { outline: 2px solid var(--accent-violet-ink); outline-offset: 4px; border-radius: 8px; }
+.sos-feed-avatar { overflow: hidden; flex-shrink: 0; }
+.sos-feed-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 
 .explore-tagged-items .product-image,
 .explore-tagged-more {

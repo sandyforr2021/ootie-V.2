@@ -2,6 +2,8 @@ import { genuineContent } from '@/services/contentAuthenticity';
 import { listPostComments, insertPostComment } from '@/services/postComments';
 import { t } from '@/i18n';
 import { editorialLook } from '@/services/editorial';
+import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
+import { alternateAuthors } from '@/services/recommendedFeed';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useAppStore } from './app';
@@ -57,6 +59,7 @@ export const useOotdStore = defineStore('ootd', () => {
     saves: remote.saves ?? null,
     user_id: remote.user_id,
     username: remote.ootie_profiles?.username || appStore.profile.username || '@衣友',
+    display_name: remote.ootie_profiles?.display_name || remote.ootie_profiles?.username || '',
     initials: remote.ootie_profiles?.initials || appStore.profile.initials || '衣友',
     avatar_url: remote.ootie_profiles?.avatar_url || '',
     image: withDevelopmentDemoMediaRevision(remote.image),
@@ -64,7 +67,7 @@ export const useOotdStore = defineStore('ootd', () => {
     caption: remote.caption,
     wearing: Array.isArray(remote.wearing) ? remote.wearing : [],
     item_ids: Array.isArray(remote.item_ids) ? remote.item_ids : [],
-    tagged_items: taggedItems,
+    tagged_items: resolvePostTaggedItems(remote, taggedItems),
     hashtags: Array.isArray(remote.hashtags) ? remote.hashtags : [],
     likes: remote.ootie_post_likes?.[0]?.count ?? remote.likes ?? 0,
     comments: remote.ootie_post_comments?.[0]?.count ?? remote.comments ?? 0,
@@ -78,13 +81,14 @@ export const useOotdStore = defineStore('ootd', () => {
   const filteredPosts = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
     const feed = activeFeedTab.value;
-    return uniquePostsById(appStore.ootdPosts).filter((post) => {
+    const matches = uniquePostsById(appStore.ootdPosts).filter((post) => {
       const socialStore = useSocialStore();
       const isFollowing = socialStore.isFollowing({ id: post.user_id, username: post.username }) || post.username === appStore.profile.username;
       const matchFeed = feed === 'for-you' || isFollowing;
-      const searchable = `${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')}`.toLowerCase();
+      const searchable = `${post.display_name || ''} ${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')}`.toLowerCase();
       return matchFeed && (!query || searchable.includes(query));
     });
+    return feed==='for-you' ? [...alternateAuthors(matches.filter(post=>!post.editorial)),...matches.filter(post=>post.editorial)] : matches;
   });
 
   const loadRemotePosts = async () => {

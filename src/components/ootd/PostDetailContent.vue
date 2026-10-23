@@ -12,7 +12,7 @@
           <span v-else>{{ authorInitials }}</span>
         </span>
         <span class="post-detail-author-copy">
-          <strong>{{ authorUsername }}</strong>
+          <strong>{{ post.display_name || authorUsername }}</strong>
           <small>{{ formattedDate || 'OOTD 分享' }}</small>
         </span>
       </router-link>
@@ -87,7 +87,7 @@
 
       <section v-if="taggedItems.length" class="ootd-tagged-section" aria-label="本套使用單品">
         <div class="ootd-tagged-heading">
-          <h3>本套使用單品</h3>
+          <h3>{{ $t('本套使用單品') }}</h3>
           <span>{{ taggedItems.length }}{{ $t("件") }}</span>
         </div>
         <div class="ootd-tagged-items">

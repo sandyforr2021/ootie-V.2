@@ -55,9 +55,9 @@
           :style="{ animationDelay: `${index * 45}ms` }"
         >
           <div class="sos-feed-user">
-            <div class="sos-feed-avatar">{{ post.initials }}</div>
+            <div class="sos-feed-avatar"><img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" /><span v-else>{{ post.initials }}</span></div>
             <div>
-              <strong>{{ post.username }}</strong>
+              <strong>{{ post.display_name || post.username }}</strong>
               <span>{{ $t("穿搭求救") }}<em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
                   {{ t(post.status === 'CLOSED' ? '已結束' : '公開中') }}
                 </em>
@@ -65,7 +65,7 @@
             </div>
           </div>
 
-          <p v-if="post.username?.includes('ootie_edit_')" class="editorial-source">{{ t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
+          <p v-if="post.curated" class="editorial-source">{{ t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
           <h2>{{ post.title }}</h2>
 
           <div class="sos-meta">

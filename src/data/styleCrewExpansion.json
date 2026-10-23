@@ -1,0 +1,416 @@
+[
+  {
+    "key": "office",
+    "name": "Clara",
+    "initials": "CC",
+    "username": "clara",
+    "postId": "0f9b5840-c89e-41d9-8d78-03ac82afaf12",
+    "sosId": "a5fd65b6-a620-4e07-8542-7a56645b7d02",
+    "image": "/images/editorial/scene-office.png",
+    "caption": "Emerald layers for a fresh start at the office.",
+    "title": "A presentation day with a little color",
+    "details": "Help me balance a structured green jacket with softer layers.",
+    "occasion": "工作",
+    "weather": "涼爽",
+    "itemKeys": [
+      "extra-01",
+      "extra-02"
+    ],
+    "wardrobe": [
+      {
+        "key": "office-01",
+        "name": "emerald blazer",
+        "category": "外套",
+        "image": "/images/style-crew/office-01.webp"
+      },
+      {
+        "key": "office-02",
+        "name": "lilac knit top",
+        "category": "上身",
+        "image": "/images/style-crew/office-02.webp"
+      },
+      {
+        "key": "office-03",
+        "name": "ivory trousers",
+        "category": "下身",
+        "image": "/images/style-crew/office-03.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/office-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "office-story-1",
+        "image": "/images/style-crew/office-story-1.webp",
+        "caption": "Coffee between meetings. The green jacket works just as well away from my desk."
+      },
+      {
+        "key": "office-story-2",
+        "image": "/images/style-crew/office-story-2.webp",
+        "caption": "A little lilac for an afternoon browsing books."
+      }
+    ]
+  },
+  {
+    "key": "rain",
+    "name": "Iris",
+    "initials": "IR",
+    "username": "iris",
+    "postId": "199a732a-e68b-49f6-8015-c5ae15db3f6c",
+    "sosId": "77b57f56-f16c-40f1-811e-827226856967",
+    "image": "/images/editorial/scene-rain.png",
+    "caption": "A blue trench and a bright umbrella kind of afternoon.",
+    "title": "Rainy city walk, comfortable all day",
+    "details": "I would love layers that still feel polished when the forecast turns rainy.",
+    "occasion": "日常",
+    "weather": "可能降雨",
+    "itemKeys": [
+      "extra-03",
+      "extra-04"
+    ],
+    "wardrobe": [
+      {
+        "key": "rain-01",
+        "name": "cobalt raincoat",
+        "category": "外套",
+        "image": "/images/style-crew/rain-01.webp"
+      },
+      {
+        "key": "rain-02",
+        "name": "striped tee",
+        "category": "上身",
+        "image": "/images/style-crew/rain-02.webp"
+      },
+      {
+        "key": "rain-03",
+        "name": "wide leg jeans",
+        "category": "下身",
+        "image": "/images/style-crew/rain-03.webp"
+      },
+      {
+        "key": "rain-04",
+        "name": "burgundy boots",
+        "category": "鞋子",
+        "image": "/images/style-crew/rain-04.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/rain-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "rain-story-1",
+        "image": "/images/style-crew/rain-story-1.webp",
+        "caption": "A quick stop for flowers before the rain starts again."
+      },
+      {
+        "key": "rain-story-2",
+        "image": "/images/style-crew/rain-story-2.webp",
+        "caption": "Comfortable layers for a slow Sunday by the canal."
+      }
+    ]
+  },
+  {
+    "key": "train",
+    "name": "Mei",
+    "initials": "MY",
+    "username": "mei",
+    "postId": "1e3b588d-56cc-419a-8893-fcc5fc0058ba",
+    "sosId": "8801b97d-49ec-426a-8131-565d15422b76",
+    "image": "/images/editorial/scene-train.png",
+    "caption": "Coral knitwear and a teal tote for the morning train.",
+    "title": "A light bag for the morning commute",
+    "details": "What would you pair for a train ride and a relaxed afternoon at a cafe?",
+    "occasion": "工作",
+    "weather": "涼爽",
+    "itemKeys": [
+      "extra-05",
+      "extra-06"
+    ],
+    "wardrobe": [
+      {
+        "key": "train-01",
+        "name": "coral cardigan",
+        "category": "外套",
+        "image": "/images/style-crew/train-01.webp"
+      },
+      {
+        "key": "train-02",
+        "name": "cream tee",
+        "category": "上身",
+        "image": "/images/style-crew/train-02.webp"
+      },
+      {
+        "key": "train-03",
+        "name": "charcoal trousers",
+        "category": "下身",
+        "image": "/images/style-crew/train-03.webp"
+      },
+      {
+        "key": "train-04",
+        "name": "teal tote",
+        "category": "配件",
+        "image": "/images/style-crew/train-04.webp"
+      },
+      {
+        "key": "train-05",
+        "name": "white sneakers",
+        "category": "鞋子",
+        "image": "/images/style-crew/train-05.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/train-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "train-story-1",
+        "image": "/images/style-crew/train-story-1.webp",
+        "caption": "Missed one train, found a very good coffee."
+      },
+      {
+        "key": "train-story-2",
+        "image": "/images/style-crew/train-story-2.webp",
+        "caption": "A quieter route home, with room to move."
+      }
+    ]
+  },
+  {
+    "key": "gallery",
+    "name": "Kai",
+    "initials": "KL",
+    "username": "kai",
+    "postId": "359be62e-b640-4f2e-823e-7556abe5454c",
+    "sosId": "807f3906-729e-4f8a-86fc-021285315ac0",
+    "image": "/images/editorial/scene-gallery.png",
+    "caption": "Lilac and olive, taking the scenic route through the sculpture garden.",
+    "title": "An afternoon at the gallery",
+    "details": "Looking for an easy combination with a little contrast and comfortable shoes.",
+    "occasion": "聚會",
+    "weather": "晴天",
+    "itemKeys": [
+      "extra-07",
+      "extra-08"
+    ],
+    "wardrobe": [
+      {
+        "key": "gallery-01",
+        "name": "lilac overshirt",
+        "category": "外套",
+        "image": "/images/style-crew/gallery-01.webp"
+      },
+      {
+        "key": "gallery-02",
+        "name": "white crew neck tee",
+        "category": "上身",
+        "image": "/images/style-crew/gallery-02.webp"
+      },
+      {
+        "key": "gallery-03",
+        "name": "olive chinos",
+        "category": "下身",
+        "image": "/images/style-crew/gallery-03.webp"
+      },
+      {
+        "key": "gallery-04",
+        "name": "cream trainers",
+        "category": "鞋子",
+        "image": "/images/style-crew/gallery-04.webp"
+      },
+      {
+        "key": "gallery-05",
+        "name": "navy cap",
+        "category": "配件",
+        "image": "/images/style-crew/gallery-05.webp"
+      },
+      {
+        "key": "gallery-06",
+        "name": "sand crossbody",
+        "category": "配件",
+        "image": "/images/style-crew/gallery-06.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/gallery-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "gallery-story-1",
+        "image": "/images/style-crew/gallery-story-1.webp",
+        "caption": "Taking time with the shapes and colors in the courtyard."
+      },
+      {
+        "key": "gallery-story-2",
+        "image": "/images/style-crew/gallery-story-2.webp",
+        "caption": "Weekend stairs, good shoes and no fixed plans."
+      }
+    ]
+  },
+  {
+    "key": "market",
+    "name": "Amara",
+    "initials": "AM",
+    "username": "amara",
+    "postId": "1d71c1c8-8005-455b-83bf-91fbe5491e73",
+    "sosId": "4ccb155e-c467-4849-84b7-d0bf5d25e6d4",
+    "image": "/images/editorial/scene-market.png",
+    "caption": "Sunshine yellow, lavender layers and flowers for the weekend.",
+    "title": "A colorful morning at the flower market",
+    "details": "I want something easy to move in, with one cheerful accent color.",
+    "occasion": "日常",
+    "weather": "溫暖",
+    "itemKeys": [
+      "extra-09",
+      "extra-10"
+    ],
+    "wardrobe": [
+      {
+        "key": "market-01",
+        "name": "yellow wrap dress",
+        "category": "洋裝",
+        "image": "/images/style-crew/market-01.webp"
+      },
+      {
+        "key": "market-02",
+        "name": "lavender cardigan",
+        "category": "外套",
+        "image": "/images/style-crew/market-02.webp"
+      },
+      {
+        "key": "market-03",
+        "name": "woven tote",
+        "category": "配件",
+        "image": "/images/style-crew/market-03.webp"
+      },
+      {
+        "key": "market-04",
+        "name": "tan sandals",
+        "category": "鞋子",
+        "image": "/images/style-crew/market-04.webp"
+      },
+      {
+        "key": "market-05",
+        "name": "denim jacket",
+        "category": "外套",
+        "image": "/images/style-crew/market-05.webp"
+      },
+      {
+        "key": "market-06",
+        "name": "striped cotton shirt",
+        "category": "上身",
+        "image": "/images/style-crew/market-06.webp"
+      },
+      {
+        "key": "market-07",
+        "name": "rust skirt",
+        "category": "下身",
+        "image": "/images/style-crew/market-07.webp"
+      },
+      {
+        "key": "market-08",
+        "name": "green scarf",
+        "category": "配件",
+        "image": "/images/style-crew/market-08.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/market-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "market-story-1",
+        "image": "/images/style-crew/market-story-1.webp",
+        "caption": "The market flowers came with me to the park."
+      },
+      {
+        "key": "market-story-2",
+        "image": "/images/style-crew/market-story-2.webp",
+        "caption": "A warm evening calls for a little movement and a lot of color."
+      }
+    ]
+  },
+  {
+    "key": "coast",
+    "name": "Elise",
+    "initials": "EL",
+    "username": "elise",
+    "postId": "3fe9506e-fd54-478e-861a-c8672c5cdb9c",
+    "sosId": "7283b219-1226-476e-8b09-1b844698be6f",
+    "image": "/images/editorial/scene-coast.png",
+    "caption": "Teal linen, raspberry sneakers and time by the sea.",
+    "title": "A breezy weekend by the coast",
+    "details": "Help me choose a packable layer for a walk by the sea and dinner outdoors.",
+    "occasion": "旅行",
+    "weather": "涼爽",
+    "itemKeys": [
+      "extra-11",
+      "extra-12"
+    ],
+    "wardrobe": [
+      {
+        "key": "coast-01",
+        "name": "teal linen shirt",
+        "category": "上身",
+        "image": "/images/style-crew/coast-01.webp"
+      },
+      {
+        "key": "coast-02",
+        "name": "cream linen trousers",
+        "category": "下身",
+        "image": "/images/style-crew/coast-02.webp"
+      },
+      {
+        "key": "coast-03",
+        "name": "raspberry sneakers",
+        "category": "鞋子",
+        "image": "/images/style-crew/coast-03.webp"
+      },
+      {
+        "key": "coast-04",
+        "name": "sand knit sweater",
+        "category": "上身",
+        "image": "/images/style-crew/coast-04.webp"
+      },
+      {
+        "key": "coast-05",
+        "name": "navy windbreaker",
+        "category": "外套",
+        "image": "/images/style-crew/coast-05.webp"
+      },
+      {
+        "key": "coast-06",
+        "name": "striped linen dress",
+        "category": "洋裝",
+        "image": "/images/style-crew/coast-06.webp"
+      },
+      {
+        "key": "coast-07",
+        "name": "straw hat",
+        "category": "配件",
+        "image": "/images/style-crew/coast-07.webp"
+      },
+      {
+        "key": "coast-08",
+        "name": "blue denim shorts",
+        "category": "下身",
+        "image": "/images/style-crew/coast-08.webp"
+      },
+      {
+        "key": "coast-09",
+        "name": "leather sandals",
+        "category": "鞋子",
+        "image": "/images/style-crew/coast-09.webp"
+      },
+      {
+        "key": "coast-10",
+        "name": "coral shoulder bag",
+        "category": "配件",
+        "image": "/images/style-crew/coast-10.webp"
+      }
+    ],
+    "avatar": "/images/style-crew/coast-avatar.webp",
+    "extraPosts": [
+      {
+        "key": "coast-story-1",
+        "image": "/images/style-crew/coast-story-1.webp",
+        "caption": "Wind in the linen and one more stop along the coast."
+      },
+      {
+        "key": "coast-story-2",
+        "image": "/images/style-crew/coast-story-2.webp",
+        "caption": "A garden afternoon, a book and the lightest linen."
+      }
+    ]
+  }
+]

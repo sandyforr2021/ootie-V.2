@@ -7,9 +7,9 @@
         <h2>{{ targetPost.title }}</h2>
 
         <div class="sos-detail-user">
-          <div class="sos-feed-avatar">{{ targetPost.initials }}</div>
+          <div class="sos-feed-avatar"><img v-if="targetPost.avatar_url" :src="targetPost.avatar_url" alt="" /><span v-else>{{ targetPost.initials }}</span></div>
           <div>
-            <strong>{{ targetPost.username }}</strong>
+            <strong>{{ targetPost.display_name || targetPost.username }}</strong>
             <span>
               {{ t('狀態') }}:
               <em :class="['sos-status-badge', { 'is-closed': targetPost.status === 'CLOSED' }]">
@@ -90,6 +90,7 @@
               ★ {{ t('發布者已採納') }}
             </div>
 
+            <div class="sos-detail-user"><div class="sos-feed-avatar"><img v-if="sug.avatar_url" :src="sug.avatar_url" alt="" loading="lazy" /><span v-else>{{ sug.initials }}</span></div><strong>{{ sug.display_name || sug.username }}</strong></div>
             <p style="font-size:14px; color:var(--ink); line-height:1.6; margin:6px 0;">
               " {{ sug.message }} "
             </p>

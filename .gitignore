@@ -82,3 +82,6 @@ playwright-report/
 /JUDGE_ACCESS.local.md
 /.impeccable/review/
 /unit-design-results.json
+
+# Generated originals stay local; deploy the un-cropped WebP encodings.
+/public/images/style-crew/*.png

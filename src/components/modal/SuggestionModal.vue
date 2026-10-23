@@ -5,7 +5,7 @@
       <p class="eyebrow">Style SOS</p>
       <h2>{{ t("幫她搭一套") }}</h2>
       <p class="suggestion-intro">
-        {{ tf('為 {user} 的「{title}」提案', { user: targetPost.username, title: targetPost.title }) }}<br />
+        {{ tf('為 {user} 的「{title}」提案', { user: targetPost.display_name || targetPost.username, title: targetPost.title }) }}<br />
         <span style="font-size:12px; color:var(--sage-dark);">
           {{ tf('僅顯示本次公開的 {count} 件衣物', { count: availableItems.length }) }}
         </span>

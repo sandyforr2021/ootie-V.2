@@ -7,7 +7,7 @@ if(!messages[lang]) lang='en';
 const copy=key=>messages[lang][key];
 function render(){document.documentElement.lang=lang; $('language').value=lang;document.querySelectorAll('[data-copy]').forEach(el=>el.textContent=copy(el.dataset.copy));}
 render();
-$('endpoint').value='http://127.0.0.1:5173';
+$('endpoint').value='https://ootie-youcam-jury.onrender.com';
 try {const saved=localStorage.getItem('ootie_custom_endpoint');if(webUrl(saved)) $('endpoint').value=new URL(saved).origin;} catch {}
 $('language').addEventListener('change',()=>{lang=$('language').value;try{localStorage.setItem('ootie_language',lang);}catch{}render();});
 function preview(){const url=webUrl($('image').value);if(url)$('preview').src=url;else $('preview').removeAttribute('src');}

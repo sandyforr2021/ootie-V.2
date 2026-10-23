@@ -19,8 +19,8 @@
               class="comment-author"
               :aria-label="`查看 ${getCommentUsername(comment)} 的個人主頁`"
             >
-              <span class="comment-avatar" aria-hidden="true">{{ getCommentInitials(comment) }}</span>
-              <strong>{{ getCommentUsername(comment) }}</strong>
+              <span class="comment-avatar" aria-hidden="true"><img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" /><span v-else>{{ getCommentInitials(comment) }}</span></span>
+              <strong>{{ comment.display_name || getCommentUsername(comment) }}</strong>
             </router-link>
             <strong v-else>{{ getCommentUsername(comment) }}</strong>
             {{ comment.text }}

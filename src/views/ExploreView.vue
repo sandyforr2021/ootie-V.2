@@ -53,7 +53,7 @@
                 <span v-else>{{ post.initials }}</span>
               </span>
               <span class="ootd-user-copy">
-                <strong class="user-link-text">{{ post.username }}</strong>
+                <strong class="user-link-text">{{ post.display_name || post.username }}</strong>
                 <span>{{ formatPostTime(post.created_at) }}<template v-if="postStyleLabel(post)"> · {{ postStyleLabel(post) }}</template></span>
               </span>
             </button>
@@ -121,16 +121,11 @@
               <div class="ootd-tags">{{ (post.hashtags || []).join('　') }}</div>
             </div>
             <div v-if="post.tagged_items?.length" class="explore-tagged-items" aria-label="這套穿搭標註的衣櫥單品">
-              <img
-                v-for="item in post.tagged_items.slice(0, 3)"
+              <button
+                v-for="item in post.tagged_items"
                 :key="item.id"
-                class="product-image"
-                :src="item.photo"
-                :alt="item.name_zh || item.name || '穿搭單品'"
-                loading="lazy"
-                decoding="async"
-              />
-              <span v-if="post.tagged_items.length > 3" class="explore-tagged-more">+{{ post.tagged_items.length - 3 }}</span>
+                type="button" class="explore-tagged-piece" @click="openPostDetail(post.id)"
+              ><img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" decoding="async" /><span>{{ item.name_zh || item.name }}</span></button>
             </div>
           </div>
         </article>

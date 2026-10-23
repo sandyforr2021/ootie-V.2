@@ -43,13 +43,29 @@ describe('Shopping studio workflow', () => {
     });
   });
   afterEach(() => wrapper?.unmount());
-  it('blocks photo step until a product is selected; opening steps never submits a job', async () => {
+  it('opens the photo step without a product but never permits an empty try-on batch', async () => {
     await render();
-    expect(wrapper.findAll('.studio-steps button')[2].attributes('disabled')).toBeDefined();
-    await selectPiece();
+    await wrapper.findAll('.studio-steps button')[2].trigger('click');
     expect(wrapper.find('.shop-fitting').exists()).toBe(true);
+    expect(wrapper.find('.shop-person-upload').exists()).toBe(true);
+    await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('選擇至少一件商品，再繼續。');
     expect(fixture.request.mock.calls.filter(([path,,body]) => path === 'jobs' && body)).toEqual([]);
+  });
+  it('keeps a blocked merchant URL and offers a photo upload and extension instead of a false import success', async () => {
+    await render();
+    fixture.request.mockImplementationOnce(async()=>{throw Object.assign(new Error('Merchant blocked'),{code:'REMOTE_IMAGE_UNAVAILABLE'});});
+    const url='https://www.net-fashion.net/product/692239';
+    await wrapper.find('.shop-url-row input').setValue(url);
+    await wrapper.find('.shop-url-row button').trigger('click'); await flushPromises();
+    expect(wrapper.find('.shop-url-row input').element.value).toBe(url);
+    expect(wrapper.find('.shop-image-upload input[type=file]').exists()).toBe(true);
+    expect(wrapper.text()).toContain('商家限制自動讀取');
+    expect(wrapper.find('.studio-form-actions .shop-primary').attributes('disabled')).toBeDefined();
+    await wrapper.find('.studio-extension-entry').trigger('click');
+    expect(wrapper.find('a[href="/downloads/ootie-browser-companion.zip"]').exists()).toBe(true);
+    expect(fixture.request.mock.calls.filter(([path,,body]) => path === 'products' && body)).toEqual([]);
   });
   it('requires consent and queues the selected product with the chosen private photo', async () => {
     await render(); await selectPiece();
