@@ -82,7 +82,11 @@ async function hydrate(path) {
   finally { loadingImages.delete(path); }
 }
 async function hydrateVisible() {
-  await Promise.all([...visibleProducts.value.map((p)=>p.image_path),...albumJobs.value.map((j)=>j.result_path),...photos.value.slice(0,8).map((p)=>p.path)].filter(Boolean).map(hydrate));
+  const paths=tab.value==='album'?albumJobs.value.map(j=>j.result_path):tab.value==='wishlist'?[
+    ...(step.value===2?visibleProducts.value:chosenProducts.value).map(p=>p.image_path),
+    ...(step.value===3?photos.value.slice(0,8).map(p=>p.path):[])
+  ]:[];
+  await Promise.all(paths.filter(Boolean).map(hydrate));
 }
 async function refreshJobs() {
   if (!auth.isMember) return;
@@ -233,7 +237,7 @@ watch(()=>route.query,async(query)=>{
   if(query.post && /^[\da-f-]{36}$/i.test(query.post)) { tab.value='community'; try { sharedPost.value=(await api(`posts/${query.post}`)).post; } catch(err) { report(err); } }
 },{immediate:true});
 watch(tab,async(value)=>{ error.value=''; if(value==='community') await loadPosts(); if(value==='activity' && auth.isMember) try {metrics.value=await api('metrics');} catch(err){report(err);} });
-watch([productLimit,jobLimit],hydrateVisible);
+watch([productLimit,jobLimit,step,tab],hydrateVisible);
 watch(selectedPhoto,()=>{pendingBatch.value=null;consent.value=false;});
 watch(()=>auth.session?.user?.id,async()=>{
   sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedPhoto.value=''; pendingBatch.value=null; metrics.value=null; matchingProduct.value=null; shareJob.value=null; consent.value=false;

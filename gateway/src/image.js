@@ -1,5 +1,9 @@
 import { GatewayError, assert } from './errors.js';
 import sharp from 'sharp';
+import {createWorkLimiter} from './workLimiter.js';
+sharp.cache(false);
+sharp.concurrency(1);
+const conversions=createWorkLimiter({concurrency:1,maxQueue:16});
 
 export const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
 export const MIN_IMAGE_EDGE = 256;
@@ -96,6 +100,7 @@ export async function normalizeGarmentImageForAi(buffer, claimedMime = '') {
 
   if (ALLOWED_MIME.has(sourceMime)) return validateImageBytes(buffer, sourceMime);
 
+  return conversions.run(async () => {
   try {
     const image = sharp(buffer, {
       failOn: 'warning',
@@ -109,6 +114,7 @@ export async function normalizeGarmentImageForAi(buffer, claimedMime = '') {
 
     const converted = await image
       .autoOrient()
+      .resize({width:2048,height:2048,fit:'inside',withoutEnlargement:true})
       .flatten({ background: '#fffdf8' })
       .jpeg({ quality: 92, chromaSubsampling: '4:4:4' })
       .toBuffer();
@@ -117,6 +123,7 @@ export async function normalizeGarmentImageForAi(buffer, claimedMime = '') {
     if (error instanceof GatewayError) throw error;
     throw new GatewayError('CLOTHING_IMAGE_INVALID', 422, 'Selected clothing image could not be prepared for AI');
   }
+  });
 }
 
 export function parseImageDataUrl(value) {
@@ -134,4 +141,13 @@ export function parseImageDataUrl(value) {
 
 export function extensionForMime(mimeType) {
   return mimeType === 'image/png' ? 'png' : 'jpg';
+}
+
+// Stop oversized Storage objects before collecting the whole upstream response.
+export async function readBoundedImage(response,maxBytes=MAX_IMAGE_BYTES){
+ if(Number(response.headers.get('content-length'))>maxBytes){await response.body?.cancel?.();throw new GatewayError('IMAGE_TOO_LARGE',413,'Image must be at most 7 MB');}
+ if(!response.body){const bytes=Buffer.from(await response.arrayBuffer());assert(bytes.length<=maxBytes,'IMAGE_TOO_LARGE',413);return bytes;}
+ const chunks=[];let total=0;
+ for await(const chunk of response.body){total+=chunk.byteLength;if(total>maxBytes)throw new GatewayError('IMAGE_TOO_LARGE',413,'Image must be at most 7 MB');chunks.push(Buffer.from(chunk));}
+ return Buffer.concat(chunks,total);
 }

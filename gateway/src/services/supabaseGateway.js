@@ -1,5 +1,5 @@
 import { GatewayError, assert } from '../errors.js';
-import { normalizeGarmentImageForAi, parseImageDataUrl, validateImageBytes } from '../image.js';
+import { normalizeGarmentImageForAi, parseImageDataUrl, validateImageBytes, readBoundedImage } from '../image.js';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const encodeStoragePath = (path) => path.split('/').map(encodeURIComponent).join('/');
@@ -32,6 +32,7 @@ export class SupabaseGateway {
     try {
       response = await this.fetchImpl(`${this.url}${path}`, {
         ...options,
+        signal: options.signal || AbortSignal.timeout(20000),
         headers: this.serviceHeaders(options.headers)
       });
     } catch {
@@ -207,13 +208,13 @@ export class SupabaseGateway {
     try {
       response = await this.fetchImpl(
         `${this.url}/storage/v1/object/authenticated/${encodeURIComponent(this.bucket)}/${encodeStoragePath(path)}`,
-        { headers: this.serviceHeaders(), redirect: 'error' }
+        { headers: this.serviceHeaders(), redirect: 'error', signal: AbortSignal.timeout(20000) }
       );
     } catch {
       throw new GatewayError('PRIVATE_IMAGE_NOT_FOUND', 404, 'Private image could not be read');
     }
     if (!response.ok) throw new GatewayError('PRIVATE_IMAGE_NOT_FOUND', 404, 'Private image could not be read');
-    const bytes = Buffer.from(await response.arrayBuffer());
+    const bytes = await readBoundedImage(response);
     return validateImageBytes(bytes, response.headers.get('content-type')?.split(';')[0] || '');
   }
 
@@ -299,7 +300,7 @@ export class SupabaseGateway {
     try {
       response = await this.fetchImpl(
         `${this.url}/storage/v1/object/authenticated/${encodeURIComponent(storage.bucket)}/${encodeStoragePath(storage.path)}`,
-        { headers: this.serviceHeaders(), redirect: 'error' }
+        { headers: this.serviceHeaders(), redirect: 'error', signal: AbortSignal.timeout(20000) }
       );
     } catch {
       throw new GatewayError('CLOTHING_IMAGE_REQUIRED', 422, 'Clothing image could not be read');
@@ -307,7 +308,7 @@ export class SupabaseGateway {
     if (!response.ok) throw new GatewayError('CLOTHING_IMAGE_REQUIRED', 422, 'Clothing image could not be read');
     try {
       return await normalizeGarmentImageForAi(
-        Buffer.from(await response.arrayBuffer()),
+        await readBoundedImage(response),
         response.headers.get('content-type')?.split(';')[0] || ''
       );
     } catch (error) {

@@ -1,3 +1,4 @@
+import {privateMediaQueue} from './mediaQueue';
 const DEFAULT_TIMEOUT_MS = 125_000;
 
 export class AiGatewayError extends Error {
@@ -110,7 +111,7 @@ export function createAiGatewayClient({
     return payload;
   };
 
-  const loadImage = async (accessToken, route) => {
+  const performLoadImage = async (accessToken, route) => {
     if (!normalizedBaseUrl) {
       throw new AiGatewayError('GATEWAY_NOT_CONFIGURED', 'OOTIE AI Gateway 尚未設定。');
     }
@@ -143,6 +144,7 @@ export function createAiGatewayClient({
     return URL.createObjectURL(await response.blob());
   };
 
+  const loadImage=(token,route)=>privateMediaQueue.run(()=>performLoadImage(token,route));
   return Object.freeze({
     healthCheck: (accessToken) => request('/v1/capabilities', { accessToken }),
     recommendOutfit: (accessToken, input) => request('/v1/recommendations', {

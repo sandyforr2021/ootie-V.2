@@ -66,13 +66,14 @@ export class CommerceJobWorker {
   }
 }
 
-export function startCommerceWorker(worker, { onError = () => {}, intervalMs = 2000 } = {}) {
+export function startCommerceWorker(worker, { onError = () => {}, intervalMs = 2000, idleIntervalMs = 10000 } = {}) {
   let stopped = false;
   let timer;
   const run = async () => {
     if (stopped) return;
-    try { await worker.tick(); } catch (error) { onError(error); }
-    if (!stopped) timer = setTimeout(run, intervalMs);
+    let found=false;
+    try { found=await worker.tick(); } catch (error) { onError(error); }
+    if (!stopped) timer = setTimeout(run, found?intervalMs:idleIntervalMs);
   };
   void run();
   return () => { stopped = true; clearTimeout(timer); };
