@@ -94,7 +94,9 @@ begin
   select count(*)::integer into v_active from public.ootie_youcam_jobs
     where user_id = p_user_id and status in ('queued','preparing','submitting','processing','needs_review');
   if v_daily + v_cost > v_budget.per_user_daily_limit then raise exception 'USER_DAILY_LIMIT'; end if;
-  if v_active >= v_budget.max_concurrent_jobs then raise exception 'USER_ACTIVE_LIMIT'; end if;
+  if v_active + (case when p_kind = 'skin_tone' then 1 else v_count end) > v_budget.max_concurrent_jobs then
+    raise exception 'USER_ACTIVE_LIMIT';
+  end if;
   if v_budget.unit_limit is null or v_budget.expires_at is null or v_budget.expires_at <= now()
     or v_budget.allocated_units + v_cost > v_budget.unit_limit then raise exception 'FREE_BUDGET_EXHAUSTED'; end if;
   if not coalesce(p_is_reviewer,false)

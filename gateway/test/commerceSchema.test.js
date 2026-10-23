@@ -57,6 +57,15 @@ test('commerce migration: real SQL enforces ownership, budget, replay and worker
     await db.exec('set role anon');
     await assert.rejects(db.query('select * from ootie_youcam_jobs'),/permission denied/);
     await db.exec('reset role');
+    await db.exec('update ootie_youcam_budget set unit_limit=100');
+    const secondProduct=randomUUID(), thirdProduct=randomUUID();
+    await db.query("insert into ootie_shop_products(id,user_id,title,image_path,category) values($1,$2,'Second product',$3,'upper_body'),($4,$2,'Third product',$5,'upper_body')",
+      [secondProduct,a,`shop/${a}/second.jpg`,thirdProduct,`shop/${a}/third.jpg`]);
+    await assert.rejects(enqueue(randomUUID(),[product,secondProduct,thirdProduct]),/USER_ACTIVE_LIMIT/);
+    assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,2);
+    assert.equal((await enqueue(randomUUID(),[secondProduct,thirdProduct])).rows.length,2);
+    assert.equal((await db.query('select get_ootie_youcam_user_quota($1) as quota',[a])).rows[0].quota.activeCount,3);
+    await assert.rejects(enqueue(randomUUID()),/USER_ACTIVE_LIMIT/);
     const policies=await db.query("select relname,relrowsecurity from pg_class where relname like 'ootie_%' and relkind='r'");
     assert.equal(policies.rows.length,7); assert.ok(policies.rows.every(row=>row.relrowsecurity));
   } finally { await db.close(); }
