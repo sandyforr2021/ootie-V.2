@@ -194,7 +194,8 @@ watch(
         selectedClosetItemIds.value.push(item.id);
       }
     }
-  }
+  },
+  { immediate: true }
 );
 
 const selectAllClosetItems = () => {

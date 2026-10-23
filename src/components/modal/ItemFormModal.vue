@@ -492,7 +492,8 @@ watch(
       });
       photoPreview.value = '';
     }
-  }
+  },
+  { immediate: true }
 );
 
 const handleFileChange = async (e) => {
