@@ -300,7 +300,7 @@ watch(() => authStore.profileId, async (profileId) => {
 const formatMetric = (value) => value === null || value === undefined ? '—' : value;
 
 const openSavedOutfits = () => {
-  router.push({ path: '/bookmarks', query: { tab: 'outfits' } });
+  router.push({ path: '/shop', query: { tab: 'saved' } });
 };
 
 const openHelpHistory = () => {

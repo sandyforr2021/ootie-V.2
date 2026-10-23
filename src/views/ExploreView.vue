@@ -116,9 +116,8 @@
               @keydown.enter="openPostDetail(post.id)"
             >
               <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
-              <p v-if="post.curated" class="editorial-source">{{ $t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
               <p class="ootd-caption">{{ $t(post.caption) }}</p>
-              <div class="ootd-tags">{{ (post.hashtags || []).join('　') }}</div>
+              <div class="ootd-tags">{{ visiblePostTags(post.hashtags).join('　') }}</div>
             </div>
             <div v-if="post.tagged_items?.length" class="explore-tagged-items" aria-label="這套穿搭標註的衣櫥單品">
               <button
@@ -146,6 +145,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { useSocialStore } from '@/stores/social';
+import { visiblePostTags } from '@/services/styleCrew';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -181,7 +181,7 @@ const formatPostTime = (value) => {
 };
 
 const postStyleLabel = (post) => {
-  const tag = (post?.hashtags || []).find((entry) => !/^#?ootd$/i.test(String(entry)));
+  const tag = visiblePostTags(post?.hashtags).find((entry) => !/^#?ootd$/i.test(String(entry)));
   return tag ? String(tag).replace(/^#/, '') : '';
 };
 
@@ -221,9 +221,7 @@ const checkDeepLink = () => {
   if (postId) {
     const post = appStore.ootdPosts.find((p) => String(p.id) === String(postId));
     if (post) {
-      appStore.activeCommentPostId = post.id;
-      appStore.highlightedCommentId = commentId || null;
-      appStore.isCommentOpen = true;
+      router.replace({path:`/ootd/${post.id}`,query:{from:'explore',...(commentId?{comment:'1'}:{})}});
     }
   }
 };

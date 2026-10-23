@@ -24,7 +24,7 @@
 <script setup>
 import { editorialLook } from '@/services/editorial';
 import { isFixtureContent } from '@/services/contentAuthenticity';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useOotdStore } from '@/stores/ootd';
@@ -82,10 +82,10 @@ const hydrateTaggedItems = async (sourcePost) => {
   }
 };
 
-const openRequestedComments = () => {
+const openRequestedComments = async () => {
   if (!route.query.comment || !post.value) return;
-  appStore.activeCommentPostId = post.value.id;
-  appStore.isCommentOpen = true;
+  await nextTick();
+  document.getElementById(`post-comments-${post.value.id}`)?.scrollIntoView?.({block:'start'});
 };
 
 const updateShareMeta = () => {

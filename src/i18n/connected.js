@@ -57,7 +57,7 @@ AI 輔助製作的品牌穿搭靈感|Brand styling inspiration created with AI|A
 採用搭配|Choose this outfit|このコーデを採用|Elegir este conjunto
 返回個人檔案|Back to profile|プロフィールに戻る|Volver al perfil
 找不到這篇穿搭。|This look could not be found.|このコーデは見つかりません。|No se encontró este look.
-尚未發送任何照片給 YouCam。|No photos have been sent to YouCam.|YouCamにはまだ写真を送信していません。|Aún no se han enviado fotos a YouCam.
+尚未發送任何照片給 OOTIE。|No photos have been sent to OOTIE.|OOTIEにはまだ写真を送信していません。|Aún no se han enviado fotos a OOTIE.
 選擇本人照片並確認授權後，才會開始試穿。|Choose your photo and confirm consent to start a try-on.|本人の写真を選択し、同意後に試着が始まります。|Elige tu foto y confirma el consentimiento para iniciar la prueba.
 尚未建立穿搭紀錄|No looks yet|まだコーデがありません|Todavía no hay looks
 先從編輯精選找靈感，再分享你的穿搭。|Find inspiration in the edit, then share your own look.|エディットでヒントを見つけて、自分のコーデをシェア。|Inspírate en la selección y comparte tu look.
@@ -144,4 +144,5 @@ AI 輔助製作的品牌穿搭靈感|Brand styling inspiration created with AI|A
 商家限制自動讀取。請使用瀏覽器收藏助手，或上傳商品照片；購買連結會保留。|This store limits automatic imports. Use the browser companion or upload a product photo; your shopping link stays saved in the form.|このショップは自動取得を制限しています。ブラウザーツールか商品写真のアップロードをお使いください。購入リンクは入力欄に保持されます。|La tienda limita la importación automática. Usa el asistente o sube una foto; el enlace se conserva en el formulario.
 AI 試穿模擬|AI try-on preview|AI試着イメージ|Vista previa de prueba con IA
 {count} 件公開衣物 · 登入查看搭配建議|{count} shared pieces · Sign in to see suggestions|公開アイテム{count}点 · ログインして提案を見る|{count} prendas compartidas · Inicia sesión para ver sugerencias
+登入後留言|Sign in to comment|ログインしてコメント|Inicia sesión para comentar
 `;

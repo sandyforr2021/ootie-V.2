@@ -15,7 +15,7 @@ export class YouCamClient {
   }
 
   async request(path, body, version = 'v2.0') {
-    if (!this.apiKey) throw new GatewayError('YOUCAM_NOT_CONFIGURED', 503, 'YouCam 尚未設定。');
+    if (!this.apiKey) throw new GatewayError('YOUCAM_NOT_CONFIGURED', 503, '試穿服務尚未設定。');
     let response;
     try {
       response = await this.fetch(`${API_ORIGIN}/s2s/${version}/${path}`, {
@@ -28,7 +28,7 @@ export class YouCamClient {
     }
     const payload = await response.json().catch(() => null);
     if (!response.ok || payload?.status !== 200) {
-      throw new GatewayError('YOUCAM_REQUEST_FAILED', 502, 'YouCam 未完成這次請求。', { httpStatus: response.status });
+      throw new GatewayError('YOUCAM_REQUEST_FAILED', 502, '試穿服務未完成這次請求。', { httpStatus: response.status });
     }
     return payload.data ?? payload.result ?? payload.results;
   }

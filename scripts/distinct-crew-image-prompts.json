@@ -1,0 +1,218 @@
+[
+  {
+    "key": "office-new-01",
+    "image": "/images/style-crew/office-new-01.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one navy sleeveless wrap midi dress, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-new-02",
+    "image": "/images/style-crew/office-new-02.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one silver flat shoes, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-new-03",
+    "image": "/images/style-crew/office-new-03.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one coral cardigan, draped over a chair in a lived-in bedroom. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-new-04",
+    "image": "/images/style-crew/office-new-04.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one indigo straight jeans, laid on an oak floor with gentle window shadows. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-new-05",
+    "image": "/images/style-crew/office-new-05.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one cream crew neck tee, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-new-06",
+    "image": "/images/style-crew/office-new-06.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one white low top sneakers, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "office-story-1-distinct",
+    "image": "/images/style-crew/office-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/office-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a navy sleeveless wrap midi dress and silver flat shoes. Bare arms, NO blazer, NO trousers, NO lilac top. Scene: standing near a small art cinema entrance with a ticket in one hand, relaxed evening, entire body visible. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "office-story-2-distinct",
+    "image": "/images/style-crew/office-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/office-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: an open coral cardigan over a cream crew neck tee, indigo straight jeans and white sneakers. NO green blazer, NO lilac, NO ivory trousers. Scene: seated sideways on a red park bench resting her hands on the bench, natural weekend daylight, entire body visible. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "rain-new-01",
+    "image": "/images/style-crew/rain-new-01.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one rust wrap midi dress, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-new-02",
+    "image": "/images/style-crew/rain-new-02.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one tan flat sandals, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-new-03",
+    "image": "/images/style-crew/rain-new-03.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one sage green cardigan, draped over a chair in a lived-in bedroom. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-new-04",
+    "image": "/images/style-crew/rain-new-04.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one white crew neck tee, laid on an oak floor with gentle window shadows. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-new-05",
+    "image": "/images/style-crew/rain-new-05.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one charcoal wide leg trousers, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-new-06",
+    "image": "/images/style-crew/rain-new-06.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one cream canvas sneakers, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "rain-story-1-distinct",
+    "image": "/images/style-crew/rain-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/rain-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a rust orange wrap midi dress and tan flat sandals. NO blue coat, NO striped sweater, NO jeans, NO boots. Scene: walking through a sunny plant nursery carrying a small potted fern, entire body visible. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "rain-story-2-distinct",
+    "image": "/images/style-crew/rain-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/rain-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a sage green cardigan over a plain white tee, charcoal wide leg trousers and cream canvas sneakers. NO cobalt coat, NO stripes, NO jeans, NO burgundy boots. Scene: leaning casually against a balcony rail with a ceramic mug, late afternoon, entire body visible. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "train-new-01",
+    "image": "/images/style-crew/train-new-01.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one indigo linen midi dress, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "train-new-02",
+    "image": "/images/style-crew/train-new-02.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one tan leather sandals, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "train-new-03",
+    "image": "/images/style-crew/train-new-03.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one butter yellow button shirt, draped over a chair in a lived-in bedroom. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "train-new-04",
+    "image": "/images/style-crew/train-new-04.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one olive cropped trousers, laid on an oak floor with gentle window shadows. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "train-story-1-distinct",
+    "image": "/images/style-crew/train-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/train-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: an indigo sleeveless linen midi dress and tan leather sandals. NO coral cardigan, NO charcoal trousers, NO tote. Scene: looking over a menu outside a tiny neighborhood restaurant, full body, warm early evening. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "train-story-2-distinct",
+    "image": "/images/style-crew/train-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/train-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a butter yellow short sleeve button shirt, olive cropped trousers and white low top sneakers. NO coral cardigan, NO charcoal trousers, NO teal tote. Scene: squatting gently beside a small dog on a leafy riverside path, full body, candid afternoon light. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "gallery-new-01",
+    "image": "/images/style-crew/gallery-new-01.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one navy camp collar shirt, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "gallery-new-02",
+    "image": "/images/style-crew/gallery-new-02.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one cream linen shorts, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "gallery-new-03",
+    "image": "/images/style-crew/gallery-new-03.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one tan sandals, draped over a chair in a lived-in bedroom. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "gallery-new-04",
+    "image": "/images/style-crew/gallery-new-04.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one charcoal pleated trousers, laid on an oak floor with gentle window shadows. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "gallery-story-1-distinct",
+    "image": "/images/style-crew/gallery-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/gallery-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a navy short sleeve camp collar shirt worn closed, cream linen knee length shorts and tan flat sandals. NO lilac shirt, NO olive chinos, NO crossbody bag. Scene: seated on a low brick wall outside a record shop browsing an album sleeve, full body, summer daylight. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "gallery-story-2-distinct",
+    "image": "/images/style-crew/gallery-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/gallery-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a plain white crew neck tee with NO overshirt, charcoal pleated trousers, cream low top trainers and a navy canvas cap. NO lilac overshirt, NO olive chinos, NO shoulder bag. Scene: standing beside a basketball court holding an orange basketball at waist height, full body, candid late afternoon. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "market-new-01",
+    "image": "/images/style-crew/market-new-01.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one navy wide leg jumpsuit, on a wooden hanger against a bedroom door. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "market-new-02",
+    "image": "/images/style-crew/market-new-02.png",
+    "kind": "garment",
+    "prompt": "Photorealistic personal wardrobe phone photograph of exactly one white canvas sneakers, laid diagonally on a rumpled linen bedspread. Entire item or one pair of shoes fully in frame. Realistic fabric texture, small wrinkles, natural home light, portrait 4:5 composition, no person, no hands, no other clothes, no brand logo, no text, no collage, no white studio background. Fictional unbranded garment."
+  },
+  {
+    "key": "market-story-1-distinct",
+    "image": "/images/style-crew/market-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/market-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a pink and white striped cotton shirt tucked into a rust midi skirt, a washed denim jacket worn open and tan sandals. NO yellow dress, NO lavender cardigan. Scene: dancing gently on a terracotta rooftop at golden hour, full body, natural joyful movement. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "market-story-2-distinct",
+    "image": "/images/style-crew/market-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/market-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a navy short sleeve wide leg jumpsuit and white canvas sneakers, carrying a natural woven tote. NO yellow dress, NO lavender cardigan. Scene: stepping out of a neighborhood bakery with a paper bread bag, full body, overcast morning. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "coast-story-1-distinct",
+    "image": "/images/style-crew/coast-story-1-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/coast-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a blue and cream striped linen midi dress, cognac flat leather sandals and a natural straw hat. NO teal shirt, NO cream trousers, NO raspberry sneakers. Scene: seated at a small garden table reading, full body including sandals, soft afternoon sun. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  },
+  {
+    "key": "coast-story-2-distinct",
+    "image": "/images/style-crew/coast-story-2-distinct.png",
+    "kind": "story",
+    "reference": "/images/style-crew/coast-avatar.webp",
+    "prompt": "Create a NEW photorealistic candid full-body photograph of the SAME fictional adult person in the portrait reference. Reference role: FACE IDENTITY ONLY, not clothing. Preserve exact face, age, ethnicity, hair and glasses. REPLACE ALL CLOTHING with this exhaustive outfit: a sand colored cotton knit sweater, blue denim knee length shorts and raspberry pink canvas sneakers. NO teal shirt, NO cream long trousers, NO dress. Scene: standing on a small ferry deck looking back toward the camera, full body, cool coastal daylight. A different day, a different outfit. Show head, hands and feet completely inside frame with breathing room, natural realistic proportions and fabric, cheerful sophisticated lifestyle photography, portrait 4:5. The outfit specification takes priority over ANY clothing visible in the portrait reference. No unlisted layers or accessories, no text, no logo, no collage. Do not reuse the portrait pose or background."
+  }
+]

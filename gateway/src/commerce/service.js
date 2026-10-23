@@ -21,6 +21,20 @@ export class CommerceService {
     return { enabled: this.enabled && active && remaining >= 2, remainingUnits: active ? remaining : 0,
       costs: { try_on: 2, skin_tone: 20 }, expiresAt: budget?.expires_at || null, provider: 'youcam', automaticTopUp: false };
   }
+  async withPublicAuthors(posts) {
+    const users=[...new Set(posts.map(post=>post.user_id).filter(isUuid))];
+    const profiles=await this.repository.publicAuthors(users);
+    return posts.map(post=>{
+      const profile=profiles.find(p=>p.user_id===post.user_id);
+      return {id:post.id,title:post.title,caption:post.caption,image_url:post.image_url,source_url:post.source_url,created_at:post.created_at,
+        author:profile?{id:profile.id,username:profile.username,displayName:profile.display_name,initials:profile.initials,avatarUrl:profile.avatar_url}:null};
+    });
+  }
+  async publicPosts() { return this.withPublicAuthors(await this.repository.posts()); }
+  async publicPost(id) {
+    const post=await this.repository.post(id);
+    return post?(await this.withPublicAuthors([post]))[0]:null;
+  }
   async preview(body) {
     const page = await this.download(publicHttpUrl(body?.url), { maxBytes: 2 * 1024 * 1024 });
     assert(page.mimeType === 'text/html', 'PRODUCT_CONTENT_UNSUPPORTED', 422, '此頁面無法讀取，請手動填寫商品。');
@@ -46,7 +60,7 @@ export class CommerceService {
   }
   async enqueue(user, body) {
     assert(this.enabled, 'YOUCAM_DISABLED', 503, '試穿服務尚未開啟。');
-    assert(body?.consent === true, 'PHOTO_CONSENT_REQUIRED', 400, '請確認同意將選用照片交由 YouCam 處理。');
+    assert(body?.consent === true, 'PHOTO_CONSENT_REQUIRED', 400, '請確認同意將選用照片交由 OOTIE 及其影像處理服務供應商處理。');
     assert(isUuid(body?.batchId), 'INVALID_BATCH', 400, '缺少有效的提交編號。');
     assert(Object.hasOwn(YOUCAM_FEATURES, body?.kind || ''), 'INVALID_JOB_KIND', 400, '請選擇試穿或配色分析。');
     assert(validPath(body?.personPath, `person/${user.id}/`), 'PERSON_IMAGE_NOT_OWNED', 403, '請選擇自己的私人照片。');
@@ -79,7 +93,7 @@ export class CommerceService {
     const job = await this.repository.job(body.jobId, user.id);
     assert(job?.status === 'succeeded' && job.kind === 'try_on' && job.result_path, 'RESULT_NOT_READY', 409, '試穿完成後才能分享。');
     const existing = await this.repository.post(job.id);
-    if (existing) return existing;
+    if (existing) return (await this.withPublicAuthors([existing]))[0];
     const product = await this.repository.product(job.product_id, user.id);
     assert(product, 'PRODUCT_NOT_FOUND', 404);
     const caption = String(body.caption || '').trim();
@@ -89,8 +103,9 @@ export class CommerceService {
     await this.storage.serviceRequest(`/storage/v1/object/ootie-shop-shares/${path}`, {
       method: 'POST', headers: { 'Content-Type': image.mimeType, 'x-upsert': 'true' }, body: image.buffer
     });
-    return this.repository.publish({ id: job.id, job_id: job.id, user_id: user.id, title: product.title, caption,
+    const published = await this.repository.publish({ id: job.id, job_id: job.id, user_id: user.id, title: product.title, caption,
       source_url: product.source_url, image_url: `${this.storage.url}/storage/v1/object/public/ootie-shop-shares/${path}` });
+    return (await this.withPublicAuthors([published]))[0];
   }
   async recordEvent(user, body) {
     assert(isUuid(body?.id) && ['purchase_click','share_link'].includes(body?.type), 'INVALID_EVENT', 400);

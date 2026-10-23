@@ -28,12 +28,12 @@ onMounted(() => { void ootdStore.loadRemotePosts(); });
 
 <template>
   <section class="page active atelier-home" id="homePage">
-    <header class="home-edition"><span>{{ $t('每天，都更像自己。') }}</span><span>OOTIE × YouCam</span></header>
+    <header class="home-edition"><span>{{ $t('每天，都更像自己。') }}</span><span>OOTIE</span></header>
     <section class="atelier-hero">
       <div class="atelier-hero-copy">
         <h1>{{ $t('買之前，') }}<em>{{ $t('先穿進自己的生活。') }}</em></h1>
         <p v-if="isMember" class="member-greeting">{{ $t('歡迎回來，') }} {{ firstName }}</p>
-        <p class="atelier-lead">{{ $t('收藏想買的商品，用 YouCam 看見本人試穿，再找到能一起穿的衣櫥舊愛。') }}</p>
+        <p class="atelier-lead">{{ $t('收藏想買的商品，用 OOTIE 看見本人試穿，再找到能一起穿的衣櫥舊愛。') }}</p>
         <router-link class="primary atelier-action" to="/shop">{{ $t('開始購物試穿') }}<AppIcon name="arrow" :size="19" /></router-link>
         <router-link class="atelier-text-link" to="/closet">{{ $t('查看我的衣櫥') }}<AppIcon name="chevron" :size="16" /></router-link>
         <p class="atelier-private"><AppIcon name="lock" :size="14" />{{ $t('照片只屬於你，分享由你決定。') }}</p>
@@ -43,7 +43,7 @@ onMounted(() => { void ootdStore.loadRemotePosts(); });
 
     <nav class="atelier-journey" :aria-label="$t('從收藏到穿搭')">
       <router-link to="/shop"><span>01</span><div><strong>{{ $t('收藏心動商品') }}</strong><small>{{ $t('商品連結或照片，都可以') }}</small></div><AppIcon name="arrow" :size="18" /></router-link>
-      <router-link to="/shop"><span>02</span><div><strong>{{ $t('看見本人試穿') }}</strong><small>{{ $t('YouCam 產生私人試穿預覽') }}</small></div><AppIcon name="arrow" :size="18" /></router-link>
+      <router-link to="/shop"><span>02</span><div><strong>{{ $t('看見本人試穿') }}</strong><small>{{ $t('OOTIE 產生私人試穿預覽') }}</small></div><AppIcon name="arrow" :size="18" /></router-link>
       <router-link to="/closet"><span>03</span><div><strong>{{ $t('配上衣櫥舊愛') }}</strong><small>{{ $t('找到更多穿法，再做決定') }}</small></div><AppIcon name="arrow" :size="18" /></router-link>
     </nav>
 

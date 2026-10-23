@@ -34,10 +34,10 @@ export function createGatewayApp({ config, supabase, provider, generationService
       }
 
       const ok = (body, status = 200) => ({ status, headers: { ...JSON_HEADERS, ...corsHeaders, 'Cache-Control': 'no-store' }, body });
-      if (commerceService && method === 'GET' && path === '/v1/shop/posts') return ok({ posts: await commerceService.repository.posts() });
+      if (commerceService && method === 'GET' && path === '/v1/shop/posts') return ok({ posts: await commerceService.publicPosts() });
       const publicPost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
       if (commerceService && method === 'GET' && publicPost) {
-        const post = await commerceService.repository.post(publicPost[1]);
+        const post = await commerceService.publicPost(publicPost[1]);
         if (!post) throw new GatewayError('POST_NOT_FOUND', 404, '找不到分享內容。');
         return ok({ post });
       }

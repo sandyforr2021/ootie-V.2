@@ -1,6 +1,6 @@
 import { t } from '@/i18n';
 
-const DEFAULT_DESCRIPTION = 'OOTIE 整合數位衣櫥、商品收藏、YouCam 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。';
+const DEFAULT_DESCRIPTION = 'OOTIE 整合數位衣櫥、商品收藏、OOTIE 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。';
 const ROUTE_TITLES = {
   Home: 'OOTIE｜你的衣櫥，更多穿搭可能', Explore: '探索 OOTD｜OOTIE', Closet: '我的衣櫥｜OOTIE',
   Bookmarks: '書籤與收藏穿搭｜OOTIE', Stats: '衣櫥統計｜OOTIE', Sos: '穿搭 SOS｜OOTIE',

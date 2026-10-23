@@ -1,43 +1,43 @@
 <template>
-  <section class="page active saved-outfits-page">
+  <section class="page active saved-outfits-page" :class="{'studio-collection':embedded}">
     <header class="core-page-hero saved-outfits-page-hero">
       <div>
-        <p class="eyebrow">My saved looks</p>
-        <h1>我的收藏</h1>
-        <p class="intro">這裡只顯示你收藏的 OOTD 與衣友求救，不混入商品／品牌書籤。</p>
+                <h2>{{ $t('收藏靈感') }}</h2>
+        <p class="intro">{{ $t('收藏的穿搭與衣友求救，隨時回來找靈感。') }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">looks worth<br />remembering ♡</p>
     </header>
 
-    <p v-if="loading" class="saved-outfits-state">正在載入收藏穿搭…</p>
+    <p v-if="loading" class="saved-outfits-state">{{ $t('正在載入收藏穿搭…') }}</p>
     <div v-else-if="errorMessage" class="saved-outfits-state is-error">
       <p>{{ errorMessage }}</p>
       <p class="saved-outfits-hint">{{ $t("收藏喜歡的穿搭，隨時回來找靈感。") }}</p>
     </div>
     <div v-else-if="entries.length" class="saved-outfits-grid">
       <article v-for="entry in entries" :key="entry.key" class="saved-outfit-card">
-        <p class="eyebrow">{{ entry.target_type === 'SOS' ? '衣友求救' : 'OOTD' }}</p>
+        <p class="eyebrow">{{ entry.target_type === 'SOS' ? $t('衣友求救') : 'OOTD' }}</p>
         <template v-if="entry.target">
           <img v-if="entry.target.image" class="saved-outfit-image" :src="entry.target.image" :alt="entry.title" />
           <h2>{{ entry.title }}</h2>
           <p>{{ entry.subtitle }}</p>
-          <button type="button" class="secondary" @click="openEntry(entry)">查看內容</button>
+          <button type="button" class="secondary" @click="openEntry(entry)">{{ $t('查看內容') }}</button>
         </template>
         <template v-else>
-          <h2>此內容已不存在</h2>
-          <p>原始貼文或求救已無法取得。</p>
+          <h2>{{ $t('此內容已不存在') }}</h2>
+          <p>{{ $t('原始貼文或求救已無法取得。') }}</p>
         </template>
-        <button type="button" class="text-button" @click="removeEntry(entry)">移除收藏</button>
+        <button type="button" class="text-button" @click="removeEntry(entry)">{{ $t('移除收藏') }}</button>
       </article>
     </div>
     <div v-else class="saved-outfits-state">
-      <h2>還沒有收藏的穿搭</h2>
-      <p>在探索或衣友求救板按下收藏，就會顯示在這裡。</p>
+      <h2>{{ $t('還沒有收藏的穿搭') }}</h2>
+      <p>{{ $t('在探索或衣友求救板按下收藏，就會顯示在這裡。') }}</p>
     </div>
   </section>
 </template>
 
 <script setup>
+defineProps({embedded:{type:Boolean,default:false}});
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
@@ -107,7 +107,7 @@ const removeEntry = async (entry) => {
 
 const openEntry = (entry) => {
   if (entry.target_type === 'OOTD') {
-    router.push({ path: `/ootd/${entry.target_id}`, query: { user: entry.target?.username, from: 'bookmarks' } });
+    router.push({ path: `/ootd/${entry.target_id}`, query: { user: entry.target?.username, from: 'shop' } });
   } else {
     appStore.activeSosDetailId = entry.target_id;
     appStore.isSosDetailOpen = true;
@@ -125,6 +125,7 @@ watch(() => authStore.profileId, (profileId) => {
 </script>
 
 <style scoped>
+.studio-collection{padding:0}.studio-collection .core-page-hero{padding:0 0 24px;background:transparent}.studio-collection .core-page-note{display:none}
 .saved-outfits-page { max-width:1180px; margin:0 auto; padding-bottom:72px; }
 .saved-outfits-page-hero { background:radial-gradient(circle at 82% 18%, rgba(247,221,105,.62) 0 8%, transparent 9%),linear-gradient(128deg,var(--accent-pink-soft),#fff 52%,var(--accent-blue-soft)); }
 .saved-outfits-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }

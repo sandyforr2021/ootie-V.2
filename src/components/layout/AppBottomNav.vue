@@ -54,7 +54,7 @@
         </button>
         <button type="button" class="quick-action-item" @click="triggerQuickAction('add-bookmark')">
           <span class="quick-action-icon" aria-hidden="true">▣</span>
-          <span><strong>{{ $t("加入書籤") }}</strong><small>{{ $t("收藏商品與穿搭靈感") }}</small></span>
+          <span><strong>{{ $t("收藏商品") }}</strong><small>{{ $t("收藏商品與穿搭靈感") }}</small></span>
         </button>
       </div>
 
@@ -90,7 +90,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useBookmarksStore } from '@/stores/bookmarks';
 import { useSocialStore } from '@/stores/social';
 import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS } from '@/router/navigation';
 import { GUEST_CLOSET_LIMIT, readGuestCloset } from '@/services/guestAccess';
@@ -98,7 +97,6 @@ import AppIcon from '@/components/ui/AppIcon.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
-const bookmarksStore = useBookmarksStore();
 const socialStore = useSocialStore();
 const route = useRoute();
 const router = useRouter();
@@ -171,8 +169,7 @@ const triggerQuickAction = (action) => {
     if (route.path === '/sos') appStore.isSosFormOpen = true;
     else router.push({ path: '/sos', query: { quick: 'add-sos' } });
   } else if (action === 'add-bookmark') {
-    if (route.path === '/bookmarks') bookmarksStore.openCreateForm();
-    else router.push({ path: '/bookmarks', query: { quick: 'add-bookmark' } });
+    router.push({ path: '/shop', query: { tab: 'wishlist', quick: 'add-product' } });
   }
 };
 
@@ -185,7 +182,7 @@ watch(
       if (authStore.isMember) appStore.isOotdFormOpen = true;
       else appStore.openLoginGate('OOTD_PUBLISH_AUTH_REQUIRED', '/explore?quick=add-ootd');
     } else if (action === 'add-sos') appStore.isSosFormOpen = true;
-    else if (action === 'add-bookmark') bookmarksStore.openCreateForm();
+    else if (action === 'add-bookmark' && route.path !== '/shop') router.replace({path:'/shop',query:{tab:'wishlist',quick:'add-product'}});
   },
   { immediate: true }
 );

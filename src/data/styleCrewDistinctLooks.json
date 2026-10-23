@@ -1,0 +1,314 @@
+[
+  {
+    "key": "office",
+    "name": "Clara",
+    "newItems": [
+      {
+        "key": "office-new-01",
+        "name": "navy sleeveless wrap midi dress",
+        "category": "Dresses",
+        "image": "/images/style-crew/office-new-01.webp"
+      },
+      {
+        "key": "office-new-02",
+        "name": "silver flat shoes",
+        "category": "Shoes",
+        "image": "/images/style-crew/office-new-02.webp"
+      },
+      {
+        "key": "office-new-03",
+        "name": "coral cardigan",
+        "category": "Outerwear",
+        "image": "/images/style-crew/office-new-03.webp"
+      },
+      {
+        "key": "office-new-04",
+        "name": "indigo straight jeans",
+        "category": "Bottoms",
+        "image": "/images/style-crew/office-new-04.webp"
+      },
+      {
+        "key": "office-new-05",
+        "name": "cream crew neck tee",
+        "category": "Tops",
+        "image": "/images/style-crew/office-new-05.webp"
+      },
+      {
+        "key": "office-new-06",
+        "name": "white low top sneakers",
+        "category": "Shoes",
+        "image": "/images/style-crew/office-new-06.webp"
+      }
+    ],
+    "looks": [
+      {
+        "key": "office-story-1-distinct",
+        "postKey": "office-story-1",
+        "image": "/images/style-crew/office-story-1-distinct.webp",
+        "wear": [
+          "office-new-01",
+          "office-new-02"
+        ],
+        "caption": "A navy dress and silver flats for a small cinema night."
+      },
+      {
+        "key": "office-story-2-distinct",
+        "postKey": "office-story-2",
+        "image": "/images/style-crew/office-story-2-distinct.webp",
+        "wear": [
+          "office-new-03",
+          "office-new-04",
+          "office-new-05",
+          "office-new-06"
+        ],
+        "caption": "Coral knitwear, jeans and a slow weekend afternoon."
+      }
+    ]
+  },
+  {
+    "key": "rain",
+    "name": "Iris",
+    "newItems": [
+      {
+        "key": "rain-new-01",
+        "name": "rust wrap midi dress",
+        "category": "Dresses",
+        "image": "/images/style-crew/rain-new-01.webp"
+      },
+      {
+        "key": "rain-new-02",
+        "name": "tan flat sandals",
+        "category": "Shoes",
+        "image": "/images/style-crew/rain-new-02.webp"
+      },
+      {
+        "key": "rain-new-03",
+        "name": "sage green cardigan",
+        "category": "Outerwear",
+        "image": "/images/style-crew/rain-new-03.webp"
+      },
+      {
+        "key": "rain-new-04",
+        "name": "white crew neck tee",
+        "category": "Tops",
+        "image": "/images/style-crew/rain-new-04.webp"
+      },
+      {
+        "key": "rain-new-05",
+        "name": "charcoal wide leg trousers",
+        "category": "Bottoms",
+        "image": "/images/style-crew/rain-new-05.webp"
+      },
+      {
+        "key": "rain-new-06",
+        "name": "cream canvas sneakers",
+        "category": "Shoes",
+        "image": "/images/style-crew/rain-new-06.webp"
+      }
+    ],
+    "looks": [
+      {
+        "key": "rain-story-1-distinct",
+        "postKey": "rain-story-1",
+        "image": "/images/style-crew/rain-story-1-distinct.webp",
+        "wear": [
+          "rain-new-01",
+          "rain-new-02"
+        ],
+        "caption": "Rust linen and sandals for a sunny stop at the plant nursery."
+      },
+      {
+        "key": "rain-story-2-distinct",
+        "postKey": "rain-story-2",
+        "image": "/images/style-crew/rain-story-2-distinct.webp",
+        "wear": [
+          "rain-new-03",
+          "rain-new-04",
+          "rain-new-05",
+          "rain-new-06"
+        ],
+        "caption": "Sage layers and charcoal trousers for a quiet afternoon at home."
+      }
+    ]
+  },
+  {
+    "key": "train",
+    "name": "Mei",
+    "newItems": [
+      {
+        "key": "train-new-01",
+        "name": "indigo linen midi dress",
+        "category": "Dresses",
+        "image": "/images/style-crew/train-new-01.webp"
+      },
+      {
+        "key": "train-new-02",
+        "name": "tan leather sandals",
+        "category": "Shoes",
+        "image": "/images/style-crew/train-new-02.webp"
+      },
+      {
+        "key": "train-new-03",
+        "name": "butter yellow button shirt",
+        "category": "Tops",
+        "image": "/images/style-crew/train-new-03.webp"
+      },
+      {
+        "key": "train-new-04",
+        "name": "olive cropped trousers",
+        "category": "Bottoms",
+        "image": "/images/style-crew/train-new-04.webp"
+      }
+    ],
+    "looks": [
+      {
+        "key": "train-story-1-distinct",
+        "postKey": "train-story-1",
+        "image": "/images/style-crew/train-story-1-distinct.webp",
+        "wear": [
+          "train-new-01",
+          "train-new-02"
+        ],
+        "caption": "An indigo dress for dinner around the corner."
+      },
+      {
+        "key": "train-story-2-distinct",
+        "postKey": "train-story-2",
+        "image": "/images/style-crew/train-story-2-distinct.webp",
+        "wear": [
+          "train-new-03",
+          "train-new-04",
+          "train-05"
+        ],
+        "caption": "Yellow and olive for the longer route home."
+      }
+    ]
+  },
+  {
+    "key": "gallery",
+    "name": "Kai",
+    "newItems": [
+      {
+        "key": "gallery-new-01",
+        "name": "navy camp collar shirt",
+        "category": "Tops",
+        "image": "/images/style-crew/gallery-new-01.webp"
+      },
+      {
+        "key": "gallery-new-02",
+        "name": "cream linen shorts",
+        "category": "Bottoms",
+        "image": "/images/style-crew/gallery-new-02.webp"
+      },
+      {
+        "key": "gallery-new-03",
+        "name": "tan sandals",
+        "category": "Shoes",
+        "image": "/images/style-crew/gallery-new-03.webp"
+      },
+      {
+        "key": "gallery-new-04",
+        "name": "charcoal pleated trousers",
+        "category": "Bottoms",
+        "image": "/images/style-crew/gallery-new-04.webp"
+      }
+    ],
+    "looks": [
+      {
+        "key": "gallery-story-1-distinct",
+        "postKey": "gallery-story-1",
+        "image": "/images/style-crew/gallery-story-1-distinct.webp",
+        "wear": [
+          "gallery-new-01",
+          "gallery-new-02",
+          "gallery-new-03"
+        ],
+        "caption": "Navy, cream and a record-shop detour."
+      },
+      {
+        "key": "gallery-story-2-distinct",
+        "postKey": "gallery-story-2",
+        "image": "/images/style-crew/gallery-story-2-distinct.webp",
+        "wear": [
+          "gallery-02",
+          "gallery-new-04",
+          "gallery-04",
+          "gallery-05"
+        ],
+        "caption": "A white tee and charcoal trousers after a walk through the neighborhood."
+      }
+    ]
+  },
+  {
+    "key": "market",
+    "name": "Amara",
+    "newItems": [
+      {
+        "key": "market-new-01",
+        "name": "navy wide leg jumpsuit",
+        "category": "Dresses",
+        "image": "/images/style-crew/market-new-01.webp"
+      },
+      {
+        "key": "market-new-02",
+        "name": "white canvas sneakers",
+        "category": "Shoes",
+        "image": "/images/style-crew/market-new-02.webp"
+      }
+    ],
+    "looks": [
+      {
+        "key": "market-story-1-distinct",
+        "postKey": "market-story-1",
+        "image": "/images/style-crew/market-story-1-distinct.webp",
+        "wear": [
+          "market-06",
+          "market-07",
+          "market-05",
+          "market-04"
+        ],
+        "caption": "Pink stripes, rust and denim for a rooftop evening."
+      },
+      {
+        "key": "market-story-2-distinct",
+        "postKey": "market-story-2",
+        "image": "/images/style-crew/market-story-2-distinct.webp",
+        "wear": [
+          "market-new-01",
+          "market-new-02",
+          "market-03"
+        ],
+        "caption": "A navy jumpsuit and a fresh loaf on the way home."
+      }
+    ]
+  },
+  {
+    "key": "coast",
+    "name": "Elise",
+    "newItems": [],
+    "looks": [
+      {
+        "key": "coast-story-1-distinct",
+        "postKey": "coast-story-1",
+        "image": "/images/style-crew/coast-story-1-distinct.webp",
+        "wear": [
+          "coast-06",
+          "coast-09",
+          "coast-07"
+        ],
+        "caption": "Striped linen, a garden chair and a good book."
+      },
+      {
+        "key": "coast-story-2-distinct",
+        "postKey": "coast-story-2",
+        "image": "/images/style-crew/coast-story-2-distinct.webp",
+        "wear": [
+          "coast-04",
+          "coast-08",
+          "coast-03"
+        ],
+        "caption": "A sand knit, denim shorts and the next ferry across the bay."
+      }
+    ]
+  }
+]

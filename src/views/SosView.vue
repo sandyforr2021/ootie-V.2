@@ -65,7 +65,6 @@
             </div>
           </div>
 
-          <p v-if="post.curated" class="editorial-source">{{ t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
           <h2>{{ post.title }}</h2>
 
           <div class="sos-meta">

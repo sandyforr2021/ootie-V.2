@@ -9,7 +9,6 @@ const OotdDetailView = () => import('@/views/OotdDetailView.vue');
 const StatsView = () => import('@/views/StatsView.vue');
 const AiView = () => import('@/views/AiView.vue');
 const TryonView = () => import('@/views/TryonView.vue');
-const BookmarksView = () => import('@/views/BookmarksView.vue');
 const HelpHistoryView = () => import('@/views/HelpHistoryView.vue');
 const SubscriptionView = () => import('@/views/SubscriptionView.vue');
 const SettingsView = () => import('@/views/SettingsView.vue');
@@ -22,7 +21,7 @@ const routes = [
   { path: '/home', redirect: '/' },
   { path: '/shop', name: 'Shop', component: ShopView },
   { path: '/closet', name: 'Closet', component: ClosetView },
-  { path: '/bookmarks', name: 'Bookmarks', component: BookmarksView },
+  { path: '/bookmarks', name: 'Bookmarks', redirect: (to) => ({ path: '/shop', query: { ...to.query, tab: to.query.tab === 'outfits' ? 'saved' : 'links' } }) },
   { path: '/stats', name: 'Stats', component: StatsView },
   { path: '/explore', name: 'Explore', component: ExploreView },
   { path: '/sos', name: 'Sos', component: SosView },

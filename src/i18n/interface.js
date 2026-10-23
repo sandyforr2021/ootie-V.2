@@ -69,10 +69,10 @@ export const interfaceMessages = `
 重試|Retry|再試行|Reintentar
 買之前，|Before you buy,|買う前に、|Antes de comprar,
 先穿進自己的生活。|see it in your life.|自分の日常に合わせて。|imagínalo en tu vida.
-收藏想買的商品，用 YouCam 看見本人試穿，再找到能一起穿的衣櫥舊愛。|Save a find, try it on with YouCam, and pair it with clothes you already own.|気になる商品を保存してYouCamで試着。手持ちの服との組み合わせも。|Guarda un producto, pruébatelo con YouCam y combínalo con prendas que ya tienes.
+收藏想買的商品，用 OOTIE 看見本人試穿，再找到能一起穿的衣櫥舊愛。|Save a find, try it on with OOTIE, and pair it with clothes you already own.|気になる商品を保存してOOTIEで試着。手持ちの服との組み合わせも。|Guarda un producto, pruébatelo con OOTIE y combínalo con prendas que ya tienes.
 開始購物試穿|Start trying on|ショッピング試着を始める|Empezar a probar
 看看大家的試穿|Explore shared looks|みんなの試着を見る|Ver looks compartidos
-商品收藏 · YouCam 試穿 · 衣櫥搭配 · 穿搭分享|Save · Try on · Pair · Share|保存 · 試着 · 組み合わせ · 共有|Guardar · Probar · Combinar · Compartir
+商品收藏 · OOTIE 試穿 · 衣櫥搭配 · 穿搭分享|Save · Try on · Pair · Share|保存 · 試着 · 組み合わせ · 共有|Guardar · Probar · Combinar · Compartir
 在明亮衣櫥前挑選柔黃色針織衫的穿搭情境|Wardrobe inspiration with a soft yellow knit|明るいワードローブと黄色のニットのイメージ|Inspiración de armario con un jersey amarillo suave
 最近最受歡迎的穿搭|Outfit inspiration|コーデのアイデア|Inspiración de looks
 探索更多 →|Explore more →|もっと見る →|Explorar más →
@@ -210,7 +210,7 @@ SOS 求救|Style SOS|コーデ相談|Ayuda de estilo
 加入一張單品照片|Add an item photo|アイテムの写真を追加|Añadir foto de prenda
 重新拍攝|Retake photo|撮り直す|Repetir foto
 拍照|Take photo|撮影|Hacer foto
-OOTIE 整合數位衣櫥、商品收藏、YouCam 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。|Save products, try them on with YouCam and pair them with your own wardrobe before you buy.|商品を保存し、YouCam で試着して手持ちの服と合わせ、購入前に検討できます。|Guarda productos, pruébatelos con YouCam y combínalos con tu armario antes de comprar.
+OOTIE 整合數位衣櫥、商品收藏、OOTIE 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。|Save products, try them on with OOTIE and pair them with your own wardrobe before you buy.|商品を保存し、OOTIE で試着して手持ちの服と合わせ、購入前に検討できます。|Guarda productos, pruébatelos con OOTIE y combínalos con tu armario antes de comprar.
 OOTIE｜你的衣櫥，更多穿搭可能|OOTIE — Before you buy|OOTIE — 買う前に試そう|OOTIE — Antes de comprar
 OOTIE｜數位衣櫥與穿搭社群|OOTIE — Your wardrobe and style community|OOTIE — ワードローブとスタイルコミュニティ|OOTIE — Tu armario y comunidad de estilo
 購物試穿｜OOTIE|Shopping studio — OOTIE|ショッピングスタジオ — OOTIE|Estudio de compras — OOTIE
@@ -229,5 +229,5 @@ OOTD 詳情｜OOTIE|Outfit details — OOTIE|コーデの詳細 — OOTIE|Detall
 找不到頁面｜OOTIE|Page not found — OOTIE|ページが見つかりません — OOTIE|Página no encontrada — OOTIE
 畫面發生未預期錯誤，請重試。|Something went wrong. Please try again.|問題が発生しました。もう一度お試しください。|Algo salió mal. Inténtalo de nuevo.
 原有穿搭示範|Original outfit showcase|既存のコーデサンプル|Muestra de conjuntos originales
-此區含預先建立的示範人物、穿搭與互動數字，不代表真實使用人數、YouCam 產圖或營收。|This area includes seeded profiles, outfits and interaction counts. These do not represent real users, YouCam results or revenue.|このエリアには事前作成のプロフィール、コーデ、操作数が含まれます。実際の利用者数、YouCam の生成結果、売上ではありません。|Esta sección incluye perfiles, conjuntos y cifras de interacción de demostración. No representan usuarios reales, resultados de YouCam ni ingresos.
+此區含預先建立的示範人物、穿搭與互動數字，不代表真實使用人數、OOTIE 產圖或營收。|This area includes seeded profiles, outfits and interaction counts. These do not represent real users, OOTIE results or revenue.|このエリアには事前作成のプロフィール、コーデ、操作数が含まれます。実際の利用者数、OOTIE の生成結果、売上ではありません。|Esta sección incluye perfiles, conjuntos y cifras de interacción de demostración. No representan usuarios reales, resultados de OOTIE ni ingresos.
 `;

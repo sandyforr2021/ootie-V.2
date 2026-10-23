@@ -47,7 +47,7 @@ OOTIE 會從商品頁讀取可公開取得的結構化資料；辨識不到的�
 收藏心動商品|Save a new find|気になる商品を保存|Guarda un hallazgo
 商品連結或照片，都可以|A product link or photo is all you need|商品リンクでも写真でも|Con un enlace o una foto
 看見本人試穿|See it on you|自分で試着してみる|Pruébatelo virtualmente
-YouCam 產生私人試穿預覽|Your private preview, made with YouCam|YouCam で非公開の試着プレビュー|Tu vista previa privada con YouCam
+OOTIE 產生私人試穿預覽|Your private preview, made with OOTIE|OOTIE で非公開の試着プレビュー|Tu vista previa privada con OOTIE
 配上衣櫥舊愛|Pair it with your favorites|手持ちのお気に入りと合わせる|Combínalo con tus favoritos
 找到更多穿法，再做決定|Find more ways to wear it. Then decide.|着こなしを見つけてから、決める。|Descubre cómo llevarlo. Después decide.
 屬於你的日常|YOUR EVERYDAY COLLECTION|あなたの日常コレクション|TU COLECCIÓN DIARIA

@@ -1,3 +1,4 @@
+import { studioMessages } from './studio.js';
 import { wardrobeInsightsMessages } from './wardrobeInsights.js';
 import { shopMessages } from './shop.js';
 import { interfaceMessages } from './interface.js';
@@ -14,4 +15,4 @@ export function rowsToMessages(rows) {
     return [zh, { 'zh-TW': zh, en, ja, es }];
   }));
 }
-export const messages = { ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages) };
+export const messages = { ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages), ...rowsToMessages(studioMessages) };

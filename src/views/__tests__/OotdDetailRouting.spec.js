@@ -94,16 +94,16 @@ describe('OOTD author profile context routing', () => {
     expect(decodeHref(wrapper.find('a.secondary'))).toContain(`/profile?user=${username}`);
   });
 
-  it('opens the existing comment interaction when Explore requests it in Post Detail', async () => {
+  it('shows comments inline without a second dialog when Explore requests them', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const post = appStore.ootdPosts[0];
 
     await router.push(`/ootd/${post.id}?user=${encodeURIComponent(post.username)}&from=explore&comment=1`);
-    mount(OotdDetailView, { global: { plugins: [router] } });
+    const wrapper=mount(OotdDetailView, { global: { plugins: [router] } });
     await flushPromises();
 
-    expect(appStore.isCommentOpen).toBe(true);
-    expect(appStore.activeCommentPostId).toBe(post.id);
+    expect(appStore.isCommentOpen).toBe(false);
+    expect(wrapper.find(`#post-comments-${post.id}`).exists()).toBe(true);
   });
 });

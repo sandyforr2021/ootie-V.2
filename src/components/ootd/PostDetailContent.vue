@@ -79,10 +79,9 @@
 
     <div class="ootd-body">
       <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
-      <p v-if="post.curated" class="editorial-source">{{ $t('OOTIE Style Crew · 團隊策展穿搭故事') }}</p>
       <h2>{{ $t(post.caption || '今日的穿搭') }}</h2>
       <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
-        {{ post.hashtags.join('　') }}
+        {{ visiblePostTags(post.hashtags).join('　') }}
       </div>
 
       <section v-if="taggedItems.length" class="ootd-tagged-section" aria-label="本套使用單品">
@@ -107,12 +106,12 @@
       <router-link v-if="post.editorial" class="primary" to="/closet">{{ $t('從自己的衣櫥搭出相似風格') }}</router-link>
 
       <div class="ootd-actions post-detail-secondary-actions">
-        <button type="button" class="secondary" @click="openComments">查看留言</button>
         <router-link v-if="authorProfileRoute && !post.editorial" :to="authorProfileRoute" class="secondary">
           查看個人主頁
         </router-link>
         <button v-if="isSelfAuthor && !post.editorial" type="button" class="secondary ootd-delete-action" @click="deletePost">刪除</button>
       </div>
+      <PostComments ref="commentsSection" :post="post" />
     </div>
   </article>
 </template>
@@ -125,6 +124,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useSocialStore } from '@/stores/social';
 import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
 import { labels } from '@/constants';
+import PostComments from './PostComments.vue';
+import { visiblePostTags } from '@/services/styleCrew';
 
 const emit = defineEmits(['deleted']);
 
@@ -144,6 +145,7 @@ const ootdStore = useOotdStore();
 const authStore = useAuthStore();
 const socialStore = useSocialStore();
 const pendingInteractions = ref(new Set());
+const commentsSection = ref(null);
 
 const authorUsername = computed(() => {
   return props.post.username ? appStore.normalizeUsername(props.post.username) : '';
@@ -193,8 +195,7 @@ const runPostAction = async (action, callback) => {
 };
 
 const openComments = () => {
-  appStore.activeCommentPostId = props.post.id;
-  appStore.isCommentOpen = true;
+  commentsSection.value?.focusComposer();
 };
 
 const sharePost = () => {

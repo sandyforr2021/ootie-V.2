@@ -22,8 +22,12 @@ export class CommerceRepository {
     if (rows.length !== 1) throw new GatewayError('JOB_LEASE_LOST', 409, '任務已交由其他工作程序處理。');
     return rows[0];
   }
-  posts() { return this.request('ootie_shop_posts', '?select=id,title,caption,image_url,source_url,created_at&order=created_at.desc&limit=60'); }
-  async post(id) { return (await this.request('ootie_shop_posts', `?id=eq.${id}&select=id,title,caption,image_url,source_url,created_at&limit=1`))?.[0]; }
+  posts() { return this.request('ootie_shop_posts', '?select=id,user_id,title,caption,image_url,source_url,created_at&order=created_at.desc&limit=60'); }
+  async post(id) { return (await this.request('ootie_shop_posts', `?id=eq.${id}&select=id,user_id,title,caption,image_url,source_url,created_at&limit=1`))?.[0]; }
+  publicAuthors(userIds) {
+    if(!userIds.length)return [];
+    return this.request('ootie_profiles',`?user_id=in.(${userIds.join(',')})&select=id,user_id,username,display_name,initials,avatar_url`);
+  }
   async publish(row) { return (await this.request('ootie_shop_posts', '?on_conflict=id', { method: 'POST', body: row, prefer: 'resolution=ignore-duplicates,return=representation' }))?.[0] || this.post(row.id); }
   event(row) { return this.request('ootie_commerce_events', '?on_conflict=id', { method: 'POST', body: row, prefer: 'resolution=ignore-duplicates,return=minimal' }); }
   events(userId) { return this.request('ootie_commerce_events', `?user_id=eq.${userId}&select=event_type,product_id,post_id&order=created_at.desc&limit=1000`); }

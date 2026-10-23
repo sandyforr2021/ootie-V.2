@@ -3,13 +3,13 @@
   <section v-else class="page active bookmarks-page">
     <header class="core-page-hero bookmarks-page-hero">
       <div>
-        <h1>{{ $t("書籤") }}</h1>
+        <h2>{{ $t('收藏的商品連結') }}</h2>
         <p class="intro">{{ $t("把想買或想再看的商品先存起來，等下一次想穿、想買時能直接找到。") }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">save now<br />style later ♡</p>
     </header>
 
-    <section class="product-import-panel" aria-labelledby="product-import-title">
+    <section v-if="!embedded" class="product-import-panel" aria-labelledby="product-import-title">
       <div>
         <h2 id="product-import-title">{{ $t("貼上商品網址") }}</h2>
         <p>{{ $t("OOTIE 會從商品頁讀取可公開取得的結構化資料；辨識不到的欄位可由你手動補上。") }}</p>
@@ -452,6 +452,7 @@
 </template>
 
 <script setup>
+defineProps({embedded:{type:Boolean,default:false}});
 import { ref, reactive, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useBookmarksStore } from '@/stores/bookmarks';
@@ -777,7 +778,7 @@ const handleUrlQueryParams = () => {
     appStore.showToast('已從擴充功能帶入商品資訊');
 
     // 清除 query params 避免重複觸發
-    router.replace({ path: '/bookmarks', query: {} });
+    router.replace({ path: '/shop', query: { tab:'links' } });
   }
 };
 
@@ -791,7 +792,7 @@ onMounted(() => {
 watch(
   () => route.query,
   () => {
-    if (route.path === '/bookmarks') {
+    if (route.path === '/bookmarks' || (route.path === '/shop' && route.query.tab === 'links')) {
       handleUrlQueryParams();
     }
   }

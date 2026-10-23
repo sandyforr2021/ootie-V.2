@@ -53,7 +53,7 @@ describe('mobile navigation information architecture', () => {
     await wrapper.find('.mobile-more-trigger').trigger('click');
 
     const destinationLabels = wrapper.findAll('.mobile-more-destinations .mobile-more-link strong').map((item) => item.text());
-    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '書籤', '衣櫥統計', '帳號設定', '通知']);
+    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '衣櫥統計', '帳號設定', '通知']);
     for (const label of ['首頁', '探索', '衣櫥', 'SOS']) {
       expect(destinationLabels).not.toContain(label);
     }
@@ -64,7 +64,7 @@ describe('mobile navigation information architecture', () => {
     await wrapper.find('.mobile-more-trigger').trigger('click');
 
     const labels = wrapper.findAll('.quick-action-item strong').map((item) => item.text());
-    expect(labels).toEqual(['加入單品', '發布 OOTD', '發布求救', '加入書籤']);
+    expect(labels).toEqual(['加入單品', '發布 OOTD', '發布求救', '收藏商品']);
     expect(wrapper.find('.quick-action-grid').text()).not.toContain('AI 助手');
     expect(wrapper.find('.quick-action-grid').text()).not.toContain('虛擬試穿');
   });

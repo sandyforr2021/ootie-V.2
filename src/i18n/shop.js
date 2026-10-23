@@ -38,7 +38,7 @@ export const shopMessages = `
 分享|Share|共有|Compartir
 一件新衣，|One new piece.|新しい一着で、|Una nueva prenda.
 更多穿法。|More ways to wear.|着こなし、もっと。|Más formas de llevarla.
-你的衣櫥 × YouCam AI|Your wardrobe × YouCam AI|あなたのワードローブ × YouCam AI|Tu armario × YouCam AI
+你的衣櫥 × OOTIE AI|Your wardrobe × OOTIE AI|あなたのワードローブ × OOTIE AI|Tu armario × OOTIE AI
 購物試穿功能|Shopping studio|ショッピングスタジオ|Estudio de compras
 登入後儲存你的商品、私人照片與試穿結果。|Sign in to save products, private photos and try-on results.|ログインして商品・非公開写真・試着結果を保存しましょう。|Inicia sesión para guardar productos, fotos privadas y resultados.
 登入／註冊|Sign in / Sign up|ログイン／登録|Entrar / Registrarse
@@ -80,7 +80,7 @@ export const shopMessages = `
 選用這張照片|Use this photo|この写真を使用|Usar esta foto
 我的私人照片|My private photo|自分の非公開写真|Mi foto privada
 照片|Photo|写真|Foto
-我有權使用選用的照片，同意傳送至 YouCam 進行這次試穿或色彩分析。原始照片保持私人。|I have permission to use this photo and consent to sending it to YouCam for this try-on or color analysis. The original stays private.|この写真の使用権限があり、試着または色分析のためにYouCamへ送信することに同意します。元の写真は非公開です。|Tengo permiso para usar esta foto y acepto enviarla a YouCam para esta prueba o análisis de color. La original sigue siendo privada.
+我有權使用選用的照片，同意由 OOTIE 及其影像處理服務供應商進行這次試穿或色彩分析。原始照片保持私人。|I have permission to use this photo and consent to OOTIE and its image processing provider using it for this try-on or color analysis. The original stays private.|この写真の使用権限があり、今回の試着または色分析のためにOOTIEと画像処理サービス提供者が使用することに同意します。元の写真は非公開です。|Tengo permiso para usar esta foto y acepto que OOTIE y su proveedor de procesamiento de imágenes la usen para esta prueba o análisis de color. La original sigue siendo privada.
 件候選商品|selected products|点を選択中|productos seleccionados
 加入工作池…|Adding to queue…|受付中…|Añadiendo a la cola…
 送出試穿工作|Queue try-ons|試着を開始|Enviar pruebas
@@ -105,7 +105,7 @@ export const shopMessages = `
 下載|Download|ダウンロード|Descargar
 分享穿搭|Share look|コーデを共有|Compartir look
 取消等待|Cancel queued job|待機中の処理をキャンセル|Cancelar trabajo en cola
-YouCam AI 試穿模擬|YouCam AI try-on simulation|YouCam AIによる試着イメージ|Simulación de prueba con YouCam AI
+OOTIE AI 試穿模擬|OOTIE AI try-on simulation|OOTIE AIによる試着イメージ|Simulación de prueba con OOTIE AI
 個人色彩分析|Personal color analysis|自分の色を分析|Análisis personal de color
 心動，也可以一起討論|Good finds are better shared|お気に入りを、みんなと。|Comparte tus descubrimientos
 由使用者主動公開的 AI 試穿，每張都能回到商品來源。|AI try-ons deliberately shared by their owners, linked to the original product.|ユーザー自身が公開したAI試着。各投稿から元の商品にアクセスできます。|Pruebas de IA publicadas voluntariamente por sus autores, con enlace al producto original.

@@ -1,0 +1,82 @@
+[
+  {
+    "key": "seoyun-avatar",
+    "reference": "public/images/style-crew/seoyun-look.webp",
+    "prompt": "Create a NEW candid head-and-shoulders profile photograph of the SAME fictional adult a petite Korean adult woman in her late twenties, warm light skin, long dark brown hair with soft blunt bangs shown in the reference. Preserve facial identity, hairstyle and age closely. Different day, different plain shirt, different pose, softly lit cafe background. Friendly natural expression, eyes near camera, believable phone portrait. Face centered with generous headroom. This must be a different photograph, never a crop or duplicate of the reference. No writing, logo, graphics."
+  },
+  {
+    "key": "seoyun-piece-1",
+    "reference": "public/images/style-crew/seoyun-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the cobalt cropped cardigan worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Hanging naturally on a wooden hanger on a bedroom door, slightly creased, window light. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "seoyun-piece-2",
+    "reference": "public/images/style-crew/seoyun-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the white pleated midi skirt worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Laid casually on a textured linen bedspread with natural folds, photographed from above at a slight angle. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "seoyun-piece-3",
+    "reference": "public/images/style-crew/seoyun-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the cream Mary Jane flats worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. A pair placed naturally near a home entryway on a wooden floor, angled three-quarter view. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "camille-avatar",
+    "reference": "public/images/style-crew/camille-look.webp",
+    "prompt": "Create a NEW candid head-and-shoulders profile photograph of the SAME fictional adult a French adult woman in her late thirties with a fuller figure, light freckled skin and a short dark brown bob shown in the reference. Preserve facial identity, hairstyle and age closely. Different day, different plain shirt, different pose, softly lit cafe background. Friendly natural expression, eyes near camera, believable phone portrait. Face centered with generous headroom. This must be a different photograph, never a crop or duplicate of the reference. No writing, logo, graphics."
+  },
+  {
+    "key": "camille-piece-1",
+    "reference": "public/images/style-crew/camille-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the rust belted midi dress worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Hanging naturally on a wooden hanger on a bedroom door, slightly creased, window light. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "camille-piece-2",
+    "reference": "public/images/style-crew/camille-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the cream lightweight trench coat worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Laid casually on a textured linen bedspread with natural folds, photographed from above at a slight angle. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "camille-piece-3",
+    "reference": "public/images/style-crew/camille-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the navy leather loafers worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. A pair placed naturally near a home entryway on a wooden floor, angled three-quarter view. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "nicha-avatar",
+    "reference": "public/images/style-crew/nicha-look.webp",
+    "prompt": "Create a NEW candid head-and-shoulders profile photograph of the SAME fictional adult a Thai adult woman in her late twenties with medium warm brown skin, dark brown eyes and long black hair in a low ponytail shown in the reference. Preserve facial identity, hairstyle and age closely. Different day, different plain shirt, different pose, softly lit cafe background. Friendly natural expression, eyes near camera, believable phone portrait. Face centered with generous headroom. This must be a different photograph, never a crop or duplicate of the reference. No writing, logo, graphics."
+  },
+  {
+    "key": "nicha-piece-1",
+    "reference": "public/images/style-crew/nicha-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the mint short sleeve linen blouse worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Hanging naturally on a wooden hanger on a bedroom door, slightly creased, window light. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "nicha-piece-2",
+    "reference": "public/images/style-crew/nicha-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the navy wide leg trousers worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Laid casually on a textured linen bedspread with natural folds, photographed from above at a slight angle. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "nicha-piece-3",
+    "reference": "public/images/style-crew/nicha-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the white leather flat sandals worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. A pair placed naturally near a home entryway on a wooden floor, angled three-quarter view. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "zuri-avatar",
+    "reference": "public/images/style-crew/zuri-look.webp",
+    "prompt": "Create a NEW candid head-and-shoulders profile photograph of the SAME fictional adult a tall athletic Black adult woman in her early thirties with deep brown skin and long neat braids shown in the reference. Preserve facial identity, hairstyle and age closely. Different day, different plain shirt, different pose, softly lit cafe background. Friendly natural expression, eyes near camera, believable phone portrait. Face centered with generous headroom. This must be a different photograph, never a crop or duplicate of the reference. No writing, logo, graphics."
+  },
+  {
+    "key": "zuri-piece-1",
+    "reference": "public/images/style-crew/zuri-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the grass green boat neck knit top worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Hanging naturally on a wooden hanger on a bedroom door, slightly creased, window light. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "zuri-piece-2",
+    "reference": "public/images/style-crew/zuri-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the raspberry pleated midi skirt worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. Laid casually on a textured linen bedspread with natural folds, photographed from above at a slight angle. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  },
+  {
+    "key": "zuri-piece-3",
+    "reference": "public/images/style-crew/zuri-look.webp",
+    "prompt": "Reference image role: exact garment appearance reference. Generate ONE photorealistic casual wardrobe-record photograph of only the black leather ankle boots worn by this fictional woman. Match color, shape, material, cut, fastening and detail visible in the reference. Garment only, no person or body. A pair placed naturally near a home entryway on a wooden floor, angled three-quarter view. Believable personal phone photograph, whole object uncropped, no white catalog background, no labels, text or brand. One coherent photograph, no collage."
+  }
+]

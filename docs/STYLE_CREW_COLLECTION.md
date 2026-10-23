@@ -23,3 +23,21 @@ The owner approved migration 030. It is now applied to OOTIE hoxkrmadzjnyjaqjbyx
 Acceptance verified all 36 unique garment owners/photos, the six SOS item selections, seven distinct avatars, jury wardrobe preservation and actual public totals. Anonymous and authenticated checks passed. No fabricated numeric counters, purchase history, wear history or revenue were introduced. Existing merchant-photo source attribution is not a redistribution license; jury catalogue photos still require final competition asset-permission review.
 
 The seven prepared names required an administrative correction of a business cooldown. An exclusive table lock and a single transaction kept concurrent client updates blocked until the display-name trigger was re-enabled; tgenabled=O was verified afterward. Normal member cooldown rules were preserved.
+
+## Current release: distinct outfits and four more characters
+
+The original six characters now have three distinct garment combinations each. Twelve replacement scenes and 22 additional garment photographs preserve their facial references but change their clothing. `src/data/styleCrewDistinctLooks.json` records each photographed outfit and its exact owned garment keys. `scripts/publish-distinct-crew-looks.mjs` updates the existing post IDs so later interactions are preserved. Only prepared content is checked for duplicate outfits; normal member publishing is unrestricted.
+
+Seo-yun (Seoul), Camille (Lyon), Nicha (Bangkok) and Zuri (Chicago) add four fictional adult styling characters with different body types, settings and poses. Each has a newly photographed matching avatar, one lifestyle post and three individually photographed garments. Their declared fictional backgrounds are authored metadata, not ethnicity inferred from images. `src/data/additionalStyleProfiles.json`, `scripts/additional-style-image-prompts.json` and `scripts/publish-additional-style.mjs` record these assets. The built-in ImageGen tool generated the images; this release does not call a paid external image API. Preserve all original PNGs. WebP files keep the full frame.
+
+Current prepared community acceptance: 25 visible character/jury posts; 70 distinct character garments; jury wardrobe unchanged at 20 pieces. Each SOS still selectively exposes only 3, 4, 5, 6, 8 or 10 of its own author's pieces. All 11 character/jury avatars are distinct. Visitor and member aggregate counts match stored like/comment/save rows, and neither can query others' private save identities. New fictional identities have sign-in disabled and do not receive emails. Prepared interactions are not evidence of organic adoption, sales or revenue.
+
+**Do not rerun the older initial publishers on an existing release:** they contain historical captions and garment combinations. Use the distinct-outfit and additional-character publishers for the current update. The initial manifests remain for provenance. Visible reserved Crew badges/hashtags were removed at the owner's request; provenance remains documented here and in prepared profile biographies.
+
+## Studio navigation and try-on scope
+
+Bookmarks no longer occupy a separate sidebar destination. `/bookmarks?tab=outfits` redirects to `/shop?tab=saved`; other old bookmark URLs redirect to `/shop?tab=links`. Existing saved looks, SOS references and legacy product links remain accessible. New product capture goes through Wishlist and the browser companion.
+
+The wardrobe pairing board shows up to six **owned** pieces side by side. Its saved selection is browser-local, namespaced by domain profile ID, with no stored image bytes and no generation request. It does not synchronize to another device. Category/search filters, removable choices and storage failures are handled explicitly. Public shopping try-on cards identify the publishing member via a public profile link; the publisher is not inferred from the person shown in the image. Private originals and other results stay private.
+
+The currently integrated clothing API takes one garment reference per job. Three selected products create separate outputs. Combined top + trousers + bag on the same person is not implemented or claimed by the pairing board. UI consent names OOTIE and its image processing provider; competition submission documentation must still accurately explain the underlying API integration.
