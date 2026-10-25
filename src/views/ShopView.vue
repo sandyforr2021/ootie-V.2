@@ -398,7 +398,7 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
   <div class="shop-view">
     <header v-if="!isCommunity" class="shop-studio-heading">
       <div><h1>{{ t('試穿工作室') }}</h1><p>{{ t('先收藏商品，再選照片。完成的試穿會留在私人相簿。') }}</p></div>
-      <p class="shop-wake-note" role="note">{{ t('首次開啟可能需要等待免費主機喚醒。若工作中斷，重新開啟後按「更新進度」；已排隊工作會在服務恢復後繼續。','The free host may take a little while to wake on your first visit. If a job pauses, reopen the page and choose “Refresh”; queued jobs resume when the service is awake.') }}</p>
+      <p class="shop-wake-note" role="note">{{ t('首次開啟可能需要稍候。若試穿進度暫停，請稍後按「更新進度」繼續查看。','Your first visit may take a little longer. If a try-on pauses, choose “Refresh” later to check its progress.') }}</p>
     </header>
 
     <router-link v-if="isCommunity" class="community-back" to="/explore">← {{ t('返回探索') }}</router-link>
