@@ -9,7 +9,7 @@
           <img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
           <strong>{{ comment.display_name || comment.user }}</strong>
         </router-link>
-        <p>{{ comment.text }}</p><button v-if="auth.isMember && comment.profile_id === auth.profileId" type="button" :disabled="deleting===comment.id" @click="remove(comment)">{{ $t('刪除') }}</button><time v-if="comment.created_at" :datetime="comment.created_at">{{ formatDate(comment.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</time>
+        <TranslatedText :content-id="comment.id" kind="comment" :text="comment.text" :source-language="comment.body_language" /><button v-if="auth.isMember && comment.profile_id === auth.profileId" type="button" :disabled="deleting===comment.id" @click="remove(comment)">{{ $t('刪除') }}</button><time v-if="comment.created_at" :datetime="comment.created_at">{{ formatDate(comment.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</time>
       </li>
     </ol>
     <p v-else>{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -22,6 +22,7 @@
   </section>
 </template>
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import {ref,computed,watch} from 'vue';
 import {deletePostComment} from '@/services/postComments';
 import {t,formatDate} from '@/i18n';

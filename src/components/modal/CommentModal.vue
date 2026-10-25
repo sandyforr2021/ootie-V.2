@@ -23,7 +23,7 @@
               <strong>{{ comment.display_name || getCommentUsername(comment) }}</strong>
             </router-link>
             <strong v-else>{{ getCommentUsername(comment) }}</strong>
-            {{ comment.text }}
+            <TranslatedText :content-id="comment.id" kind="comment" :text="comment.text" :source-language="comment.body_language" />
           </div>
         </template>
         <p v-else-if="!ootdStore.commentsLoading && !ootdStore.commentsError" class="notification-time">{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -45,6 +45,7 @@
 </template>
 
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useOotdStore } from '@/stores/ootd';

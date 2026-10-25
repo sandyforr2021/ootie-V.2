@@ -34,6 +34,8 @@
             required
             placeholder="今天這套穿搭，想和衣友分享什麼？"
           ></textarea>
+          <label for="ootdCaptionLanguage">{{ $t('原文語言') }}</label>
+          <select id="ootdCaptionLanguage" v-model="captionLanguage"><option v-for="code in CONTENT_LANGUAGES" :key="code" :value="code">{{ languageNames[code] }}</option></select>
         </div>
 
         <div class="form-field" style="margin-top:16px">
@@ -84,6 +86,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { locale } from '@/i18n';
+import { CONTENT_LANGUAGES, languageNames, inferContentLanguage } from '../../../shared/contentLanguages.js';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
@@ -98,6 +102,7 @@ const photo = ref('');
 const photoPreview = ref('');
 const photoFile = ref(null);
 const caption = ref('');
+const captionLanguage = ref(locale.value);
 const hashtags = ref('');
 const selectedItemIds = ref([]);
 const imageStatus = ref('empty');
@@ -137,6 +142,7 @@ watch(
         photo.value = post.image || '';
         photoPreview.value = post.image || '';
         caption.value = post.caption || '';
+        captionLanguage.value = post.caption_language || inferContentLanguage(post.caption, locale.value);
         hashtags.value = (post.hashtags || []).join(' ');
         selectedItemIds.value = post.item_ids || post.itemIds || [];
         imageStatus.value = post.image ? 'ready' : 'empty';
@@ -146,6 +152,7 @@ watch(
     photo.value = '';
     photoPreview.value = '';
     caption.value = '';
+    captionLanguage.value = locale.value;
     hashtags.value = '';
     selectedItemIds.value = (appStore.ootdDraftItemIds || []).filter(id => remoteClosetItems.value.some(item => item.id === id));
     appStore.ootdDraftItemIds = [];
@@ -200,6 +207,7 @@ const handleSubmit = async () => {
       imageFile: photoFile.value,
       image: photo.value,
       caption: caption.value,
+      captionLanguage: captionLanguage.value,
       hashtags: hashtags.value,
       selectedItemIds: selectedItemIds.value
     });
@@ -207,6 +215,7 @@ const handleSubmit = async () => {
     result = await ootdStore.createPost({
       imageFile: photoFile.value,
       caption: caption.value,
+      captionLanguage: captionLanguage.value,
       hashtags: hashtags.value,
       selectedItemIds: selectedItemIds.value
     });

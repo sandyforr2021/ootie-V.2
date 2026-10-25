@@ -2,7 +2,7 @@ import { GatewayError, toErrorResponse } from './errors.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
-export function createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService, weatherPlacesService }) {
+export function createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService, weatherPlacesService, contentTranslationService }) {
   const isOriginAllowed = (origin) => !origin || config.corsAllowedOrigins.includes(origin);
 
   const authenticate = async (headers) => {
@@ -35,6 +35,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
 
       const ok = (body, status = 200) => ({ status, headers: { ...JSON_HEADERS, ...corsHeaders, 'Cache-Control': 'no-store' }, body });
       if (weatherPlacesService && method === 'POST' && path === '/v1/weather/places') return ok({ places: await weatherPlacesService.search(body) });
+      if (contentTranslationService && method === 'POST' && path === '/v1/translations') return ok(await contentTranslationService.translate(body));
       if (commerceService && method === 'GET' && path === '/v1/shop/posts') return ok({ posts: await commerceService.publicPosts() });
       const publicPost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
       if (commerceService && method === 'GET' && publicPost) {

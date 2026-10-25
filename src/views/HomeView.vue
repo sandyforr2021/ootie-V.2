@@ -11,6 +11,8 @@ import AppIcon from '@/components/ui/AppIcon.vue';
 import EditorialVisual from '@/components/ui/EditorialVisual.vue';
 import { itemName } from '@/services/itemPresentation';
 import WeatherWardrobe from '@/components/closet/WeatherWardrobe.vue';
+import { alternateAuthors } from '@/services/recommendedFeed';
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 const router = useRouter();
 const replayOpening = () => window.dispatchEvent(new Event('ootie:replay-opening'));
 const appStore = useAppStore();
@@ -24,7 +26,7 @@ onBeforeUnmount(()=>clearInterval(clockTimer));
 const isMember = computed(() => authStore.isMember);
 const firstName = computed(() => (appStore.profile.name || '').split(' ')[0]);
 const recentItems = computed(() => appStore.items.slice(0, 4));
-const trendingPosts = computed(() => uniquePostsById(genuineContent(appStore.ootdPosts)).filter(post => post.image && (!isMember.value || socialStore.isFollowing({id:post.user_id,username:post.username}))).slice(0, 4));
+const trendingPosts = computed(() => alternateAuthors(uniquePostsById(genuineContent(appStore.ootdPosts)).filter(post => post.image && (!isMember.value || socialStore.isFollowing({id:post.user_id,username:post.username})))).slice(0, 8));
 const openPost = post => router.push({ name: 'OotdDetail', params: { id: post.id }, query: { user: post.username, from: 'home' } });
 const openDetail = id => { appStore.selectedItemId = id; appStore.isDetailOpen = true; };
 watch(() => authStore.profileId, id => { if (id) void closetStore.loadRemoteItems(id); }, { immediate: true });
@@ -72,7 +74,7 @@ onMounted(() => { void ootdStore.loadRemotePosts(); });
 
     <section v-if="trendingPosts.length || isMember" class="home-section">
       <div class="section-heading"><div><h2>{{ isMember ? $t('追蹤中') : $t('穿搭靈感') }}</h2></div><router-link class="atelier-text-link" to="/explore">{{ $t('探索更多 →') }}</router-link></div>
-      <p v-if="isMember && !trendingPosts.length">{{ $t('還沒有追蹤動態，到探索找找喜歡的衣友。', 'No followed posts yet. Discover people in Explore.') }}</p><div class="atelier-journal"><button v-for="post in trendingPosts" :key="post.id" class="trending-card" @click="openPost(post)"><img :src="post.image" :alt="post.caption || post.username" loading="lazy" /><span>{{ post.editorial ? $t('OOTIE 編輯精選') : post.username }}</span><strong>{{ $t(post.caption) }}</strong><AppIcon name="arrow" :size="18" /></button></div>
+      <p v-if="isMember && !trendingPosts.length">{{ $t('還沒有追蹤動態，到探索找找喜歡的衣友。', 'No followed posts yet. Discover people in Explore.') }}</p><div class="atelier-journal"><article v-for="post in trendingPosts" :key="post.id" class="trending-card"><button class="journal-open" @click="openPost(post)"><img :src="post.image" :alt="post.caption || post.username" loading="lazy" /><span>{{ post.editorial ? $t('OOTIE 編輯精選') : (post.display_name || post.username) }}</span><AppIcon name="arrow" :size="18" /></button><TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" compact /></article></div>
     </section>
     <footer v-if="!isMember" class="atelier-footer"><button class="opening-replay" @click="replayOpening">{{ $t('再開一次衣櫥') }}</button><span>OOTIE</span><p>{{ $t('新衣，遇見舊愛。') }}</p><router-link to="/shop">{{ $t('開始購物試穿') }}<AppIcon name="arrow" :size="16" /></router-link></footer>
   </section>

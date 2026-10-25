@@ -79,7 +79,7 @@
 
     <div class="ootd-body">
       <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
-      <h2>{{ $t(post.caption || '今日的穿搭') }}</h2>
+      <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" />
       <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
         {{ visiblePostTags(post.hashtags).join('　') }}
       </div>
@@ -117,6 +117,7 @@
 </template>
 
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { computed, ref } from 'vue';
 import { useAppStore } from '@/stores/app';

@@ -153,6 +153,7 @@ const loadPost = async () => {
         image: withDevelopmentDemoMediaRevision(data.image),
         image_storage_path: data.image_storage_path || '',
         caption: data.caption,
+        caption_language: data.caption_language,
         wearing: Array.isArray(data.wearing) ? data.wearing : [],
         item_ids: Array.isArray(data.item_ids) ? data.item_ids : [],
         hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],

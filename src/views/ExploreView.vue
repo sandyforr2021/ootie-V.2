@@ -116,10 +116,10 @@
               role="button"
               tabindex="0"
               @click="openPostDetail(post.id)"
-              @keydown.enter="openPostDetail(post.id)"
+              @keydown.enter.self="openPostDetail(post.id)"
             >
               <p v-if="post.editorial" class="editorial-source">{{ $t('AI 輔助製作的品牌穿搭靈感') }}</p>
-              <p class="ootd-caption">{{ $t(post.caption) }}</p>
+              <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" />
               <div class="ootd-tags">{{ visiblePostTags(post.hashtags).join('　') }}</div>
             </div>
             <div v-if="post.tagged_items?.length" class="explore-tagged-items" aria-label="這套穿搭標註的衣櫥單品">
@@ -142,6 +142,7 @@
 </template>
 
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import {searchProfiles} from '@/services/profileSearch';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue';

@@ -1,4 +1,12 @@
 export const wardrobeInsightsMessages = `
+翻譯|Translate|翻訳|Traducir
+顯示原文|Show original|原文を表示|Mostrar original
+翻譯中…|Translating…|翻訳中…|Traduciendo…
+原文語言|Original language|原文の言語|Idioma original
+參考譯文|Translated text|参考訳|Traducción de referencia
+今日翻譯額度已用完，原文仍可閱讀。|Today's translation limit has been reached. The original is still available.|本日の翻訳上限に達しました。原文は引き続き読めます。|Se alcanzó el límite diario de traducción. El original sigue disponible.
+暫時無法翻譯，請稍後再試。|Translation is unavailable. Please try again later.|現在翻訳できません。後でもう一度お試しください。|La traducción no está disponible. Inténtalo más tarde.
+
 城市資料|City data|都市データ|Datos de ciudades
 原幣金額|Original amount|元の通貨の金額|Importe original
 暫以原幣顯示|Shown in original currency|元の通貨で表示|Se muestra en la moneda original

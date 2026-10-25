@@ -236,6 +236,7 @@ export async function insertOotdPost(postData, userId) {
       user_id: userId,
       image: postData.image,
       caption: postData.caption,
+      caption_language: postData.caption_language || null,
       item_ids: postData.itemIds || postData.item_ids || [],
       wearing: postData.wearing || [],
       hashtags: postData.hashtags || [],
@@ -270,6 +271,7 @@ export async function updateOotdPost(postId, postData, userId) {
     const payload = {
       image: postData.image,
       caption: postData.caption,
+      caption_language: postData.caption_language || null,
       item_ids: postData.itemIds || postData.item_ids || [],
       wearing: postData.wearing || [],
       hashtags: postData.hashtags || []
