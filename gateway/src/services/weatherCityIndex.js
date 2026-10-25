@@ -18,7 +18,12 @@ export async function findIndexedCities(query, language) {
     shards.set(shard, data);
   }
   const regions = new Intl.DisplayNames([language], { type: 'region' });
-  return (data[key] || []).filter(row => !query.countryCode || row[2] === query.countryCode).slice(0, 8).map(([id, name, countryCode, latitude, longitude, , administrative]) => ({
+  const candidates = (data[key] || []).filter(row => !query.countryCode || row[2] === query.countryCode);
+  // Historical aliases can refer to a former county seat (e.g. Kaohsiung/Fengshan).
+  // Prefer current exact city names when the query has one, retaining same-name cities.
+  const cityKey = value => normalize(value.replace(/(?:\s+City|市)$/iu, ''));
+  const exact = candidates.filter(row => cityKey(row[1]) === cityKey(query.name));
+  return (exact.length ? exact : candidates).slice(0, 8).map(([id, name, countryCode, latitude, longitude, , administrative]) => ({
     id: `geonames-${id}`, name, countryCode, latitude, longitude,
     label: [...new Set([query.inputName && normalize(query.inputName) !== normalize(name) ? `${query.inputName} · ${name}` : name, countryCode !== 'TW' && administrative !== name ? administrative : '', regions.of(countryCode)].filter(Boolean))].join(', ')
   }));
