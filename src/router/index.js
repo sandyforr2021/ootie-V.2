@@ -19,9 +19,10 @@ const ShopView = () => import('@/views/ShopView.vue');
 const routes = [
   { path: '/', name: 'Home', component: HomeView },
   { path: '/home', redirect: '/' },
-  { path: '/shop', name: 'Shop', component: ShopView },
+  { path: '/shop', name: 'Shop', component: ShopView, beforeEnter: to => ['saved','links'].includes(to.query.tab) ? {path:'/bookmarks',query:{...to.query,tab:to.query.tab==='saved'?'outfits':'links'}} : to.query.tab==='community' || to.query.post ? {path:'/community/tryons',query:to.query} : true },
+  { path: '/community/tryons', name: 'TryonCommunity', component: ShopView },
   { path: '/closet', name: 'Closet', component: ClosetView },
-  { path: '/bookmarks', name: 'Bookmarks', redirect: (to) => ({ path: '/shop', query: { ...to.query, tab: to.query.tab === 'outfits' ? 'saved' : 'links' } }) },
+  { path: '/bookmarks', name: 'Bookmarks', component: () => import('@/views/BookmarksView.vue') },
   { path: '/stats', name: 'Stats', component: StatsView },
   { path: '/explore', name: 'Explore', component: ExploreView },
   { path: '/sos', name: 'Sos', component: SosView },

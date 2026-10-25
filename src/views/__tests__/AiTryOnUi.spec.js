@@ -28,12 +28,12 @@ describe('AI styling and try-on UI contract', () => {
     expect(shopSource).toContain('URL.revokeObjectURL');
   });
 
-  it('makes private-photo deletion and the 1-to-5 outfit selection explicit', () => {
+  it('keeps private photo and result deletion accessible with a simplified album', () => {
     expect(shopSource).toContain('aiGateway.deletePersonPhoto(token.value,photo.id)');
     expect(shopSource).toContain('刪除這張照片');
     expect(shopSource).toContain('刪除結果');
     expect(shopSource).toContain('取消公開');
-    expect(shopSource).toContain('原始人物照');
-    expect(shopSource).toContain('商品原圖');
+    expect(shopSource).toContain('更換或管理照片');
+    expect(shopSource).not.toContain('class="shop-triptych"');
   });
 });

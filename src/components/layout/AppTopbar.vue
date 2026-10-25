@@ -128,6 +128,8 @@ watch(() => authStore.profileId, (profileId) => {
 </script>
 
 <style scoped>
+.top-actions{gap:14px;display:flex;align-items:center}.popover-copy{flex-direction:column;gap:5px;padding-right:30px;overflow-wrap:anywhere}
+
 .auth-btn-sm {
   border: 1px solid var(--ink);
   padding: 9px 17px;

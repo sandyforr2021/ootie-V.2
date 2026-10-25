@@ -23,13 +23,7 @@
         <div class="modal-actions">
           <button class="primary" @click="addToOutfit">{{ $t("用這件分享穿搭") }}</button>
           <button class="secondary" @click="sendToSos">{{ $t("丟到 SOS 求救") }}</button>
-          <button
-            :class="['secondary', { 'is-marked': isMarkedClearance }]"
-            :disabled="isMarkedClearance"
-            @click="closetStore.markItemForClearance(item.id)"
-          >
-            {{ $t(isMarkedClearance ? '已標記待出清' : '標記為考慮出清') }}
-          </button>
+
           <button class="secondary" @click="closetStore.toggleFavorite(item.id)">
             {{ $t(item.favorite ? '已收藏' : '加入收藏') }}
           </button>

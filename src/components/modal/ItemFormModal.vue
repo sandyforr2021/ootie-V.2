@@ -34,10 +34,7 @@
               <li><span>2</span><strong>{{ $t("光線均勻") }}</strong><small>{{ $t("靠近窗邊，避免強烈背光或陰影") }}</small></li>
               <li><span>3</span><strong>{{ $t("一次一件") }}</strong><small>{{ $t("平放、掛起或放在椅面都可以") }}</small></li>
             </ol>
-            <div class="capture-guide-actions">
-              <button type="button" class="primary" @click="openCameraInput">{{ $t("開始拍照") }}</button>
-              <button type="button" class="secondary" @click="openGalleryInput">{{ $t("從相簿選擇") }}</button>
-            </div>
+
           </section>
 
           <div class="upload-zone">
@@ -260,6 +257,7 @@ import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
 import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
 import { getColorFamilyForPrimaryColor, legacyColorNames } from '@/constants';
+import { filenameGarmentCategory, suggestedGarmentName } from '@/services/garmentImport';
 import { analyzeImageColor } from '@/services/colorDetection';
 import { prepareClothingImage, blobToDataUrl } from '@/services/clothingMedia';
 
@@ -413,16 +411,19 @@ const applyColorSuggestion = (suggestion) => {
   form.secondary_color = suggestion.colorFamily;
 };
 
-const analyzeSelectedImage = async (source) => {
+const analyzeSelectedImage = async (source, sequence) => {
+  const originalColor=form.primary_color, originalName=form.name;
   colorAnalysisState.value = 'loading';
   const suggestion = await analyzeImageColor(source);
+  if(sequence!==selectionSequence || !appStore.isItemFormOpen)return;
   colorSuggestion.value = suggestion;
   if (suggestion) {
-    applyColorSuggestion(suggestion);
+    if(form.primary_color===originalColor)applyColorSuggestion(suggestion);
+    if(!isEdit.value && !originalName && !form.name){
+      form.name=suggestedGarmentName(form.category,form.primary_color);
+    }
     colorAnalysisState.value = 'success';
-  } else {
-    colorAnalysisState.value = 'failure';
-  }
+  } else { colorAnalysisState.value = 'failure'; }
 };
 
 const rememberCaptureGuide = () => {
@@ -519,7 +520,8 @@ const handleFileChange = async (e) => {
     form.photo = '';
     warningsAcknowledged.value = nextMedia.warnings.length === 0;
     mediaStatus.value = 'ready';
-    void analyzeSelectedImage(previewObjectUrl);
+    if(!isEdit.value && !form.name){ const category=filenameGarmentCategory(file.name);if(category)form.category=category;}
+    void analyzeSelectedImage(previewObjectUrl, sequence);
   } catch (error) {
     if (sequence !== selectionSequence) return;
     mediaStatus.value = 'error';

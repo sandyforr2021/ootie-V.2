@@ -5,7 +5,7 @@
       <p class="eyebrow">Style SOS</p>
       <h2>{{ t("請衣友幫忙搭配") }}</h2>
       <p v-if="contextItem" class="sos-item-context">
-        {{ tf('已帶入單品：{name}', { name: contextItem.name_zh || contextItem.name }) }}
+        <img v-if="contextItem.photo" :src="contextItem.photo" :alt="contextItem.name_zh || contextItem.name" style="width:72px;height:90px;object-fit:contain" />{{ tf('已帶入單品：{name}', { name: contextItem.name_zh || contextItem.name }) }}
       </p>
 
       <p v-if="loadingCloset" role="status">{{ t('正在讀取衣櫥…') }}</p>
@@ -54,72 +54,13 @@
               <option value="微涼有風">{{ t("微涼有風") }}</option>
             </select>
           </div>
-          <div class="form-field">
-            <label for="sosWhen">{{ t("穿著時機") }}</label>
-            <select id="sosWhen" v-model="whenLabel">
-              <option value="今晚">{{ t("今晚") }}</option>
-              <option value="明天">{{ t("明天") }}</option>
-              <option value="週末">{{ t("週末") }}</option>
-              <option value="下週">{{ t("下週") }}</option>
-            </select>
-          </div>
         </div>
 
-        <div class="form-field" style="margin-top:16px">
-          <label>{{ t("想呈現的風格") }}</label>
-          <div class="vibe-options">
-            <label
-              v-for="vibe in availableVibes"
-              :key="vibe"
-              :class="['vibe-option', { selected: selectedVibes.includes(vibe) }]"
-            >
-              <input type="checkbox" :value="vibe" v-model="selectedVibes" />
-              {{ t(vibe) }}
-            </label>
-          </div>
-        </div>
-
-        <!-- Public Closet Items Selection -->
-        <div class="form-field" style="margin-top:20px">
-          <label>{{ t("本次公開給衣友的衣物") }}</label>
-          <p class="sos-share-help">
-            {{ t("只有你勾選的衣物會出現在這筆求救中，其他衣櫥內容不會公開。衣友只能使用你本次公開的衣物幫你搭配。") }}
-          </p>
-
-          <div class="sos-share-tools">
-            <span class="suggestion-selected">{{ tf('已選 {count} 件', { count: selectedClosetItemIds.length }) }}</span>
-            <div>
-              <button type="button" @click="selectAllClosetItems">{{ t("全選") }}</button>
-              <span style="margin:0 4px; color:var(--muted);">|</span>
-              <button type="button" @click="clearClosetItems">{{ t("取消全選") }}</button>
-            </div>
-          </div>
-
-          <div class="sos-selection-grid sos-share-items">
-            <label
-              v-for="item in appStore.items"
-              :key="item.id"
-              :class="['suggestion-item', 'sos-selection-card', { selected: selectedClosetItemIds.includes(item.id) }]"
-            >
-              <input
-                type="checkbox"
-                :value="item.id"
-                v-model="selectedClosetItemIds"
-                :aria-label="tf('公開 {name}', { name: item.name_zh || item.name })"
-              />
-              <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
-              <span class="sos-selection-card-name">{{ item.name_zh || item.name }}</span>
-              <span class="sos-selection-check" aria-hidden="true">✓</span>
-            </label>
-          </div>
-          <p v-if="showValidation && !selectedClosetItemIds.length" class="sos-share-validation">
-            {{ t("請至少選擇 1 件要公開給衣友的衣物。") }}
-          </p>
-        </div>
-
+        <p v-if="!appStore.profile.public_closet" role="alert">{{ t('請先在我的衣櫥開啟公開衣櫥，才能發布求救。', 'Make your wardrobe public in My wardrobe before posting a request.') }} <router-link to="/closet" @click="close">{{ t('我的衣櫥') }}</router-link></p>
+        <p v-else>{{ t('衣友可以從你的公開衣櫥提供搭配建議。', 'People can suggest outfits from your public wardrobe.') }}</p>
         <div class="form-actions">
           <button type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
-          <button type="submit" class="primary">{{ $t("發布求救") }}</button>
+          <button type="submit" class="primary" :disabled="!appStore.profile.public_closet">{{ $t("發布求救") }}</button>
         </div>
         </fieldset>
       </form>
@@ -140,16 +81,12 @@ const sosStore = useSosStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
 
-const availableVibes = ['Soft', 'Elegant', 'Smart Casual', 'Relaxed', 'Confident', 'Playful'];
 
 const title = ref('');
 const details = ref('');
 const occasion = ref('約會');
 const weather = ref('涼爽');
-const whenLabel = ref('明天');
-const selectedVibes = ref([]);
 const selectedClosetItemIds = ref([]);
-const showValidation = ref(false);
 const loadingCloset = ref(false);
 const closetLoadFailed = ref(false);
 let openVersion = 0;
@@ -168,10 +105,7 @@ watch(
     details.value = '';
     occasion.value = '約會';
     weather.value = '涼爽';
-    whenLabel.value = '明天';
-    selectedVibes.value = ['Soft'];
     selectedClosetItemIds.value = [];
-    showValidation.value = false;
     closetLoadFailed.value = false;
     loadingCloset.value = authStore.isMember && !!profileId;
     if (loadingCloset.value) {
@@ -198,28 +132,16 @@ watch(
   { immediate: true }
 );
 
-const selectAllClosetItems = () => {
-  selectedClosetItemIds.value = appStore.items.map((i) => i.id);
-};
-
-const clearClosetItems = () => {
-  selectedClosetItemIds.value = [];
-};
-
 const close = () => {
   appStore.isSosFormOpen = false;
   appStore.sosTargetItemId = null;
 };
 
 const handleSubmit = async () => {
-  if (loadingCloset.value || closetLoadFailed.value) return;
-  if (!selectedVibes.value.length) {
-    appStore.showToast(t('至少選一個想呈現的風格'));
-    return;
-  }
+  if (loadingCloset.value || closetLoadFailed.value || !appStore.profile.public_closet) return;
+  selectedClosetItemIds.value=appStore.items.filter(item=>!item.hidden).map(item=>item.id);
   if (!selectedClosetItemIds.value.length) {
-    showValidation.value = true;
-    appStore.showToast(t('請至少選擇 1 件要公開給衣友的衣物。'));
+    appStore.showToast(t('請先在衣櫥加入至少一件衣物。'));
     return;
   }
 
@@ -228,8 +150,8 @@ const handleSubmit = async () => {
     details: details.value,
     occasion: occasion.value,
     weather: weather.value,
-    when_label: whenLabel.value,
-    vibes: selectedVibes.value,
+    when_label: '',
+    vibes: [],
     closet_item_ids: selectedClosetItemIds.value
   });
 

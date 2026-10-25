@@ -83,9 +83,9 @@ export const useOotdStore = defineStore('ootd', () => {
     const feed = activeFeedTab.value;
     const matches = uniquePostsById(appStore.ootdPosts).filter((post) => {
       const socialStore = useSocialStore();
-      const isFollowing = socialStore.isFollowing({ id: post.user_id, username: post.username }) || post.username === appStore.profile.username;
+      const isFollowing = socialStore.isFollowing({ id: post.user_id, username: post.username }) ;
       const matchFeed = feed === 'for-you' || isFollowing;
-      const searchable = `${post.display_name || ''} ${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')}`.toLowerCase();
+      const searchable = `${post.display_name || ''} ${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')} ${(post.tagged_items || []).map(item => [item.name,item.name_zh,item.brand,item.category].filter(Boolean).join(' ')).join(' ')}`.toLowerCase();
       return matchFeed && (!query || searchable.includes(query));
     });
     return feed==='for-you' ? [...alternateAuthors(matches.filter(post=>!post.editorial)),...matches.filter(post=>post.editorial)] : matches;

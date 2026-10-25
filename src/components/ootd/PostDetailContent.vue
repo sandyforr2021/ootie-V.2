@@ -60,8 +60,9 @@
         :aria-label="post.liked ? '取消喜歡這套穿搭' : '喜歡這套穿搭'"
         @click="runPostAction('like', () => ootdStore.toggleLike(post.id))"
       >
-        {{ $t(post.liked ? '已喜歡' : '喜歡') }} <span>{{ post.likes || 0 }}</span>
+        <AppIcon name="heart" :fill="post.liked ? 'currentColor' : 'none'" /> <span>{{ post.likes || 0 }}</span>
       </button>
+      <button type="button" class="ootd-action" :aria-label="`查看 ${post.comments || 0} 則留言`" @click="openComments"><AppIcon name="comment" /><span>{{ post.comments || 0 }}</span></button>
       <button
         type="button"
         :class="['ootd-action', { saved: post.saved }]"
@@ -70,11 +71,10 @@
         :aria-label="post.saved ? '取消收藏這套穿搭' : '收藏這套穿搭'"
         @click="runPostAction('save', () => ootdStore.toggleSave(post.id))"
       >
-        {{ $t(post.saved ? '已收藏' : '收藏') }} <span v-if="post.saves != null">{{ post.saves }}</span>
+        <AppIcon name="bookmark" :fill="post.saved ? 'currentColor' : 'none'" /> <span v-if="post.saves != null">{{ post.saves }}</span>
       </button>
-      <button type="button" class="ootd-action" aria-label="分享這套穿搭" @click="sharePost">{{ $t("分享") }}</button>
-      <button type="button" class="ootd-action" :aria-label="`查看 ${post.comments || 0} 則留言`" @click="openComments"> {{ $t("留言") }} <span>{{ post.comments || 0 }}</span>
-      </button>
+      <button type="button" class="ootd-action" aria-label="分享這套穿搭" @click="sharePost"><AppIcon name="share" /></button>
+
     </div>
 
     <div class="ootd-body">
@@ -117,6 +117,7 @@
 </template>
 
 <script setup>
+import AppIcon from '@/components/ui/AppIcon.vue';
 import { computed, ref } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useOotdStore } from '@/stores/ootd';

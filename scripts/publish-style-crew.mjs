@@ -1,5 +1,5 @@
 // Team-authored, explicitly attributed styling stories and persisted interactions.
-// Accounts are non-deliverable, banned editorial identities, not customer accounts.
+// New editorial identities start disabled. Existing demo logins activated by the owner are preserved.
 // Idempotent inserts preserve later visitor interactions. No emails or paid APIs.
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash, randomBytes } from 'node:crypto';
@@ -26,7 +26,8 @@ for(const story of collection){
  }
  const account=accounts[story.key];
  const verified=await db.serviceRequest(`/auth/v1/admin/users/${account.userId}`);
- if(!verified.banned_until || new Date(verified.banned_until)<new Date('2050-01-01'))throw new Error('Editorial sign-in must stay disabled');
+ if(verified.id!==account.userId || verified.email!==`style-crew-${story.key}@ootie.example`)throw new Error('Editorial account identity mismatch');
+ // Never rotate passwords or re-ban owner-activated demonstration accounts here.
  const profiles=await db.serviceRequest(`/rest/v1/ootie_profiles?user_id=eq.${account.userId}&select=id,username`);
  if(profiles.length>1)throw new Error('Ambiguous identity');
  account.profileId=profiles[0]?.id||uuid('profile-'+story.key);

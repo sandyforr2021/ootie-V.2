@@ -22,10 +22,8 @@
         <div class="sos-meta">
           <span>{{ t("場合") }} · {{ t(targetPost.occasion) }}</span>
           <span>{{ t("天氣") }} · {{ t(targetPost.weather) }}</span>
-          <span>{{ t("穿著時機") }} · {{ t(targetPost.when_label) }}</span>
-        </div>
 
-        <div class="sos-vibes">{{ t('想呈現的風格') }} · {{ (targetPost.vibes || []).map(v => t(v)).join(' · ') }}</div>
+        </div>
 
         <p v-if="targetPost.details" style="color:var(--ink); font-size:14px; line-height:1.6; margin-top:12px;">
           {{ targetPost.details }}
@@ -64,7 +62,7 @@
           class="primary"
           @click="openSuggestionForm"
         >
-          {{ t("幫她搭配") }}
+          {{ t("提供穿搭建議") }}
         </button>
       </div>
 
@@ -205,6 +203,7 @@ const openCloseConfirm = () => {
 
 const openSuggestionForm = () => {
   appStore.activeSosId = targetPost.value.id;
+  close();
   appStore.isSuggestionFormOpen = true;
 };
 

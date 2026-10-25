@@ -1,4 +1,5 @@
 <template>
+  <nav class="collection-navigation" :aria-label="$t('收藏靈感')"><router-link to="/explore">← {{ $t('返回探索') }}</router-link><router-link to="/bookmarks?tab=outfits">{{ $t('收藏靈感') }}</router-link><router-link to="/bookmarks?tab=links">{{ $t('收藏的商品連結') }}</router-link></nav>
   <SavedOutfitsCollection v-if="route.query.tab === 'outfits'" />
   <section v-else class="page active bookmarks-page">
     <header class="core-page-hero bookmarks-page-hero">
@@ -1479,3 +1480,5 @@ watch(
   }
 }
 </style>
+
+<style scoped>.collection-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:18px;padding:20px 0}.collection-navigation a{padding:10px 0;font-size:14px}</style>

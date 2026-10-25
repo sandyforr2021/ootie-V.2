@@ -1,8 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useWeatherStore } from '@/stores/weather';
 import { useAppStore } from '@/stores/app';
-import { searchWeatherPlaces } from '@/services/weather';
+import { searchWeatherPlaces, getBrowserPosition } from '@/services/weather';
 import { itemName } from '@/services/itemPresentation';
 import { locale } from '@/i18n';
 const weather = useWeatherStore();
@@ -11,6 +11,11 @@ const query = ref('');
 const places = ref([]);
 const searching = ref(false);
 const error = ref('');
+onMounted(async()=>{
+ if(weather.current || weather.loading) return;
+ try { const position=await getBrowserPosition(); if(!weather.current && !weather.loading) await weather.selectPlace({...position,label:locale.value==='zh-TW'?'目前位置':'Current location'}); }
+ catch(failure) { error.value=failure.message; }
+});
 async function search() {
   if (searching.value) return;
   searching.value = true; places.value = []; error.value = '';

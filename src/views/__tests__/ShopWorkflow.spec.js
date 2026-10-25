@@ -98,11 +98,23 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.shop-product.selected h3').text()).toBe('Linen shirt');
     expect(fixture.request.mock.calls.filter(([path,,body]) => path === 'jobs' && body)).toEqual([]);
   });
+  it('does not jump back to step 02 after a refresh', async () => {
+    await render('/shop');
+    await wrapper.findAll('.studio-steps button')[0].trigger('click');
+    await wrapper.vm.refresh();
+    await flushPromises();
+    expect(wrapper.find('form.shop-import').exists()).toBe(true);
+    expect(wrapper.find('.studio-credit-summary').text()).toContain('100');
+    await wrapper.findAll('.studio-steps button')[2].trigger('click');
+    await wrapper.vm.refresh();await flushPromises();
+    expect(wrapper.find('.shop-fitting').exists()).toBe(true);
+  });
   it('lets a member remove a person photo from the current studio flow', async () => {
     fixture.deletePhoto.mockResolvedValue({ id: 'photo-unit', path: 'person/unit/photo.jpg' });
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     await render('/shop');
     await wrapper.findAll('.studio-steps button')[2].trigger('click');
+    await wrapper.findAll('button').find(button=>button.text()==='更換或管理照片').trigger('click');
     await wrapper.find('.shop-photo-delete').trigger('click');
     await flushPromises();
     expect(fixture.deletePhoto).toHaveBeenCalledWith('unit-only', 'photo-unit');

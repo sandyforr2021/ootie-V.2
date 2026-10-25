@@ -86,3 +86,5 @@ const handleSubmit = async () => {
   }
 };
 </script>
+
+<style scoped>.profile-edit-modal>h2{padding-right:48px}.profile-edit-modal .form-grid{gap:18px}.profile-edit-modal .form-field{min-width:0}.profile-edit-modal .form-field input{width:100%;box-sizing:border-box}</style>

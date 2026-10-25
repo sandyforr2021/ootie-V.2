@@ -7,6 +7,7 @@
       </div>
       <button type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
     </header>
+    <ClosetVisibility />
 
     <section
       v-if="!canShowClosetData"
@@ -52,15 +53,7 @@
                 <span class="disused-action-wide">{{ $t("丟到 SOS 求救") }}</span>
                 <span class="disused-action-compact">{{ $t("SOS 求救") }}</span>
               </button>
-              <button
-                :class="['secondary', { 'is-marked': isMarkedClearance(item) }]"
-                type="button"
-                :disabled="isMarkedClearance(item)"
-                @click="closetStore.markItemForClearance(item.id)"
-              >
-                <span class="disused-action-wide">{{ isMarkedClearance(item) ? '已標記待出清' : '標記為考慮出清' }}</span>
-                <span class="disused-action-compact">{{ isMarkedClearance(item) ? '已標記' : '考慮出清' }}</span>
-              </button>
+
             </div>
           </div>
         </article>
@@ -208,13 +201,7 @@
             @keydown.enter="openDetail(item.id)"
             @keydown.space.prevent="openDetail(item.id)"
           >
-            <button
-              :class="['favorite', { 'is-favorite': item.favorite }]"
-              :aria-label="`${$t(item.favorite ? '取消收藏' : '收藏')} ${itemName(item)}`"
-              @click.stop="closetStore.toggleFavorite(item.id)"
-            >
-              {{ item.favorite ? '♥' : '♡' }}
-            </button>
+            <span v-if="item.favorite" class="favorite is-favorite" :aria-label="$t('已收藏')">♥</span>
             <img
               class="product-image"
               :src="item.photo"
@@ -247,6 +234,7 @@
 </template>
 
 <script setup>
+import ClosetVisibility from '@/components/closet/ClosetVisibility.vue';
 import { itemName } from '@/services/itemPresentation';
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
@@ -445,3 +433,5 @@ onBeforeUnmount(() => {
 });
 </script>
 
+
+<style scoped>.disused-banner,.disused-section{padding:24px!important}.favorite.is-favorite{pointer-events:none}</style>

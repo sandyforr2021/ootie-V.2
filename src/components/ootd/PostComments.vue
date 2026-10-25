@@ -9,7 +9,7 @@
           <img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
           <strong>{{ comment.display_name || comment.user }}</strong>
         </router-link>
-        <p>{{ comment.text }}</p><time v-if="comment.created_at" :datetime="comment.created_at">{{ formatDate(comment.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</time>
+        <p>{{ comment.text }}</p><button v-if="auth.isMember && comment.profile_id === auth.profileId" type="button" :disabled="deleting===comment.id" @click="remove(comment)">{{ $t('刪除') }}</button><time v-if="comment.created_at" :datetime="comment.created_at">{{ formatDate(comment.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</time>
       </li>
     </ol>
     <p v-else>{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -23,13 +23,22 @@
 </template>
 <script setup>
 import {ref,computed,watch} from 'vue';
-import {formatDate} from '@/i18n';
+import {deletePostComment} from '@/services/postComments';
+import {t,formatDate} from '@/i18n';
 import {useAppStore} from '@/stores/app';
 import {useAuthStore} from '@/stores/auth';
 import {useOotdStore} from '@/stores/ootd';
 const props=defineProps({post:{type:Object,required:true}});
 const app=useAppStore(), auth=useAuthStore(), store=useOotdStore();
 const section=ref(null),composer=ref(null),draft=ref(''),loading=ref(false),error=ref(''),sending=ref(false);
+const deleting=ref(null);
+async function remove(comment){
+ if(deleting.value || comment.profile_id!==auth.profileId)return;
+ deleting.value=comment.id;
+ try {await deletePostComment({id:comment.id,profileId:auth.profileId});await refresh();}
+ catch {error.value=t('留言未刪除，請重試。','Could not delete this comment. Please retry.');}
+ finally {deleting.value=null;}
+}
 let draftId=crypto.randomUUID(), version=0;
 const comments=computed(()=>props.post.commentList || []);
 watch(draft,()=>{if(!sending.value)draftId=crypto.randomUUID();});

@@ -14,11 +14,11 @@
     </div>
     <nav class="nav" :aria-label="$t(&quot;主選單&quot;)">
       <router-link
-        v-for="item in NAVIGATION_ITEMS"
+        v-for="item in sidebarItems"
         :key="item.routeName"
         :to="item.path"
         :title="$t(item.label)"
-        :class="{ active: route.name === item.routeName || (item.routeName === 'Explore' && route.name === 'OotdDetail') }"
+        :class="{ 'nav-group-start': ['Closet','Settings'].includes(item.routeName), active: route.name === item.routeName || (item.routeName === 'Explore' && route.name === 'OotdDetail') }"
         active-class=""
         exact-active-class=""
       >
@@ -38,4 +38,7 @@ import AppIcon from '@/components/ui/AppIcon.vue';
 
 const appStore = useAppStore();
 const route = useRoute();
+const sidebarItems = ['Home','Explore','Profile','Sos','Closet','Shop','Stats','Settings'].map(name=>NAVIGATION_ITEMS.find(item=>item.routeName===name));
 </script>
+
+<style scoped>.nav-group-start{margin-top:18px!important;border-top:1px solid var(--line);padding-top:18px!important}</style>
