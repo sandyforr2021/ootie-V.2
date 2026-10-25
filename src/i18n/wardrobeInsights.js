@@ -1,5 +1,6 @@
 export const wardrobeInsightsMessages = `
 翻譯|Translate|翻訳|Traducir
+使用 Google 翻譯（新視窗）|Use Google Translate (new window)|Google 翻訳を使う（新しいウィンドウ）|Usar Google Traductor (nueva ventana)
 顯示原文|Show original|原文を表示|Mostrar original
 翻譯中…|Translating…|翻訳中…|Traduciendo…
 原文語言|Original language|原文の言語|Idioma original

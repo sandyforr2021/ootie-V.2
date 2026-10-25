@@ -6,6 +6,7 @@ const props = defineProps({ contentId: { type: String, required: true }, kind: {
 const source = ref('en'), translated = ref(''), showing = ref(false), busy = ref(false), error = ref(''), provider = ref('');
 const inferred = computed(() => normalizeContentLanguage(props.sourceLanguage) || inferContentLanguage(props.text));
 const canTranslate = computed(() => props.text.trim() && (inferred.value || source.value) !== locale.value);
+const externalTranslationUrl = computed(() => `https://translate.google.com/?${new URLSearchParams({ sl: inferred.value || source.value, tl: locale.value, text: props.text, op: 'translate' })}`);
 let version = 0;
 watch([() => props.contentId, () => props.text, () => props.sourceLanguage, locale], () => {
   version++; source.value = inferred.value || 'en'; translated.value = ''; showing.value = false; busy.value = false; error.value = ''; provider.value = '';
@@ -37,7 +38,7 @@ function changeSource() { version++; translated.value = ''; showing.value = fals
       <button v-if="canTranslate" type="button" :disabled="busy" :aria-pressed="showing" @click.stop="toggle">{{ $t(busy ? '翻譯中…' : showing ? '顯示原文' : '翻譯') }}</button>
       <small v-if="showing && provider && provider !== 'original'">{{ $t('參考譯文') }} · {{ provider }}</small>
     </div>
-    <p v-if="error" class="translation-error" role="status">{{ error }}</p>
+    <p v-if="error" class="translation-error" role="status">{{ error }} <a :href="externalTranslationUrl" target="_blank" rel="noopener noreferrer" @click.stop>{{ $t('使用 Google 翻譯（新視窗）') }}</a></p>
   </div>
 </template>
 <style scoped>

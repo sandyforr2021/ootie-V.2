@@ -70,7 +70,7 @@ export function createContentTranslationService({ supabase, fetchImpl = fetch })
             const r = await fetchImpl(url, { signal: AbortSignal.timeout(12000), headers: { Accept: 'application/json' } });
             if (!r.ok) {
               console.warn(JSON.stringify({ event: 'translation_provider_http', status: r.status }));
-              throw new GatewayError(r.status === 429 ? 'TRANSLATION_DAILY_LIMIT' : 'TRANSLATION_UNAVAILABLE', r.status === 429 ? 429 : 503);
+              throw new GatewayError(r.status === 429 ? 'TRANSLATION_BUSY' : 'TRANSLATION_UNAVAILABLE', r.status === 429 ? 429 : 503);
             }
             result = await r.json();
           } catch (error) {
