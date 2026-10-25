@@ -66,11 +66,24 @@ export function createContentTranslationService({ supabase, fetchImpl = fetch })
           const url = new URL('https://api.mymemory.translated.net/get');
           url.searchParams.set('q', segment); url.searchParams.set('langpair', `${source}|${targetLanguage}`);
           let result;
-          try { const r = await fetchImpl(url, { signal: AbortSignal.timeout(12000) }); if (!r.ok) throw Error(); result = await r.json(); }
-          catch { throw new GatewayError('TRANSLATION_UNAVAILABLE', 503); }
+          try {
+            const r = await fetchImpl(url, { signal: AbortSignal.timeout(12000), headers: { Accept: 'application/json' } });
+            if (!r.ok) {
+              console.warn(JSON.stringify({ event: 'translation_provider_http', status: r.status }));
+              throw new GatewayError(r.status === 429 ? 'TRANSLATION_DAILY_LIMIT' : 'TRANSLATION_UNAVAILABLE', r.status === 429 ? 429 : 503);
+            }
+            result = await r.json();
+          } catch (error) {
+            if (error instanceof GatewayError) throw error;
+            console.warn(JSON.stringify({ event: 'translation_provider_network', code: error?.cause?.code || error?.name || 'unknown' }));
+            throw new GatewayError('TRANSLATION_UNAVAILABLE', 503);
+          }
           if (result.quotaFinished || Number(result.responseStatus) === 429) throw new GatewayError('TRANSLATION_DAILY_LIMIT', 429);
           const text = result.responseData?.translatedText;
-          if (Number(result.responseStatus) !== 200 || typeof text !== 'string' || !text.trim()) throw new GatewayError('TRANSLATION_UNAVAILABLE', 503);
+          if (Number(result.responseStatus) !== 200 || typeof text !== 'string' || !text.trim()) {
+            console.warn(JSON.stringify({ event: 'translation_provider_result', status: result.responseStatus, quotaFinished: !!result.quotaFinished }));
+            throw new GatewayError('TRANSLATION_UNAVAILABLE', 503);
+          }
           const prefix = segment.match(/^\s*/u)[0], suffix = segment.match(/\s*$/u)[0];
           translated[index] = prefix + decodeEntities(text).trim() + suffix;
         };
