@@ -13,6 +13,7 @@
             <dt>{{ $t(field.label) }}</dt><dd>{{ field.value }}</dd>
           </div>
         </dl>
+        <div v-if="item.price != null && item.price !== ''" class="detail-purchase-price"><span>{{ $t('購入價格') }}</span> <MoneyAmount :amount="item.price" :currency="itemCurrency(item)" /><CurrencyNotice /></div>
         <p v-if="item.notes" class="detail-notes">{{ item.notes }}</p>
         <div v-if="sourceUrl" class="detail-source-links">
           <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('查看原商品') }} <AppIcon name="ExternalLink" :size="15" /></a>
@@ -39,7 +40,9 @@
 import { computed } from 'vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { itemName } from '@/services/itemPresentation';
-import { formatMoney, itemCurrency } from '@/services/money';
+import { itemCurrency } from '@/services/money';
+import MoneyAmount from '@/components/ui/MoneyAmount.vue';
+import CurrencyNotice from '@/components/ui/CurrencyNotice.vue';
 import { safeCommerceUrl } from '@/services/commerce';
 import { useOotdStore } from '@/stores/ootd';
 import { t } from '@/i18n';
@@ -65,7 +68,6 @@ const details = computed(() => {
     ['風格', i.style && t(labels[i.style] || i.style)],
     ['適合季節', i.season && t(labels[i.season] || i.season)],
     ['版型', i.shape],
-    ['購入價格', i.price != null ? formatMoney(i.price, itemCurrency(i)) : ''],
     ['購買日期', i.purchase_date],
     ['穿著次數', `${i.wear_count || 0}`],
     ['上次穿著', i.last_worn]

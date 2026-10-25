@@ -1,7 +1,9 @@
 <script setup>
 import { computed } from 'vue';
 import { useAppStore } from '@/stores/app';
-import { wardrobeCosts, formatMoney } from '@/services/money';
+import { wardrobeCosts } from '@/services/money';
+import MoneyAmount from '@/components/ui/MoneyAmount.vue';
+import CurrencyNotice from '@/components/ui/CurrencyNotice.vue';
 import { itemName } from '@/services/itemPresentation';
 const app = useAppStore();
 const groups = computed(() => wardrobeCosts(app.items));
@@ -11,12 +13,13 @@ const open = id => { app.selectedItemId = id; app.isDetailOpen = true; };
 <template>
   <section class="wardrobe-costs" aria-labelledby="wardrobe-cost-title">
     <div class="cost-heading"><div><span class="eyebrow">{{ $t('衣櫥帳本') }}</span><h2 id="wardrobe-cost-title">{{ $t('每件衣服，都有更多可能。') }}</h2></div><p>{{ $t('每次穿著成本＝購買金額 ÷ 已記錄穿著次數。不同幣別分開統計。') }}</p></div>
+    <CurrencyNotice />
     <div v-if="!groups.length" class="cost-empty"><p>{{ $t('加入衣物與購買金額，開始記錄你的衣櫥開銷。') }}</p><router-link class="secondary" to="/closet?quick=add-item">{{ $t('新增衣物') }}</router-link></div>
     <section v-for="group in groups" :key="group.currency" class="cost-currency-group" :aria-label="group.currency">
-      <header class="cost-summary"><div><small>{{ $t('已記錄購買金額') }} · {{ group.currency }}</small><strong>{{ group.priced ? formatMoney(group.total, group.currency) : '—' }}</strong></div><dl><div><dt>{{ $t('已填金額') }}</dt><dd>{{ group.priced }}</dd></div><div><dt>{{ $t('金額未填') }}</dt><dd>{{ group.unknown }}</dd></div><div><dt>{{ $t('已記錄穿著') }}</dt><dd>{{ group.wears }}</dd></div></dl></header>
-      <div class="cost-table-wrap" tabindex="0" :aria-label="$t('衣物成本明細')"><table><thead><tr><th scope="col">{{ $t('衣物') }}</th><th scope="col">{{ $t('購買金額') }}</th><th scope="col">{{ $t('穿著次數') }}</th><th scope="col">{{ $t('每次穿著成本') }}</th><th scope="col">{{ $t('購買日期') }}</th></tr></thead><tbody><tr v-for="item in group.rows" :key="item.id"><th scope="row"><button class="cost-item" @click="open(item.id)"><img v-if="item.photo" :src="item.photo" alt="" loading="lazy"><span>{{ itemName(item) }}</span></button></th><td>{{ formatMoney(item.price, group.currency) }}</td><td>{{ item.wear_count || 0 }}</td><td>{{ item.costPerWear == null ? '—' : formatMoney(item.costPerWear, group.currency) }}</td><td>{{ item.purchase_date || '—' }}</td></tr></tbody></table></div>
+      <header class="cost-summary"><div><small>{{ $t('已記錄購買金額') }} · {{ group.currency }}</small><strong><MoneyAmount :amount="group.priced ? group.total : null" :currency="group.currency" /></strong></div><dl><div><dt>{{ $t('已填金額') }}</dt><dd>{{ group.priced }}</dd></div><div><dt>{{ $t('金額未填') }}</dt><dd>{{ group.unknown }}</dd></div><div><dt>{{ $t('已記錄穿著') }}</dt><dd>{{ group.wears }}</dd></div></dl></header>
+      <div class="cost-table-wrap" tabindex="0" :aria-label="$t('衣物成本明細')"><table><thead><tr><th scope="col">{{ $t('衣物') }}</th><th scope="col">{{ $t('購買金額') }}</th><th scope="col">{{ $t('穿著次數') }}</th><th scope="col">{{ $t('每次穿著成本') }}</th><th scope="col">{{ $t('購買日期') }}</th></tr></thead><tbody><tr v-for="item in group.rows" :key="item.id"><th scope="row"><button class="cost-item" @click="open(item.id)"><img v-if="item.photo" :src="item.photo" alt="" loading="lazy"><span>{{ itemName(item) }}</span></button></th><td><MoneyAmount :amount="item.price" :currency="group.currency" /></td><td>{{ item.wear_count || 0 }}</td><td><MoneyAmount :amount="item.costPerWear" :currency="group.currency" /></td><td>{{ item.purchase_date || '—' }}</td></tr></tbody></table></div>
     </section>
-    <p class="cost-footnote">{{ $t('未填金額及尚未記錄穿著的衣物，不會被算成零成本。不進行匯率換算。') }}</p>
+    <p class="cost-footnote">{{ $t('未填金額及尚未記錄穿著的衣物，不會被算成零成本。換算金額依參考匯率顯示。') }}</p>
   </section>
 </template>
 

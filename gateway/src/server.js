@@ -16,6 +16,7 @@ import { CommerceRepository } from './commerce/repository.js';
 import { CommerceService } from './commerce/service.js';
 import { YouCamClient } from './commerce/youcamClient.js';
 import { CommerceJobWorker, startCommerceWorker } from './commerce/jobWorker.js';
+import { createWeatherPlacesService } from './services/weatherPlacesService.js';
 
 const config = loadConfig();
 const webRoot = fileURLToPath(new URL('../../dist', import.meta.url));
@@ -36,7 +37,8 @@ const repository = new CommerceRepository(supabase);
 const youcamClient = new YouCamClient(config.youcam);
 const commerceService = new CommerceService({ repository, storage: supabase, provider: youcamClient,
   reviewerUserIds: config.youcam.reviewerUserIds, enabled: config.youcam.enabled && !!config.youcam.apiKey });
-const app = createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService });
+const weatherPlacesService = createWeatherPlacesService();
+const app = createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService, weatherPlacesService });
 const stopWorker = config.youcam.workerEnabled && config.youcam.enabled && config.youcam.apiKey
   ? startCommerceWorker(new CommerceJobWorker({ repository, storage: supabase, provider: youcamClient }), {
     onError: (error) => console.error('Commerce worker:', error?.code || 'UNAVAILABLE')

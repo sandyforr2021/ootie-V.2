@@ -9,6 +9,7 @@
       </div>
       <p class="core-page-note" aria-hidden="true">save now<br />style later ♡</p>
     </header>
+    <CurrencyNotice />
 
     <section v-if="!embedded" class="product-import-panel" aria-labelledby="product-import-title">
       <div>
@@ -453,6 +454,8 @@
 </template>
 
 <script setup>
+import CurrencyNotice from '@/components/ui/CurrencyNotice.vue';
+import { defaultCurrency } from '@/services/money';
 defineProps({embedded:{type:Boolean,default:false}});
 import { ref, reactive, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -496,7 +499,7 @@ const formData = reactive({
   color: '',
   size: '',
   price: '',
-  currency: 'TWD',
+  currency: defaultCurrency(),
   notes: ''
 });
 
@@ -602,7 +605,7 @@ const handleOpenCreateModal = (prefill = null) => {
   formData.color = data.color || '';
   formData.size = data.size || '';
   formData.price = data.price ? String(data.price).replace(/[^0-9.]/g, '') : '';
-  formData.currency = data.currency || 'TWD';
+  formData.currency = data.currency || (data.price != null && data.price !== '' ? 'TWD' : defaultCurrency());
   formData.notes = data.notes || '';
 
   uploadedFile.value = null;

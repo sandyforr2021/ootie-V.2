@@ -1,3 +1,5 @@
+import { weatherPlaceSearchUrl } from '../../shared/weatherPlaces.js';
+
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
@@ -40,14 +42,24 @@ export async function fetchWeatherAt({ latitude, longitude, city }, fetchImpl = 
 export async function searchWeatherPlaces(city, language = 'en', fetchImpl = fetch) {
   const normalized = String(city || '').trim();
   if (normalized.length < 2) throw new WeatherError('CITY_REQUIRED', '請輸入城市名稱。');
-  const url = new URL(GEOCODING_URL);
-  url.searchParams.set('name', normalized);
-  url.searchParams.set('count', '8');
-  url.searchParams.set('language', language === 'zh-TW' ? 'zh' : language);
-  url.searchParams.set('format', 'json');
+  const gateway = String(import.meta.env.VITE_OOTIE_AI_GATEWAY_URL || '').replace(/\/$/, '');
+  if (gateway) {
+    const response = await fetchImpl(`${gateway}/v1/weather/places`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: normalized, language }), signal: AbortSignal.timeout(30000)
+    });
+    if (!response.ok) throw new WeatherError('PROVIDER_ERROR', '城市搜尋暫時無法使用。');
+    const payload = await response.json();
+    if (!Array.isArray(payload.places)) throw new WeatherError('PROVIDER_ERROR', '城市搜尋暫時無法使用。');
+    if (!payload.places.length) throw new WeatherError('CITY_NOT_FOUND', '找不到這個城市，請確認名稱後再試。');
+    return payload.places;
+  }
+  const { url, countryCode } = weatherPlaceSearchUrl(GEOCODING_URL, normalized, language, 8);
   const response = await fetchImpl(url, { signal: AbortSignal.timeout(12000) });
   if (!response.ok) throw new WeatherError('PROVIDER_ERROR', '城市搜尋暫時無法使用。');
-  const places = ((await response.json())?.results || []).filter(place=>!place.feature_code || /^(PPL|ADM)/.test(place.feature_code));
+  const places = ((await response.json())?.results || []).filter(place =>
+    (!countryCode || place.country_code === countryCode) &&
+    (!place.feature_code || /^(PPL|ADM)/.test(place.feature_code)));
   if (!places.length) throw new WeatherError('CITY_NOT_FOUND', '找不到這個城市，請確認名稱後再試。');
   return places.map(place => {
     let region=place.country;
@@ -68,18 +80,8 @@ export function weatherWardrobeAdvice(weather) {
 }
 
 export async function fetchWeatherForCity(city, fetchImpl = fetch) {
-  const normalized = String(city || '').trim();
-  if (!normalized) throw new WeatherError('CITY_REQUIRED', '請輸入城市名稱。');
-  const url = new URL(GEOCODING_URL);
-  url.searchParams.set('name', normalized);
-  url.searchParams.set('count', '1');
-  url.searchParams.set('language', 'zh');
-  url.searchParams.set('format', 'json');
-  const response = await fetchImpl(url);
-  if (!response.ok) throw new WeatherError('PROVIDER_ERROR', '城市搜尋暫時無法使用。');
-  const place = (await response.json())?.results?.[0];
-  if (!place) throw new WeatherError('CITY_NOT_FOUND', '找不到這個城市，請確認名稱後再試。');
-  return fetchWeatherAt({ latitude: place.latitude, longitude: place.longitude, city: place.name || normalized }, fetchImpl);
+  const [place] = await searchWeatherPlaces(city, 'zh-TW', fetchImpl);
+  return fetchWeatherAt({ latitude: place.latitude, longitude: place.longitude, city: place.name }, fetchImpl);
 }
 
 export function getBrowserPosition(geolocation = typeof navigator !== 'undefined' ? navigator.geolocation : null) {

@@ -21,11 +21,12 @@
 
     <section class="membership-section">
       <div class="section-heading"><h2>訂閱方案</h2><span class="eyebrow">目前方案 · {{ store.currentPlan }}</span></div>
+      <CurrencyNotice />
       <div class="plan-grid">
         <article v-for="plan in store.plans" :key="plan.id" :class="['plan-card', { current: store.currentPlan === plan.id }]">
           <span v-if="store.currentPlan === plan.id" class="plan-badge">目前方案</span>
           <h3>{{ plan.name }}</h3>
-          <p class="plan-price">NT$ {{ plan.monthlyPrice }} <small>/ 月</small></p>
+          <p class="plan-price"><MoneyAmount :amount="plan.monthlyPrice" currency="TWD" /> <small>/ 月</small></p>
           <p>{{ plan.description }}</p>
           <strong>每月 {{ plan.monthlyPoints }} 點</strong>
           <button class="primary" :disabled="store.loading || store.currentPlan === plan.id" @click="openPlanCheckout(plan.id)">
@@ -41,7 +42,7 @@
       <div class="credit-grid">
         <article v-for="pack in store.creditPacks" :key="pack.id" class="credit-card">
           <div><strong>{{ pack.name }}</strong><span>＋{{ pack.points }} 點</span></div>
-          <button class="secondary" :disabled="store.loading" @click="openCreditCheckout(pack.id)">購買點數 · NT$ {{ pack.price }}</button>
+          <button class="secondary" :disabled="store.loading" @click="openCreditCheckout(pack.id)">購買點數 · <MoneyAmount :amount="pack.price" currency="TWD" /></button>
         </article>
       </div>
     </section>
@@ -68,7 +69,7 @@
             <div><dt>項目</dt><dd>{{ store.checkout.title }}</dd></div>
             <div><dt>包含點數</dt><dd>{{ store.checkout.points }} 點</dd></div>
             <div v-if="store.checkout.billingPeriod"><dt>方案週期</dt><dd>每月</dd></div>
-            <div class="order-total"><dt>合計</dt><dd>NT$ {{ store.checkout.amount }}</dd></div>
+            <div class="order-total"><dt>合計</dt><dd><MoneyAmount :amount="store.checkout.amount" currency="TWD" /></dd></div>
           </dl>
           <p class="checkout-note">確認後會更新目前方案或點數餘額；此頁不會要求輸入信用卡資料。</p>
           <div class="checkout-actions">
@@ -91,6 +92,8 @@
 </template>
 
 <script setup>
+import MoneyAmount from '@/components/ui/MoneyAmount.vue';
+import CurrencyNotice from '@/components/ui/CurrencyNotice.vue';
 import { computed, watch } from 'vue';
 import { useSubscriptionStore } from '@/stores/subscription';
 import { useAuthStore } from '@/stores/auth';

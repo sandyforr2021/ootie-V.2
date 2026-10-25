@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useWeatherStore } from '@/stores/weather';
 import { useAppStore } from '@/stores/app';
 import { searchWeatherPlaces, getBrowserPosition } from '@/services/weather';
@@ -11,6 +11,8 @@ const query = ref('');
 const places = ref([]);
 const searching = ref(false);
 const error = ref('');
+let searchVersion = 0;
+watch([query, locale], () => { searchVersion++; places.value = []; error.value = ''; searching.value = false; });
 onMounted(async()=>{
  if(weather.current || weather.loading) return;
  try { const position=await getBrowserPosition(); if(!weather.current && !weather.loading) await weather.selectPlace({...position,label:locale.value==='zh-TW'?'目前位置':'Current location'}); }
@@ -18,10 +20,11 @@ onMounted(async()=>{
 });
 async function search() {
   if (searching.value) return;
+  const version = ++searchVersion;
   searching.value = true; places.value = []; error.value = '';
-  try { places.value = await searchWeatherPlaces(query.value, locale.value); }
-  catch (failure) { error.value = failure.name === 'WeatherError' ? failure.message : '城市搜尋暫時無法使用。'; }
-  finally { searching.value = false; }
+  try { const found = await searchWeatherPlaces(query.value, locale.value); if (version === searchVersion) places.value = found; }
+  catch (failure) { if (version === searchVersion) error.value = failure.name === 'WeatherError' ? failure.message : '城市搜尋暫時無法使用。'; }
+  finally { if (version === searchVersion) searching.value = false; }
 }
 const open = id => { app.selectedItemId = id; app.isDetailOpen = true; };
 const pieces = computed(() => {
@@ -40,6 +43,7 @@ const pieces = computed(() => {
       <p v-if="searching || weather.loading" role="status">{{ $t('正在取得當地天氣…') }}</p><p v-if="error || weather.error" role="alert">{{ $t(error || weather.error) }}</p>
       <div v-if="weather.current" class="weather-current"><div class="weather-now"><span aria-hidden="true">{{ weather.current.icon }}</span><strong>{{ weather.current.temperature }}°C</strong><div><h3>{{ weather.current.city }}</h3><p>{{ $t(weather.current.summary) }}<template v-if="weather.current.apparent != null"> · {{ $t('體感') }} {{ weather.current.apparent }}°C</template></p></div></div><p class="weather-day"><span v-if="weather.current.min != null && weather.current.max != null">{{ $t('今日') }} {{ weather.current.min }}–{{ weather.current.max }}°C</span><span v-if="weather.current.rain != null">{{ $t('降雨機率') }} {{ weather.current.rain }}%</span></p><ul><li v-for="tip in weather.advice" :key="tip">{{ $t(tip) }}</li></ul><div v-if="pieces.length" class="weather-pieces"><button v-for="item in pieces" :key="item.id" @click="open(item.id)"><img v-if="item.photo" :src="item.photo" alt="" loading="lazy"><span>{{ itemName(item) }}</span></button></div><small v-if="weather.current.time">{{ $t('資料時間') }} {{ weather.current.time.replace('T',' ') }} · {{ weather.current.timezone }}</small></div>
       <a class="weather-source" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">{{ $t('天氣資料') }}: Open-Meteo · {{ $t('天氣預報，非即時實測') }}</a>
+      <small class="weather-source">{{ $t('城市資料') }}: <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a> · <a href="https://photon.komoot.io/" target="_blank" rel="noopener noreferrer">Photon</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></small>
     </div>
   </section>
 </template>
