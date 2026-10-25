@@ -89,7 +89,7 @@
             <img class="ootd-photo" :src="post.image" :alt="tf('{user} 的 OOTD', { user: post.username })" loading="lazy" decoding="async" />
           </router-link>
           <div class="ootd-body">
-            <p class="ootd-caption">{{ $t(post.caption) }}</p>
+            <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" />
             <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
               {{ post.hashtags.join('　') }}
             </div>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { t, tf, formatDate } from '@/i18n';
 import { isFixtureContent } from '@/services/contentAuthenticity';
@@ -148,7 +149,7 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
 const socialStore = useSocialStore();
-const followCounts = ref({ followers: 0, following: 0 });
+const followCounts = ref({ followers: null, following: null });
 
 const isMember = computed(() => authStore.isMember);
 const openLoginGate = () => appStore.openLoginGate('AUTH_REQUIRED', '/profile');
@@ -239,6 +240,7 @@ const targetProfile = computed(() => {
 const loadProfileMetrics = async () => {
   const profileId = isSelf.value ? authStore.profileId : remotePublicProfile.value?.id;
   if (!profileId) {
+    followCounts.value = { followers: null, following: null };
     profileMetrics.value = {
       saved: null, helped: null, likes: null,
       savedError: false, helpedError: false, likesError: false
