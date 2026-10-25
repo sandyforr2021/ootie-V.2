@@ -1,7 +1,7 @@
 import {readFile,realpath,stat} from 'node:fs/promises';
 import {resolve,sep,extname} from 'node:path';
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.ico':'image/x-icon','.woff2':'font/woff2','.zip':'application/zip','.txt':'text/plain; charset=utf-8'};
-const routes=/^\/(?:|home|shop|explore|closet|sos|profile|profile\/help-history|bookmarks|stats|settings|ai|tryon|membership|legal\/(?:privacy|terms|ai)|auth\/callback|ootd\/[\da-f-]{36})$/i;
+const routes=/^\/(?:|home|shop|community\/tryons|explore|closet|sos|profile|profile\/help-history|bookmarks|stats|settings|ai|tryon|membership|legal\/(?:privacy|terms|ai)|auth\/callback|ootd\/[\da-f-]{36})$/i;
 export function createStaticSite(root,{revision,streamFiles=false}={}){
  const base=resolve(root);
  const releaseHeaders=/^[0-9a-f]{40}$/i.test(revision||'')?{'X-OOTIE-Revision':revision}:{};

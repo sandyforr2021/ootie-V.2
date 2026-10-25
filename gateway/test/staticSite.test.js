@@ -10,7 +10,7 @@ test('serves SPA routes and assets but never secrets, traversal, or API paths',a
  await writeFile(join(root,'index.html'),'<h1>OOTIE</h1>');await writeFile(join(root,'assets','app.js'),'export {};');
  await writeFile(join(root,'.env'),'PRIVATE');
  const serve=createStaticSite(root);
- assert.equal((await serve('/shop')).status,200);
+ for(const path of ['/shop','/community/tryons','/bookmarks']){assert.equal((await serve(path)).status,200);assert.match((await serve(path)).headers['Content-Type'],/html/);}
  assert.match((await serve('/shop')).headers['Content-Type'],/html/);
  assert.match((await serve('/assets/app.js')).headers['Cache-Control'],/immutable/);
  assert.equal((await serve('/shop','HEAD')).rawBody.length,0);
