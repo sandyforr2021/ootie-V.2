@@ -2,7 +2,6 @@
   <div v-if="appStore.isNotificationOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal notification-modal">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
-      <p class="eyebrow">Community</p>
       <div class="notification-heading">
         <div><h2>{{ $t("通知") }}</h2><span v-if="socialStore.unreadCount" class="unread-summary">{{ socialStore.unreadCount }} 則未讀</span></div>
         <button v-if="socialStore.unreadCount" type="button" class="text-button" @click="markAllRead">全部標為已讀</button>

@@ -1,6 +1,6 @@
 # OOTIE × YouCam: implementation and database handoff
 
-Verified on 2026-10-22. This file describes this checkout, not a deployed release.
+Current safety release verified on 2026-10-23: code `086c0991f898e9ca6dadfc2710b748edff078eca` is live on the existing Render URL, and its Supabase migration is applied. See [deployment evidence](YOUCAM_SAFETY_DEPLOYMENT_20261023.md). Earlier sections retain their original dated observations.
 
 ## Database separation
 
@@ -78,3 +78,11 @@ Still required before describing this as a finished submission: a real, consente
 The user's approved direction is joyful, colorful high fashion using berry, butter yellow, mint and lilac. The opening wardrobe-door animation is preserved, with a replay control and reduced-motion support. The shopping flow uses three steps, with photo consent and sufficient-credit checks before queue submission. English is the initial language; saved preferences remain respected. CJK display type is upright, with separate size, line-height and spacing rules; Spanish controls wrap. No paid assets or generated media were purchased for this revision.
 
 Sources of UI truth: PRODUCT.md, DESIGN.md, src/assets/atelier.css and src/assets/shop-studio.css. The review folder contains actual browser captures and offline test results. The source detector was run once and returned no findings. The production build succeeds with the existing main-chunk size warning; no live paid/gift-unit generation was used for UI verification.
+
+## Follow-up recorded on 2026-10-23
+
+The user supplied a YouCam account screenshot showing **1,014 reward units remaining** and **42 units used in the past 30 days**. Treat those as screenshot values; this workspace did not make a direct API balance request. The prior unit values in this handoff describe the earlier check and should not be presented as the current console balance.
+
+Migration `supabase/migrations/20261023091242_youcam_safety_and_recovery.sql` was reviewed against the live schema and budget, then applied to OOTIE as remote version `20261023095421` (`youcam_safety_and_recovery`). It adds credit lifecycle states, a default per-user daily limit of 22 units, maximum three active jobs per member including the entire proposed batch, and a 22-unit reviewer reserve. Its release/deletion/quota RPCs and photo-deletion lease table are server-only. `YOUCAM_REVIEWER_USER_IDS` is configured in Render using the verified existing jury account. The internal 100-unit cap and 46 allocated units were preserved; this internal ledger is separate from the provider account balance.
+
+The deployed release includes photo and result deletion controls, public-share retraction, same-batch recovery after a lost response, a sample-result shortcut, a three-image result comparison, optional color-preference ranking, and English privacy/security copy. Auto-deploy remains off. The full app test command and production build passed before the initial code push; the final batch-limit correction also passed its real-SQL PGlite test before migration. The local npm audit reported zero advisories after moving Vite to 8.3.5, Vitest to 5.0.5, and `@vitejs/plugin-vue` to 6.0.10. Render's build and deployment completed successfully, and the public revision header was verified. No additional generation or deletion of real user media was performed during deployment verification.

@@ -1,4 +1,6 @@
 import { genuineContent } from '@/services/contentAuthenticity';
+import { formatConvertedMoney } from '@/services/money';
+import { t } from '@/i18n';
 import { defineStore } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import { BOOKMARKS_STORAGE_KEY } from '@/constants';
@@ -94,16 +96,11 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   };
 
   const formatPrice = (price, currency = 'TWD') => {
-    if (!price || !String(price).trim()) return '價格未提供';
+    if (price == null || !String(price).trim()) return t('價格未提供');
     const rawNum = String(price).replace(/[^0-9.]/g, '');
     if (!rawNum) return String(price).trim();
-    const formattedNum = Number(rawNum).toLocaleString();
     const cur = (currency || 'TWD').toUpperCase();
-    if (cur === 'TWD') return `NT$ ${formattedNum}`;
-    if (cur === 'USD') return `$ ${formattedNum}`;
-    if (cur === 'EUR') return `€ ${formattedNum}`;
-    if (cur === 'JPY') return `¥ ${formattedNum}`;
-    return `${cur} ${formattedNum}`;
+    return formatConvertedMoney(Number(rawNum), cur);
   };
 
   const findDuplicateBookmark = (url, variant, color, size, excludeId = null) => {

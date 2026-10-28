@@ -8,7 +8,7 @@ async function copy() {try {await navigator.clipboard.writeText(address);copied.
 <template>
   <section class="extension-setup">
     <h2>{{ t('瀏覽器收藏助手') }}</h2>
-    <p>{{ t('瀏覽商品頁時擷取名稱、圖片與購買連結，確認後帶到試穿工作室。') }}</p>
+    <p>{{ t('擷取商品圖片與連結，加入想買清單。') }}</p>
     <a class="primary" href="/downloads/ootie-browser-companion.zip" download>{{ t('下載 Chrome 擴充功能') }}</a>
     <ol>
       <li>{{ t('解壓縮下載的檔案，保留整個資料夾。') }}</li>
@@ -19,7 +19,7 @@ async function copy() {try {await navigator.clipboard.writeText(address);copied.
     <label>{{ t('OOTIE 網站網址') }}<input :value="address" readonly @focus="$event.target.select()" /></label>
     <button class="secondary" @click="copy">{{ t(copied ? '網址已複製' : '複製網站網址') }}</button>
     <p v-if="copyError" role="alert">{{ t('請選取上方網址並手動複製。') }}</p>
-    <p class="extension-note">{{ t('此版本以資料夾安裝，尚未在 Chrome 線上應用程式商店上架。商品讀取受到各網站提供的資訊限制，缺少圖片時可在工作室上傳。') }}</p>
+    <p class="extension-note">{{ t('目前使用資料夾安裝。若商家限制讀取，可在新增商品視窗上傳圖片。') }}</p>
   </section>
 </template>
 <style scoped>

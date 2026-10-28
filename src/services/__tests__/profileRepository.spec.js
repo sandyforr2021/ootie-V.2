@@ -191,7 +191,7 @@ describe('profileRepository', () => {
 
   it('public profile query explicitly excludes private account fields', async () => {
     const select = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ data: [{ id: mockProfileId, username: '@sandy', display_name: 'Sandy' }], error: null })
+      in: vi.fn().mockResolvedValue({ data: [{ id: mockProfileId, username: '@sandy', display_name: 'Sandy' }], error: null })
     });
     const client = { from: vi.fn().mockReturnValue({ select }) };
     const result = await getPublicProfileByUsername('@sandy', client);

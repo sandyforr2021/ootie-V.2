@@ -6,9 +6,9 @@
     @close="close"
   >
       <div class="auth-header">
-        <h2 id="auth-modal-title">{{ isLoginMode ? $t('歡迎回來') : $t('建立 OOTIE 帳號') }}</h2>
+        <h2 id="auth-modal-title">{{ isLoginMode ? $t('歡迎回來','Welcome back') : $t('建立 OOTIE 帳號','Create an OOTIE account') }}</h2>
         <p class="auth-subtitle">
-          {{ isLoginMode ? $t('登入後繼續整理衣櫥與收藏穿搭。') : $t('從自己的衣服開始，慢慢整理出喜歡的風格。') }}
+          {{ isLoginMode ? $t('登入後繼續整理衣櫥與收藏穿搭。','Sign in to continue organizing your wardrobe and saved looks.') : $t('從自己的衣服開始，慢慢整理出喜歡的風格。','Start with your own clothes and build a style you love.') }}
         </p>
       </div>
 
@@ -18,13 +18,13 @@
           class="auth-tab"
           :class="{ active: isLoginMode }"
           @click="switchMode('login')"
-        >{{ $t("登入") }}</button>
+        >{{ $t("登入", "Sign in") }}</button>
         <button
           type="button"
           class="auth-tab"
           :class="{ active: !isLoginMode }"
           @click="switchMode('register')"
-        >{{ $t("註冊") }}</button>
+        >{{ $t("註冊", "Create account") }}</button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="auth-form">
@@ -32,26 +32,26 @@
           <span>{{ $t(authStore.errorMsg) }}</span>
         </div>
 
-        <div class="oauth-actions" :aria-label="$t(&quot;第三方登入&quot;)">
-          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" :aria-label="isLoginMode ? $t('使用 Google 帳號登入') : $t('使用 Google 建立帳號')" @click="handleProviderLogin('google')">
+        <div class="oauth-actions" :aria-label="$t(&quot;第三方登入&quot;, &quot;Third-party sign-in&quot;)">
+          <BaseButton type="button" variant="ghost" class="google-auth-button" :disabled="authStore.loading" :aria-label="isLoginMode ? $t('使用 Google 帳號登入','Sign in with Google') : $t('使用 Google 建立帳號','Create an account with Google')" @click="handleProviderLogin('google')">
             <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.19-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"/>
               <path fill="#34A853" d="M12 22c2.7 0 4.98-.9 6.64-2.43l-3.24-2.53c-.9.6-2.05.96-3.4.96-2.61 0-4.82-1.76-5.61-4.13H3.05v2.62A10 10 0 0 0 12 22Z"/>
               <path fill="#FBBC05" d="M6.39 13.87A6.02 6.02 0 0 1 6.08 12c0-.65.11-1.28.31-1.87V7.51H3.05A10 10 0 0 0 2 12c0 1.61.39 3.13 1.05 4.49l3.34-2.62Z"/>
               <path fill="#EA4335" d="M12 6c1.47 0 2.79.5 3.82 1.49l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.95 5.51l3.34 2.62C7.18 7.76 9.39 6 12 6Z"/>
             </svg>
-            <span>{{ isLoginMode ? $t('使用 Google 登入') : $t('使用 Google 建立帳號') }}</span>
+            <span>{{ isLoginMode ? $t('使用 Google 登入','Continue with Google') : $t('使用 Google 建立帳號','Create an account with Google') }}</span>
           </BaseButton>
         </div>
 
-        <p v-if="!isLoginMode" class="auth-subtitle">{{ $t('使用 Google 即可建立帳號。已有帳號可切換至登入。') }}</p>
+        <p v-if="!isLoginMode" class="auth-subtitle">{{ $t('使用 Google 即可建立帳號。已有帳號可切換至登入。','Create an account with Google. If you already have an account, switch to Sign in.') }}</p>
         <template v-if="isLoginMode">
-        <div class="auth-divider"><span>{{ $t("或使用電子郵件") }}</span></div>
+        <div class="auth-divider"><span>{{ $t("或使用電子郵件", "or use email") }}</span></div>
 
         <BaseInput
             id="authEmail"
             v-model="form.email"
-            :label="$t(&quot;電子郵件&quot;)"
+            :label="$t(&quot;電子郵件&quot;, &quot;Email address&quot;)"
             type="email"
             required
             placeholder="name@example.com"
@@ -60,17 +60,17 @@
         <BaseInput
             id="authPassword"
             v-model="form.password"
-            :label="$t(&quot;密碼&quot;)"
+            :label="$t('密碼', 'Password')"
             type="password"
             required
             minlength="6"
-            :placeholder="$t(&quot;請輸入至少 6 位字元密碼&quot;)"
+            :placeholder="$t(&quot;請輸入至少 6 位字元密碼&quot;, &quot;Enter a password with at least 6 characters&quot;)"
         />
 
         <div class="form-actions">
-          <BaseButton variant="ghost" @click="close">{{ $t("取消") }}</BaseButton>
+          <BaseButton variant="ghost" @click="close">{{ $t("取消", "Cancel") }}</BaseButton>
           <BaseButton type="submit" :loading="authStore.loading">
-            {{ isLoginMode ? $t('立即登入') : $t('完成註冊') }}
+            {{ isLoginMode ? $t('立即登入','Sign in') : $t('完成註冊','Create account') }}
           </BaseButton>
         </div>
         </template>
@@ -113,14 +113,14 @@ const handleSubmit = async () => {
   if (isLoginMode.value) {
     const success = await authStore.login(form.email, form.password);
     if (success) {
-      appStore.showToast(t('登入成功！歡迎回來'), { type: 'success' });
+      appStore.showToast(t('登入成功！歡迎回來','Signed in successfully. Welcome back.'), { type: 'success' });
     }
   }
 };
 
 const handleProviderLogin = async (provider) => {
   const success = await authStore.signInWithProvider(provider, authStore.oauthReturnTo || route.fullPath || '/');
-  if (success) appStore.showToast(t('正在前往登入服務…'), { type: 'info' });
+  if (success) appStore.showToast(t('正在前往登入服務…','Opening sign-in…'), { type: 'info' });
 };
 </script>
 

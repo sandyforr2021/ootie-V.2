@@ -2,11 +2,8 @@
   <section class="page active" id="sosPage">
     <header class="core-page-hero sos-page-hero">
       <div>
-        <p class="eyebrow">Style SOS</p>
         <h1>{{ $t("穿搭求救") }}</h1>
-        <p class="intro">{{ t("衣友正在求救，從她真正擁有的衣櫥裡幫她搭一套。") }}</p>
       </div>
-      <p class="core-page-note" aria-hidden="true">more ideas<br />more possibilities ♡</p>
     </header>
 
     <!-- Toolbar & Search -->
@@ -72,10 +69,8 @@
           <div class="sos-meta">
             <span>{{ t("場合") }} · {{ t(post.occasion) }}</span>
             <span>{{ t("天氣") }} · {{ t(post.weather) }}</span>
-            <span>{{ t("穿著時機") }} · {{ t(post.when_label) }}</span>
-          </div>
 
-          <div class="sos-vibes">{{ t('想呈現的風格') }} · {{ (post.vibes || []).map(v => t(v)).join(' · ') }}</div>
+          </div>
 
           <div class="sos-card-footer">
             <span class="sos-available">
@@ -104,7 +99,7 @@
                 class="sos-cta"
                 @click="openSuggestion(post.id)"
               >
-                {{ t("幫她搭配") }}
+                {{ t("提供穿搭建議") }}
               </button>
 
               <!-- Explicit close button for sent tab -->

@@ -5,7 +5,7 @@
     content-class="login-gate-modal"
     @close="appStore.closeLoginGate()"
   >
-    <p class="eyebrow">OOTie Member Access</p>
+
     <h2 id="login-gate-title">{{ copy.title }}</h2>
     <p class="login-gate-copy">{{ copy.body }}</p>
     <div class="login-gate-actions">

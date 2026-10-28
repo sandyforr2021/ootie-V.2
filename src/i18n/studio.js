@@ -37,4 +37,10 @@ export const studioMessages = `
 商品試穿會為每件選取的商品各產生一張結果；同批三件不會合成一套。整套衣服與包包一起上身的功能尚未提供。|Product try-on creates a separate result for each selected item. Three items in one batch do not become one outfit. Combined clothing and bag try-on is not available yet.|商品試着は選んだ商品ごとに別の結果を作成します。3点選んでも1つのコーデには合成されません。服とバッグの一括試着にはまだ対応していません。|La prueba crea un resultado por producto. Tres productos en un lote no forman un conjunto. La prueba conjunta de ropa y bolso aún no está disponible.
 前往商品試穿|Try on a product|商品を試着する|Probar un producto
 每件商品會分別產生一張試穿結果，不會合成一套穿搭。|Each product creates its own try-on result; selected products are not combined into one outfit.|商品ごとに別の試着結果を作成します。複数商品を1つのコーデには合成しません。|Cada producto genera su propio resultado; no se combinan en un solo conjunto.
+天氣與穿搭|Weather and outfits|天気とコーデ|Clima y conjuntos
+擷取商品圖片與連結，加入想買清單。|Save product images and links to your wishlist.|商品画像とリンクを欲しいものリストに保存します。|Guarda imágenes y enlaces de productos en tu lista de deseos.
+目前使用資料夾安裝。若商家限制讀取，可在新增商品視窗上傳圖片。|Install from the downloaded folder. If a store blocks access, upload an image in Add product.|ダウンロードしたフォルダーからインストールします。読み取りが制限される場合は「商品を追加」で画像をアップロードできます。|Instala desde la carpeta descargada. Si una tienda bloquea el acceso, sube una imagen en Añadir producto.
+想買清單目前沒有商品|Your wishlist is empty|欲しいものリストは空です|Tu lista de deseos está vacía
+最多選取三張照片比較。|Compare up to three photos.|最大3枚の写真を比較できます。|Compara hasta tres fotos.
+尚無試穿結果|No try-on results yet|試着結果はまだありません|Aún no hay resultados de prueba
 `;

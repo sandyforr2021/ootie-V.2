@@ -59,16 +59,22 @@ describe('SOS clothing preview and selection UX', () => {
     expect(appStore.isSosDetailOpen).toBe(true);
   });
 
-  it('renders the SOS publish picker as an image selection grid', async () => {
+  it('requires public wardrobe visibility instead of individual-item publication', async () => {
     const appStore = useAppStore();
     const wrapper = mount(SosFormModal);
     appStore.isSosFormOpen = true;
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.find('.sos-selection-grid').exists()).toBe(true);
-    expect(wrapper.findAll('.sos-selection-card')).toHaveLength(8);
-    expect(wrapper.findAll('.sos-selection-card.selected')).toHaveLength(8);
-    expect(wrapper.findAll('.sos-selection-card .product-image')).toHaveLength(8);
+    expect(wrapper.find('.sos-selection-grid').exists()).toBe(false);
+    appStore.profile.public_closet=false;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('button[type="submit"]').element.disabled).toBe(true);
+    expect(wrapper.text()).toContain('請先開啟「公開衣櫥」功能，才能發布求救。');
+    appStore.profile.public_closet=true;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('button[type="submit"]').element.disabled).toBe(false);
+    expect(wrapper.find('#sosWhen').exists()).toBe(false);
+    wrapper.unmount();
   });
 
   it('renders only the SOS shared items in the suggestion picker', async () => {
@@ -145,7 +151,7 @@ describe('SOS clothing preview and selection UX', () => {
     finish({ ok: true });
     await flushPromises();
     expect(wrapper.find('fieldset').element.disabled).toBe(false);
-    expect(wrapper.findAll('.sos-selection-card.selected')).toHaveLength(1);
+    expect(wrapper.find('.sos-selection-grid').exists()).toBe(false);
     expect(wrapper.find('[role="status"]').exists()).toBe(false);
     wrapper.unmount();
   });

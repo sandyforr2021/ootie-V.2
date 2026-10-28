@@ -1,4 +1,24 @@
 export const wardrobeInsightsMessages = `
+翻譯|Translate|翻訳|Traducir
+使用 Google 翻譯（新視窗）|Use Google Translate (new window)|Google 翻訳を使う（新しいウィンドウ）|Usar Google Traductor (nueva ventana)
+顯示原文|Show original|原文を表示|Mostrar original
+翻譯中…|Translating…|翻訳中…|Traduciendo…
+原文語言|Original language|原文の言語|Idioma original
+參考譯文|Translated text|参考訳|Traducción de referencia
+今日翻譯額度已用完，原文仍可閱讀。|Today's translation limit has been reached. The original is still available.|本日の翻訳上限に達しました。原文は引き続き読めます。|Se alcanzó el límite diario de traducción. El original sigue disponible.
+暫時無法翻譯，請稍後再試。|Translation is unavailable. Please try again later.|現在翻訳できません。後でもう一度お試しください。|La traducción no está disponible. Inténtalo más tarde.
+
+城市資料|City data|都市データ|Datos de ciudades
+原幣金額|Original amount|元の通貨の金額|Importe original
+暫以原幣顯示|Shown in original currency|元の通貨で表示|Se muestra en la moneda original
+顯示幣別|Display currency|表示通貨|Moneda de visualización
+參考匯率日期|Reference rate date|参考為替レートの日付|Fecha del tipo de cambio
+約算金額僅供參考，原幣金額不變。|Conversions are estimates; original amounts are unchanged.|換算額は参考値です。元の金額は変更されません。|Las conversiones son estimaciones; los importes originales no cambian.
+匯率來源|Exchange rate source|為替レートの出典|Fuente del tipo de cambio
+正在取得匯率，暫以原幣顯示。|Loading exchange rates. Showing original currency for now.|為替レートを取得中です。元の通貨で表示しています。|Cargando tipos de cambio. Se muestra la moneda original.
+匯率暫時無法取得，保留原幣金額。|Exchange rates are unavailable. Original amounts are retained.|為替レートを取得できません。元の通貨の金額を表示します。|Tipos de cambio no disponibles. Se mantienen los importes originales.
+未填金額及尚未記錄穿著的衣物，不會被算成零成本。換算金額依參考匯率顯示。|Missing prices and unrecorded wears are unknown, never zero. Conversions use reference exchange rates.|金額や着用記録がない場合は未計算とし、ゼロ扱いにしません。換算額は参考為替レートに基づきます。|Los precios o usos sin registrar son desconocidos, nunca cero. Las conversiones usan tipos de cambio de referencia.
+
 目前沒有需要回顧的穿著紀錄。|No wear records need a review right now.|現在、見直す着用記録はありません。|No hay registros de uso que revisar ahora.
 年度衣櫥回顧|Your year in clothes|年間ワードローブ|Tu año en prendas
 統計項目|Measure|項目|Medida

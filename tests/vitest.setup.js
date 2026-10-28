@@ -1,14 +1,15 @@
 import { vi } from 'vitest';
 import { config } from '@vue/test-utils';
 import accessibleModal from '@/directives/accessibleModal';
-import { t, setLocale } from '@/i18n';
+import { t, tf, setLocale } from '@/i18n';
 
 // Existing interaction fixtures use Traditional Chinese; locale behavior has its own tests.
 setLocale('zh-TW');
-config.global.config = { ...(config.global.config || {}), globalProperties: { $t: t } };
+config.global.config = { ...(config.global.config || {}), globalProperties: { $t: t, $tf: tf } };
 vi.stubEnv('VITE_SUPABASE_URL', 'https://unit-test.supabase.co');
 vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-only-public-key');
 vi.stubEnv('VITE_OOTIE_SUPABASE_PROJECT_REF', 'unit-test');
+if (typeof window.confirm !== 'function') window.confirm = vi.fn(() => false);
 
 config.global.directives = {
   ...(config.global.directives || {}),

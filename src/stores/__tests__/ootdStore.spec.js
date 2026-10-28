@@ -80,7 +80,7 @@ describe('OOTD publish and actions contract', () => {
   it('renders each Explore post ID only once even if the data source repeats a row', async () => {
     const { appStore, ootdStore } = prepareMember();
     const repeated = { id: postId, user_id: profileId, caption: '同一篇', image: '/look.jpg' };
-    appStore.ootdPosts = [repeated, { ...repeated }, { ...repeated, id: 'unique-post' }];
+    appStore.ootdPosts = [repeated, { ...repeated }, { ...repeated, id: 'unique-post', image: '/other-look.jpg' }];
 
     expect(uniquePostsById(appStore.ootdPosts).map((post) => post.id)).toEqual([postId, 'unique-post']);
     expect(ootdStore.filteredPosts.map((post) => post.id)).toEqual([postId, 'unique-post']);

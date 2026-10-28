@@ -290,4 +290,13 @@ OOTD 詳情｜OOTIE|Outfit details — OOTIE|コーデの詳細 — OOTIE|Detall
 畫面發生未預期錯誤，請重試。|Something went wrong. Please try again.|問題が発生しました。もう一度お試しください。|Algo salió mal. Inténtalo de nuevo.
 原有穿搭示範|Original outfit showcase|既存のコーデサンプル|Muestra de conjuntos originales
 此區含預先建立的示範人物、穿搭與互動數字，不代表真實使用人數、OOTIE 產圖或營收。|This area includes seeded profiles, outfits and interaction counts. These do not represent real users, OOTIE results or revenue.|このエリアには事前作成のプロフィール、コーデ、操作数が含まれます。実際の利用者数、OOTIE の生成結果、売上ではありません。|Esta sección incluye perfiles, conjuntos y cifras de interacción de demostración. No representan usuarios reales, resultados de OOTIE ni ingresos.
+整套試穿請各選最多一件上衣、下身與外套。|Choose at most one top, one bottom and one outer layer for an outfit.|上下の服とアウターをそれぞれ1点まで選んでください。|Elige como máximo una prenda superior, una inferior y una chaqueta.
+依序試穿上衣、下身、外套，完成後保留一張整套結果；每件各使用一次額度。|Try on a top, bottom and outer layer in sequence. Keep one final outfit image; each piece uses one try-on allowance.|トップス、ボトムス、アウターを順番に試着します。完成画像は1枚で、各アイテムに1回分の利用枠を使用します。|Prueba la parte superior, inferior y chaqueta en secuencia. Obtendrás una imagen final; cada prenda consume una prueba.
+選衣、選擇模特兒，完成的試穿會留在私人相簿。|Choose clothes and a model photo. Find the finished look in your private album.|服とモデル写真を選ぶと、完成した試着が非公開アルバムに届きます。|Elige prendas y una foto de modelo. El resultado aparecerá en tu álbum privado.
+下一步：選擇模特兒|Next: choose a model|次へ：モデルを選ぶ|Siguiente: elegir modelo
+先在想買清單加入商品，或切換到我的衣櫥挑選衣物。|Add products to your wishlist, or choose clothes from your wardrobe.|ウィッシュリストに商品を追加するか、クローゼットから服を選んでください。|Añade productos a tu lista de deseos o elige prendas de tu armario.
+整套試穿|Outfit try-on|コーディネート試着|Prueba del conjunto
+已完成 {done} / {total} 件|{done} of {total} pieces completed|{total}点中{done}点が完了|{done} de {total} prendas completadas
+目前可用額度|Available credits|利用可能なクレジット|Créditos disponibles
+可用額度已考量今日使用量、處理中的工作及網站剩餘額度。|Availability accounts for today's usage, active jobs and the remaining site credits.|本日の利用量、処理中のジョブ、サイトの残高を考慮した利用枠です。|La disponibilidad considera el uso de hoy, los trabajos activos y los créditos restantes del sitio.
 `;

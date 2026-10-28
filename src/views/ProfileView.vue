@@ -10,7 +10,6 @@
       <router-link to="/explore" class="back-link">← {{ t('返回探索') }}</router-link>
     </div>
 
-    <p class="profile-context">{{ isSelf ? $t('我的帳號') : t('衣友個人檔案') }}</p>
     <h1>{{ isSelf ? $t('個人檔案') : (targetProfile.name || targetProfile.display_name) }}</h1>
 
     <div class="profile-header">
@@ -76,31 +75,8 @@
 
     <SavedOutfitsCollection v-if="isSelf && route.query.tab === 'saved'" embedded />
 
-    <router-link v-if="isSelf" to="/shop?tab=activity" class="profile-membership-card">
-      <div>
 
-        <strong>{{ $t('我的購物足跡') }}</strong>
-        <small>{{ $t('查看收藏、試穿與前往商家的紀錄。') }}</small>
-      </div>
-      <span aria-hidden="true">→</span>
-    </router-link>
 
-    <section class="profile-settings" v-if="isSelf">
-      <h2>{{ $t("衣櫥設定") }}</h2>
-      <div id="closet-privacy" class="setting-row">
-        <div>
-          <strong>{{ $t("公開我的衣櫥") }}</strong>
-          <p>{{ $t("讓衣友可以查看你的單品並提供穿搭建議。") }}</p>
-        </div>
-        <button
-          :class="['switch', { on: appStore.profile.public_closet }]"
-          :aria-pressed="appStore.profile.public_closet"
-          :disabled="changingVisibility"
-          :aria-label="t('切換公開衣櫥')"
-          @click="togglePublicCloset"
-        ></button>
-      </div>
-    </section>
 
     <section class="profile-ootd">
       <div class="profile-ootd-heading">
@@ -113,7 +89,7 @@
             <img class="ootd-photo" :src="post.image" :alt="tf('{user} 的 OOTD', { user: post.username })" loading="lazy" decoding="async" />
           </router-link>
           <div class="ootd-body">
-            <p class="ootd-caption">{{ $t(post.caption) }}</p>
+            <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" />
             <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
               {{ post.hashtags.join('　') }}
             </div>
@@ -124,13 +100,14 @@
               {{ formatDate(post.created_at || post.createdAt) }}
             </p>
             <div class="ootd-actions">
-              <button type="button" :class="['ootd-action', { liked: post.liked }]" @click="ootdStore.toggleLike(post.id)">
-                {{ post.liked ? '♥' : '♡' }} {{ post.likes || 0 }}
+              <button type="button" :class="['ootd-action', { liked: post.liked }]" :aria-label="t('喜歡')" :aria-pressed="!!post.liked" @click="ootdStore.toggleLike(post.id)">
+                <AppIcon name="heart" :fill="post.liked ? 'currentColor' : 'none'" /> {{ post.likes || 0 }}
               </button>
-              <button type="button" :class="['ootd-action', { saved: post.saved }]" @click="ootdStore.toggleSave(post.id)">
-                {{ post.saved ? '▣ ' + t('已收藏') : '▢ ' + t('收藏') }}
+              <router-link class="ootd-action" :aria-label="t('留言')" :to="{path:`/ootd/${post.id}`,query:{from:'profile',comment:'1'}}"><AppIcon name="comment" /> {{ post.comments || 0 }}</router-link>
+              <button type="button" :class="['ootd-action', { saved: post.saved }]" :aria-label="t('收藏')" :aria-pressed="!!post.saved" @click="ootdStore.toggleSave(post.id)">
+                <AppIcon name="bookmark" :fill="post.saved ? 'currentColor' : 'none'" />
               </button>
-              <button type="button" class="ootd-action" @click="shareOotd(post.id)">{{ $t("分享") }}</button>
+              <button type="button" class="ootd-action" :aria-label="t('分享')" @click="shareOotd(post.id)"><AppIcon name="share" /></button>
               <template v-if="isSelf">
                 <button type="button" class="ootd-action" @click="editOotd(post.id)">{{ t("編輯") }}</button>
                 <button type="button" class="ootd-action ootd-delete-action" @click="deleteOotd(post.id)">
@@ -150,6 +127,8 @@
 </template>
 
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
+import AppIcon from '@/components/ui/AppIcon.vue';
 import { t, tf, formatDate } from '@/i18n';
 import SavedOutfitsCollection from '@/components/bookmarks/SavedOutfitsCollection.vue';
 import { isFixtureContent } from '@/services/contentAuthenticity';
@@ -171,7 +150,7 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
 const socialStore = useSocialStore();
-const followCounts = ref({ followers: 0, following: 0 });
+const followCounts = ref({ followers: null, following: null });
 
 const isMember = computed(() => authStore.isMember);
 const openLoginGate = () => appStore.openLoginGate('AUTH_REQUIRED', '/profile');
@@ -262,6 +241,7 @@ const targetProfile = computed(() => {
 const loadProfileMetrics = async () => {
   const profileId = isSelf.value ? authStore.profileId : remotePublicProfile.value?.id;
   if (!profileId) {
+    followCounts.value = { followers: null, following: null };
     profileMetrics.value = {
       saved: null, helped: null, likes: null,
       savedError: false, helpedError: false, likesError: false
@@ -367,24 +347,6 @@ const shareOotd = (postId) => {
   ootdStore.sharePost(postId);
 };
 
-const changingVisibility = ref(false);
-const togglePublicCloset = async () => {
-  if (!isMember.value || !authStore.profileId) { openLoginGate(); return; }
-  if (changingVisibility.value) return;
-  const profileId = authStore.profileId;
-  const next = !appStore.profile.public_closet;
-  changingVisibility.value = true;
-  try {
-    const row = await updatePublicProfile(profileId, { public_closet: next });
-    if (row?.public_closet !== next) throw new Error('PROFILE_UPDATE_NOT_CONFIRMED');
-    if (profileId !== authStore.profileId) return;
-    appStore.profile.public_closet = next;
-    authStore.profileIdentity = { ...authStore.profileIdentity, profile: { ...authStore.profile, public_closet: next } };
-    appStore.showToast(t(next ? '衣櫥已設為公開' : '衣櫥已設為私人'), { type: 'success', syncStatus: 'SYNCED' });
-  } catch {
-    appStore.showToast(t('衣櫥設定未儲存，請重試。'), { type: 'error', syncStatus: 'REMOTE_FAILED' });
-  } finally { changingVisibility.value = false; }
-};
 </script>
 
 <style scoped>

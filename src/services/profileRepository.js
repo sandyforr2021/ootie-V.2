@@ -209,9 +209,9 @@ export async function getPublicProfileByUsername(username, client = supabase) {
   try {
     const { data, error } = await client.from('ootie_profiles')
       .select(PUBLIC_PROFILE_SELECT)
-      .eq('username', normalized.startsWith('@') ? normalized : `@${normalized}`);
+      .in('username', [normalized.replace(/^@/, ''), `@${normalized.replace(/^@/, '')}`]);
     if (error) throw normalizeServiceError(error);
-    return data?.[0] || null;
+    return data?.find(profile => profile.username === normalized) || data?.[0] || null;
   } catch (err) {
     throw normalizeServiceError(err);
   }

@@ -13,7 +13,7 @@ export class CommerceRepository {
   async product(id, userId) { return (await this.request('ootie_shop_products', `?id=eq.${id}&user_id=eq.${userId}&limit=1`))?.[0]; }
   async createProduct(row) { return (await this.request('ootie_shop_products', '', { method: 'POST', body: row }))[0]; }
   async updateProduct(id, userId, changes) { return (await this.request('ootie_shop_products', `?id=eq.${id}&user_id=eq.${userId}`, { method: 'PATCH', body: changes }))[0]; }
-  listJobs(userId) { return this.request('ootie_youcam_jobs', `?user_id=eq.${userId}&select=id,batch_id,product_id,kind,status,units,result_path,result_data,error_code,created_at,completed_at,product:ootie_shop_products(title)&order=created_at.desc&limit=200`); }
+  listJobs(userId) { return this.request('ootie_youcam_jobs', `?user_id=eq.${userId}&select=id,batch_id,product_id,kind,status,credit_state,person_path,product_path,sequence_index,sequence_total,previous_job_id,result_deleted_at,units,result_path,result_data,error_code,created_at,completed_at,product:ootie_shop_products(title)&order=created_at.desc&limit=200`); }
   async job(id, userId) { return (await this.request('ootie_youcam_jobs', `?id=eq.${id}&user_id=eq.${userId}&limit=1`))?.[0]; }
   async savedOutfit(profileId, postId) { return (await this.request('ootie_saved_outfits', `?profile_id=eq.${profileId}&target_type=eq.OOTD&target_id=eq.${postId}&select=id&limit=1`))?.[0]; }
   async outfit(postId) { return (await this.request('ootie_ootd_posts', `?id=eq.${postId}&select=id,item_ids&limit=1`))?.[0]; }
@@ -22,7 +22,13 @@ export class CommerceRepository {
     return (await this.request('ootie_youcam_jobs', query, { method: 'PATCH', body: { result_path: null } }))?.[0];
   }
   async budget() { return (await this.request('ootie_youcam_budget', '?id=eq.true&limit=1'))?.[0]; }
-  async claim(lease) { return (await this.rpc('claim_ootie_youcam_job', { p_lease: lease }))?.[0]; }
+  async userQuota(userId) { return this.rpc('get_ootie_youcam_user_quota', { p_user_id: userId }); }
+  releaseReservation(id, lease, errorCode) { return this.rpc('release_ootie_youcam_reservation', { p_id: id, p_lease: lease, p_error_code: errorCode }); }
+  beginPhotoDeletion(userId, personPath, lease) { return this.rpc('begin_ootie_youcam_photo_deletion', { p_user_id: userId, p_person_path: personPath, p_lease: lease }); }
+  finishPhotoDeletion(userId, personPath, lease) { return this.rpc('finish_ootie_youcam_photo_deletion', { p_user_id: userId, p_person_path: personPath, p_lease: lease }); }
+  async removeJobResult(id, userId) { return this.rpc('delete_ootie_youcam_result', { p_id: id, p_user_id: userId }); }
+  async removePost(id, userId) { return this.rpc('delete_ootie_youcam_post', { p_id: id, p_user_id: userId }); }
+  async claim(lease) { return (await this.rpc('claim_ootie_youcam_job', { p_lease: lease, p_support_outfits: true }))?.[0]; }
   async updateJob(id, lease, changes) {
     const rows = await this.request('ootie_youcam_jobs', `?id=eq.${id}&lease_token=eq.${lease}`, { method: 'PATCH', body: changes });
     if (rows.length !== 1) throw new GatewayError('JOB_LEASE_LOST', 409, '任務已交由其他工作程序處理。');
@@ -30,6 +36,7 @@ export class CommerceRepository {
   }
   posts() { return this.request('ootie_shop_posts', '?select=id,user_id,title,caption,image_url,source_url,created_at&order=created_at.desc&limit=60'); }
   async post(id) { return (await this.request('ootie_shop_posts', `?id=eq.${id}&select=id,user_id,title,caption,image_url,source_url,created_at&limit=1`))?.[0]; }
+  async ownedPost(id, userId) { return (await this.request('ootie_shop_posts', `?id=eq.${id}&user_id=eq.${userId}&select=id,user_id,job_id&limit=1`))?.[0] || null; }
   publicAuthors(userIds) {
     if(!userIds.length)return [];
     return this.request('ootie_profiles',`?user_id=in.(${userIds.join(',')})&select=id,user_id,username,display_name,initials,avatar_url`);

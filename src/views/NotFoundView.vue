@@ -1,7 +1,7 @@
 <template>
   <section class="page active not-found-page" aria-labelledby="not-found-title">
     <div class="not-found-card">
-      <p class="eyebrow">404 · LOST OUTFIT</p>
+      <p class="eyebrow">404</p>
       <span class="not-found-mark" aria-hidden="true">?</span>
       <h1 id="not-found-title">這一頁不在衣櫥裡</h1>
       <p>連結可能已更新或內容已移除。你可以回到首頁，或繼續探索公開穿搭。</p>

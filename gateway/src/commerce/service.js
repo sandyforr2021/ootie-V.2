@@ -1,3 +1,4 @@
+import { orderedOutfit, outfitLayer } from '../../../shared/outfitSelection.js';
 import { randomUUID, createHash } from 'node:crypto';
 import { assert, GatewayError } from '../errors.js';
 import { parseImageDataUrl, normalizeGarmentImageForAi } from '../image.js';
@@ -8,7 +9,7 @@ import { YOUCAM_FEATURES } from './youcamClient.js';
 
 const validPath = (path, prefix) => typeof path === 'string' && path.startsWith(prefix)
   && !path.split('/').some((part) => !part || part === '..' || part === '.' || /[%\\?#]/.test(part));
-const categories = new Set(['upper_body','lower_body','full_body','shoes','auto']);
+const categories = new Set(['outer','upper_body','lower_body','full_body','shoes','auto']);
 const snapshotId = (userId, batchId, itemId) => {
   const bytes = createHash('sha256').update(`ootie-closet:${userId}:${batchId}:${itemId}`).digest().subarray(0,16);
   bytes[6] = (bytes[6] & 0x0f) | 0x50; bytes[8] = (bytes[8] & 0x3f) | 0x80;
@@ -26,14 +27,28 @@ const garmentCategory = value => {
 };
 
 export class CommerceService {
-  constructor({ repository, storage, enabled = false, download = safeDownload }) {
-    this.repository = repository; this.storage = storage; this.enabled = enabled; this.download = download;
+  constructor({ repository, storage, provider, enabled = false, reviewerUserIds = [], download = safeDownload }) {
+    this.repository = repository; this.storage = storage; this.provider = provider; this.enabled = enabled;
+    this.reviewerUserIds = new Set(reviewerUserIds); this.download = download;
   }
-  async capabilities() {
-    const budget = await this.repository.budget();
-    const remaining = Math.max(0, (budget?.unit_limit || 0) - (budget?.allocated_units || 0));
+  async capabilities(user) {
+    const [budget, quota, providerBalance] = await Promise.all([
+      this.repository.budget(),
+      user ? this.repository.userQuota(user.id) : null,
+      this.provider?.balanceSnapshot ? this.provider.balanceSnapshot().catch(() => null) : null
+    ]);
+    const isReviewer = !!user && this.reviewerUserIds.has(user.id);
+    const dbRemaining = Math.max(0, (budget?.unit_limit || 0) - (budget?.allocated_units || 0));
+    const reserve = isReviewer ? 0 : Number(budget?.reviewer_reserve_units || 0);
+    const quotaRemaining = Math.max(0, Number(quota?.dailyLimit || 0) - Number(quota?.dailyUsed || 0));
+    const underConcurrencyLimit = Number(quota?.activeCount || 0) < Number(quota?.activeLimit || 0);
+    const providerRemaining = providerBalance === null ? 0 : Math.max(0, providerBalance - reserve);
+    const remaining = Math.min(Math.max(0, dbRemaining - reserve), providerRemaining, quotaRemaining);
     const active = !!budget?.expires_at && Date.parse(budget.expires_at) > Date.now();
-    return { enabled: this.enabled && active && remaining >= 2, remainingUnits: active ? remaining : 0,
+    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= 2,
+      remainingUnits: active && underConcurrencyLimit ? remaining : 0, dailyRemainingUnits: quotaRemaining,
+      activeJobs: Number(quota?.activeCount || 0), activeJobLimit: Number(quota?.activeLimit || 0),
+      providerBalance, balanceVerified: providerBalance !== null, reviewerReserveUnits: Number(budget?.reviewer_reserve_units || 0),
       costs: { try_on: 2, skin_tone: 20 }, expiresAt: budget?.expires_at || null, provider: 'youcam', automaticTopUp: false };
   }
   async withPublicAuthors(posts) {
@@ -71,7 +86,7 @@ export class CommerceService {
     const id = randomUUID();
     const imagePath = `shop/${user.id}/${id}.jpg`;
     await this.storage.uploadPrivate(imagePath, image);
-    return this.repository.createProduct({ id, user_id: user.id, title, source_url: sourceUrl, image_path: imagePath, category: body.category, color: body.color });
+    return this.repository.createProduct({ id, user_id: user.id, title, source_url: sourceUrl, image_path: imagePath, category: body.category==='outer'?'upper_body':body.category, outfit_layer:outfitLayer({category:body.category}), color: body.color });
   }
   async enqueue(user, body) {
     assert(this.enabled, 'YOUCAM_DISABLED', 503, '試穿服務尚未開啟。');
@@ -86,10 +101,12 @@ export class CommerceService {
       && (body.kind === 'try_on' ? ids.length + clothingIds.length + savedItems.length >= 1 && ids.length + clothingIds.length + savedItems.length <= 3 : ids.length + clothingIds.length + savedItems.length === 0), 'INVALID_BATCH', 400, '每批請選擇 1–3 件不同商品。');
     // Validate existence before reserving any credits. Ownership is checked again in SQL.
     await this.storage.downloadPrivate(body.personPath);
+    const selectedProducts=[];
     // Reject an invalid wishlist selection before making any wardrobe snapshots.
     for (const id of ids) {
       const product = await this.repository.product(id, user.id);
       assert(product && categories.has(product.category) && product.state !== 'tryon_only', 'INVALID_PRODUCT', 400, '請重新選擇想買清單中的商品。');
+      selectedProducts.push(product);
     }
     const snapshots=[];
     if (clothingIds.length || savedItems.length) {
@@ -107,23 +124,29 @@ export class CommerceService {
         item.tryonCategory = garmentCategory(item.category);
         assert(item.tryonCategory, 'UNSUPPORTED_GARMENT_CATEGORY', 400, '目前試穿支援衣服與鞋履；請移除包包、配件或無法辨識的分類。');
       }
+      assert(orderedOutfit([...selectedProducts,...items]).valid, 'INVALID_OUTFIT_LAYERS', 400, '整套試穿請各選最多一件上衣、下身與外套。');
       for (const item of items) {
         const id=snapshotId(user.id,body.batchId,item.id);
         const existing=await this.repository.product(id,user.id);
-        if (existing) { assert(existing.state==='tryon_only', 'INVALID_PRODUCT', 409); snapshots.push(id); continue; }
+        if (existing) { assert(existing.state==='tryon_only', 'INVALID_PRODUCT', 409); snapshots.push(id); selectedProducts.push(existing); continue; }
         const source=item.shared ? await this.storage.sharedClothingImage(user,item.id) : await this.storage.clothingImage(item,{userId:user.id});
         const image=await normalizeGarmentImageForAi(source.buffer,source.mimeType);
         const imagePath=`shop/${user.id}/${id}.jpg`;
         await this.storage.uploadPrivate(imagePath,image,{upsert:true});
-        try { await this.repository.createProduct({id,user_id:user.id,title:String(item.name_zh || item.name || 'Wardrobe item').slice(0,160),source_url:'',image_path:imagePath,category:item.tryonCategory,color:'#c8bba9',state:'tryon_only'}); }
+        try { await this.repository.createProduct({id,user_id:user.id,title:String(item.name_zh || item.name || 'Wardrobe item').slice(0,160),source_url:'',image_path:imagePath,category:item.tryonCategory,outfit_layer:outfitLayer(item),color:'#c8bba9',state:'tryon_only'}); }
         catch (error) {
           const raced=await this.repository.product(id,user.id);
           if (!raced || raced.state !== 'tryon_only' || raced.image_path !== imagePath) throw error;
         }
-        snapshots.push(id);
+        snapshots.push(id); selectedProducts.push({id,category:item.tryonCategory,outfit_layer:outfitLayer(item)});
       }
     }
-    return this.repository.rpc('enqueue_ootie_youcam', { p_batch_id: body.batchId, p_user_id: user.id, p_person_path: body.personPath, p_product_ids: [...ids,...snapshots], p_kind: body.kind });
+    if (body.kind==='try_on') {
+      const outfit=orderedOutfit(selectedProducts);
+      assert(outfit.valid, 'INVALID_OUTFIT_LAYERS', 400, '整套試穿請各選最多一件上衣、下身與外套。');
+      return this.repository.rpc('enqueue_ootie_outfit', {p_batch_id:body.batchId,p_user_id:user.id,p_person_path:body.personPath,p_product_ids:outfit.items.map(item=>item.id),p_is_reviewer:this.reviewerUserIds.has(user.id)});
+    }
+    return this.repository.rpc('enqueue_ootie_youcam', { p_batch_id: body.batchId, p_user_id: user.id, p_person_path: body.personPath, p_product_ids: [...ids,...snapshots], p_kind: body.kind, p_is_reviewer: this.reviewerUserIds.has(user.id) });
   }
   async privateImage(user, path) {
     assert(validPath(path, `shop/${user.id}/`), 'PRIVATE_IMAGE_NOT_OWNED', 403, '無法讀取其他人的商品圖片。');
@@ -142,31 +165,47 @@ export class CommerceService {
     assert(cancelled, 'JOB_ALREADY_STARTED', 409, '工作已開始，請等待結果。');
     return { cancelled };
   }
+  async deletePersonPhoto(user, photoId) {
+    const photos = await this.storage.listPersonPhotos(user.id);
+    const target = photos.find((photo) => photo.id === photoId);
+    assert(target, 'PERSON_IMAGE_NOT_FOUND', 404, '找不到這張人物照片。');
+    const lease = randomUUID();
+    await this.repository.beginPhotoDeletion(user.id, target.path, lease);
+    try {
+      return await this.storage.deletePersonPhoto(user.id, photoId);
+    } finally {
+      await this.repository.finishPhotoDeletion(user.id, target.path, lease).catch(() => {});
+    }
+  }
+  async retract(user, id) {
+    assert(isUuid(id), 'INVALID_POST', 400);
+    const post = await this.repository.ownedPost(id, user.id);
+    assert(post, 'POST_NOT_FOUND', 404, '找不到你發布的分享。');
+    await this.storage.deleteObject('ootie-shop-shares', `${user.id}/${post.job_id}.jpg`);
+    const removed = await this.repository.removePost(id, user.id);
+    assert(removed === true, 'POST_NOT_FOUND', 404, '分享已撤回或不存在。');
+    return { retracted: true };
+  }
   async deleteResult(user, id) {
     assert(isUuid(id), 'INVALID_JOB', 400);
     const job = await this.repository.job(id, user.id);
-    assert(job, 'JOB_NOT_FOUND', 404, '找不到這筆試穿結果。');
-    assert(job.kind === 'try_on' && job.status === 'succeeded', 'RESULT_NOT_READY', 409, '只能刪除已完成的試穿結果。');
-    if (!job.result_path) return { deleted: true };
-    const path = `ai-generated/${user.id}/${id}.jpg`;
-    assert(job.result_path === path, 'PRIVATE_IMAGE_NOT_OWNED', 403, '無法刪除此照片。');
-    // Delete the Storage object through the Storage API. A retry is safe if
-    // the database update fails after the object has already been removed.
-    await this.storage.serviceRequest(`/storage/v1/object/${encodeURIComponent(this.storage.bucket)}`, {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prefixes: [path] })
-    });
-    const updated = await this.repository.clearJobResult(id, user.id, path);
-    if (!updated) {
-      const current = await this.repository.job(id, user.id);
-      assert(current && !current.result_path, 'RESULT_DELETE_NOT_CONFIRMED', 409, '結果刪除尚未確認，請再試一次。');
+    assert(job, 'JOB_NOT_FOUND', 404, '找不到這筆工作。');
+    assert(!['queued','preparing','submitting','processing','needs_review'].includes(job.status), 'JOB_STILL_ACTIVE', 409, '工作完成或核對後才能刪除結果。');
+    assert(!job.result_path || job.result_path===`ai-generated/${user.id}/${id}.jpg`, 'PRIVATE_IMAGE_NOT_OWNED', 403);
+    const post = await this.repository.ownedPost(id, user.id);
+    if (post) await this.storage.deleteObject('ootie-shop-shares', `${user.id}/${post.job_id}.jpg`);
+    const removed = await this.repository.removeJobResult(id, user.id);
+    assert(removed === true, 'JOB_NOT_FOUND', 404, '找不到可刪除的結果。');
+    if (job.result_path) {
+      await this.storage.deletePrivate(job.result_path);
+      await this.repository.clearJobResult(id,user.id,job.result_path);
     }
     return { deleted: true };
   }
   async publish(user, body) {
     assert(isUuid(body?.jobId) && body?.consent === true, 'SHARE_CONSENT_REQUIRED', 400, '請確認公開分享這張試穿結果。');
     const job = await this.repository.job(body.jobId, user.id);
-    assert(job?.status === 'succeeded' && job.kind === 'try_on' && job.result_path, 'RESULT_NOT_READY', 409, '試穿完成後才能分享。');
+    assert(!job?.result_deleted_at && (job?.sequence_index || 1)===(job?.sequence_total || 1) && job?.status === 'succeeded' && job.kind === 'try_on' && job.result_path, 'RESULT_NOT_READY', 409, '試穿完成後才能分享。');
     const existing = await this.repository.post(job.id);
     if (existing) return (await this.withPublicAuthors([existing]))[0];
     const product = await this.repository.product(job.product_id, user.id);

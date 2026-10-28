@@ -5,7 +5,7 @@
                 <h2>{{ $t('我的收藏') }}</h2>
         <p class="intro">{{ $t('收藏的穿搭與衣友求救，隨時回來找靈感。') }}</p>
       </div>
-      <p class="core-page-note" aria-hidden="true">looks worth<br />remembering ♡</p>
+
     </header>
 
     <p v-if="loading" class="saved-outfits-state">{{ $t('正在載入收藏穿搭…') }}</p>

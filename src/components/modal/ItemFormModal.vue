@@ -2,7 +2,6 @@
   <div v-if="appStore.isItemFormOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal form-modal">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" :disabled="isSubmitting" @click="close">×</button>
-      <p class="eyebrow">{{ isEdit ? $t('編輯你的單品') : $t('新增單品') }}</p>
       <h2>{{ isEdit ? $t('編輯單品') : $t('加入衣櫥') }}</h2>
 
       <form @submit.prevent="handleSubmit">
@@ -34,10 +33,7 @@
               <li><span>2</span><strong>{{ $t("光線均勻") }}</strong><small>{{ $t("靠近窗邊，避免強烈背光或陰影") }}</small></li>
               <li><span>3</span><strong>{{ $t("一次一件") }}</strong><small>{{ $t("平放、掛起或放在椅面都可以") }}</small></li>
             </ol>
-            <div class="capture-guide-actions">
-              <button type="button" class="primary" @click="openCameraInput">{{ $t("開始拍照") }}</button>
-              <button type="button" class="secondary" @click="openGalleryInput">{{ $t("從相簿選擇") }}</button>
-            </div>
+
           </section>
 
           <div class="upload-zone">
@@ -65,6 +61,8 @@
               @change="handleFileChange"
             />
             <img
+              v-if="photoPreview"
+              :key="photoPreview"
               :class="['upload-preview', 'product-image', { visible: photoPreview }]"
               :src="photoPreview"
               :alt="form.name ? `${form.name}照片預覽` : '單品照片預覽'"
@@ -116,6 +114,12 @@
           <p class="capture-privacy-note">{{ $t('照片不會自動發布。原圖保留私有；顯示版本會校正方向、縮放及壓縮，可選擇嘗試去除單色背景。') }}</p>
         </div>
 
+        <div v-if="preparedMedia" class="vision-controls">
+          <button type="button" class="secondary" :disabled="visionBusy || isSubmitting" @click="recognizeGarment">{{ $t(visionState==='loading'?'正在載入辨識模型…':visionState==='analyzing'?'正在辨識衣物…':'辨識品名與分類') }}</button>
+          <button v-if="visionBusy" type="button" class="text-button" @click="visionController?.abort();visionState='idle'">{{ $t('取消') }}</button>
+          <p class="form-hint">{{ $t('辨識在你的裝置上完成；首次使用會下載模型，照片不會傳送至辨識服務。') }}</p>
+          <p v-if="visionMessage" role="status">{{ visionMessage }}</p>
+        </div>
         <div class="form-grid">
           <div class="form-field">
             <label for="name">{{ $t("單品名稱") }}</label>
@@ -240,6 +244,7 @@ import { getColorFamilyForPrimaryColor, legacyColorNames } from '@/constants';
 import { analyzeImageColor } from '@/services/colorDetection';
 import { prepareClothingImage, blobToDataUrl } from '@/services/clothingMedia';
 import { suggestFromClothingFilename } from '@/services/clothingSuggestions';
+import { identifyClothing } from '@/services/clothingVision';
 import { removeSimpleBackground } from '@/services/simpleBackgroundRemoval';
 
 const appStore = useAppStore();
@@ -293,6 +298,9 @@ const backgroundBusy = ref(false);
 const backgroundRemoved = ref(false);
 const backgroundMessage = ref('');
 const filenameSuggestion = ref(false);
+const visionState=ref('idle'), visionMessage=ref('');
+let visionController=null;
+const visionBusy=computed(()=>['loading','analyzing'].includes(visionState.value));
 let originalDisplay = null;
 let lastSuggestedName = '';
 let categoryWasSuggested = false;
@@ -353,6 +361,7 @@ const releasePreviewUrl = () => {
 };
 
 const resetMediaSelection = ({ keepExistingPreview = false } = {}) => {
+  visionController?.abort(); visionController=null; visionState.value='idle'; visionMessage.value='';
   selectionSequence += 1;
   releasePreviewUrl();
   preparedMedia.value = null;
@@ -410,17 +419,33 @@ const applyColorSuggestion = (suggestion) => {
   form.secondary_color = suggestion.colorFamily;
 };
 
+const recognizeGarment = async () => {
+  if(!preparedMedia.value || visionBusy.value)return;
+  const sequence=selectionSequence, originalName=form.name, originalCategory=form.category;
+  visionController?.abort(); visionController=new AbortController(); visionMessage.value=''; visionState.value='loading';
+  try {
+    const suggestion=await identifyClothing(preparedMedia.value.displayBlob,{signal:visionController.signal,onState:state=>{visionState.value=state;}});
+    if(sequence!==selectionSequence || !appStore.isItemFormOpen)return;
+    if(suggestion){
+      if(form.name===originalName){form.name=t(suggestion.nameKey);lastSuggestedName=form.name;}
+      if(form.category===originalCategory){form.category=suggestion.category;categoryWasSuggested=true;categoryEdited.value=false;}
+      filenameSuggestion.value=false;visionMessage.value=t('已提供品名與分類建議，請確認後儲存。');
+    } else visionMessage.value=t('這張照片的分類不明確，請手動確認品名與分類。');
+    visionState.value='done';
+  } catch(error){if(error.name!=='AbortError' && sequence===selectionSequence){visionState.value='error';visionMessage.value=t('辨識暫時無法完成，你仍可自行填寫。');}}
+};
+
 const analyzeSelectedImage = async (source, sequence) => {
+  const originalColor=form.primary_color, originalName=form.name;
   colorAnalysisState.value = 'loading';
   const suggestion = await analyzeImageColor(source);
-  if (sequence !== selectionSequence) return;
+  if(sequence!==selectionSequence || !appStore.isItemFormOpen)return;
   colorSuggestion.value = suggestion;
   if (suggestion) {
-    applyColorSuggestion(suggestion);
+    if(form.primary_color===originalColor)applyColorSuggestion(suggestion);
+
     colorAnalysisState.value = 'success';
-  } else {
-    colorAnalysisState.value = 'failure';
-  }
+  } else { colorAnalysisState.value = 'failure'; }
 };
 
 const rememberCaptureGuide = () => {
@@ -529,13 +554,15 @@ watch(
       });
       photoPreview.value = '';
     }
-  }
+  },
+  { immediate: true }
 );
 
 const handleFileChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   rememberCaptureGuide();
+  visionController?.abort(); visionState.value='idle'; visionMessage.value='';
   const sequence = ++selectionSequence;
   releasePreviewUrl();
   preparedMedia.value = null;
@@ -588,6 +615,7 @@ const handleFileChange = async (e) => {
 
 const close = () => {
   if (isSubmitting.value) return;
+  visionController?.abort();
   resetMediaSelection();
   appStore.isItemFormOpen = false;
 };
@@ -658,5 +686,6 @@ const handleSubmit = async () => {
 };
 
 onUnmounted(releasePreviewUrl);
+onUnmounted(()=>visionController?.abort());
 </script>
 

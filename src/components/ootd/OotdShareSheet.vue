@@ -5,7 +5,7 @@
     content-class="ootd-share-sheet"
     @close="close"
   >
-    <p class="eyebrow">Share OOTD</p>
+
     <h2 id="ootd-share-title">{{ t("分享這套穿搭") }}</h2>
     <p class="ootd-share-copy">{{ t("選擇分享方式；實際發布仍由各平台或系統分享選單完成。") }}</p>
     <div class="ootd-share-options">

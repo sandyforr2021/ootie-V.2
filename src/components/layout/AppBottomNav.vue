@@ -11,13 +11,13 @@
     >
       <div class="mobile-more-header">
         <div>
-          <p class="quick-action-kicker">Navigation</p>
+
           <h2 id="mobile-more-title">{{ $t("更多功能") }}</h2>
         </div>
         <button ref="moreCloseButton" type="button" class="mobile-more-close" :aria-label="$t(&quot;關閉更多功能&quot;)" @click="closeMoreMenu">×</button>
       </div>
 
-      <p class="quick-action-heading">{{ $t("功能導覽") }}</p>
+
       <div class="mobile-more-destinations" :aria-label="$t(&quot;次要導覽&quot;)">
         <router-link
           v-for="item in MOBILE_MORE_ITEMS"

@@ -12,11 +12,11 @@
           </router-link>
           <time v-if="comment.created_at" :datetime="comment.created_at">{{ commentTime(comment.created_at) }}</time>
           <details class="comment-menu"><summary :aria-label="$t('留言選項')">⋯</summary><div>
-            <button v-if="auth.profileId === comment.profile_id" type="button" @click="store.removeComment(post.id, comment)">{{ $t('刪除') }}</button>
+            <button v-if="auth.profileId === comment.profile_id" type="button" class="comment-delete" :disabled="!!deleting" @click="remove(comment)">{{ $t('刪除') }}</button>
             <button type="button" @click="app.showToast($t('檢舉功能準備中。'), {type:'info'})">{{ $t('檢舉') }}</button>
           </div></details>
         </div>
-        <p>{{ comment.text }}</p>
+        <TranslatedText :text="comment.text" :source-language="comment.body_language" />
       </li>
     </ol>
     <p v-else>{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -29,13 +29,24 @@
   </section>
 </template>
 <script setup>
+import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import {ref,computed,watch} from 'vue';
+import {deletePostComment} from '@/services/postComments';
+import {t,formatDate} from '@/i18n';
 import {useAppStore} from '@/stores/app';
 import {useAuthStore} from '@/stores/auth';
 import {useOotdStore} from '@/stores/ootd';
 const props=defineProps({post:{type:Object,required:true}});
 const app=useAppStore(), auth=useAuthStore(), store=useOotdStore();
 const section=ref(null),composer=ref(null),draft=ref(''),loading=ref(false),error=ref(''),sending=ref(false);
+const deleting=ref(null);
+async function remove(comment){
+ if(deleting.value || comment.profile_id!==auth.profileId)return;
+ deleting.value=comment.id;
+ try {await deletePostComment({id:comment.id,profileId:auth.profileId,postId:props.post.id});await refresh();}
+ catch {error.value=t('留言未刪除，請重試。','Could not delete this comment. Please retry.');}
+ finally {deleting.value=null;}
+}
 let draftId=crypto.randomUUID(), version=0;
 const comments=computed(()=>props.post.commentList || []);
 function commentTime(value){

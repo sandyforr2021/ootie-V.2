@@ -14,11 +14,12 @@ test('commerce migration: real SQL enforces ownership, budget, replay and worker
       grant usage on schema public,auth to anon,authenticated,service_role;
       create schema storage; create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);`);
     await db.exec(await readFile(new URL('../../supabase/migrations/20261022103816_youcam_commerce_jobs.sql',import.meta.url),'utf8'));
+    await db.exec(await readFile(new URL('../../supabase/migrations/20261023091242_youcam_safety_and_recovery.sql',import.meta.url),'utf8'));
     await db.query('insert into auth.users values($1),($2)',[a,b]);
     await db.query("insert into ootie_shop_products(id,user_id,title,image_path,category) values($1,$2,'Owned product',$3,'upper_body'),($4,$5,'Other product',$6,'lower_body')",[product,a,`shop/${a}/one.jpg`,other,b,`shop/${b}/two.jpg`]);
     const enqueue=(batch,ids=[product],kind='try_on',user=a)=>db.query('select * from enqueue_ootie_youcam($1,$2,$3,$4,$5)',[batch,user,`person/${user}/photo.jpg`,ids,kind]);
     await assert.rejects(enqueue(randomUUID()),/FREE_BUDGET_EXHAUSTED/);
-    await db.exec("update ootie_youcam_budget set unit_limit=4,expires_at=now()+interval '1 day'");
+    await db.exec("update ootie_youcam_budget set unit_limit=4,reviewer_reserve_units=0,expires_at=now()+interval '1 day'");
     const batch=randomUUID(); const first=await enqueue(batch); const replay=await enqueue(batch);
     assert.equal(first.rows.length,1); assert.equal(first.rows[0].id,replay.rows[0].id);
     assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,2);
@@ -32,12 +33,22 @@ test('commerce migration: real SQL enforces ownership, budget, replay and worker
     const cancel=()=>db.query('select cancel_ootie_youcam_job($1,$2) as ok',[first.rows[0].id,a]);
     assert.equal((await cancel()).rows[0].ok,true); assert.equal((await cancel()).rows[0].ok,false);
     assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,2);
-    const claimed=(await db.query('select * from claim_ootie_youcam_job($1)',[randomUUID()])).rows[0];
+    const lease=randomUUID();
+    const claimed=(await db.query('select * from claim_ootie_youcam_job($1)',[lease])).rows[0];
     assert.equal(claimed.status,'preparing');
     assert.equal((await db.query('select * from claim_ootie_youcam_job($1)',[randomUUID()])).rows.length,0);
-    await db.query("update ootie_youcam_jobs set status='submitting',lease_until=now()-interval '1 second' where id=$1",[claimed.id]);
+    assert.equal((await db.query('select release_ootie_youcam_reservation($1,$2,$3) as ok',[claimed.id,lease,'YOUCAM_FREE_CREDITS_UNAVAILABLE'])).rows[0].ok,true);
+    assert.equal((await db.query('select credit_state from ootie_youcam_jobs where id=$1',[claimed.id])).rows[0].credit_state,'released');
+    assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,0);
+    const uncertainBatch=randomUUID();
+    const uncertainJob=(await enqueue(uncertainBatch)).rows[0];
+    await db.query("update ootie_youcam_jobs set status='submitting',lease_until=now()-interval '1 second' where id=$1",[uncertainJob.id]);
     assert.equal((await db.query('select * from claim_ootie_youcam_job($1)',[randomUUID()])).rows.length,0);
-    assert.equal((await db.query('select status from ootie_youcam_jobs where id=$1',[claimed.id])).rows[0].status,'needs_review');
+    const uncertain=(await db.query('select status,credit_state from ootie_youcam_jobs where id=$1',[uncertainJob.id])).rows[0];
+    assert.deepEqual(uncertain,{status:'needs_review',credit_state:'uncertain'});
+    assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,2);
+    const quota=(await db.query('select get_ootie_youcam_user_quota($1) as quota',[a])).rows[0].quota;
+    assert.equal(quota.dailyUsed,2); assert.equal(quota.activeCount,1);
     await db.exec(`set role authenticated; set request.jwt.claim.sub='${a}'`);
     assert.deepEqual((await db.query('select title from ootie_shop_products')).rows,[{title:'Owned product'}]);
     await assert.rejects(db.query("update ootie_shop_products set title='stolen'"),/permission denied/);
@@ -46,7 +57,16 @@ test('commerce migration: real SQL enforces ownership, budget, replay and worker
     await db.exec('set role anon');
     await assert.rejects(db.query('select * from ootie_youcam_jobs'),/permission denied/);
     await db.exec('reset role');
+    await db.exec('update ootie_youcam_budget set unit_limit=100');
+    const secondProduct=randomUUID(), thirdProduct=randomUUID();
+    await db.query("insert into ootie_shop_products(id,user_id,title,image_path,category) values($1,$2,'Second product',$3,'upper_body'),($4,$2,'Third product',$5,'upper_body')",
+      [secondProduct,a,`shop/${a}/second.jpg`,thirdProduct,`shop/${a}/third.jpg`]);
+    await assert.rejects(enqueue(randomUUID(),[product,secondProduct,thirdProduct]),/USER_ACTIVE_LIMIT/);
+    assert.equal((await db.query('select allocated_units from ootie_youcam_budget')).rows[0].allocated_units,2);
+    assert.equal((await enqueue(randomUUID(),[secondProduct,thirdProduct])).rows.length,2);
+    assert.equal((await db.query('select get_ootie_youcam_user_quota($1) as quota',[a])).rows[0].quota.activeCount,3);
+    await assert.rejects(enqueue(randomUUID()),/USER_ACTIVE_LIMIT/);
     const policies=await db.query("select relname,relrowsecurity from pg_class where relname like 'ootie_%' and relkind='r'");
-    assert.equal(policies.rows.length,6); assert.ok(policies.rows.every(row=>row.relrowsecurity));
+    assert.equal(policies.rows.length,7); assert.ok(policies.rows.every(row=>row.relrowsecurity));
   } finally { await db.close(); }
 });

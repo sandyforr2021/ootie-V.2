@@ -5,16 +5,18 @@ import { CommerceService } from '../src/commerce/service.js';
 
 const owner = randomUUID(), other = randomUUID(), id = randomUUID();
 function fixture() {
-  const state = { result_path: `ai-generated/${owner}/${id}.jpg`, kind: 'try_on', status: 'succeeded' };
+  const state = { result_path: `ai-generated/${owner}/${id}.jpg`, id, kind: 'try_on', status: 'succeeded' };
   const calls = [];
   const repository = {
     async job(jobId, userId) { return jobId === id && userId === owner ? { ...state } : undefined; },
+    async ownedPost() { return null; },
+    async removeJobResult() { state.result_deleted_at=new Date().toISOString(); return true; },
     async clearJobResult(jobId, userId, path) {
       if (jobId !== id || userId !== owner || path !== state.result_path) return undefined;
       state.result_path = null; return { ...state };
     }
   };
-  const storage = { bucket: 'private-bucket', async serviceRequest(path, options) { calls.push({path, options}); } };
+  const storage = { async deletePrivate(path) { calls.push(path); } };
   return { service: new CommerceService({repository, storage}), state, calls };
 }
 
@@ -23,7 +25,7 @@ test('owner deletes one result and replay remains safe', async () => {
   assert.deepEqual(await service.deleteResult({id:owner}, id), {deleted:true});
   assert.equal(state.result_path, null);
   assert.equal(calls.length, 1);
-  assert.deepEqual(JSON.parse(calls[0].options.body).prefixes, [`ai-generated/${owner}/${id}.jpg`]);
+  assert.deepEqual(calls[0], `ai-generated/${owner}/${id}.jpg`);
   assert.deepEqual(await service.deleteResult({id:owner}, id), {deleted:true});
   assert.equal(calls.length, 1);
 });
@@ -38,7 +40,7 @@ test('another user and unexpected storage paths cannot delete a result', async (
 
 test('a storage failure leaves the result available for retry', async () => {
   const {service, state} = fixture();
-  service.storage.serviceRequest = async () => { throw new Error('storage unavailable'); };
+  service.storage.deletePrivate = async () => { throw new Error('storage unavailable'); };
   await assert.rejects(service.deleteResult({id:owner}, id));
   assert.equal(state.result_path, `ai-generated/${owner}/${id}.jpg`);
 });

@@ -133,6 +133,8 @@ watch(() => authStore.profileId, (profileId) => {
 .topbar-notification { display:grid; place-items:center; border:0; background:transparent; box-shadow:none; }
 .topbar-notification:hover { background:var(--accent-pink-soft); box-shadow:none; }
 .topbar-notification .notification-badge { top: 1px; right: 1px; margin: 0; }
+.top-actions{gap:14px;display:flex;align-items:center}.popover-copy{flex-direction:column;gap:5px;padding-right:30px;overflow-wrap:anywhere}
+
 .auth-btn-sm {
   border: 1px solid var(--ink);
   padding: 9px 17px;

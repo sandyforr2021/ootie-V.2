@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
 import { assertOotieProject, OOTIE_PROJECT_REF } from '../src/contracts/projectBoundary.js';
+import { mergePublicPostCounts } from '../src/services/publicPostCounts.js';
 
 const clientFiles = [
   'src/services/supabase.js',
@@ -10,6 +11,7 @@ const clientFiles = [
 
 function evaluateClient(file, env, calls = []) {
   const source = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')
+    .replace(/^import \{ mergePublicPostCounts \} from '\.\/publicPostCounts';?\r?\n/m, '')
     .replace(/^import \{ createClient \} from '@supabase\/supabase-js';?\r?\n/m, '')
     .replace(/^import \{ assertOotieProject \} from '@\/contracts\/projectBoundary';?\r?\n/m, '')
     .replaceAll('import.meta.env', 'env')
@@ -18,6 +20,7 @@ function evaluateClient(file, env, calls = []) {
   runInNewContext(source, {
     env,
     assertOotieProject,
+    mergePublicPostCounts,
     createClient: (...args) => {
       calls.push(args);
       return {};

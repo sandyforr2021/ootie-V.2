@@ -1,4 +1,5 @@
 // One free Node web service serves the built SPA and the authenticated gateway.
+import {runApprovedReleaseActions} from './release/retract-reviewed-share.mjs';
 import {spawnSync} from 'node:child_process';
 const required=['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY'];
 for(const key of required)if(!process.env[key])throw new Error(`Missing ${key}`);
@@ -8,3 +9,5 @@ Object.assign(env,{NODE_ENV:'production',VITE_SUPABASE_URL:process.env.SUPABASE_
 const result=spawnSync(process.execPath,['node_modules/vite/bin/vite.js','build','--emptyOutDir','false'],{stdio:'inherit',env});
 if(result.error)throw result.error;
 process.exitCode=result.status||0;
+
+if(result.status===0)await runApprovedReleaseActions();

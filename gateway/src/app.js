@@ -2,7 +2,7 @@ import { GatewayError, toErrorResponse } from './errors.js';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
-export function createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService }) {
+export function createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService, weatherPlacesService, contentTranslationService }) {
   const isOriginAllowed = (origin) => !origin || config.corsAllowedOrigins.includes(origin);
 
   const authenticate = async (headers) => {
@@ -34,6 +34,8 @@ export function createGatewayApp({ config, supabase, provider, generationService
       }
 
       const ok = (body, status = 200) => ({ status, headers: { ...JSON_HEADERS, ...corsHeaders, 'Cache-Control': 'no-store' }, body });
+      if (weatherPlacesService && method === 'POST' && path === '/v1/weather/places') return ok({ places: await weatherPlacesService.search(body) });
+      if (contentTranslationService && method === 'POST' && path === '/v1/translations') return ok(await contentTranslationService.translate(body));
       if (commerceService && method === 'GET' && path === '/v1/shop/posts') return ok({ posts: await commerceService.publicPosts() });
       const publicPost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
       if (commerceService && method === 'GET' && publicPost) {
@@ -51,7 +53,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
       if (commerceService && path.startsWith('/v1/shop/')) {
         const user = identity.user;
         const repo = commerceService.repository;
-        if (method === 'GET' && path === '/v1/shop/capabilities') return ok(await commerceService.capabilities());
+        if (method === 'GET' && path === '/v1/shop/capabilities') return ok(await commerceService.capabilities(user));
         if (method === 'GET' && path === '/v1/shop/products') return ok({ products: await repo.listProducts(user.id) });
         if (method === 'GET' && path === '/v1/shop/jobs') return ok({ jobs: await repo.listJobs(user.id) });
         if (method === 'GET' && path === '/v1/shop/metrics') return ok(await commerceService.metrics(user));
@@ -60,6 +62,10 @@ export function createGatewayApp({ config, supabase, provider, generationService
         if (method === 'POST' && path === '/v1/shop/jobs') return ok({ jobs: await commerceService.enqueue(user, body) }, 202);
         if (method === 'POST' && path === '/v1/shop/posts') return ok({ post: await commerceService.publish(user, body) }, 201);
         if (method === 'POST' && path === '/v1/shop/events') return ok(await commerceService.recordEvent(user, body));
+        const deleteResult = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/result$/i.exec(path);
+        if (method === 'DELETE' && deleteResult) return ok(await commerceService.deleteResult(user, deleteResult[1]));
+        const deletePost = /^\/v1\/shop\/posts\/([\da-f-]{36})$/i.exec(path);
+        if (method === 'DELETE' && deletePost) return ok(await commerceService.retract(user, deletePost[1]));
         const product = /^\/v1\/shop\/products\/([\da-f-]{36})\/state$/i.exec(path);
         if (method === 'POST' && product) return ok({ product: await commerceService.updateProduct(user, product[1], body) });
         const cancel = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/cancel$/i.exec(path);
@@ -90,6 +96,11 @@ export function createGatewayApp({ config, supabase, provider, generationService
           storagePath = decodeURIComponent(privateImageMatch[1]);
         } catch {
           throw new GatewayError('INVALID_PRIVATE_IMAGE_PATH', 400, 'Private image path is invalid');
+        }
+        if(commerceService && storagePath.startsWith(`ai-generated/${identity.user.id}/`)) {
+          const match=/\/([\da-f-]{36})\.jpg$/i.exec(storagePath);
+          const job=match && await commerceService.repository.job(match[1],identity.user.id);
+          if(job?.result_deleted_at) throw new GatewayError('PRIVATE_IMAGE_NOT_FOUND',404);
         }
         const image = commerceService && storagePath.startsWith('shop/')
           ? await commerceService.privateImage(identity.user, storagePath)
@@ -122,7 +133,9 @@ export function createGatewayApp({ config, supabase, provider, generationService
         return {
           status: 200,
           headers: { ...JSON_HEADERS, ...corsHeaders },
-          body: await generationService.deletePersonPhoto(identity.user, photoId)
+          body: commerceService
+            ? await commerceService.deletePersonPhoto(identity.user, photoId)
+            : await generationService.deletePersonPhoto(identity.user, photoId)
         };
       }
       if (method === 'GET' && path === '/v1/generations') {

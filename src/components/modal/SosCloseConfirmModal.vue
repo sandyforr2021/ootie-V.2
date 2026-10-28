@@ -3,7 +3,6 @@
     :open="appStore.isSosCloseConfirmOpen"
     :title="t('結束這次求救？')"
     :message="t('結束後將不再接受新的搭配建議，但你仍可以查看目前收到的所有回覆。')"
-    eyebrow="Style SOS"
     :confirm-label="t('確認結束')"
     content-class="sos-close-confirm-modal"
     @cancel="close"

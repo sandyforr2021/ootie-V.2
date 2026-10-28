@@ -1,7 +1,7 @@
 <template>
   <section class="page active help-history-page">
     <router-link to="/profile" class="back-link">← 返回個人檔案</router-link>
-    <p class="eyebrow">Style SOS</p>
+
     <h1>幫助紀錄</h1>
     <div class="help-history-tabs" role="tablist" aria-label="幫助紀錄期間">
       <button :class="{ active: days === 7 }" type="button" @click="load(7)">最近 7 天</button>
@@ -11,7 +11,7 @@
     <p v-else-if="errorMessage" class="help-history-state is-error">{{ errorMessage }}</p>
     <div v-else-if="records.length" class="help-history-list">
       <article v-for="record in records" :key="record.id" class="help-history-card">
-        <p class="eyebrow">衣友求救</p>
+
         <h2>{{ record.ootie_sos_posts?.title || $t('穿搭求救') }}</h2>
         <p>{{ record.message }}</p>
         <small>{{ formatDate(record.created_at) }}</small>

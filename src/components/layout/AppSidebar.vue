@@ -16,18 +16,17 @@
     </div>
     <nav class="nav" :aria-label="$t(&quot;主選單&quot;)">
       <router-link
-        v-for="item in NAVIGATION_ITEMS"
+        v-for="item in sidebarItems"
         :key="item.routeName"
         :to="item.path"
         :title="$t(item.label)"
-        :class="{ active: route.name === item.routeName || (item.routeName === 'Explore' && route.name === 'OotdDetail') }"
+        :class="{ 'nav-group-start': ['Closet','Settings'].includes(item.routeName), active: route.name === item.routeName || (item.routeName === 'Explore' && route.name === 'OotdDetail') }"
         active-class=""
         exact-active-class=""
       >
         <AppIcon class="nav-icon" :name="item.routeName" /><span class="nav-text">{{ displayLabel(item) }}</span>
       </router-link>
     </nav>
-    <div class="sidebar-footer" v-if="!appStore.isSidebarCollapsed">{{ $t("你的衣櫥，是每天選擇穿搭的") }}<br />{{ $t("專屬空間。") }}</div>
   </aside>
 </template>
 
@@ -41,6 +40,7 @@ import { locale, t } from '@/i18n';
 
 const appStore = useAppStore();
 const route = useRoute();
+const sidebarItems = ['Home','Explore','Profile','Sos','Closet','Shop','Stats','Settings'].map(name=>NAVIGATION_ITEMS.find(item=>item.routeName===name));
 // Short Spanish navigation labels keep every target the same height without truncating the full title.
 const displayLabel = (item) => locale.value === 'es'
   ? ({ Shop: 'Probador', Stats: 'Estadísticas' }[item.routeName] || t(item.label))

@@ -1,4 +1,5 @@
 <template>
+  <nav class="collection-navigation" :aria-label="$t('收藏靈感')"><router-link to="/explore">← {{ $t('返回探索') }}</router-link><router-link to="/bookmarks?tab=outfits">{{ $t('收藏靈感') }}</router-link><router-link to="/bookmarks?tab=links">{{ $t('收藏的商品連結') }}</router-link></nav>
   <SavedOutfitsCollection v-if="route.query.tab === 'outfits'" />
   <section v-else class="page active bookmarks-page">
     <header class="core-page-hero bookmarks-page-hero">
@@ -8,6 +9,7 @@
       </div>
       <p class="core-page-note" aria-hidden="true">save now<br />style later ♡</p>
     </header>
+    <CurrencyNotice />
 
     <section v-if="!embedded" class="product-import-panel" aria-labelledby="product-import-title">
       <div>
@@ -452,6 +454,8 @@
 </template>
 
 <script setup>
+import CurrencyNotice from '@/components/ui/CurrencyNotice.vue';
+import { defaultCurrency } from '@/services/money';
 defineProps({embedded:{type:Boolean,default:false}});
 import { ref, reactive, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -495,7 +499,7 @@ const formData = reactive({
   color: '',
   size: '',
   price: '',
-  currency: 'TWD',
+  currency: defaultCurrency(),
   notes: ''
 });
 
@@ -601,7 +605,7 @@ const handleOpenCreateModal = (prefill = null) => {
   formData.color = data.color || '';
   formData.size = data.size || '';
   formData.price = data.price ? String(data.price).replace(/[^0-9.]/g, '') : '';
-  formData.currency = data.currency || 'TWD';
+  formData.currency = data.currency || (data.price != null && data.price !== '' ? 'TWD' : defaultCurrency());
   formData.notes = data.notes || '';
 
   uploadedFile.value = null;
@@ -1479,3 +1483,5 @@ watch(
   }
 }
 </style>
+
+<style scoped>.collection-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:18px;padding:20px 0}.collection-navigation a{padding:10px 0;font-size:14px}</style>

@@ -18,3 +18,11 @@
 | 截止 | 2026-11-02 11:45 美東標準時間，即台灣 2026-11-03 00:45；正式提交尚未完成。 |
 
 影片依使用者指示，待網站完成後再討論。官方要求另有截圖與提交資料，不能只憑網站已上線就標示參賽完成。
+
+## 2026-10-23 implementation follow-up
+
+The working tree now contains a local migration and code changes for reservation release, per-user and concurrent limits, a reviewer reserve, reversible photo/result sharing, same-ID submission recovery, sample-result shortcuts, English privacy/security copy, and the result-to-shopping decision flow. These changes are **not deployed**. The Supabase migration must be reviewed and applied to the OOTIE project before deploying this gateway version. Render auto-deploy is off.
+
+The current free Render service may sleep. The shopping studio now explains that first access can take time and that queued work resumes after the service wakes. A submission whose provider result is unknown remains in review and is never automatically resubmitted. Set `YOUCAM_REVIEWER_USER_IDS` in Render to the judge account's Supabase Auth UUID before expecting that account to use the reserved units.
+
+The user's YouCam account screenshot shows **1,014 reward units remaining** and **42 units used in the past 30 days**. This is a screenshot observation, not a direct API check. Keep the server-side allocation cap in place until the account owner confirms how much of that balance should be available to the competition.

@@ -1,6 +1,7 @@
 import { genuineContent } from '@/services/contentAuthenticity';
 import { listPostComments, insertPostComment, deletePostComment } from '@/services/postComments';
-import { t } from '@/i18n';
+import { t, locale } from '@/i18n';
+import { normalizeContentLanguage, inferContentLanguage } from '../../shared/contentLanguages.js';
 import { editorialLook } from '@/services/editorial';
 import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
 import { alternateAuthors } from '@/services/recommendedFeed';
@@ -65,6 +66,7 @@ export const useOotdStore = defineStore('ootd', () => {
     image: withDevelopmentDemoMediaRevision(remote.image),
     image_storage_path: remote.image_storage_path || '',
     caption: remote.caption,
+    caption_language: remote.caption_language || null,
     wearing: Array.isArray(remote.wearing) ? remote.wearing : [],
     item_ids: Array.isArray(remote.item_ids) ? remote.item_ids : [],
     tagged_items: resolvePostTaggedItems(remote, taggedItems),
@@ -83,12 +85,12 @@ export const useOotdStore = defineStore('ootd', () => {
     const feed = activeFeedTab.value;
     const matches = uniquePostsById(appStore.ootdPosts).filter((post) => {
       const socialStore = useSocialStore();
-      const isFollowing = socialStore.isFollowing({ id: post.user_id, username: post.username }) || post.username === appStore.profile.username;
+      const isFollowing = socialStore.isFollowing({ id: post.user_id, username: post.username }) ;
       const matchFeed = feed === 'for-you' || isFollowing;
-      const searchable = `${post.display_name || ''} ${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')}`.toLowerCase();
+      const searchable = `${post.display_name || ''} ${post.username} ${post.caption} ${(post.hashtags || []).join(' ')} ${(post.wearing || []).map(getWearingName).join(' ')} ${(post.tagged_items || []).map(item => [item.name,item.name_zh,item.brand,item.category].filter(Boolean).join(' ')).join(' ')}`.toLowerCase();
       return matchFeed && (!query || searchable.includes(query));
     });
-    return feed==='for-you' ? [...alternateAuthors(matches.filter(post=>!post.editorial)),...matches.filter(post=>post.editorial)] : matches;
+    return [...alternateAuthors(matches.filter(post=>!post.editorial)),...matches.filter(post=>post.editorial)];
   });
 
   const loadRemotePosts = async () => {
@@ -246,7 +248,7 @@ export const useOotdStore = defineStore('ootd', () => {
     photo: /^https?:\/\//i.test(item.photo || '') ? item.photo : ''
   });
 
-  const createPost = async ({ imageFile, caption, hashtags, selectedItemIds }) => {
+  const createPost = async ({ imageFile, caption, captionLanguage, hashtags, selectedItemIds }) => {
     const authStore = useAuthStore();
     if (!authStore.isMember || !authStore.profileId || !authStore.user?.id) {
       appStore.openLoginGate('OOTD_PUBLISH_AUTH_REQUIRED', '/explore?quick=add-ootd');
@@ -262,6 +264,7 @@ export const useOotdStore = defineStore('ootd', () => {
         image: uploaded.publicUrl,
         image_storage_path: uploaded.path,
         caption: caption.trim(),
+        caption_language: normalizeContentLanguage(captionLanguage) || inferContentLanguage(caption, locale.value),
         wearing: selectedItems.map(toPublicItemSnapshot),
         item_ids: selectedItems.map((item) => item.id),
         hashtags: formatHashtags(hashtags),
@@ -285,7 +288,7 @@ export const useOotdStore = defineStore('ootd', () => {
     }
   };
 
-  const updatePost = async (postId, { imageFile, image, caption, hashtags, selectedItemIds }) => {
+  const updatePost = async (postId, { imageFile, image, caption, captionLanguage, hashtags, selectedItemIds }) => {
     const authStore = useAuthStore();
     const post = appStore.ootdPosts.find((item) => String(item.id) === String(postId));
     if (!post || !authStore.isMember || !authStore.profileId || publishing.value) return { post: null, syncStatus: 'REMOTE_FAILED' };
@@ -297,6 +300,7 @@ export const useOotdStore = defineStore('ootd', () => {
       const changes = {
         image: uploaded?.publicUrl || image || post.image,
         caption: caption.trim(),
+        caption_language: normalizeContentLanguage(captionLanguage) || inferContentLanguage(caption, locale.value),
         wearing: selectedItems.map(toPublicItemSnapshot),
         item_ids: selectedItems.map((item) => item.id),
         hashtags: formatHashtags(hashtags)

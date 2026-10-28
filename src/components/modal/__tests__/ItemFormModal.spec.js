@@ -29,6 +29,13 @@ describe('ItemFormModal remote write confirmation', () => {
     localStorage.clear();
   });
 
+  it('initializes existing item values when first mounted after opening', () => {
+    openRemoteEditForm();
+    const wrapper = mount(ItemFormModal);
+    expect(wrapper.find('#name').element.value).toBe('Remote shirt');
+    wrapper.unmount();
+  });
+
   it('keeps the remote edit form open when the database update fails', async () => {
     const { appStore, closetStore } = openRemoteEditForm();
     vi.spyOn(closetStore, 'updateItem').mockResolvedValue({

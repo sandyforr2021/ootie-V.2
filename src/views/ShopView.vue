@@ -1,4 +1,5 @@
 <script setup>
+import { orderedOutfit } from '../../shared/outfitSelection.js';
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import ExtensionGuide from '@/components/bookmarks/ExtensionGuide.vue';
@@ -17,17 +18,20 @@ import { locale as language, setLocale, normalizeLocale, t, tf, formatDate } fro
 const auth = useAuthStore(); const app = useAppStore(); const closet = useClosetStore(); const ootd = useOotdStore();
 const route = useRoute(); const router = useRouter();
 const token = computed(() => auth.session?.access_token || '');
-const tab = ref(['album','community','activity','wardrobe','saved','links'].includes(route.query.tab) ? route.query.tab : 'wishlist');
+const isCommunity=computed(()=>route.name==='TryonCommunity');
+const tab = ref(['album','community','activity','wardrobe','saved','links'].includes(route.query.tab) ? route.query.tab : (isCommunity.value?'community':'wishlist'));
 const products = ref([]); const jobs = ref([]); const photos = ref([]); const posts = ref([]);
 const images = ref({}); const selected = ref([]); const selectedClothing = ref([]); const selectedSaved = ref([]); const savedEntries = ref([]); const selectionSource = ref('wishlist'); const selectedPhoto = ref(''); const consent = ref(false);
 const capabilities = ref({ enabled:false, remainingUnits:0, costs:{ try_on:2, skin_tone:20 } });
 const metrics = ref(null); const busy = ref(''); const loading = ref(false); const error = ref(''); const notice = ref('');
+let initialStepResolved = false;
 const form = ref({ title:'', sourceUrl:'', imageUrl:'', imageData:'', category:'upper_body', color:'#c8bba9' });
 const productLimit = ref(12); const jobLimit = ref(12); const matchingProduct = ref(null); const showPassed = ref(false);
 const shareJob = ref(null); const shareCaption = ref(''); const shareConsent = ref(false);
 const purchasedProduct = ref(null);
 const step = ref(2); const importMode = ref('link'); const workflowTitle = ref(null);
 const extensionOpen = ref(false); const manualImport = ref(false);
+const choosePhoto=ref(false);
 const steps = computed(() => [t('挑選試穿'), t('選擇模特兒'), t('模擬試穿')]);
 const chosenProducts = computed(() => products.value.filter(p => selected.value.includes(p.id)));
 const chosenClothing = computed(() => app.items.filter(item => selectedClothing.value.includes(item.id) && item.owner_id === auth.profileId));
@@ -41,13 +45,14 @@ const savedItems = computed(() => {
   return [...found.values()];
 });
 const chosenSaved = computed(() => savedItems.value.filter(item=>selectedSaved.value.some(entry=>entry.itemId===item.id)));
+const selectedOutfit = computed(()=>orderedOutfit([...chosenProducts.value,...chosenClothing.value,...chosenSaved.value]));
 const selectionCount = computed(() => selected.value.length + selectedClothing.value.length + selectedSaved.value.length);
 async function goStep(value) {
   step.value = value;
   await nextTick();
   workflowTitle.value?.focus({preventScroll:true});
 }
-const submitHint = computed(() => !selectionCount.value ? t('選擇至少一件商品，再繼續。') : capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on ? t('額度不足，請減少本次試穿商品。') : (!selectedPhoto.value || !consent.value) ? t('選擇一張私人照片，並同意本次處理後即可送出。') : '');
+const submitHint = computed(() => !selectionCount.value ? t('選擇至少一件商品，再繼續。') : !selectedOutfit.value.valid ? t('整套試穿請各選最多一件上衣、下身與外套。') : capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on ? t('額度不足，請減少本次試穿商品。') : (!selectedPhoto.value || !consent.value) ? t('選擇一張私人照片，並同意本次處理後即可送出。') : '');
 const comparisonIds = ref([]); const pendingBatch = ref(null); const sharedPost = ref(null);
 let pollTimer; let disposed = false; let sessionVersion = 0;
 const identityReady = () => auth.isMember && !!token.value && auth.user?.id === auth.session?.user?.id && (!auth.profileIdentity?.authUserId || auth.profileIdentity.authUserId === auth.session?.user?.id);
@@ -58,20 +63,60 @@ const categories = computed(() => [['upper_body',t('上衣','Tops')],['lower_bod
 const tabs = computed(() => [['wishlist',t('試穿模擬')],['album',t('私人相簿','Private album')]]);
 const visibleProducts = computed(() => products.value.filter((p) => showPassed.value || p.state !== 'dismissed').slice(0,productLimit.value));
 const activeJobs = computed(() => jobs.value.filter((j) => ['queued','preparing','submitting','processing'].includes(j.status)));
-const albumJobs = computed(() => jobs.value.filter((j) => j.kind === 'try_on' && (j.status !== 'succeeded' || j.result_path)).slice(0,jobLimit.value));
+const albumJobs = computed(() => jobs.value.filter((j) => (j.sequence_index || 1)===(j.sequence_total || 1) && j.kind === 'try_on' && !j.result_deleted_at && (j.status !== 'succeeded' || j.result_path)).slice(0,jobLimit.value));
 const palette = computed(() => personalPalette(jobs.value.find((j) => j.kind === 'skin_tone' && j.status === 'succeeded')?.result_data));
 const toneJobs = computed(() => jobs.value.filter((j) => j.kind === 'skin_tone').slice(0,3));
 const comparisons = computed(() => jobs.value.filter((j) => comparisonIds.value.includes(j.id)));
 const matches = computed(() => matchingProduct.value ? wardrobeMatches(matchingProduct.value, app.items, auth.profileId) : []);
-const canSubmit = computed(() => capabilities.value.enabled && capabilities.value.remainingUnits >= selectionCount.value * capabilities.value.costs.try_on && selectionCount.value && selectedPhoto.value && consent.value && !busy.value);
-const jobTitle = (job) => products.value.find((p) => p.id === job.product_id)?.title || job.product?.title || t('試穿結果','Try-on result');
+const canSubmit = computed(() => selectedOutfit.value.valid && capabilities.value.enabled && capabilities.value.remainingUnits >= selectionCount.value * capabilities.value.costs.try_on && selectionCount.value && selectedPhoto.value && consent.value && !busy.value && !pendingBatch.value);
+const jobTitle = (job) => job.sequence_total>1 ? t('整套試穿') : products.value.find((p) => p.id === job.product_id)?.title || job.product?.title || t('試穿結果','Try-on result');
 const stateLabel = (status) => ({ queued:t('等待中','Queued'), preparing:t('準備圖片','Preparing'), submitting:t('送出中','Submitting'), processing:t('試穿製作中','Processing'), succeeded:t('已完成','Ready'), failed:t('未完成','Failed'), needs_review:t('等待服務核對','Needs review'), cancelled:t('已取消','Cancelled') })[status] || status;
 const reasonLabel = (reason) => ({ neutral:t('中性色，容易搭配','A versatile neutral'), tonal:t('相近色系，柔和協調','Similar hues, a soft pairing'), contrast:t('對比色，增加層次','Contrasting hues, more definition'), category:t('可互補的衣物類別','A complementary garment category') })[reason];
-const api = (path, body, accessToken=token.value) => commerceClient.request(path, accessToken, body);
+const api = (path, body, accessToken=token.value, options) => options ? commerceClient.request(path, accessToken, body, options) : commerceClient.request(path, accessToken, body);
 const login = () => auth.openAuthModal('login', null, '/shop');
 
+const pendingKey = (userId) => `ootie-shop-pending:${userId}`;
+function readPending(userId) {
+  if (!userId) return null;
+  try {
+    const value = JSON.parse(sessionStorage.getItem(pendingKey(userId)) || 'null');
+    if (!value || !/^[\da-f-]{36}$/i.test(value.id) || !value.selection?.personPath) return null;
+    return value;
+  } catch { return null; }
+}
+function persistPending(value) {
+  pendingBatch.value = value;
+  try {
+    const userId = auth.session?.user?.id;
+    if (userId && value) sessionStorage.setItem(pendingKey(userId), JSON.stringify(value));
+  } catch { /* Recovery remains available for this page session if storage is restricted. */ }
+}
+function clearPending() {
+  try { const userId = auth.session?.user?.id; if (userId) sessionStorage.removeItem(pendingKey(userId)); } catch { /* Ignore restricted storage. */ }
+  pendingBatch.value = null;
+}
+
+const errorMessages = {
+  FREE_BUDGET_EXHAUSTED:['免費額度不足，這次沒有送出新的產圖。','There are not enough available credits. No new image job was submitted.'],
+  REVIEWER_RESERVE_PROTECTED:['這些點數已保留給評審使用。','These credits are reserved for the judges.'],
+  USER_DAILY_LIMIT:['已達今日試穿上限，請明天再試。','You have reached today’s try-on limit. Try again tomorrow.'],
+  USER_ACTIVE_LIMIT:['等待中的工作較多，完成或核對後再提交。','Too many jobs are waiting. Submit again after they finish or are reviewed.'],
+  PERSON_IMAGE_IN_USE:['這張照片仍被工作使用，暫時不能刪除。','This photo is still used by a job and cannot be deleted yet.'],
+  PERSON_IMAGE_DELETING:['照片正在刪除，請稍後重新整理再試。','This photo is being deleted. Refresh and try again shortly.'],
+  JOB_STILL_ACTIVE:['工作尚未完成，完成後再刪除結果。','This job is still active. Delete the result after it finishes.'],
+  POST_NOT_FOUND:['分享已撤回或不存在。','This post was retracted or no longer exists.'],
+  NETWORK_UNCERTAIN:['連線中斷。先查詢原提交編號，不要建立新工作。','The connection was interrupted. Check the original request ID before starting another job.'],
+  YOUCAM_DISABLED:['試穿服務尚未開啟。','The try-on service is not available yet.'],
+  PHOTO_CONSENT_REQUIRED:['請同意處理選用的照片。','Please consent to processing the selected photo.'],
+  JOB_ALREADY_STARTED:['工作已開始，請等待結果。','This job has started. Wait for its result.'],
+  INVALID_OUTFIT_LAYERS:['整套試穿請各選最多一件上衣、下身與外套。','Choose at most one top, one bottom and one outer layer for an outfit.'],
+  INVALID_TITLE:['請填寫商品名稱。','Enter a product name.'],
+  PRODUCT_URL_BLOCKED:['請使用有效的圖片或商品連結。','Use a valid product or image link.'],
+  REMOTE_IMAGE_UNAVAILABLE:['目前無法讀取這個網站，請手動上傳商品圖片。','This site cannot be read right now. Upload the product image instead.']
+};
 function report(err) {
-  error.value = t(({ FREE_BUDGET_EXHAUSTED:'免費額度不足，這次沒有送出新的產圖。', NETWORK_UNCERTAIN:'連線中斷，請先更新相簿，再視需要重試同一筆提交。', YOUCAM_DISABLED:'試穿服務尚未開啟。', PHOTO_CONSENT_REQUIRED:'請同意處理選用的照片。', JOB_ALREADY_STARTED:'工作已開始，請等待結果。', INVALID_TITLE:'請填寫商品名稱。', PRODUCT_URL_BLOCKED:'請使用有效的圖片或商品連結。', REMOTE_IMAGE_UNAVAILABLE:'目前無法讀取這個網站，請手動上傳商品圖片。' })[err?.code] || '暫時無法完成，請稍後再試。');
+  const copy=errorMessages[err?.code] || ['暫時無法完成，請稍後再試。','Something went wrong. Please try again later.'];
+  error.value=t(copy[0],copy[1]);
 }
 async function act(name, action) {
   if (busy.value || (name !== 'share' && !identityReady())) return;
@@ -81,26 +126,28 @@ async function act(name, action) {
 }
 function selectTab(next) { tab.value=next; if(next==='wishlist') step.value=2; router.replace({ path:'/shop', query:{ tab:next, lang:language.value } }); }
 function toggleProduct(id) {
+  if(pendingBatch.value) return;
   if (selected.value.includes(id)) selected.value=selected.value.filter((value)=>value!==id);
   else if (selectionCount.value<3) selected.value.push(id);
   else notice.value=t('每批最多選擇 3 件商品。','Choose up to three products per batch.');
-  pendingBatch.value=null;
 }
 function toggleClothing(id) {
+  if(pendingBatch.value) return;
   if (!canTryOnClothing(app.items.find(item => item.id === id) || {})) return;
   if (selectedClothing.value.includes(id)) selectedClothing.value=selectedClothing.value.filter(value=>value!==id);
   else if (selectedSaved.value.some(entry=>entry.itemId===id)) notice.value=t('這件衣物已從收藏穿搭選取。');
   else if (selectionCount.value<3) selectedClothing.value.push(id);
   else notice.value=t('每批最多選擇 3 件商品。');
-  pendingBatch.value=null;
+
 }
 function toggleSavedItem(item) {
+  if(pendingBatch.value) return;
   if (!canTryOnClothing(item)) return;
   if (selectedSaved.value.some(entry=>entry.itemId===item.id)) selectedSaved.value=selectedSaved.value.filter(entry=>entry.itemId!==item.id);
   else if (selectedClothing.value.includes(item.id)) notice.value=t('這件衣物已從衣櫥選取。');
   else if (selectionCount.value<3) selectedSaved.value.push({postId:item.postId,itemId:item.id});
   else notice.value=t('每批最多選擇 3 件商品。');
-  pendingBatch.value=null;
+
 }
 async function hydrate(path) {
   if (!path || urls.has(path) || loadingImages.has(path) || !token.value) return;
@@ -115,7 +162,7 @@ async function hydrate(path) {
 async function hydrateVisible() {
   const paths=tab.value==='album'?albumJobs.value.map(j=>j.result_path):tab.value==='wishlist'?[
     ...(step.value===2?visibleProducts.value:chosenProducts.value).map(p=>p.image_path),
-    ...(step.value===3?photos.value.slice(0,8).map(p=>p.path):[])
+    ...(step.value===3?[selectedPhoto.value,...(choosePhoto.value?photos.value:photos.value.slice(0,8)).map(p=>p.path)]:[])
   ]:[];
   await Promise.all(paths.filter(Boolean).map(hydrate));
 }
@@ -124,7 +171,16 @@ async function refreshJobs() {
   const identity=identitySnapshot();
   const [jobData,caps]=await Promise.all([api('jobs',undefined,identity.accessToken),api('capabilities',undefined,identity.accessToken)]);
   if (!identityCurrent(identity)) return;
-  jobs.value=jobData.jobs; capabilities.value=caps; await hydrateVisible();
+  jobs.value=jobData.jobs; capabilities.value=caps;
+  if (pendingBatch.value) {
+    const recovered=jobData.jobs.some((job)=>job.batch_id===pendingBatch.value.id);
+    if (recovered) {
+      clearPending(); tab.value='album';
+      notice.value=t('已找到原提交的工作，已恢復進度。','Your original submission was found and its progress is restored.');
+    }
+  }
+  await hydrateVisible();
+
 }
 async function refresh() {
   if (!identityReady()) return;
@@ -204,31 +260,54 @@ async function uploadPerson(event) {
 }
 async function submit(kind='try_on') {
   if(!auth.isMember) return login();
+  if(kind==='try_on' && !canSubmit.value) return;
+  if(pendingBatch.value) { error.value=t('先查詢或恢復待確認的提交，再建立新的工作。','Check or recover the pending request before starting another job.'); return; }
   await act('submit',async(identity)=>{
-    const selection={kind,personPath:selectedPhoto.value,productIds:kind==='try_on'?[...selected.value]:[],clothingItemIds:kind==='try_on'?[...selectedClothing.value]:[],savedItems:kind==='try_on'?[...selectedSaved.value]:[],consent:consent.value};
-    const key=JSON.stringify(selection);
-    if(!pendingBatch.value || pendingBatch.value.key!==key) pendingBatch.value={ key,id:createGenerationId() };
-    await api('jobs',{...selection,batchId:pendingBatch.value.id},identity.accessToken);
+    const selection={kind,personPath:selectedPhoto.value,productIds:kind==='try_on'?[...selected.value]:[],clothingItemIds:kind==='try_on'?[...selectedClothing.value]:[],savedItems:kind==='try_on'?[...selectedSaved.value]:[]};
+    const pending={ id:createGenerationId(),key:JSON.stringify(selection),selection };
+    persistPending(pending);
+    try { await api('jobs',{...selection,consent:consent.value,batchId:pending.id},identity.accessToken); if (!identityCurrent(identity)) return; }
+    catch (err) {
+      if (!identityCurrent(identity)) return;
+      if (err.status>=400 && err.status<500) { clearPending(); throw err; }
+      await refreshJobs().catch(()=>{});
+      if (pendingBatch.value) throw err;
+    }
     if (!identityCurrent(identity)) return;
-    pendingBatch.value=null; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; step.value=2; await refreshJobs();
-    if (!identityCurrent(identity)) return;
-    selectTab('album');
+    if (pendingBatch.value) clearPending();
+    selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; step.value=2; await refreshJobs(); if(!identityCurrent(identity)) return; selectTab('album');
     notice.value=t('已排入工作池。你可以離開頁面，稍後回相簿查看。','Added to the queue. You can leave and return to your album later.');
   });
 }
-async function cancel(job) { await act('cancel',async(identity)=>{ await api(`jobs/${job.id}/cancel`,{},identity.accessToken); if (identityCurrent(identity)) await refreshJobs(); }); }
-async function deleteResult(job) {
-  if (!window.confirm(t('確定刪除這張試穿結果？此動作無法復原。'))) return;
-  await act('delete-result', async (identity) => {
-    await api(`jobs/${job.id}/delete-result`, {}, identity.accessToken);
-    if (!identityCurrent(identity)) return;
-    comparisonIds.value = comparisonIds.value.filter(id => id !== job.id);
-    jobs.value = jobs.value.filter(item => item.id !== job.id);
-    if (job.result_path && urls.has(job.result_path)) {
-      URL.revokeObjectURL(urls.get(job.result_path)); urls.delete(job.result_path);
-      const next = { ...images.value }; delete next[job.result_path]; images.value = next;
+async function retryPending() {
+  if (!pendingBatch.value || !consent.value || busy.value) return;
+  await act('recover', async (identity) => {
+    const pending=pendingBatch.value;
+    try {
+      await api('jobs',{...pending.selection,consent:true,batchId:pending.id},identity.accessToken); if (!identityCurrent(identity)) return;
+    } catch (err) {
+      if (!identityCurrent(identity)) return;
+      if (err.status>=400 && err.status<500) { clearPending(); throw err; }
+      await refreshJobs().catch(()=>{});
+      if (pendingBatch.value) throw err;
     }
-    notice.value = t('試穿結果已刪除。');
+    if (!identityCurrent(identity)) return;
+    if (pendingBatch.value) clearPending();
+    await refreshJobs(); if(!identityCurrent(identity)) return; selectTab('album');
+    notice.value=t('已用原提交編號恢復這筆工作。','The original submission ID was reused to recover this job.');
+  });
+}
+async function cancel(job) { await act('cancel',async(identity)=>{ await api(`jobs/${job.id}/cancel`,{},identity.accessToken); if(identityCurrent(identity)) await refreshJobs(); }); }
+async function removePhoto(photo) {
+  if (pendingBatch.value?.selection?.personPath===photo.path) { error.value=t('這張照片關聯一筆待確認提交，請先恢復或核對工作。','This photo is tied to a submission awaiting confirmation. Recover or check that job first.'); return; }
+  if (!window.confirm(t('刪除這張私人照片？','Delete this private photo?'))) return;
+  await act('photo-delete',async(identity)=>{
+    await aiGateway.deletePersonPhoto(identity.accessToken,photo.id); if(!identityCurrent(identity)) return;
+    photos.value=photos.value.filter((entry)=>entry.path!==photo.path);
+    if(selectedPhoto.value===photo.path) selectedPhoto.value=photos.value[0]?.path || '';
+    const url=urls.get(photo.path); if(url) URL.revokeObjectURL(url); urls.delete(photo.path);
+    const next={...images.value}; delete next[photo.path]; images.value=next;
+    notice.value=t('私人照片已刪除。','Private photo deleted.');
   });
 }
 async function setState(product,state) {
@@ -279,9 +358,33 @@ async function publish() {
     notice.value=t('已公開這張試穿結果與商品連結。','Your try-on result and product link are now public.');
   });
 }
+async function retract(post) {
+  if (!window.confirm(t('撤回這則公開分享？','Retract this public post?'))) return;
+  await act('retract',async(identity)=>{
+    await api(`posts/${post.id}`,null,identity.accessToken,{method:'DELETE'});
+    if(!identityCurrent(identity)) return;
+    posts.value=posts.value.filter((entry)=>entry.id!==post.id);
+    if(sharedPost.value?.id===post.id) sharedPost.value=null;
+    notice.value=t('已撤回公開分享。','The public post has been retracted.');
+  });
+}
+async function removeResult(job) {
+  if (!window.confirm(t('刪除這筆試穿結果，也會撤回相對應的公開分享。','Delete this try-on result and retract its public post?'))) return;
+  await act('result-delete',async(identity)=>{
+    await api(`jobs/${job.id}/result`,null,identity.accessToken,{method:'DELETE'});
+    if(!identityCurrent(identity)) return;
+    jobs.value=jobs.value.filter(entry=>entry.id!==job.id);
+    const url=urls.get(job.result_path); if(url) URL.revokeObjectURL(url); urls.delete(job.result_path);
+    const next={...images.value}; delete next[job.result_path]; images.value=next;
+    comparisonIds.value=comparisonIds.value.filter((id)=>id!==job.id);
+    await refreshJobs();
+    notice.value=t('試穿結果已刪除。','Try-on result deleted.');
+  });
+}
+const productForJob = (job) => products.value.find((product)=>product.id===job.product_id) || null;
 async function share(post) {
   await act('share',async()=>{
-    const url=new URL('/shop',window.location.origin); url.searchParams.set('post',post.id);
+    const url=new URL('/community/tryons',window.location.origin); url.searchParams.set('post',post.id);
     const data={title:`OOTIE · ${post.title}`,text:post.caption,url:url.href};
     if(navigator.share) { try { await navigator.share(data); } catch(err) { if(err.name==='AbortError') return; throw err; } }
     else { await navigator.clipboard.writeText(url.href); notice.value=t('分享連結已複製。','Share link copied.'); }
@@ -295,6 +398,8 @@ async function download(job) {
   const anchor=document.createElement('a'); anchor.href=url; anchor.download=`ootie-tryon-${job.id}.jpg`; anchor.click();
 }
 watch(()=>route.query,async(query)=>{
+  if(isCommunity.value) tab.value='community';
+  if(query.tab==='community' && !isCommunity.value) { await router.replace({path:'/community/tryons',query:{...query,tab:undefined}}); return; }
   if(query.title || query.quick==='add-product') {
     await router.replace({path:'/closet',query:{...query,tab:'wishlist',quick:'add-product'}});
     return;
@@ -309,12 +414,12 @@ watch(()=>route.query,async(query)=>{
   if(query.post && /^[\da-f-]{36}$/i.test(query.post)) { tab.value='community'; try { sharedPost.value=(await api(`posts/${query.post}`)).post; } catch(err) { report(err); } }
 },{immediate:true});
 watch(tab,async(value)=>{ error.value=''; if(value==='community') await loadPosts(); if(value==='activity' && identityReady()) { const identity=identitySnapshot(); try { const result=await api('metrics',undefined,identity.accessToken); if(identityCurrent(identity)) metrics.value=result; } catch(err){if(identityCurrent(identity)) report(err);} } });
-watch([productLimit,jobLimit,step,tab],hydrateVisible);
-watch(selectedPhoto,()=>{pendingBatch.value=null;consent.value=false;});
+watch([productLimit,jobLimit,step,tab,choosePhoto],hydrateVisible);
+watch(selectedPhoto,()=>{consent.value=false;});
 watch(()=>[auth.session?.user?.id,auth.profileId],()=>{
-  sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; savedEntries.value=[]; selectedPhoto.value=''; pendingBatch.value=null; metrics.value=null; matchingProduct.value=null; shareJob.value=null; purchasedProduct.value=null; consent.value=false; busy.value=''; loading.value=false; error.value=''; notice.value=''; comparisonIds.value=[]; form.value={title:'',sourceUrl:'',imageUrl:'',imageData:'',category:'upper_body',color:'#c8bba9'};
+  sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; savedEntries.value=[]; selectedPhoto.value=''; pendingBatch.value=readPending(auth.session?.user?.id); metrics.value=null; matchingProduct.value=null; shareJob.value=null; purchasedProduct.value=null; consent.value=false; busy.value=''; loading.value=false; error.value=''; notice.value=''; comparisonIds.value=[]; form.value={title:'',sourceUrl:'',imageUrl:'',imageData:'',category:'upper_body',color:'#c8bba9'};
   for(const url of urls.values()) URL.revokeObjectURL(url); urls.clear(); images.value={};
-},{flush:'sync'});
+},{flush:'sync',immediate:true});
 watch(()=>[auth.session?.user?.id,auth.user?.id,auth.profileIdentity?.authUserId,auth.profileId,auth.isMember],()=>{if(identityReady()) void refresh();},{immediate:true});
 void loadPosts(); pollTimer=setTimeout(poll,15000);
 onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(const url of urls.values()) URL.revokeObjectURL(url);});
@@ -322,12 +427,15 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
 
 <template>
   <div class="shop-view">
-    <header class="shop-studio-heading">
-      <div><h1>{{ t('試穿工作室') }}</h1><p>{{ t('先收藏商品，再選照片。完成的試穿會留在私人相簿。') }}</p><router-link to="/credits">{{ t('查看試穿額度') }} →</router-link></div>
+    <header v-if="!isCommunity" class="shop-studio-heading">
+      <div><h1>{{ t('試穿工作室') }}</h1><router-link to="/credits">{{ t('查看試穿額度') }} →</router-link></div>
     </header>
 
-    <nav class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key || (tab==='links' && key==='saved')}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>
+    <router-link v-if="isCommunity" class="community-back" to="/explore">← {{ t('返回探索') }}</router-link>
+    <p v-if="auth.isMember && !isCommunity" class="studio-credit-summary" role="status">{{ t('目前可用試穿額度', 'Available try-on credits') }}: {{ loading ? '…' : capabilities.remainingUnits }} {{ t('單位','units') }} · {{ t('每件試穿','Per try-on') }} {{ capabilities.costs.try_on }} {{ t('單位','units') }}</p>
+    <nav v-if="!isCommunity" class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key || (tab==='links' && key==='saved')}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>
     <p v-if="error" class="shop-message error" role="alert">{{ error }}</p><p v-if="notice" class="shop-message" role="status">{{ notice }}</p>
+    <section v-if="pendingBatch && auth.isMember" class="shop-pending-recovery" role="status"><div><strong>{{ t('有一筆提交尚待確認','One submission is waiting for confirmation') }}</strong><p>{{ t('重新整理後，先查詢原提交編號。若伺服器尚無這筆工作，可在同意處理照片後用相同編號恢復，避免重複扣點。','We first check the original request ID. If the server has no matching job, you can consent again and retry with that same ID to avoid duplicate charges.') }}</p></div><label class="shop-consent"><input v-model="consent" type="checkbox"><span>{{ t('我再次同意以這張私人照片恢復原提交。','I consent again to resume the original request with this private photo.') }}</span></label><div class="shop-result-actions"><button :disabled="!!busy" @click="refreshJobs">{{ t('查詢原工作','Check original job') }}</button><button class="shop-primary" :disabled="!!busy || !consent" @click="retryPending">{{ busy==='recover'?t('恢復中…','Recovering…'):t('用原編號恢復','Resume same request') }}</button></div></section>
     <p v-if="!auth.initialized && !auth.isMember && tab!=='community'" role="status">{{ t('載入中…') }}</p><div v-else-if="!auth.isMember && tab!=='community'" class="shop-login"><p>{{ t('登入後儲存你的商品、私人照片與試穿結果。','Sign in to save products, private photos and try-on results.') }}</p><button class="shop-primary" @click="login">{{ t('登入／註冊','Sign in / Sign up') }}</button></div>
 
     <section v-if="tab==='wishlist'" class="shop-studio">
@@ -337,13 +445,13 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
       <h2 ref="workflowTitle" class="sr-only" tabindex="-1">{{ steps[step-2] }}</h2>
       <div class="studio-layout">
         <section v-if="step===2" class="studio-shortlist">
-          <div class="shop-section-title"><div><h2>{{ t('值得再看一眼的心動') }}</h2><p>{{ t('加入後可繼續收藏，或選擇最多三件一起試穿。') }}</p></div><router-link class="secondary" to="/closet?tab=wishlist&amp;quick=add-product">{{ t('新增商品') }}</router-link></div>
+          <div class="shop-section-title"><div><h2>{{ t('挑選試穿') }}</h2><p>{{ t('依序試穿上衣、下身、外套，完成後保留一張整套結果；每件各使用一次額度。') }}</p></div><router-link class="secondary" to="/closet?tab=wishlist&amp;quick=add-product">{{ t('新增商品') }}</router-link></div>
         <div class="studio-source-tabs" role="group" :aria-label="t('選擇衣物來源')"><button type="button" :aria-pressed="selectionSource==='wishlist'" @click="selectionSource='wishlist'">{{ t('想買清單') }}</button><button type="button" :aria-pressed="selectionSource==='closet'" @click="selectionSource='closet'">{{ t('我的衣櫥') }}</button><button type="button" :aria-pressed="selectionSource==='saved'" @click="selectionSource='saved'">{{ t('收藏穿搭') }}</button></div>
         <template v-if="selectionSource==='wishlist'">
-        <label class="shop-consent"><input v-model="showPassed" type="checkbox">{{ t('顯示先前放下的商品') }}</label><div v-if="!visibleProducts.length" class="shop-empty"><AppIcon name="Shop" :size="34" /><h3>{{ t('第一件心動，從這裡開始','Your first find starts here') }}</h3><p>{{ t('貼上商品連結或上傳照片，挑選最多三件一起比較。','Paste a product link or upload a photo. Compare up to three at a time.') }}</p><router-link class="primary" to="/closet?tab=wishlist&amp;quick=add-product">{{ t('新增商品') }}</router-link></div>
+        <label class="shop-consent"><input v-model="showPassed" type="checkbox">{{ t('顯示先前放下的商品') }}</label><div v-if="!visibleProducts.length" class="shop-empty"><AppIcon name="Shop" :size="34" /><h3>{{ t('想買清單目前沒有商品') }}</h3><p>{{ t('先在想買清單加入商品，或切換到我的衣櫥挑選衣物。') }}</p><router-link class="primary" to="/closet?tab=wishlist&amp;quick=add-product">{{ t('新增商品') }}</router-link></div>
         <div v-else class="shop-product-grid">
           <article v-for="product in visibleProducts" :key="product.id" :class="['shop-product',{selected:selected.includes(product.id)}]">
-            <button class="shop-product-image" :aria-pressed="selected.includes(product.id)" :aria-label="`${t('選擇試穿','Select for try-on')} ${product.title}`" @click="toggleProduct(product.id)"><img v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title" loading="lazy"><span v-else class="shop-image-placeholder">{{ t('商品照片','Product photo') }}</span><span class="shop-select-mark">{{ selected.includes(product.id)?'✓':'＋' }}</span></button>
+            <button class="shop-product-image" :disabled="!!busy || !!pendingBatch" :aria-pressed="selected.includes(product.id)" :aria-label="`${t('選擇試穿','Select for try-on')} ${product.title}`" @click="toggleProduct(product.id)"><img v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title" loading="lazy"><span v-else class="shop-image-placeholder">{{ t('商品照片','Product photo') }}</span><span class="shop-select-mark">{{ selected.includes(product.id)?'✓':'＋' }}</span></button>
             <div class="shop-product-info"><small>{{ product.state==='dismissed'?t('已放下'):product.state==='purchased'?t('已購買','Purchased'):product.state==='kept'?t('保留候選','Shortlisted'):t('想買','Wishlist') }}</small><h3>{{ product.title }}</h3><div class="shop-product-actions"><button @click="matchingProduct=product">{{ t('搭我的衣櫥','Pair with mine') }}</button><a v-if="safeCommerceUrl(product.source_url)" :href="safeCommerceUrl(product.source_url)" target="_blank" rel="noopener noreferrer" @click="track('purchase_click',{productId:product.id})">{{ t('前往購買 ↗','Shop ↗') }}</a></div><div class="shop-secondary-actions"><button v-if="product.state==='dismissed'" :disabled="!!busy" @click="setState(product,'wishlist')">{{ t('放回想買清單') }}</button><button :disabled="!!busy" @click="setState(product,'kept')">{{ t('保留','Keep') }}</button><button :disabled="!!busy" @click="setState(product,'dismissed')">{{ t('先放下','Pass') }}</button><button :disabled="!!busy" @click="purchasedProduct=product">{{ t('買到了，加入衣櫥','Bought it') }}</button></div></div>
           </article>
         </div><button v-if="products.filter(p=>showPassed || p.state!=='dismissed').length>productLimit" class="shop-load-more" @click="productLimit+=12">{{ t('顯示更多','Show more') }}</button>
@@ -357,12 +465,13 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
           <div v-if="!savedItems.length" class="shop-empty"><p>{{ t('收藏的穿搭目前沒有可選擇的公開衣物。') }}</p><router-link to="/profile?tab=saved">{{ t('我的收藏') }}</router-link></div>
           <div v-else class="shop-product-grid"><article v-for="item in savedItems" :key="item.id" :class="['shop-product',{selected:selectedSaved.some(entry=>entry.itemId===item.id)}]"><button class="shop-product-image" :disabled="!canTryOnClothing(item)" :aria-pressed="selectedSaved.some(entry=>entry.itemId===item.id)" :aria-label="`${t('選擇試穿')} ${item.name}`" @click="toggleSavedItem(item)"><img v-if="item.photo" :src="item.photo" :alt="item.name"><span v-if="canTryOnClothing(item)" class="shop-select-mark">{{ selectedSaved.some(entry=>entry.itemId===item.id)?'✓':'＋' }}</span></button><div class="shop-product-info"><h3>{{ item.name }}</h3><p v-if="!canTryOnClothing(item)" class="shop-hint">{{ t('這個品類暫不支援試穿。') }}</p></div></article></div>
         </template>
-          <div class="studio-next"><div><strong>{{ selectionCount }} / 3</strong><span>{{ t('件候選商品') }}</span><p v-if="!selectionCount" class="shop-hint">{{ t('選擇至少一件商品，再繼續。') }}</p></div><button class="shop-primary" :disabled="!selectionCount" @click="goStep(3)">{{ t('繼續：選擇照片') }}<AppIcon name="arrow" :size="18" /></button></div>
+          <div class="studio-next"><div><strong>{{ selectionCount }} / 3</strong><span>{{ t('件候選商品') }}</span><p v-if="!selectionCount" class="shop-hint">{{ t('選擇至少一件商品，再繼續。') }}</p></div><button class="shop-primary" :disabled="!selectionCount" @click="goStep(3)">{{ t('下一步：選擇模特兒') }}<AppIcon name="arrow" :size="18" /></button></div>
         </section>
         <section v-if="step===3" class="shop-fitting shop-panel">
-        <h2>{{ t('把想像穿上身','See it on you') }}</h2><p>{{ t('選擇本人的單人正面照，讓身體與衣物清楚入鏡。','Choose your own front-facing photo, with your body and clothing clearly visible.') }}</p>
-        <label class="shop-person-upload">＋ {{ busy==='photo'?t('處理照片中…','Preparing photo…'):t('上傳私人照片','Add a private photo') }}<input type="file" accept="image/jpeg,image/png" :disabled="!auth.isMember || !!busy" @change="uploadPerson"></label>
-        <div class="shop-person-list"><button v-for="photo in photos.slice(0,8)" :key="photo.path" :class="{selected:selectedPhoto===photo.path}" :aria-pressed="selectedPhoto===photo.path" :aria-label="t('選用這張照片','Use this photo')" @click="selectedPhoto=photo.path"><img v-if="images[photo.path]" :src="images[photo.path]" :alt="t('我的私人照片','My private photo')"><span v-else>{{ t('照片','Photo') }}</span></button></div>
+        <h2>{{ t('選擇模特兒') }}</h2><p>{{ t('選擇本人的單人正面照，讓身體與衣物清楚入鏡。','Choose your own front-facing photo, with your body and clothing clearly visible.') }}</p>
+        <label class="shop-person-upload">＋ {{ busy==='photo'?t('處理照片中…','Preparing photo…'):t('上傳私人照片','Add a private photo') }}<input type="file" accept="image/jpeg,image/png" :disabled="!auth.isMember || !!busy || !!pendingBatch" @change="uploadPerson"></label>
+        <div v-if="selectedPhoto && images[selectedPhoto]" class="selected-person-preview"><img :src="images[selectedPhoto]" :alt="t('本次選用的私人照片','Selected private photo')"></div><button v-if="photos.length" type="button" @click="choosePhoto=!choosePhoto">{{ choosePhoto?t('完成'):t('更換或管理照片','Change or manage photos') }}</button>
+        <div v-if="choosePhoto || !selectedPhoto" class="shop-person-list"><div v-for="photo in photos" :key="photo.path" class="shop-person-entry"><button :disabled="!!pendingBatch" :class="{selected:selectedPhoto===photo.path}" :aria-pressed="selectedPhoto===photo.path" :aria-label="t('選用這張照片','Use this photo')" @click="selectedPhoto=photo.path;choosePhoto=false;hydrate(photo.path)"><img v-if="images[photo.path]" :src="images[photo.path]" :alt="t('我的私人照片','My private photo')"><span v-else>{{ t('照片','Photo') }}</span></button><button class="shop-photo-delete" :disabled="!!busy || pendingBatch?.selection?.personPath===photo.path" :aria-label="t('刪除這張照片','Delete this photo')" @click="removePhoto(photo)">×</button></div></div>
         <button class="shop-primary shop-wide" :disabled="!selectedPhoto" @click="goStep(4)">{{ t('下一步：模擬試穿') }}</button>
         </section>
         <section v-if="step===4" class="shop-fitting shop-panel">
@@ -374,30 +483,30 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
         <p class="shop-hint">{{ t('送出後可離開頁面，完成的圖片會保存在私人相簿。AI 圖片僅供視覺參考，尺寸請查看商品資訊。','Leave the page after submitting; results will appear in your private album. AI previews illustrate a look, not sizing or fit.') }}</p>
 
         </section>
-        <aside v-if="step>=2" class="studio-selection"><p class="shop-hint">{{ t('每件商品會分別產生一張試穿結果，不會合成一套穿搭。') }}</p><h3>{{ t('這次選擇') }} <span>{{ selectionCount }} / 3</span></h3><div v-for="product in chosenProducts" :key="product.id" class="studio-selected-product"><img v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title"><span>{{ product.title }}</span></div><div v-for="item in chosenClothing" :key="item.id" class="studio-selected-product"><img v-if="item.photo" :src="item.photo" :alt="item.name_zh || item.name"><span>{{ item.name_zh || item.name }}</span></div><div v-for="item in chosenSaved" :key="item.id" class="studio-selected-product"><img v-if="item.photo" :src="item.photo" :alt="item.name"><span>{{ item.name }}</span></div><button v-if="step>2" @click="goStep(2)"><AppIcon name="back" :size="16" />{{ t('返回商品清單') }}</button><p class="shop-hint"><AppIcon name="lock" :size="14" /> {{ t('照片只屬於你，分享由你決定。') }}</p></aside>
+        <aside v-if="step>=2" class="studio-selection"><p class="shop-hint">{{ t('整套試穿請各選最多一件上衣、下身與外套。') }}</p><h3>{{ t('這次選擇') }} <span>{{ selectionCount }} / 3</span></h3><div v-for="product in chosenProducts" :key="product.id" class="studio-selected-product"><img v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title"><span>{{ product.title }}</span></div><div v-for="item in chosenClothing" :key="item.id" class="studio-selected-product"><img v-if="item.photo" :src="item.photo" :alt="item.name_zh || item.name"><span>{{ item.name_zh || item.name }}</span></div><div v-for="item in chosenSaved" :key="item.id" class="studio-selected-product"><img v-if="item.photo" :src="item.photo" :alt="item.name"><span>{{ item.name }}</span></div><button v-if="step>2" @click="goStep(2)"><AppIcon name="back" :size="16" />{{ t('返回商品清單') }}</button></aside>
       </div>
     </section>
 
     <section v-else-if="tab==='album'" class="shop-album">
-      <div class="shop-section-title"><div><span class="shop-eyebrow">{{ t('私人收藏') }}</span><h2>{{ t('先看見，再決定','See it. Then decide.') }}</h2><p>{{ t('工作進度會自動更新。選取最多三張完成結果，並排比較。','Progress updates automatically. Select up to three finished results to compare.') }}</p></div><button :disabled="loading" @click="refresh">{{ t('更新進度','Refresh') }}</button></div>
+      <div class="shop-section-title"><div><h2>{{ t('私人相簿') }}</h2><p>{{ t('最多選取三張照片比較。') }}</p></div><button :disabled="loading" @click="refresh">{{ t('更新進度','Refresh') }}</button></div>
       <div v-if="comparisons.length" class="shop-comparison"><figure v-for="job in comparisons" :key="job.id"><img :src="images[job.result_path]" :alt="jobTitle(job)"><figcaption>{{ jobTitle(job) }}</figcaption></figure></div>
-      <div v-if="!albumJobs.length && !toneJobs.length" class="shop-empty"><AppIcon name="album" :size="34" /><h3>{{ t('你的試穿相簿還在等第一張照片','Your album is waiting for its first look') }}</h3><button @click="selectTab('wishlist')">{{ t('去挑選商品','Choose products') }} →</button></div>
-      <div class="shop-album-grid"><article v-for="job in albumJobs" :key="job.id" class="shop-result shop-panel"><div class="shop-result-media"><img v-if="job.result_path && images[job.result_path]" :src="images[job.result_path]" :alt="jobTitle(job)" loading="lazy"><div v-else class="shop-job-placeholder"><AppIcon name="sparkle" :size="34" :class="{working:['preparing','submitting','processing'].includes(job.status)}" /><strong>{{ stateLabel(job.status) }}</strong></div><span class="shop-job-state">{{ stateLabel(job.status) }}</span></div><small>{{ t('批次','Batch') }} {{ job.batch_id.slice(0,8) }} · {{ formatDate(job.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</small><h3>{{ jobTitle(job) }}</h3><p v-if="['needs_review','failed'].includes(job.status)" class="shop-hint">{{ job.status==='needs_review'?t('服務正在核對這筆工作，請勿重送相同生成。','The service must reconcile this job. Please do not submit it again.'):t('這次未能完成，請檢查人物照與商品圖。','This job did not finish. Please check the portrait and garment image.') }}</p><div v-if="job.status==='succeeded'" class="shop-result-actions"><button :aria-pressed="comparisonIds.includes(job.id)" @click="compare(job)">{{ comparisonIds.includes(job.id)?'✓ ':'' }}{{ t('比較','Compare') }}</button><button @click="download(job)">{{ t('下載','Download') }}</button><button :disabled="!!busy" @click="deleteResult(job)">{{ t('刪除') }}</button></div><button v-if="job.status==='queued'" :disabled="!!busy" @click="cancel(job)">{{ t('取消等待','Cancel queued job') }}</button></article></div>
+      <p v-if="loading && !albumJobs.length" role="status">{{ t('載入中…') }}</p><div v-else-if="!albumJobs.length && !toneJobs.length" class="shop-empty"><AppIcon name="album" :size="34" /><h3>{{ t('尚無試穿結果') }}</h3><button @click="selectTab('wishlist')">{{ t('去挑選商品','Choose products') }} →</button></div>
+      <div class="shop-album-grid"><article v-for="job in albumJobs" :key="job.id" class="shop-result shop-panel"><div class="shop-result-media"><img v-if="job.result_path && images[job.result_path]" :src="images[job.result_path]" :alt="jobTitle(job)" loading="lazy"><div v-else class="shop-job-placeholder"><AppIcon name="sparkle" :size="34" :class="{working:['preparing','submitting','processing'].includes(job.status)}" /><strong>{{ stateLabel(job.status) }}</strong></div><span class="shop-job-state">{{ stateLabel(job.status) }}</span></div><small>{{ formatDate(job.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</small><h3>{{ jobTitle(job) }}</h3><p v-if="job.sequence_total>1" class="shop-hint">{{ $tf('已完成 {done} / {total} 件', {done:jobs.filter(entry=>entry.batch_id===job.batch_id &amp;&amp; entry.status==='succeeded').length,total:job.sequence_total}) }}</p><p v-if="['needs_review','failed'].includes(job.status)" class="shop-hint">{{ job.status==='needs_review'?t('服務正在核對這筆工作，請勿重送相同生成。','The service must reconcile this job. Please do not submit it again.'):t('這次未能完成，請檢查人物照與商品圖。','This job did not finish. Please check the portrait and garment image.') }}</p><div v-if="job.status==='succeeded'" class="shop-result-actions"><button :aria-pressed="comparisonIds.includes(job.id)" @click="compare(job)">{{ comparisonIds.includes(job.id)?'✓ ':'' }}{{ t('比較','Compare') }}</button><button @click="download(job)">{{ t('下載','Download') }}</button><button :disabled="!!busy" @click="removeResult(job)">{{ t('刪除') }}</button></div><button v-if="job.status==='queued' &amp;&amp; jobs.filter(entry=>entry.batch_id===job.batch_id).every(entry=>entry.status==='queued')" :disabled="!!busy" @click="cancel(job)">{{ t('取消等待','Cancel queued job') }}</button></article></div>
       <button v-if="jobs.filter(j=>j.kind==='try_on').length>jobLimit" class="shop-load-more" @click="jobLimit+=12">{{ t('顯示更多','Show more') }}</button>
       <div v-if="toneJobs.length" class="shop-panel shop-tone-results"><h3>{{ t('個人色彩分析','Personal color analysis') }}</h3><p v-for="job in toneJobs" :key="job.id">{{ stateLabel(job.status) }} · {{ formatDate(job.created_at,{dateStyle:'medium'}) }} <span v-if="job.status==='failed'" class="shop-hint">{{ t('請改用光線均勻、臉部清晰的正面近照。') }}</span> <span v-if="job.result_data?.skin_color" class="shop-skin-swatch" :style="{background:job.result_data.skin_color}"></span></p><div class="shop-palette"><div v-for="color in palette" :key="color.key"><i :style="{background:color.color}"></i><span>{{ t({soft:'柔和',contrast:'對比',neutral:'中性'}[color.key]) }}</span></div></div></div>
     </section>
 
     <section v-else-if="tab==='community'">
-      <div class="shop-section-title"><div><span class="shop-eyebrow">{{ t('好物分享') }}</span><h2>{{ t('心動，也可以一起討論','Good finds are better shared') }}</h2><p>{{ t('這裡是大家主動公開的試穿動態。你的私人相簿只有你能查看。') }}</p></div><button @click="loadPosts">{{ t('重新整理','Refresh') }}</button></div>
+      <div class="shop-section-title"><div><h2>{{ t('穿搭分享') }}</h2><p>{{ t('這裡是大家主動公開的試穿動態。你的私人相簿只有你能查看。') }}</p></div><button @click="loadPosts">{{ t('重新整理','Refresh') }}</button></div>
       <div v-if="!posts.length && !sharedPost" class="shop-empty"><AppIcon name="Explore" :size="34" /><h3>{{ t('成為第一位分享穿搭的人','Share the first look') }}</h3><p>{{ t('試穿完成後，在私人相簿選擇你願意公開的一張。','After a try-on finishes, choose one result from your album to publish.') }}</p></div>
-      <div class="shop-album-grid"><article v-for="post in sharedPost?[sharedPost,...posts.filter(p=>p.id!==sharedPost.id)]:posts" :key="post.id" class="shop-result shop-panel"><router-link v-if="post.author?.username" class="studio-share-author" :to="{path:'/profile',query:{user:post.author.username}}"><img v-if="post.author.avatarUrl" :src="post.author.avatarUrl" alt=""><span v-else class="studio-author-initials">{{ post.author.initials }}</span><span>{{ tf('由 {name} 分享',{name:post.author.displayName || post.author.username}) }}</span></router-link><p v-else class="studio-share-author">{{ t('公開分享') }}</p><img class="shop-shared-image" :src="post.image_url" :alt="post.title" loading="lazy"><small>{{ t('AI 試穿','AI try-on') }}</small><h3>{{ post.title }}</h3><p class="shop-caption">{{ post.caption }}</p><div class="shop-product-actions"><a v-if="safeCommerceUrl(post.source_url)" :href="safeCommerceUrl(post.source_url)" target="_blank" rel="noopener noreferrer" @click="track('purchase_click',{postId:post.id})">{{ t('查看商品 ↗','View product ↗') }}</a><button :disabled="!!busy" @click="share(post)">{{ t('分享連結','Share link') }}</button></div></article></div>
+      <div class="shop-album-grid"><article v-for="post in sharedPost?[sharedPost,...posts.filter(p=>p.id!==sharedPost.id)]:posts" :key="post.id" class="shop-result shop-panel"><router-link v-if="post.author?.username" class="studio-share-author" :to="{path:'/profile',query:{user:post.author.username}}"><img v-if="post.author.avatarUrl" :src="post.author.avatarUrl" alt=""><span v-else class="studio-author-initials">{{ post.author.initials }}</span><span>{{ tf('由 {name} 分享',{name:post.author.displayName || post.author.username}) }}</span></router-link><p v-else class="studio-share-author">{{ t('公開分享') }}</p><img class="shop-shared-image" :src="post.image_url" :alt="post.title" loading="lazy"><small>{{ t('AI 試穿','AI try-on') }}</small><h3>{{ post.title }}</h3><p class="shop-caption">{{ post.caption }}</p><div class="shop-product-actions"><a v-if="safeCommerceUrl(post.source_url)" :href="safeCommerceUrl(post.source_url)" target="_blank" rel="noopener noreferrer" @click="track('purchase_click',{postId:post.id})">{{ t('查看商品 ↗','View product ↗') }}</a><button :disabled="!!busy" @click="share(post)">{{ t('分享連結','Share link') }}</button><button v-if="jobs.some(job=>job.id===post.id)" :disabled="!!busy" @click="retract(post)">{{ t('取消公開','Unpublish') }}</button></div></article></div>
     </section>
 
     <section v-else-if="tab==='activity'" class="shop-panel"><h2>{{ t('從心動到行動','From discovery to action') }}</h2><div v-if="metrics" class="shop-metrics"><div><strong>{{ metrics.products }}</strong><span>{{ t('收藏商品','Saved products') }}</span></div><div><strong>{{ metrics.completedTryOns }}</strong><span>{{ t('完成試穿','Completed try-ons') }}</span></div><div><strong>{{ metrics.purchaseClicks }}</strong><span>{{ t('購買連結點擊','Product link clicks') }}</span></div><div><strong>{{ metrics.shareActions }}</strong><span>{{ t('分享操作','Share actions') }}</span></div></div><p>{{ t('這裡整理你近期收藏商品、完成試穿、前往商店和分享穿搭的紀錄。點開商品連結會記為前往商店，不代表已購買。') }}</p><p>{{ t('免費額度用於試穿及選用的配色分析，沒有付款或自動加值。','Free credits fund try-ons and optional color analysis. No payments or automatic top-ups.') }}</p></section>
 
     <div v-if="extensionOpen" class="shop-modal-backdrop" @click.self="extensionOpen=false"><section class="shop-modal" role="dialog" aria-modal="true" :aria-label="t('瀏覽器收藏助手')" v-accessible-modal="{onClose:()=>extensionOpen=false}"><button class="shop-modal-close modal-close" @click="extensionOpen=false" :aria-label="t('關閉')">×</button><ExtensionGuide /></section></div>
     <div v-if="purchasedProduct" class="shop-modal-backdrop" @click.self="!busy && (purchasedProduct=null)"><section class="shop-modal" role="dialog" aria-modal="true" :aria-label="t('確認已購買')" v-accessible-modal><button class="shop-modal-close modal-close" :disabled="!!busy" @click="purchasedProduct=null" :aria-label="t('關閉')">×</button><h2>{{ t('確認已購買') }}</h2><p>{{ purchasedProduct.title }}</p><p>{{ t('確認你已擁有這件商品，將照片與名稱加入衣櫥。') }}</p><button class="shop-primary" :disabled="!!busy" @click="addPurchasedToCloset(purchasedProduct)">{{ busy==='closet'?t('加入衣櫥中…'):t('完成並加入衣櫥') }}</button></section></div>
-    <div v-if="matchingProduct" class="shop-modal-backdrop" @click.self="matchingProduct=null"><section class="shop-modal" role="dialog" aria-modal="true" :aria-label="t('衣櫥搭配','Wardrobe pairings')" v-accessible-modal="{onClose:()=>matchingProduct=null}"><button class="shop-modal-close modal-close" @click="matchingProduct=null" :aria-label="t('關閉','Close')">×</button><span class="shop-eyebrow">{{ t('已在你的衣櫥中') }}</span><h2>{{ t('和這些舊愛一起穿','Pair it with pieces you own') }}</h2><p>{{ matchingProduct.title }}</p><div v-if="matches.length" class="shop-match-list"><article v-for="match in matches" :key="match.item.id"><img v-if="match.item.photo" :src="match.item.photo" :alt="match.item.name_zh || match.item.name"><div><h3>{{ match.item.name_zh || match.item.name }}</h3><p>{{ reasonLabel(match.reason) }}</p></div></article></div><p v-else>{{ t('還沒有合適的衣物資料。先加入幾件自己的衣服，再來看看搭配。','No complementary wardrobe pieces yet. Add a few items you own and try again.') }}</p><p class="shop-hint">{{ t('依衣物分類與你填寫的顏色提供搭配靈感，可依個人喜好調整。','Pairing ideas use garment categories and saved colors. Your preferences come first.') }}</p><router-link to="/closet" @click="matchingProduct=null">{{ t('查看我的衣櫥','Open my wardrobe') }} →</router-link></section></div>
+    <div v-if="matchingProduct" class="shop-modal-backdrop" @click.self="matchingProduct=null"><section class="shop-modal" role="dialog" aria-modal="true" :aria-label="t('衣櫥搭配','Wardrobe pairings')" v-accessible-modal="{onClose:()=>matchingProduct=null}"><button class="shop-modal-close modal-close" @click="matchingProduct=null" :aria-label="t('關閉','Close')">×</button><h2>{{ t('衣櫥搭配') }}</h2><p>{{ matchingProduct.title }}</p><label v-if="palette.length" class="shop-consent"><input v-model="useColorIdeas" type="checkbox"><span>{{ t('使用我選用的色彩分析作為搭配偏好','Use my optional color analysis as a pairing preference') }}</span></label><div v-if="matches.length" class="shop-match-list"><article v-for="match in matches" :key="match.item.id"><img v-if="match.item.photo" :src="match.item.photo" :alt="match.item.name_zh || match.item.name"><div><h3>{{ match.item.name_zh || match.item.name }}</h3><p>{{ reasonLabel(match.reason) }}</p></div></article></div><p v-else>{{ t('還沒有合適的衣物資料。先加入幾件自己的衣服，再來看看搭配。','No complementary wardrobe pieces yet. Add a few items you own and try again.') }}</p><p class="shop-hint">{{ t('依衣物分類與你填寫的顏色提供搭配靈感，可依個人喜好調整。','Pairing ideas use garment categories and saved colors. Your preferences come first.') }}</p><router-link to="/closet" @click="matchingProduct=null">{{ t('查看我的衣櫥','Open my wardrobe') }} →</router-link></section></div>
     <div v-if="shareJob" class="shop-modal-backdrop" @click.self="shareJob=null"><form class="shop-modal" role="dialog" aria-modal="true" :aria-label="t('公開分享試穿','Publish try-on')" v-accessible-modal="{onClose:()=>shareJob=null}" @submit.prevent="publish"><button type="button" class="shop-modal-close modal-close" @click="shareJob=null" :aria-label="t('關閉','Close')">×</button><h2>{{ t('分享這張穿搭','Share this look') }}</h2><img class="shop-share-preview" :src="images[shareJob.result_path]" :alt="jobTitle(shareJob)"><label>{{ t('想和大家說什麼？','What would you like to share?') }}<textarea v-model="shareCaption" maxlength="800" rows="3"></textarea></label><label class="shop-consent"><input v-model="shareConsent" type="checkbox" required><span>{{ t('我同意公開這張 AI 試穿結果、文字與商品連結，讓任何人都能查看。原始人物照與其他私人相簿不公開。','I agree to publish this AI try-on image, caption and product link for anyone to view. My original photo and other private results stay private.') }}</span></label><button class="shop-primary" :disabled="!shareConsent || !!busy">{{ busy==='publish'?t('發布中…','Publishing…'):t('確認公開發布','Publish this look') }}</button></form></div>
   </div>
 </template>
@@ -405,6 +514,20 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
 <style scoped>
 .studio-source-tabs{display:flex;gap:8px;margin:0 0 18px}.studio-source-tabs button[aria-pressed=true]{background:var(--accent-pink-soft);border-color:var(--accent)}
 
+.shop-wake-note{flex:1;max-width:520px;margin:0;padding:12px 16px;border:1px solid var(--shop-line);border-radius:14px;background:#fff8e9;color:var(--shop-muted);font-size:12px;line-height:1.7}
+.shop-pending-recovery{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:12px;align-items:center;margin:14px 0 20px;padding:18px;border:1px solid #d6b98a;border-radius:16px;background:#fff8e9}
+.shop-pending-recovery p{margin:5px 0;color:var(--shop-muted);font-size:12px}
+.shop-pending-recovery .shop-result-actions{grid-column:1/-1}
+.shop-credit-status{padding:10px 12px;border-radius:10px;background:#f5f2ed;font-size:12px}
+.shop-sample-link{margin:0 0 18px;background:#f8eee8!important}
+.shop-person-entry{position:relative;flex:none;width:65px;height:83px}
+.shop-person-entry>button:first-child{width:100%;height:100%;padding:2px;overflow:hidden}
+.shop-person-entry .shop-photo-delete{position:absolute;top:-5px;right:-5px;width:23px!important;height:23px!important;min-height:23px;padding:0!important;border-radius:50%;background:#fff!important;color:#8b423b!important;line-height:1}
+.shop-triptych{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:14px}
+.shop-triptych figure{min-width:0;margin:0;text-align:center}
+.shop-triptych img{display:block;width:100%;aspect-ratio:3/4;object-fit:contain;background:#f4eee6;border-radius:8px}
+.shop-triptych figure>span{display:grid;place-items:center;aspect-ratio:3/4;border-radius:8px;background:#f4eee6;color:var(--shop-muted);font-size:10px}
+.shop-triptych figcaption{padding-top:5px;font-size:10px;color:var(--shop-muted)}
 .studio-share-author{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;text-decoration:none}.studio-share-author img,.studio-author-initials{width:36px;height:36px;border-radius:50%;object-fit:cover}.studio-author-initials{display:grid;place-items:center;background:var(--accent-lavender-soft)}.studio-saved{padding-bottom:24px}
 .studio-extension-entry{margin-bottom:16px;display:flex;align-items:center;gap:8px}.studio-product-preview{display:block;max-width:220px;max-height:260px;object-fit:contain;margin:16px auto}
 
@@ -413,6 +536,11 @@ onBeforeUnmount(()=>{disposed=true;sessionVersion++;clearTimeout(pollTimer);for(
 @media(max-width:1150px){.shop-workspace{grid-template-columns:minmax(0,1fr) 260px}.shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-hero{grid-template-columns:1fr 200px;padding:30px}.shop-import-details{grid-template-columns:120px 1fr}.shop-panel{padding:18px}}
 @media(max-width:850px){.shop-workspace{grid-template-columns:1fr}.shop-fitting{position:static;max-width:none}.shop-hero{grid-template-columns:1fr 170px;gap:20px}.shop-hero-note strong{font-size:18px}.shop-album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.shop-person-list button{width:75px;height:95px}}
 @media(max-width:560px){.shop-view{padding-top:0}.shop-hero{padding:25px 20px;border-radius:20px;grid-template-columns:1fr;margin-bottom:12px}.shop-hero-note{display:none}.shop-hero h1{font-size:29px}.shop-hero-copy>p{font-size:13px}.shop-journey{gap:5px}.shop-journey span{font-size:10px;padding:7px 9px}.shop-tabs{gap:18px;margin-bottom:20px}.shop-tabs button{font-size:12px}.shop-import-details{grid-template-columns:1fr}.shop-image-upload{min-height:125px}.shop-fields{gap:12px}.shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.shop-product-image{height:165px!important}.shop-product-info{padding:11px}.shop-album-grid{gap:12px;grid-template-columns:1fr}.shop-section-title{align-items:start}.shop-section-title h2{font-size:21px}.shop-tag{display:none}.shop-login{align-items:start;flex-direction:column;padding:16px}.shop-comparison{padding:10px;gap:6px;overflow:auto}.shop-comparison figcaption{font-size:10px}.shop-result-media{max-height:500px}.shop-metrics{grid-template-columns:repeat(2,1fr)}.shop-modal{padding:24px 18px}.shop-url-row button{padding:10px;font-size:11px}}
+@media(max-width:560px){.shop-pending-recovery{grid-template-columns:1fr}.shop-wake-note{margin-top:12px}.shop-triptych{gap:4px}.shop-triptych figcaption{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.working{animation:none}.shop-view button{transition:none}}
 </style>
 <style scoped src="@/assets/shop-studio.css"></style>
+
+<style scoped>.studio-credit-summary{padding:14px 18px;background:var(--accent-yellow-soft);border-radius:12px;font-size:14px}.community-back{display:inline-block;padding:16px 0}.shop-product-info{min-width:0}.shop-product-info h3{overflow-wrap:anywhere}.shop-product-actions,.shop-secondary-actions{flex-wrap:wrap}</style>
+
+<style scoped>.garment-source-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.garment-source-tabs button[aria-pressed=true]{background:var(--ink);color:white}.garment-source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:14px;margin-bottom:24px}.garment-source-grid button{min-width:0;padding:10px}.garment-source-grid img{width:100%;height:150px;object-fit:contain}.garment-source-grid span,.garment-source-grid small{display:block;overflow-wrap:anywhere;margin-top:8px}.selected-person-preview{max-width:240px;margin:20px 0}.selected-person-preview img{width:100%;max-height:320px;object-fit:contain}.selected-person-preview p{font-size:13px}</style>

@@ -1,5 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { validateMigrationSources } from './lib/migrationSources.mjs'
 
 const root = resolve(import.meta.dirname, '..')
 const allowedStatuses = new Set(['PASS', 'FAIL', 'BLOCKED', 'NOT REQUIRED'])
@@ -48,11 +49,7 @@ for (const entry of secretInventory.entries ?? []) {
 const migrationFiles = (await readdir(resolve(root, 'supabase/personal_baseline')))
   .filter((name) => /^\d{3}_.*\.sql$/.test(name))
   .sort()
-const numbers = migrationFiles.map((name) => Number(name.slice(0, 3)))
-const expected = Array.from({ length: 27 }, (_, index) => index + 1)
-if (JSON.stringify(numbers) !== JSON.stringify(expected)) {
-  errors.push(`Expected contiguous migrations 001-027; found ${numbers.join(',')}`)
-}
+errors.push(...validateMigrationSources(migrationFiles, migrationManifest))
 
 const productionFiles = [
   'PRODUCTION_ARCHITECTURE.md',

@@ -93,6 +93,7 @@ export const shopMessages = `
 對比|Contrast|コントラスト|Contraste
 中性|Neutral|ニュートラル|Neutro
 這些是可自由選擇的配色靈感，不是四季色彩鑑定。|These are optional color ideas, not a seasonal color diagnosis.|自由に選べる配色のヒントです。パーソナルカラーの四季分類ではありません。|Son ideas de color opcionales, no un diagnóstico de colorimetría estacional.
+符合你選用的色彩靈感|Matches your optional color ideas|選んだ色のアイデアに合います|Combina con tus ideas de color opcionales
 先看見，再決定|See it. Then decide.|見てから、決めよう。|Primero mira. Luego decide.
 工作進度會自動更新。選取最多三張完成結果，並排比較。|Progress updates automatically. Select up to three finished results to compare.|進行状況は自動で更新されます。完成した結果を最大3枚並べて比較できます。|El progreso se actualiza automáticamente. Selecciona hasta tres resultados para comparar.
 更新進度|Refresh|進行状況を更新|Actualizar progreso
@@ -170,4 +171,40 @@ AI 試穿|AI try-on|AI試着|Prueba con IA
 照片必須是 JPEG 或 PNG，且解析度至少為 256 × 256。|Use a JPEG or PNG photo of at least 256 × 256 pixels.|256 × 256ピクセル以上のJPEGまたはPNG写真を使用してください。|Usa una foto JPEG o PNG de al menos 256 × 256 píxeles.
 目前無法讀取這個網站，請手動上傳商品圖片。|This site cannot be read. Please upload the product photo manually.|このサイトを読み込めません。商品写真をアップロードしてください。|No se puede leer esta web. Sube la foto del producto manualmente.
 你可以使用上方語言選單切換。|Use the language menu above to switch.|上部の言語メニューで切り替えられます。|Puedes cambiar el idioma en el menú superior.
+已找到原提交的工作，已恢復進度。|Your original submission was found and its progress is restored.|元の送信が見つかり、進行状況を復元しました。|Encontramos el envío original y restauramos su progreso.
+先查詢或恢復待確認的提交，再建立新的工作。|Check or resume the pending submission before starting another job.|新しいジョブを始める前に、保留中の送信を確認または再開してください。|Comprueba o reanuda el envío pendiente antes de iniciar otro trabajo.
+已用原提交編號恢復這筆工作。|The job was resumed with its original submission ID.|元の送信 ID でジョブを再開しました。|Reanudamos el trabajo con el ID de envío original.
+這張照片關聯一筆待確認提交，請先恢復或核對工作。|This photo is tied to an unconfirmed submission. Resume or check that job first.|この写真は未確認の送信に関連付けられています。先にジョブを再開するか確認してください。|Esta foto está vinculada a un envío sin confirmar. Reanuda o comprueba ese trabajo primero.
+刪除這張私人照片？|Delete this private photo?|この非公開写真を削除しますか？|¿Eliminar esta foto privada?
+私人照片已刪除。|Private photo deleted.|非公開写真を削除しました。|Foto privada eliminada.
+撤回這則公開分享？|Retract this public post?|この公開投稿を取り消しますか？|¿Retirar esta publicación pública?
+已撤回公開分享。|Public post retracted.|公開投稿を取り消しました。|Publicación retirada.
+刪除這筆試穿結果，也會撤回相對應的公開分享。|Deleting this try-on result also retracts its public post.|この試着結果を削除すると、関連する公開投稿も取り消されます。|Al eliminar este resultado también se retira su publicación pública.
+試穿結果已刪除。|Try-on result deleted.|試着結果を削除しました。|Resultado de prueba eliminado.
+首次開啟可能需要等待免費主機喚醒。若工作中斷，重新開啟後按「更新進度」；已排隊工作會在服務恢復後繼續。|The free host may take a moment to wake on your first visit. If a job pauses, reopen the studio and select “Refresh”; queued jobs resume when service is available.|初回アクセス時は無料ホストの起動に時間がかかることがあります。ジョブが止まった場合はスタジオを再度開き、「進捗を更新」を選択してください。待機中のジョブはサービス復旧後に再開します。|El servidor gratuito puede tardar en activarse la primera vez. Si un trabajo se detiene, vuelve a abrir el estudio y pulsa «Actualizar»; los trabajos en cola se reanudarán cuando el servicio esté disponible.
+有一筆提交尚待確認|One submission is awaiting confirmation|確認待ちの送信があります|Hay un envío pendiente de confirmación
+重新整理後，先查詢原提交編號。若伺服器尚無這筆工作，可在同意處理照片後用相同編號恢復，避免重複扣點。|After refreshing, check the original submission ID first. If the server has no matching job, consent again and resume with the same ID to avoid duplicate charges.|再読み込み後、まず元の送信 ID を確認してください。サーバーに該当ジョブがない場合は、写真処理に再同意して同じ ID で再開し、二重請求を防いでください。|Después de actualizar, comprueba primero el ID original. Si el servidor no encuentra el trabajo, vuelve a aceptar el procesamiento de la foto y reanúdalo con el mismo ID para evitar cargos duplicados.
+我再次同意以這張私人照片恢復原提交。|I consent again to resume the original request with this private photo.|この非公開写真を使って元の送信を再開することに、改めて同意します。|Vuelvo a dar mi consentimiento para reanudar el envío original con esta foto privada.
+查詢原工作|Check original job|元のジョブを確認|Consultar el trabajo original
+恢復中…|Resuming…|再開中…|Reanudando…
+用原編號恢復|Resume with original ID|元の ID で再開|Reanudar con el ID original
+查看範例成果與試穿相簿|View sample results and try-on album|サンプル結果と試着アルバムを見る|Ver ejemplos y el álbum de pruebas
+刪除這張照片|Delete this photo|この写真を削除|Eliminar esta foto
+YouCam 帳戶餘額|YouCam account balance|YouCam アカウント残高|Saldo de la cuenta de YouCam
+單位|units|ユニット|unidades
+保留評審額度|Judge reserve|審査員用の確保枠|Reserva para jueces
+目前無法核對 YouCam 餘額，產圖會暫停以避免超額。|YouCam balance could not be verified. Generation is paused to prevent overspending.|YouCam の残高を確認できないため、超過を防ぐため画像生成を一時停止しています。|No se pudo verificar el saldo de YouCam. La generación está pausada para evitar excederlo.
+每日個人額度|Daily personal limit|1日の個人上限|Límite diario personal
+等待中工作|Active jobs|進行中のジョブ|Trabajos activos
+原始人物照|Original person photo|元の人物写真|Foto original de la persona
+私人照|Private photo|非公開写真|Foto privada
+商品原圖|Original product image|元の商品画像|Imagen original del producto
+商品圖|Product image|商品画像|Imagen del producto
+YouCam 試穿結果|YouCam try-on result|YouCam 試着結果|Resultado de prueba de YouCam
+結果已刪除|Result deleted|結果を削除しました|Resultado eliminado
+前往商家|Visit merchant|ショップへ|Visitar tienda
+刪除結果|Delete result|結果を削除|Eliminar resultado
+這筆試穿圖片已刪除。|This try-on image has been deleted.|この試着画像は削除されました。|Esta imagen de prueba se eliminó.
+取消公開|Unpublish|公開を取り消す|Retirar publicación
+使用我選用的色彩分析作為搭配偏好|Use my optional color analysis as a pairing preference|選択したカラー分析をコーデの好みに使う|Usar mi análisis de color opcional como preferencia
 `;

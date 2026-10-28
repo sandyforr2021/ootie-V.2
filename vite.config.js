@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue({ template: { transformAssetUrls: { includeAbsolute: false } } })],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
@@ -20,7 +20,15 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      input: resolve(__dirname, 'index.html')
+      input: resolve(__dirname, 'index.html'),
+      output: {
+        // Keep stable SDK/framework code cached when application screens change.
+        // Deferred modals still control what is downloaded on the first visit.
+        manualChunks(id) {
+          if (id.includes('/node_modules/@supabase/')) return 'vendor-supabase';
+          if (/\/node_modules\/(?:@vue\/|vue\/|vue-router\/|pinia\/|vue-demi\/)/.test(id)) return 'vendor-vue';
+        }
+      }
     }
   },
   server: {

@@ -5,7 +5,7 @@
     content-class="guest-import-modal"
     @close="appStore.dismissGuestImport()"
   >
-    <p class="eyebrow">Welcome back</p>
+
     <h2 id="guest-import-title">要把試用期間加入的衣物帶進會員衣櫥嗎？</h2>
     <p>共 {{ appStore.guestImportItems.length }} 件。匯入後會沿用你的會員身份與遠端衣櫥權限。</p>
     <p v-if="appStore.guestImportError" class="guest-import-error" role="alert">

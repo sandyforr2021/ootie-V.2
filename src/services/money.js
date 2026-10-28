@@ -1,4 +1,5 @@
 import { locale } from '@/i18n';
+import { convertCurrency } from './exchangeRates';
 
 export const CURRENCIES = Object.freeze(['TWD', 'USD', 'JPY', 'EUR', 'GBP', 'CAD', 'AUD', 'HKD', 'CNY', 'KRW']);
 export const defaultCurrency = (language = locale.value) => ({ 'zh-TW': 'TWD', en: 'USD', ja: 'JPY', es: 'EUR' }[language] || 'USD');
@@ -14,7 +15,19 @@ export function validPurchaseAmount(value, currency) {
 }
 export function formatMoney(value, currency = 'TWD', language = locale.value) {
   if (value === '' || value == null || !Number.isFinite(Number(value))) return '—';
-  return new Intl.NumberFormat(language, { style: 'currency', currency, currencyDisplay: 'code', maximumFractionDigits: currencyDigits(currency) }).format(Number(value));
+  try { return new Intl.NumberFormat(language, { style: 'currency', currency, currencyDisplay: 'code', maximumFractionDigits: currencyDigits(currency) }).format(Number(value)); }
+  catch { return `${currency} ${Number(value).toLocaleString(language)}`; }
+}
+export function moneyQuote(value, currency = 'TWD', language = locale.value) {
+  const original = formatMoney(value, currency, language);
+  if (value === '' || value == null || !Number.isFinite(Number(value))) return { formatted: '—', original: '', converted: false };
+  const quote = convertCurrency(Number(value), String(currency).toUpperCase(), defaultCurrency(language));
+  if (!quote) return { formatted: original, original, converted: false, unavailable: true };
+  return { ...quote, original, formatted: `${quote.converted ? '≈ ' : ''}${formatMoney(quote.amount, quote.currency, language)}` };
+}
+export function formatConvertedMoney(value, currency = 'TWD', language = locale.value) {
+  const quote = moneyQuote(value, currency, language);
+  return quote.converted ? `${quote.formatted} (${quote.original})` : quote.formatted;
 }
 export function wardrobeCosts(items) {
   const groups = new Map();

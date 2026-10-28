@@ -16,6 +16,8 @@ import { CommerceRepository } from './commerce/repository.js';
 import { CommerceService } from './commerce/service.js';
 import { YouCamClient } from './commerce/youcamClient.js';
 import { CommerceJobWorker, startCommerceWorker } from './commerce/jobWorker.js';
+import { createWeatherPlacesService } from './services/weatherPlacesService.js';
+import { createContentTranslationService } from './services/contentTranslationService.js';
 
 const config = loadConfig();
 const webRoot = fileURLToPath(new URL('../../dist', import.meta.url));
@@ -33,10 +35,14 @@ const supabase = new SupabaseGateway({ config });
 const generationService = new GenerationService({ config, supabase, provider });
 const productImportService = new ProductImportService();
 const repository = new CommerceRepository(supabase);
-const commerceService = new CommerceService({ repository, storage: supabase, enabled: config.youcam.enabled && !!config.youcam.apiKey });
-const app = createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService });
+const youcamClient = new YouCamClient(config.youcam);
+const commerceService = new CommerceService({ repository, storage: supabase, provider: youcamClient,
+  reviewerUserIds: config.youcam.reviewerUserIds, enabled: config.youcam.enabled && !!config.youcam.apiKey });
+const weatherPlacesService = createWeatherPlacesService();
+const contentTranslationService = createContentTranslationService({ supabase });
+const app = createGatewayApp({ config, supabase, provider, generationService, productImportService, commerceService, weatherPlacesService, contentTranslationService });
 const stopWorker = config.youcam.workerEnabled && config.youcam.enabled && config.youcam.apiKey
-  ? startCommerceWorker(new CommerceJobWorker({ repository, storage: supabase, provider: new YouCamClient(config.youcam) }), {
+  ? startCommerceWorker(new CommerceJobWorker({ repository, storage: supabase, provider: youcamClient }), {
     onError: (error) => console.error('Commerce worker:', error?.code || 'UNAVAILABLE')
   }) : () => {};
 process.on('SIGTERM', () => { stopWorker(); server.close(); });

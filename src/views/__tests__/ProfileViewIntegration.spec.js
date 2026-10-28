@@ -15,6 +15,7 @@ vi.mock('@/services/ootdMedia', () => ootdMedia);
 vi.mock('@/services/clothingRepository', () => ({ getCurrentUserItems: vi.fn().mockResolvedValue([]) }));
 
 import ProfileView from '../ProfileView.vue';
+import ClosetVisibility from '@/components/closet/ClosetVisibility.vue';
 import ProfileEditModal from '@/components/modal/ProfileEditModal.vue';
 import OotdFormModal from '@/components/modal/OotdFormModal.vue';
 import OotdDetailView from '../OotdDetailView.vue';
@@ -141,7 +142,7 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
 
   it('2. Public Closet Toggle Integration', async () => {
     const appStore = useAppStore();
-    const wrapper = mount(ProfileView, {
+    const wrapper = mount(ClosetVisibility, {
       global: { plugins: [pinia, router] }
     });
 
@@ -165,7 +166,7 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
     const appStore = useAppStore();
     appStore.profile.public_closet = false;
     vi.spyOn(profileRepository, 'updatePublicProfile').mockRejectedValue(new Error('offline'));
-    const wrapper = mount(ProfileView, { global: { plugins: [pinia, router] } });
+    const wrapper = mount(ClosetVisibility, { global: { plugins: [pinia, router] } });
     await wrapper.find('.switch').trigger('click');
     await flushPromises();
     expect(appStore.profile.public_closet).toBe(false);
@@ -237,7 +238,7 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
     expect(firstCard.exists()).toBe(true);
 
     const firstCardActions = firstCard.findAll('.ootd-action');
-    const shareBtn = firstCardActions.find((b) => b.text() === '分享');
+    const shareBtn = firstCardActions.find((b) => b.attributes('aria-label') === '分享');
 
     await shareBtn.trigger('click');
     expect(shareSpy).toHaveBeenCalled();

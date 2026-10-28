@@ -3,10 +3,10 @@
     <header class="closet-page-header">
       <div>
         <h1>{{ $t("我的衣櫥") }}</h1>
-        <p>{{ $t("把擁有的每一件衣服，準備成下一套日常。") }}</p>
       </div>
       <button v-if="!showWishlist" type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
     </header>
+    <ClosetVisibility v-if="!showWishlist" />
 
     <nav class="closet-collections" :aria-label="$t('我的衣櫥')">
       <router-link :to="{path:'/closet',query:{lang:route.query.lang}}" :aria-current="!showWishlist ? 'page' : undefined">{{ $t('衣櫥衣物') }}</router-link>
@@ -199,6 +199,7 @@
 </template>
 
 <script setup>
+import ClosetVisibility from '@/components/closet/ClosetVisibility.vue';
 import { itemName } from '@/services/itemPresentation';
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Heart } from '@lucide/vue';
@@ -383,3 +384,5 @@ onBeforeUnmount(() => {
 });
 </script>
 
+
+<style scoped>.favorite{display:grid;place-items:center;padding:0}.favorite svg{display:block;pointer-events:none}</style>

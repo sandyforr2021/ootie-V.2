@@ -1,3 +1,4 @@
+import { uxReviewMessages } from './uxReview.js';
 import { studioMessages } from './studio.js';
 import { wardrobeInsightsMessages } from './wardrobeInsights.js';
 import { shopMessages } from './shop.js';
@@ -16,4 +17,4 @@ export function rowsToMessages(rows) {
     return [zh, { 'zh-TW': zh, en, ja, es }];
   }));
 }
-export const messages = { ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages), ...rowsToMessages(studioMessages), ...rowsToMessages(clothingImageMessages) };
+export const messages = { ...rowsToMessages(uxReviewMessages), ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages), ...rowsToMessages(studioMessages), ...rowsToMessages(clothingImageMessages) };

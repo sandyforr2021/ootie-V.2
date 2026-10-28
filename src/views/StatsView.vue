@@ -3,9 +3,7 @@
     <header class="core-page-hero stats-page-hero">
       <div>
         <h1>{{ $t("衣櫥統計") }}</h1>
-        <p class="intro">{{ $t("看看你的衣櫥裡，哪些顏色、風格與類別最常出現。") }}</p>
       </div>
-      <p class="core-page-note" aria-hidden="true">your closet<br />in numbers ♡</p>
     </header>
 
     <!-- 個人統計區塊 -->
@@ -140,7 +138,6 @@
     <section class="profile-insights disused-ranking-section" aria-labelledby="disusedRankingTitle">
       <div class="profile-ootd-heading">
         <h2 id="disusedRankingTitle">{{ $t('OOTD 單品紀錄') }}</h2>
-        <span class="eyebrow">{{ $t('完整清單') }}</span>
       </div>
       <div class="disused-ranking" v-if="topWornItems.length">
         <article

@@ -60,4 +60,28 @@ export const accountMessages = `
 分享穿搭|Share this look|このコーデを共有|Compartir este conjunto
 選擇分享方式；實際發布仍由各平台或系統分享選單完成。|Choose where to share. Complete your post in the selected app.|共有先を選び、アプリ側で投稿を完了してください。|Elige dónde compartir y completa la publicación en esa aplicación.
 複製連結|Copy link|リンクをコピー|Copiar enlace
+請先登入後再繼續。|Please sign in to continue.|続けるにはログインしてください。|Inicia sesión para continuar.
+帳號已登入，但尚未建立 OOTIE 個人檔案。|You are signed in, but your OOTIE profile has not been created yet.|ログイン済みですが、OOTIEプロフィールがまだ作成されていません。|Has iniciado sesión, pero aún no se ha creado tu perfil de OOTIE.
+個人檔案尚未準備完成，暫時無法執行此操作。|Your profile is not ready yet. Please try again shortly.|プロフィールの準備が完了していません。しばらくしてからもう一度お試しください。|Tu perfil aún no está listo. Inténtalo de nuevo en breve.
+找不到指定資料。|The requested item could not be found.|指定した項目が見つかりません。|No se encontró el elemento solicitado.
+你沒有執行這項操作的權限。|You do not have permission to perform this action.|この操作を行う権限がありません。|No tienes permiso para realizar esta acción.
+資料格式不正確，請檢查後再試。|Some information is invalid. Check it and try again.|入力内容に誤りがあります。確認してもう一度お試しください。|Algunos datos no son válidos. Revísalos e inténtalo de nuevo.
+網路連線失敗，請稍後再試。|Network connection failed. Please try again.|ネットワークに接続できませんでした。もう一度お試しください。|Falló la conexión. Inténtalo de nuevo.
+暱稱每 30 天可以修改一次。|You can change your display name once every 30 days.|表示名は30日に1回変更できます。|Puedes cambiar tu nombre visible una vez cada 30 días.
+此登入方式目前尚未啟用。|This sign-in method is not available yet.|このログイン方法はまだ利用できません。|Este método de inicio de sesión aún no está disponible.
+大頭貼只接受 JPEG、PNG 或 WebP 圖片。|Profile photos must be JPEG, PNG, or WebP images.|プロフィール写真はJPEG、PNG、WebP形式のみ対応しています。|La foto de perfil debe ser JPEG, PNG o WebP.
+大頭貼檔案不可超過 5 MB。|Profile photos must be 5 MB or smaller.|プロフィール写真は5 MB以下にしてください。|La foto de perfil no puede superar los 5 MB.
+發生未預期的錯誤，請稍後再試。|Something went wrong. Please try again later.|予期しないエラーが発生しました。後でもう一度お試しください。|Ocurrió un error inesperado. Inténtalo más tarde.
+註冊完成，請先驗證電子郵件後再登入。|Registration complete. Verify your email before signing in.|登録が完了しました。ログインする前にメールアドレスを確認してください。|Registro completado. Verifica tu correo antes de iniciar sesión.
+目前帳號沒有可用的電子郵件。|There is no email address available for this account.|このアカウントで利用できるメールアドレスがありません。|Esta cuenta no tiene una dirección de correo disponible.
+新密碼至少需要 8 個字元。|Your new password must have at least 8 characters.|新しいパスワードは8文字以上にしてください。|La nueva contraseña debe tener al menos 8 caracteres.
+兩次輸入的新密碼不一致。|The passwords do not match.|入力したパスワードが一致しません。|Las contraseñas no coinciden.
+資料尚未同步到伺服器。|Your changes have not synced to the server yet.|変更はまだサーバーに同期されていません。|Los cambios aún no se han sincronizado con el servidor.
+私人帳號資料|Private account details|非公開のアカウント情報|Datos privados de la cuenta
+新密碼|New password|新しいパスワード|Nueva contraseña
+目前密碼|Current password|現在のパスワード|Contraseña actual
+再次輸入新密碼|Confirm new password|新しいパスワードを再入力|Confirma la nueva contraseña
+至少 8 個字元。儲存後請使用新密碼登入。|Use at least 8 characters. Sign in with your new password after saving.|8文字以上を使用してください。保存後は新しいパスワードでログインしてください。|Usa al menos 8 caracteres. Inicia sesión con la nueva contraseña después de guardar.
+密碼重設信已寄出，請查看信箱。|Password reset email sent. Check your inbox.|パスワード再設定メールを送信しました。受信箱をご確認ください。|Se envió el correo para restablecer la contraseña. Revisa tu bandeja.
+密碼已更新。|Password updated.|パスワードを更新しました。|Contraseña actualizada.
 `;

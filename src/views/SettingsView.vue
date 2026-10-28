@@ -3,8 +3,7 @@
     <template v-if="authStore.isMember">
       <div class="settings-hero">
         <div>
-          <h1 id="settings-title">{{ $t("帳號設定") }}</h1>
-          <p>{{ $t("管理公開資料、私人偏好與帳號安全。私人資料不會顯示在公開個人檔案。") }}</p>
+          <h1 id="settings-title">{{ $t("帳號設定", "Account settings") }}</h1>
         </div>
         <router-link class="secondary settings-profile-link" to="/profile">{{ $t("查看個人檔案") }}</router-link>
       </div>
@@ -12,45 +11,45 @@
       <div class="settings-layout">
         <section class="settings-panel" aria-labelledby="account-heading">
           <div class="settings-panel-heading">
-            <div><h2 id="account-heading">{{ $t("帳號") }}</h2><p>{{ $t("登入身分與目前工作階段") }}</p></div>
-            <span class="settings-security-badge">{{ $t("已驗證") }}</span>
+            <div><h2 id="account-heading">{{ $t("帳號", "Account") }}</h2></div>
+            <span class="settings-security-badge">{{ $t("已驗證", "Verified") }}</span>
           </div>
           <dl class="settings-details">
-            <div><dt>{{ $t("電子郵件") }}</dt><dd>{{ authStore.user?.email }}</dd></div>
-            <div><dt>{{ $t("登入方式") }}</dt><dd>{{ providerLabel }}</dd></div>
-            <div><dt>{{ $t("最近登入") }}</dt><dd>{{ lastSignIn }}</dd></div>
+            <div><dt>{{ $t("電子郵件", "Email") }}</dt><dd>{{ authStore.user?.email }}</dd></div>
+            <div><dt>{{ $t("登入方式", "Sign-in method") }}</dt><dd>{{ providerLabel }}</dd></div>
+            <div><dt>{{ $t("最近登入", "Last sign-in") }}</dt><dd>{{ lastSignIn }}</dd></div>
           </dl>
         </section>
 
         <section class="settings-panel" aria-labelledby="security-heading">
           <div class="settings-panel-heading">
-            <div><h2 id="security-heading">{{ $t("安全性") }}</h2><p>{{ $t("密碼重設與登入安全") }}</p></div>
+            <div><h2 id="security-heading">{{ $t("安全性", "Security") }}</h2></div>
           </div>
           <div class="settings-actions">
-            <button type="button" class="secondary" :disabled="authStore.loading" @click="sendReset">{{ $t("寄送密碼重設信") }}</button>
-            <button v-if="hasPasswordIdentity" type="button" class="text-button" @click="showPasswordForm = !showPasswordForm">{{ showPasswordForm ? '收起密碼變更' : '直接變更密碼' }}</button>
+            <button type="button" class="secondary" :disabled="authStore.loading" @click="sendReset">{{ $t("寄送密碼重設信", "Send password reset email") }}</button>
+            <button v-if="hasPasswordIdentity" type="button" class="text-button" @click="showPasswordForm = !showPasswordForm">{{ showPasswordForm ? $t('收起密碼變更','Hide password form') : $t('直接變更密碼','Change password') }}</button>
           </div>
           <form v-if="showPasswordForm" class="settings-password-form" @submit.prevent="changePassword">
-            <label for="settingsCurrentPassword">目前密碼</label>
+            <label for="settingsCurrentPassword">{{ $t("目前密碼", "Current password") }}</label>
             <input id="settingsCurrentPassword" v-model="currentPassword" type="password" autocomplete="current-password" required />
-            <label for="settingsPassword">新密碼</label>
+            <label for="settingsPassword">{{ $t("新密碼", "New password") }}</label>
             <input id="settingsPassword" v-model="password" type="password" minlength="8" autocomplete="new-password" required aria-describedby="settingsPasswordHint" />
-            <label for="settingsPasswordConfirm">再次輸入新密碼</label>
+            <label for="settingsPasswordConfirm">{{ $t("再次輸入新密碼", "Confirm new password") }}</label>
             <input id="settingsPasswordConfirm" v-model="passwordConfirm" type="password" minlength="8" autocomplete="new-password" required />
-            <small id="settingsPasswordHint">至少 8 個字元。儲存後請使用新密碼登入。</small>
-            <button type="submit" class="primary" :disabled="authStore.loading">更新密碼</button>
+            <small id="settingsPasswordHint">{{ $t("至少 8 個字元。儲存後請使用新密碼登入。", "Use at least 8 characters. Sign in with your new password after saving.") }}</small>
+            <button type="submit" class="primary" :disabled="authStore.loading">{{ $t("更新密碼", "Update password") }}</button>
           </form>
           <p v-if="authStore.errorMsg" class="form-error" role="alert">{{ authStore.errorMsg }}</p>
         </section>
 
         <section class="settings-panel" aria-labelledby="profile-heading">
-          <div class="settings-panel-heading"><div><h2 id="profile-heading">個人資料</h2><p>公開暱稱與私人帳號資料分開保存</p></div></div>
+          <div class="settings-panel-heading"><div><h2 id="profile-heading">{{ $t("個人資料", "Profile") }}</h2></div></div>
           <dl class="settings-details">
-            <div><dt>顯示暱稱</dt><dd>{{ profileName }}</dd></div>
-            <div><dt>帳號 ID</dt><dd>{{ appStore.profile.username }}</dd></div>
-            <div><dt>個人 Slogan</dt><dd>{{ appStore.profile.bio || '尚未設定' }}</dd></div>
+            <div><dt>{{ $t("顯示暱稱", "Display name") }}</dt><dd>{{ profileName }}</dd></div>
+            <div><dt>{{ $t("帳號 ID", "Account ID") }}</dt><dd>{{ appStore.profile.username }}</dd></div>
+            <div><dt>{{ $t("個人 Slogan", "Bio") }}</dt><dd>{{ appStore.profile.bio || $t('尚未設定','Not set') }}</dd></div>
           </dl>
-          <button type="button" class="secondary" @click="appStore.isProfileEditOpen = true">編輯個人資料</button>
+          <button type="button" class="secondary" @click="appStore.isProfileEditOpen = true">{{ $t("編輯個人資料", "Edit profile") }}</button>
         </section>
 
         <section class="settings-panel" aria-labelledby="weather-heading">
@@ -70,13 +69,13 @@
         <section class="settings-panel"><ExtensionGuide /></section>
 
         <section v-if="canInstallApp" class="settings-panel settings-install" aria-labelledby="install-heading">
-          <div class="settings-panel-heading"><div><h2 id="install-heading">{{ $t("加入主畫面") }}</h2><p>{{ $t("加入主畫面，以獨立視窗快速開啟") }}</p></div><span class="settings-security-badge">PWA</span></div>
-          <p class="settings-install-copy">安裝不會把私人衣櫥、AI 圖片或登入資料存進離線快取。</p>
+          <div class="settings-panel-heading"><div><h2 id="install-heading">{{ $t("加入主畫面") }}</h2></div></div>
+          <p class="settings-install-copy">{{ $t("安裝不會把私人衣櫥、AI 圖片或登入資料存進離線快取。", "Installation does not store your private wardrobe, AI images, or sign-in details in the offline cache.") }}</p>
           <button type="button" class="secondary" @click="installApp">{{ $t("加入這台裝置") }}</button>
         </section>
 
         <section class="settings-panel settings-legal" aria-labelledby="legal-heading">
-          <div class="settings-panel-heading"><div><h2 id="legal-heading">{{ $t("資訊與法律") }}</h2><p>{{ $t("查看隱私、使用條款與 AI 圖像說明") }}</p></div></div>
+          <div class="settings-panel-heading"><div><h2 id="legal-heading">{{ $t("資訊與法律") }}</h2></div></div>
           <nav :aria-label="$t(&quot;資訊與法律&quot;)">
             <router-link to="/legal/privacy">{{ $t("隱私權說明") }}</router-link>
             <router-link to="/legal/terms">{{ $t("使用條款") }}</router-link>
@@ -86,15 +85,13 @@
       </div>
 
       <div class="settings-footer-actions">
-        <p>{{ $t("私人資料只在登入後顯示，登出後即停止存取。") }}</p>
         <button type="button" class="secondary" @click="logout">{{ $t("登出") }}</button>
       </div>
     </template>
 
     <div v-else class="settings-guest-state">
-      <h1 id="settings-title">登入後管理帳號設定</h1>
-      <p>帳號、安全與私人偏好只對本人開放。</p>
-      <button type="button" class="primary" @click="authStore.openAuthModal('login', null, '/settings')">會員登入</button>
+      <h1 id="settings-title">{{ $t("登入後管理帳號設定", "Sign in to manage account settings") }}</h1>
+      <button type="button" class="primary" @click="authStore.openAuthModal('login', null, '/settings')">{{ $t("會員登入", "Member sign-in") }}</button>
     </div>
   </section>
 </template>
@@ -107,6 +104,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
 import { upsertPrivateProfile } from '@/services/profileRepository';
 import { requestPwaInstall, subscribeToInstallAvailability } from '@/services/pwa';
+import { t } from '@/i18n';
 
 const authStore = useAuthStore();
 const appStore = useAppStore();
@@ -119,10 +117,10 @@ const weatherCity = ref('');
 const savingCity = ref(false);
 const canInstallApp = ref(false);
 let unsubscribeInstall;
-const profileName = computed(() => appStore.profile.name || appStore.profile.display_name || '尚未設定');
-const providerLabel = computed(() => authStore.user?.app_metadata?.provider === 'google' ? 'Google' : '電子郵件與密碼');
+const profileName = computed(() => appStore.profile.name || appStore.profile.display_name || t('尚未設定','Not set'));
+const providerLabel = computed(() => authStore.user?.app_metadata?.provider === 'google' ? 'Google' : t('電子郵件與密碼','Email and password'));
 const hasPasswordIdentity = computed(() => (authStore.user?.identities || []).some((identity) => identity.provider === 'email'));
-const lastSignIn = computed(() => authStore.user?.last_sign_in_at ? new Date(authStore.user.last_sign_in_at).toLocaleString('zh-TW') : '目前工作階段');
+const lastSignIn = computed(() => authStore.user?.last_sign_in_at ? new Date(authStore.user.last_sign_in_at).toLocaleString() : t('目前工作階段','Current session'));
 
 onMounted(async () => {
   unsubscribeInstall = subscribeToInstallAvailability((available) => { canInstallApp.value = available; });
@@ -133,15 +131,15 @@ onBeforeUnmount(() => unsubscribeInstall?.());
 
 const installApp = async () => {
   const result = await requestPwaInstall();
-  if (result === 'ACCEPTED') appStore.showToast('OOTIE 已加入這台裝置。', { type: 'success' });
+  if (result === 'ACCEPTED') appStore.showToast(t('OOTIE 已加入這台裝置。','OOTIE was added to this device.'), { type: 'success' });
 };
 
 const sendReset = async () => {
-  if (await authStore.requestPasswordReset()) appStore.showToast('密碼重設信已寄出，請查看信箱。', { type: 'success' });
+  if (await authStore.requestPasswordReset()) appStore.showToast(t('密碼重設信已寄出，請查看信箱。','Password reset email sent. Check your inbox.'), { type: 'success' });
 };
 const changePassword = async () => {
   if (password.value !== passwordConfirm.value) {
-    authStore.errorMsg = '兩次輸入的新密碼不一致。';
+    authStore.errorMsg = t('兩次輸入的新密碼不一致。','The passwords do not match.');
     return;
   }
   if (await authStore.updatePassword(password.value, currentPassword.value)) {
@@ -149,7 +147,7 @@ const changePassword = async () => {
     password.value = '';
     passwordConfirm.value = '';
     showPasswordForm.value = false;
-    appStore.showToast('密碼已更新。', { type: 'success' });
+    appStore.showToast(t('密碼已更新。','Password updated.'), { type: 'success' });
   }
 };
 const saveWeatherCity = async () => {
@@ -161,7 +159,7 @@ const saveWeatherCity = async () => {
     await authStore.loadPrivateAccount();
     appStore.showToast('天氣城市已儲存。', { type: 'success', syncStatus: 'SYNCED' });
   } catch (error) {
-    appStore.showToast(error?.userMessage || '城市偏好儲存失敗。', { type: 'error' });
+    appStore.showToast(error?.userMessage || t('城市偏好儲存失敗。','Could not save city preference.'), { type: 'error' });
   } finally {
     savingCity.value = false;
   }
@@ -169,7 +167,7 @@ const saveWeatherCity = async () => {
 const logout = async () => {
   await authStore.logout();
   await router.replace('/');
-  appStore.showToast('已登出');
+  appStore.showToast(t('已登出','Signed out'));
 };
 </script>
 

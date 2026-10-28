@@ -25,13 +25,13 @@ const optionalMoney = (value) => {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const uuidAllowlist = (value) => {
+const uuidAllowlist = (value, settingName = 'AI_QUOTA_EXEMPT_USER_IDS') => {
   const ids = String(value || '')
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean);
   if (ids.some((id) => !UUID_PATTERN.test(id))) {
-    throw new GatewayError('CONFIG_ERROR', 500, 'AI_QUOTA_EXEMPT_USER_IDS must contain only UUIDs');
+    throw new GatewayError('CONFIG_ERROR', 500, `${settingName} must contain only UUIDs`);
   }
   return Object.freeze([...new Set(ids)]);
 };
@@ -57,7 +57,8 @@ export function loadConfig(env = process.env) {
       apiKey: String(env.YOUCAM_API_KEY || '').trim(),
       freeCreditExpiry: Number(env.YOUCAM_FREE_CREDIT_EXPIRY_MS || 0),
       enabled: env.YOUCAM_ENABLED === 'true',
-      workerEnabled: env.YOUCAM_WORKER_ENABLED === 'true'
+      workerEnabled: env.YOUCAM_WORKER_ENABLED === 'true',
+      reviewerUserIds: uuidAllowlist(env.YOUCAM_REVIEWER_USER_IDS, 'YOUCAM_REVIEWER_USER_IDS')
     },
     google: {
       projectId: googleSetting('GOOGLE_CLOUD_PROJECT'),

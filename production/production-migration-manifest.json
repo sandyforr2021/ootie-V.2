@@ -3,6 +3,10 @@
   "status": "BLOCKED",
   "environment": "production",
   "sourceRange": "001-027",
+  "supplementalSources": [
+    { "file": "029_wardrobe_currency.sql", "action": "REVIEW_APPLY", "reason": "Wardrobe currency and decimal prices; requires Production schema review and rehearsal." },
+    { "file": "030_public_post_counts.sql", "action": "REVIEW_APPLY", "reason": "Public aggregate counts; review function grants and privacy before Production promotion." }
+  ],
   "rules": {
     "allowDemoSeed": false,
     "allowDevelopmentUrls": false,

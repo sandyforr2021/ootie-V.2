@@ -28,11 +28,11 @@ function toggle(id){
 }
 function save(){
  if(!key.value||!looks.value.length)return;
- try{localStorage.setItem(key.value,JSON.stringify(looks.value.map(item=>item.id)));dirty.value=false;storageError.value=false;status.value=t('搭配板已儲存在此瀏覽器。');}
+ try{localStorage.setItem(key.value,JSON.stringify(looks.value.map(item=>item.id)));dirty.value=false;storageError.value=false;status.value=t('已儲存。下次在這台裝置開啟「試穿工作室 → 衣櫥搭配」即可繼續。');}
  catch{storageError.value=true;status.value=t('瀏覽器無法儲存，請保留此頁繼續搭配。');}
 }
 function clear(){selected.value=[];dirty.value=true;status.value='';}
-function saveEmpty(){try{localStorage.setItem(key.value,'[]');dirty.value=false;storageError.value=false;status.value=t('搭配板已儲存在此瀏覽器。');}catch{storageError.value=true;status.value=t('瀏覽器無法儲存，請保留此頁繼續搭配。');}}
+function saveEmpty(){try{localStorage.setItem(key.value,'[]');dirty.value=false;storageError.value=false;status.value=t('已儲存。下次在這台裝置開啟「試穿工作室 → 衣櫥搭配」即可繼續。');}catch{storageError.value=true;status.value=t('瀏覽器無法儲存，請保留此頁繼續搭配。');}}
 </script>
 <template>
  <section class="wardrobe-board" aria-labelledby="wardrobe-board-title">
@@ -43,7 +43,7 @@ function saveEmpty(){try{localStorage.setItem(key.value,'[]');dirty.value=false;
     <div class="board-toolbar"><h3>{{ t('這次的搭配') }} <span>{{ looks.length }}/6</span></h3><button v-if="looks.length" @click="clear">{{ t('清空搭配') }}</button></div>
     <div v-if="looks.length" class="board-canvas"><figure v-for="item in looks" :key="item.id"><img v-if="item.photo" :src="item.photo" :alt="item.name_zh || item.name"><div v-else class="board-no-image">{{ t('尚未加入照片') }}</div><figcaption>{{ item.name_zh || item.name }}</figcaption><button :aria-label="tf('移除 {name}',{name:item.name_zh || item.name})" @click="toggle(item.id)">{{ t('移除') }}</button></figure></div>
     <div v-else class="board-empty"><p>{{ t('從衣櫥點選單品，開始組合你的穿搭。') }}</p></div>
-    <div class="board-save"><button class="primary" :disabled="!dirty" @click="looks.length?save():saveEmpty()">{{ t('儲存搭配板') }}</button><p>{{ t('只儲存單品選擇到此瀏覽器，照片不會送出，也不會使用試穿額度。') }}</p></div>
+    <div class="board-save"><button class="primary" :disabled="!dirty" @click="looks.length?save():saveEmpty()">{{ t('儲存搭配板') }}</button><p>{{ t('儲存在這台裝置的「試穿工作室 → 衣櫥搭配」，再次開啟會恢復選擇。尚未跨裝置同步，不使用試穿額度。') }}</p></div>
     <p v-if="status" :role="storageError?'alert':'status'">{{ status }}</p>
    </div>
    <div class="board-closet"><h3>{{ t('我的衣櫥') }}</h3><label for="board-search">{{ t('搜尋單品') }}</label><input id="board-search" v-model="query" type="search" autocomplete="off"><div class="board-filters"><button v-for="[value,label] in filters" :key="value" :aria-pressed="family===value" @click="family=value">{{ label }}</button></div>

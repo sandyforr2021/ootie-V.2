@@ -6,11 +6,11 @@ import { useAuthStore } from '@/stores/auth';
 import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), credits: 100, products: [] }));
+const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, products: [], jobs: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
-  aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ path: 'person/unit/photo.jpg' }] })), loadPrivateImage: vi.fn(async () => 'blob:unit-only'), uploadPersonPhoto: vi.fn(async()=>({path:'person/unit/new.jpg'})) }
+  aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ id:'photo-unit', path: 'person/unit/photo.jpg' }] })), deletePersonPhoto: fixture.deletePhoto, loadPrivateImage: vi.fn(async () => 'blob:unit-only'), uploadPersonPhoto: vi.fn(async()=>({path:'person/unit/new.jpg'})) }
 }));
 vi.mock('@/stores/closet', () => ({ useClosetStore: () => ({ loadRemoteItems: vi.fn() }) }));
 vi.mock('@/stores/ootd', () => ({ useOotdStore: () => ({ loadRemotePosts: vi.fn(async()=>true) }) }));
@@ -30,14 +30,14 @@ async function selectPiece() {
 }
 describe('Shopping studio workflow', () => {
   beforeEach(() => {
-    localStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
+    localStorage.clear(); sessionStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
     const auth=useAuthStore(); auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
     auth.profileIdentity={status:'PROFILE_READY',profileId:'profile-unit',profile:{id:'profile-unit'}};
-    fixture.credits=100; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
+    fixture.credits=100; fixture.jobs=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
       if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,costs:{try_on:2,skin_tone:20}};
-      if(path==='jobs')return {jobs:[]}; if(path==='posts')return {posts:[]}; return {};
+      if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
   });
   afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); });
@@ -111,5 +111,58 @@ describe('Shopping studio workflow', () => {
     await wrapper.find('.wishlist-heading .primary').trigger('click');
     expect(wrapper.find('.wishlist-preview').exists()).toBe(false);
     expect(wrapper.find('.wishlist-dialog input[maxlength]').element.value).toBe('');
+  });
+  it('does not jump back to step 02 after a refresh', async () => {
+    await render();
+    await wrapper.findAll('.studio-steps button')[0].trigger('click');
+    await wrapper.vm.refresh();
+    await flushPromises();
+    expect(wrapper.find('.studio-shortlist').exists()).toBe(true);
+    expect(wrapper.find('.studio-credit-summary').text()).toContain('100');
+    await wrapper.find('.shop-product-image').trigger('click');
+    await wrapper.findAll('.studio-steps button')[1].trigger('click');
+    await wrapper.vm.refresh();await flushPromises();
+    expect(wrapper.find('.shop-fitting').exists()).toBe(true);
+  });
+  it('lets a member remove a person photo from the current studio flow', async () => {
+    fixture.deletePhoto.mockResolvedValue({ id: 'photo-unit', path: 'person/unit/photo.jpg' });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await render();
+    await wrapper.find('.shop-product-image').trigger('click');
+    await wrapper.findAll('.studio-steps button')[1].trigger('click');
+    await wrapper.findAll('button').find(button=>button.text()==='更換或管理照片').trigger('click');
+    await wrapper.find('.shop-photo-delete').trigger('click');
+    await flushPromises();
+    expect(fixture.deletePhoto).toHaveBeenCalledWith('unit-only', 'photo-unit');
+  });
+  it('shows only the final outfit and removes its comparison and card after deletion and refresh', async () => {
+    fixture.jobs=[1,2,3].map(index=>({id:`job-${index}`,kind:'try_on',status:'succeeded',batch_id:'outfit-batch',sequence_index:index,sequence_total:3,result_path:`ai-generated/unit/${index}.jpg`,created_at:'2026-10-28T00:00:00Z'}));
+    vi.spyOn(window,'confirm').mockReturnValue(true);
+    const request=fixture.request.getMockImplementation();
+    fixture.request.mockImplementation(async(path,...args)=>{
+      if(path==='jobs/job-3/result') { fixture.jobs[2].result_deleted_at='2026-10-28T01:00:00Z'; return {deleted:true}; }
+      return request(path,...args);
+    });
+    await render(ShopView,'/shop?tab=album');
+    expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(1);
+    await wrapper.find('.shop-result-actions button').trigger('click');
+    expect(wrapper.find('.shop-comparison').exists()).toBe(true);
+    await wrapper.findAll('.shop-result-actions button').find(button=>button.text()==='刪除').trigger('click');
+    await flushPromises();
+    expect(fixture.request).toHaveBeenCalledWith('jobs/job-3/result','unit-only',null,{method:'DELETE'});
+    expect(wrapper.find('.shop-comparison').exists()).toBe(false);
+    expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(0);
+    await wrapper.vm.refresh();await flushPromises();
+    expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(0);
+  });
+  it('keeps a completed result if the deletion request fails',async()=>{
+    fixture.jobs=[{id:'job-final',kind:'try_on',status:'succeeded',batch_id:'batch',result_path:'ai-generated/unit/result.jpg',created_at:'2026-10-28T00:00:00Z'}];
+    vi.spyOn(window,'confirm').mockReturnValue(true);
+    await render(ShopView,'/shop?tab=album');
+    fixture.request.mockImplementationOnce(async()=>{throw new Error('offline');});
+    await wrapper.findAll('.shop-result-actions button').find(button=>button.text()==='刪除').trigger('click');
+    await flushPromises();
+    expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(1);
+    expect(wrapper.find('[role=alert]').exists()).toBe(true);
   });
 });

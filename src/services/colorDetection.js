@@ -24,18 +24,25 @@ const rgbToHsl = (r, g, b) => {
   const lightness = (max + min) / 2;
   const delta = max - min;
 
-  if (delta === 0) return { saturation: 0, lightness };
+  if (delta === 0) return { hue: 0, saturation: 0, lightness };
 
   const saturation = delta / (1 - Math.abs(2 * lightness - 1));
-  return { saturation, lightness };
+  let hue = max === red ? ((green-blue)/delta)%6 : max===green ? (blue-red)/delta+2 : (red-green)/delta+4;
+  hue=((hue*60)+360)%360;
+  return { hue, saturation, lightness };
 };
 const nearestSupportedColor = (pixel) => {
   const { r, g, b } = pixel;
   return supportedColors.reduce((closest, candidate) => {
     if (!candidate.rgb) return closest;
-    const distance = (r - candidate.rgb.r) ** 2
-      + (g - candidate.rgb.g) ** 2
-      + (b - candidate.rgb.b) ** 2;
+    const sourceHsl=rgbToHsl(r,g,b), targetHsl=rgbToHsl(candidate.rgb.r,candidate.rgb.g,candidate.rgb.b);
+    const difference=Math.abs(sourceHsl.hue-targetHsl.hue);
+    const hueDistance=Math.min(difference,360-difference)/180;
+    // Saturated dark denim/plum should not collapse to neutral gray/black.
+    const colorful=Math.max(r,g,b)-Math.min(r,g,b)>18 && sourceHsl.saturation>0.15;
+    const distance=colorful
+      ? hueDistance**2*25000 + (sourceHsl.saturation-targetHsl.saturation)**2*3000 + (sourceHsl.lightness-targetHsl.lightness)**2*5000 + (targetHsl.saturation<0.12?18000:0)
+      : (r-candidate.rgb.r)**2+(g-candidate.rgb.g)**2+(b-candidate.rgb.b)**2;
     return !closest || distance < closest.distance
       ? { name: candidate.name, distance }
       : closest;
@@ -90,7 +97,9 @@ export const analyzePixelData = (pixels, width, height) => {
         : nearestSupportedColor(pixel);
       if (!color) continue;
 
-      const weight = 1 + saturation * 2;
+      const chroma=Math.max(pixel.r,pixel.g,pixel.b)-Math.min(pixel.r,pixel.g,pixel.b);
+      const centerWeight=1+2*(1-Math.abs(2*x/Math.max(1,width-1)-1))*(1-Math.abs(2*y/Math.max(1,height-1)-1));
+      const weight = centerWeight * (chroma>18 ? 1+saturation*2 : 0.2);
       scores.set(color, (scores.get(color) || 0) + weight);
       candidateCount += 1;
     }

@@ -2,8 +2,7 @@
   <div v-if="appStore.isSuggestionFormOpen && targetPost" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal suggestion-form-modal">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
-      <p class="eyebrow">Style SOS</p>
-      <h2>{{ t("幫她搭一套") }}</h2>
+      <h2>{{ t("提供穿搭建議") }}</h2>
       <p class="suggestion-intro">
         {{ tf('為 {user} 的「{title}」提案', { user: targetPost.display_name || targetPost.username, title: targetPost.title }) }}<br />
         <span style="font-size:12px; color:var(--sage-dark);">
@@ -52,7 +51,7 @@
         </div>
 
         <div class="form-field" style="margin-top:18px">
-          <label for="suggestionMessage">{{ t("給她的搭配建議") }}</label>
+          <label for="suggestionMessage">{{ t("你的搭配建議") }}</label>
           <textarea
             id="suggestionMessage"
             v-model="message"
@@ -108,7 +107,8 @@ watch(
     if (!open) return;
     selectedIds.value = [];
     message.value = '';
-  }
+  },
+  { immediate: true }
 );
 
 const close = () => {
