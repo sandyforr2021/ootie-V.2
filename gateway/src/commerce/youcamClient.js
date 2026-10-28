@@ -3,7 +3,7 @@ import { safeDownload } from './safeDownload.js';
 import { normalizeGarmentImageForAi } from '../image.js';
 
 const API_ORIGIN = 'https://yce-api-01.makeupar.com';
-export const YOUCAM_FEATURES = Object.freeze({ try_on: { endpoint: 'cloth-v3', units: 2 }, skin_tone: { endpoint: 'skin-tone-analysis', units: 20 } });
+export const YOUCAM_FEATURES = Object.freeze({ try_on: { endpoint: 'cloth-v3', units: 2 }, skin_tone: { endpoint: 'skin-tone-analysis', units: 20 }, garment_cleanup: { endpoint: 'image-to-image/youcam', units: 1 } });
 
 export class YouCamClient {
   constructor({ apiKey, freeCreditExpiry = 0, fetchImpl = fetch, download = safeDownload, now = () => Date.now() }) {
@@ -107,7 +107,11 @@ export class YouCamClient {
     const feature = YOUCAM_FEATURES[job.kind];
     if (!feature) throw new GatewayError('INVALID_JOB_KIND', 400);
     await this.preflight(job.kind, job.is_reviewer ? 0 : job.reviewer_reserve_units);
-    const body = job.kind === 'skin_tone'
+    const body = job.kind === 'garment_cleanup'
+      ? {model:'youcam-image-v2',src_file_ids:[sourceId],size:'1024*1024',prompt_extend:false,
+        prompt:'Create one clean product photograph of the exact single garment in the reference. Straighten and lay it flat, arrange sleeves naturally and smooth unnecessary creases. Remove the hanger, person, mannequin and background. Preserve color, fabric, buttons, seams, cut and proportions. Keep the entire garment visible centered on pure white. No extra objects, text or logos.',
+        negative_prompt:'changed garment, changed color, altered details, cropped garment, person, mannequin, hanger, watermark'}
+      : job.kind === 'skin_tone'
       ? { src_file_id: sourceId, face_angle_strictness_level: 'high' }
       : { src_file_id: sourceId, ref_file_id: referenceId, garment_category: job.garment_category, change_shoes: false };
     const data = await this.request(`task/${feature.endpoint}`, body);

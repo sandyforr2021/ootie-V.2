@@ -109,8 +109,8 @@ main{max-width:1510px;padding:24px clamp(24px,4vw,64px) 64px;margin-inline:auto}
 .ootd-detail-image-frame .ootd-detail-image{width:100%;height:auto;max-height:80vh;object-fit:contain;background:#f2e9ee}
 .editorial-source{font-size:12px;line-height:1.6;color:var(--muted);margin:8px 0}
 .member-greeting{font-size:14px;letter-spacing:0;line-height:1.5;margin:14px 0 0}
-#closetPage .item-image{background:#f6f6f6}
-#closetPage .item-image img.product-image,.detail-photo img.product-image{background:#f6f6f6;object-fit:contain;padding:8px}
+#closetPage .item-image,.detail-photo{background:#fff}
+#closetPage .item-image img.product-image,.detail-photo img.product-image{background:#fff;object-fit:contain;padding:8px}
 #closetPage .item-card:hover .item-image img{transform:scale(1.015)}
 #closetPage .item-info h3{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
 #closetPage .item-brand{font-size:11px;letter-spacing:.02em;color:var(--accent);margin-top:6px}
@@ -132,3 +132,31 @@ main{max-width:1510px;padding:24px clamp(24px,4vw,64px) 64px;margin-inline:auto}
 .sos-copy-link{overflow-wrap:anywhere;font-size:14px;line-height:1.6}.sos-copy-link a{text-decoration:underline;text-underline-offset:4px}.sos-detail-user>div:last-child{display:grid;gap:6px}
 
 .atelier-journal .journal-open{display:block;position:relative;width:100%;padding:0;border:0;background:none;text-align:left;color:var(--ink)}.atelier-journal .journal-open>img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px}.atelier-journal .journal-open>span{display:block;font-size:12px;margin:12px 24px 6px 0;color:var(--muted)}.atelier-journal .journal-open>svg{position:absolute;right:0;bottom:1px}.atelier-journal .trending-card{display:block}
+
+/* The visibility control belongs to the wardrobe heading. */
+#closetPage .closet-title-group { display:flex; align-items:center; flex-wrap:wrap; gap:12px 24px; min-width:0; }
+#closetPage .closet-title-group h1 { margin:0; }
+#closetPage .closet-title-group .profile-settings.compact { border:0; border-radius:0; padding:0; margin:0; }
+#closetPage .closet-title-group .setting-row { gap:10px; }
+#closetPage .closet-title-group .setting-row strong { font-size:13px; font-weight:500; }
+@media(max-width:600px) { #closetPage .closet-title-group { gap:10px; } #closetPage .closet-page-header { align-items:center; } }
+#closetPage .closet-view-mode { display:flex;gap:4px;margin-left:auto;padding:3px;border:1px solid var(--line);border-radius:24px; }
+#closetPage .closet-view-mode button { border:0;border-radius:20px;background:transparent;color:var(--muted);padding:9px 17px;font-size:13px; }
+#closetPage .closet-view-mode button[aria-pressed=true] { background:var(--ink);color:white; }
+
+.sos-form-modal .sos-image-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--ink)}
+.sos-form-modal .sos-image-toggle input{width:18px;height:18px;margin:0;padding:0;accent-color:var(--accent)}
+.sos-feed-user .sos-status-badge{margin-left:0}
+
+/* Digital pastel surfaces: color frames the product; garment photography stays white. */
+:root{--gradient-celebration:linear-gradient(115deg,#f0eaff 0%,#fff0f5 53%,#fff7d9 100%);--gradient-navigation:linear-gradient(165deg,#f0eaff 0%,#f9e9f1 57%,#fff6eb 100%);--gradient-action:linear-gradient(110deg,#8b326b 0%,#a62e68 55%,#72428a 100%);--gradient-canvas:linear-gradient(135deg,#faf7ff 0%,#fff9f7 48%,#fffcf2 100%)}
+body{background:var(--gradient-canvas);background-attachment:fixed}
+.sidebar{background:var(--gradient-navigation)}
+.sidebar .nav a.active,.sidebar .nav a.active:hover{background:var(--gradient-action);color:#fff}
+.primary,.btn-primary,#closetPage .closet-header-add,.shop-view .shop-primary{background:var(--gradient-action);border-color:transparent;color:white}
+.primary:hover,.btn-primary:hover,#closetPage .closet-header-add:hover,.shop-view .shop-primary:hover{background:linear-gradient(110deg,#76295c,#8e2459 55%,#613574);border-color:transparent}
+.page.stats-page .core-page-hero,.settings-page .settings-hero,.bookmarks-page .bookmarks-page-hero,.shop-view .shop-hero{background:var(--gradient-celebration)}
+.profile-page .profile-membership-card,.settings-page .settings-membership,.atelier-wardrobe-empty,.page .empty-state{background:var(--gradient-celebration)}
+.category.active,.feed-tab.active,.shop-view .studio-steps .active{background:var(--gradient-action);color:white}
+.bottom-nav{background:linear-gradient(105deg,#f6f1fffa,#fff4f8fa 55%,#fffaecfa)}
+.modal,.shop-modal,.popover{background:linear-gradient(145deg,#fff 50%,#fff9fc 100%)}

@@ -1,12 +1,12 @@
 <template>
-  <section class="page active settings-page" aria-labelledby="settings-title">
+  <section class="page active settings-page app-page" aria-labelledby="settings-title">
     <template v-if="authStore.isMember">
-      <div class="settings-hero">
+      <header class="settings-hero ootie-page-heading">
         <div>
           <h1 id="settings-title">{{ $t("帳號設定", "Account settings") }}</h1>
         </div>
         <router-link class="secondary settings-profile-link" to="/profile">{{ $t("查看個人檔案") }}</router-link>
-      </div>
+      </header>
 
       <div class="settings-layout">
         <section class="settings-panel" aria-labelledby="account-heading">
@@ -90,7 +90,7 @@
     </template>
 
     <div v-else class="settings-guest-state">
-      <h1 id="settings-title">{{ $t("登入後管理帳號設定", "Sign in to manage account settings") }}</h1>
+      <header class="ootie-page-heading"><h1 id="settings-title">{{ $t("登入後管理帳號設定", "Sign in to manage account settings") }}</h1></header>
       <button type="button" class="primary" @click="authStore.openAuthModal('login', null, '/settings')">{{ $t("會員登入", "Member sign-in") }}</button>
     </div>
   </section>

@@ -40,7 +40,7 @@ import { locale, t } from '@/i18n';
 
 const appStore = useAppStore();
 const route = useRoute();
-const sidebarItems = ['Home','Explore','Profile','Sos','Closet','Shop','Stats','Settings'].map(name=>NAVIGATION_ITEMS.find(item=>item.routeName===name));
+const sidebarItems = ['Home','Explore','Profile','Sos','Closet','Shop','Stats','Credits','Settings'].map(name=>NAVIGATION_ITEMS.find(item=>item.routeName===name));
 // Short Spanish navigation labels keep every target the same height without truncating the full title.
 const displayLabel = (item) => locale.value === 'es'
   ? ({ Shop: 'Probador', Stats: 'Estadísticas' }[item.routeName] || t(item.label))

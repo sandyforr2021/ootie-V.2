@@ -1,32 +1,88 @@
 <script setup>
-import {computed,ref,watch} from 'vue';
+import {ref,watch} from 'vue';
 import {useAuthStore} from '@/stores/auth';
-import {commerceClient} from '@/services/commerce';
-import {t,formatDate} from '@/i18n';
-const auth=useAuthStore(), data=ref(null), error=ref(''), loading=ref(false);
-const token=computed(()=>auth.session?.access_token || '');
-let requestVersion=0;
-async function load(){
- const version=++requestVersion;
- if(!auth.isMember || !token.value)return;
- loading.value=true;error.value='';
- try { const result=await commerceClient.request('capabilities',token.value);if(version===requestVersion)data.value=result; }
- catch {if(version===requestVersion)error.value=t('額度資訊暫時無法載入。');} finally {if(version===requestVersion)loading.value=false;}
+import {t,tf,formatDate} from '@/i18n';
+import {loadPointAccount} from '@/services/pointAccount';
+import {MEMBERSHIP_PLANS,POINT_TOPUP,POINTS_PER_GARMENT} from '@/services/membershipPlans';
+const auth=useAuthStore();
+const points=ref(null),pointsError=ref(false),pointsLoading=ref(false);
+let pointVersion=0;
+const pointReasons={BIRTHDAY_BONUS:'生日點數',SUBSCRIPTION_GRANT:'方案點數',CREDIT_PURCHASE:'點數補給',PROMOTIONAL_REWARD:'活動贈點',TRYON_USAGE:'試穿使用',AI_USAGE:'AI 圖片處理',MANUAL_ADJUSTMENT:'點數調整',REFUND:'退還點數'};
+async function loadPoints(){
+ const version=++pointVersion,id=auth.profileId;points.value=null;pointsError.value=false;pointsLoading.value=false;
+ if(!auth.isMember||!id)return;
+ pointsLoading.value=true;
+ try{const result=await loadPointAccount(id);if(version===pointVersion&&id===auth.profileId)points.value=result;}
+ catch{if(version===pointVersion)pointsError.value=true;}
+ finally{if(version===pointVersion)pointsLoading.value=false;}
 }
-watch(()=>[auth.isMember,auth.session?.user?.id],()=>{requestVersion++;data.value=null;error.value='';loading.value=false;if(auth.isMember)void load();},{immediate:true});
+watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
 </script>
 <template>
-<section class="page active credits-page">
- <h1>{{ t('試穿額度') }}</h1>
- <div v-if="!auth.initialized || loading" role="status">{{ t('載入中…') }}</div>
- <div v-else-if="!auth.isMember"><p>{{ t('登入後查看試穿額度。') }}</p><button class="primary" @click="auth.openAuthModal('login',null,'/credits')">{{ t('登入／註冊') }}</button></div>
- <div v-else-if="error" role="alert"><p>{{ error }}</p><button class="secondary" @click="load">{{ t('重試') }}</button></div>
- <template v-else-if="data">
-  <section class="credits-balance"><span>{{ t('目前可用額度') }}</span><strong>{{ data.remainingUnits }}</strong><p>{{ t('可用額度已考量今日使用量、處理中的工作及網站剩餘額度。') }}</p></section>
-  <section class="credits-details"><h2>{{ t('使用方式') }}</h2><p>{{ $tf('每件試穿預留 {count} 額度。', {count:data.costs.try_on}) }}</p><p v-if="data.expiresAt">{{ t('有效期限') }}：{{ formatDate(data.expiresAt,{dateStyle:'medium'}) }}</p><p>{{ t('目前沒有付款或自動加值。') }}</p><router-link class="secondary" to="/shop">{{ t('返回試穿工作室') }}</router-link></section>
- </template>
+<section class="page active credits-page app-page">
+ <header class="membership-hero ootie-page-heading">
+  <h1>{{ t('方案與點數') }}</h1>
+  <section class="balance-card" :aria-label="t('我的點數')">
+   <span>{{ t('目前點數') }}</span>
+   <p v-if="pointsLoading || !auth.initialized" role="status">{{ t('載入中…') }}</p>
+   <template v-else-if="!auth.isMember"><strong class="personal-balance">—</strong><button class="secondary" @click="auth.openAuthModal('login',null,'/credits')">{{ t('登入／註冊') }}</button></template>
+   <div v-else-if="pointsError" role="alert"><p>{{ t('點數紀錄暫時無法載入。') }}</p><button class="secondary" @click="loadPoints">{{ t('重試') }}</button></div>
+   <template v-else-if="points"><strong class="personal-balance">{{ points.balance }}</strong><a href="#point-history">{{ t('查看點數紀錄') }}</a></template>
+   <p class="membership-rule">{{ t('每件 2 點・每日最多 2 次') }}</p>
+  </section>
+ </header>
+ <section class="membership-options" aria-labelledby="point-options-title">
+  <div class="membership-section-heading"><h2 id="point-options-title">{{ t('月費會員') }}</h2><span>{{ t('價格以新臺幣計算') }}</span></div>
+  <div class="membership-grid">
+   <article class="membership-card">
+    <h3>OOTIE Free</h3><p class="point-price">NT$ 0</p>
+    <p>{{ t('整理衣櫥，分享日常穿搭。') }}</p>
+    <ul><li>{{ t('免費去背與品名辨識') }}</li><li>{{ t('穿搭紀錄與衣櫥統計') }}</li></ul>
+    <router-link class="secondary" to="/closet">{{ t('前往我的衣櫥') }}</router-link>
+   </article>
+   <article v-for="plan in MEMBERSHIP_PLANS" :key="plan.id" class="membership-card" :class="{featured:plan.id==='pro'}">
+    <h3>{{ plan.name }}</h3><p class="point-price">NT$ {{ plan.priceTwd }}<span>{{ t('／月') }}</span></p>
+    <p class="included-points">{{ tf('每月 {points} 點',{points:plan.points}) }}</p>
+    <ul><li>{{ tf('可用於 {count} 件 AI 處理',{count:plan.points/POINTS_PER_GARMENT}) }}</li><li>{{ t('AI 試穿與衣物整理共用點數') }}</li><li>{{ t('結果存入私人相簿') }}</li></ul>
+    <span class="plan-unavailable">{{ t('尚未開放訂閱') }}</span>
+   </article>
+  </div>
+  <p class="membership-availability">{{ t('方案預告，尚未開放付款。') }}</p>
+ </section>
+ <section class="topup-section" aria-labelledby="topup-title">
+  <div class="membership-section-heading"><h2 id="topup-title">{{ t('加購點數') }}</h2><span>{{ t('一次性購買') }}</span></div>
+  <article class="topup-card">
+   <div><h3>{{ tf('{points} 點補給包',{points:POINT_TOPUP.points}) }}</h3><p>{{ tf('可用於 {count} 件 AI 處理',{count:POINT_TOPUP.points/POINTS_PER_GARMENT}) }}</p></div>
+   <strong class="topup-price">NT$ {{ POINT_TOPUP.priceTwd }}</strong><span class="plan-unavailable">{{ t('尚未開放加購') }}</span>
+  </article>
+ </section>
+ <section v-if="auth.isMember" id="point-history" class="point-history" aria-labelledby="point-history-title">
+  <div class="membership-section-heading"><h2 id="point-history-title">{{ t('點數紀錄') }}</h2><button type="button" class="text-button" :disabled="pointsLoading" @click="loadPoints">{{ t('重新整理') }}</button></div>
+  <p v-if="pointsLoading" role="status">{{ t('載入中…') }}</p>
+  <p v-else-if="pointsError" role="alert">{{ t('點數紀錄暫時無法載入。') }}</p>
+  <ul v-else-if="points?.transactions.length"><li v-for="entry in points.transactions" :key="entry.id"><span>{{ t(pointReasons[entry.type] || '點數調整') }}<small>{{ formatDate(entry.created_at,{dateStyle:'medium'}) }}</small></span><strong :class="{credit:entry.amount>0}">{{ entry.amount>0?'+':'' }}{{ entry.amount }}</strong></li></ul>
+  <p v-else>{{ t('尚無點數紀錄。') }}</p>
+ </section>
 </section>
 </template>
 <style scoped>
-.credits-page{max-width:880px}.credits-page>p,.credits-balance p,.credits-details p{color:var(--muted);line-height:1.7}.credits-balance{margin:28px 0;padding:28px;border-radius:18px;background:var(--accent-lavender-soft)}.credits-balance span,.credits-balance strong{display:block}.credits-balance strong{font-size:48px;margin:8px 0}.credits-details{padding:8px 0 24px}.credits-details a{display:inline-block;margin-top:12px}
+.credits-page{max-width:1240px;margin-inline:auto}
+.membership-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.48fr);align-items:center;gap:40px;padding:clamp(24px,4vw,48px);border:1px solid #e2d6ec;border-radius:24px;background:var(--gradient-celebration);min-height:260px}
+.membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-size:clamp(32px,3.8vw,54px);font-weight:750;line-height:1.2;letter-spacing:-.025em;margin:0 0 18px;text-align:left}
+:lang(zh-TW) .membership-hero h1,:lang(ja) .membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-weight:750;line-height:1.35;letter-spacing:.01em}
+.membership-intro p{font-size:14px;margin:0;max-width:40ch}
+.balance-card{padding:28px;border-radius:16px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 16px 30px #3a25451a;min-width:0}
+.balance-card>span{font-size:14px;color:#eee3f4}.balance-card p{color:#eee3f4}.personal-balance{display:block;font-size:clamp(42px,4.3vw,64px);line-height:1.15;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 18px;overflow-wrap:anywhere}
+.balance-card a{font-size:12px;color:#eee3f4;text-decoration:underline;text-underline-offset:4px}.balance-card .secondary{color:white;border-color:#cdbcd6}
+.membership-options,.point-history{margin-top:40px}.membership-section-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.membership-section-heading h2{font-size:24px;margin:0;font-weight:700}.membership-section-heading>span{font-size:12px;color:var(--muted)}
+.membership-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.membership-card{display:flex;flex-direction:column;min-width:0;padding:26px;border-radius:16px;border:1px solid var(--line);background:#fff}.membership-card.featured{background:linear-gradient(145deg,#fff 8%,#f3ebff);border-color:#a891bd}.membership-card h3{font-size:20px;margin:0 0 22px}.membership-card p{font-size:14px;line-height:1.7;margin:0 0 20px}.membership-card .point-price{display:flex;align-items:baseline;gap:8px;color:var(--ink);min-height:48px;font-size:30px;font-weight:650;margin:0 0 16px}.point-price strong{font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}.point-price span{font-size:13px;font-weight:400;color:var(--muted)}
+.membership-card ul{padding-left:18px;font-size:13px;line-height:1.8;margin:0 0 28px}.membership-card li+li{margin-top:6px}.membership-card>a{margin-top:auto;width:100%;text-decoration:none;min-height:46px;font-size:14px}.membership-availability{font-size:12px;margin:16px 0 0}.point-history{scroll-margin-top:30px}.point-history ul{list-style:none;padding:0;margin:0}.point-history li{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--line);padding:16px 0;font-size:14px}.point-history li strong{font-variant-numeric:tabular-nums;font-size:20px}.point-history .credit{color:var(--sage-dark)}.point-history small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+@media(max-width:980px){.membership-hero{gap:24px;grid-template-columns:minmax(0,1fr) 240px}.membership-grid{gap:12px}.membership-card{padding:20px}}
+@media(max-width:760px){.membership-hero{grid-template-columns:1fr;gap:26px}.balance-card{max-width:none}.membership-grid{grid-template-columns:1fr}.membership-card{padding:24px}.membership-section-heading{align-items:flex-start;flex-wrap:wrap}.membership-hero h1{font-size:34px}.membership-options,.point-history{margin-top:30px}}
+</style>
+<style scoped>
+.text-button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:8px 4px;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.text-button:disabled{opacity:.5;cursor:wait}
+.membership-card .included-points{font-weight:700;color:var(--ink);font-size:18px}.plan-unavailable{margin-top:auto;display:block;color:var(--muted);font-size:13px;padding:14px 0;border-top:1px solid var(--line)}
+.topup-section{margin-top:36px}.topup-card{display:flex;align-items:center;gap:32px;background:linear-gradient(115deg,#fff,#fcf2ff 65%,#fff8e9);border:1px solid var(--line);border-radius:16px;padding:26px}.topup-card>div{flex:1}.topup-card h3{font-size:20px;margin:0 0 8px}.topup-card p{margin:0;font-size:14px}.topup-price{font-size:28px;white-space:nowrap}.topup-card .plan-unavailable{margin:0;border:0;padding:0}.usage-note{margin-top:20px;font-size:13px}.usage-note p{margin:4px 0}.point-price{flex-wrap:wrap}
+@media(max-width:760px){.topup-card{flex-wrap:wrap;gap:20px}.topup-card>div{flex-basis:100%}.topup-card .plan-unavailable{margin-left:auto}}
 </style>

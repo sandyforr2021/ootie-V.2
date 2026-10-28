@@ -3,7 +3,7 @@
     <article v-accessible-modal class="modal detail-layout">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <div class="detail-photo">
-        <img class="product-image" :src="item.photo" :alt="itemName(item)" />
+        <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
       </div>
       <div class="detail-content">
         <h2>{{ itemName(item) }}</h2>
@@ -17,7 +17,6 @@
         <div v-if="sourceUrl" class="detail-source-links">
           <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('查看原商品') }} <AppIcon name="ExternalLink" :size="15" /></a>
           <a href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
-          <small>{{ $t('在 Google Lens 選擇要搜尋的圖片。') }}</small>
         </div>
 
         <div class="modal-actions">
@@ -35,7 +34,8 @@
 <script setup>
 import { computed } from 'vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
-import { itemName } from '@/services/itemPresentation';
+import { itemName, itemPhoto } from '@/services/itemPresentation';
+import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
 import { safeCommerceUrl } from '@/services/commerce';
 import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';

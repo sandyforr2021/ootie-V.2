@@ -1,6 +1,6 @@
 <template>
-  <section class="page active" id="statsPage">
-    <header class="core-page-hero stats-page-hero">
+  <section class="page active app-page" id="statsPage">
+    <header class="core-page-hero stats-page-hero ootie-page-heading">
       <div>
         <h1>{{ $t("衣櫥統計") }}</h1>
       </div>
@@ -122,7 +122,7 @@
           <span :class="['top-worn-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
             {{ index === 0 ? '♛' : index + 1 }}
           </span>
-          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
+          <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
           <div class="top-worn-copy">
             <h3>{{ itemName(item) }}</h3>
             <p>{{ tf('出現在 {count} 篇 OOTD', { count: item.ootd_count }) }}</p>
@@ -148,7 +148,7 @@
           <span :class="['disused-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
             {{ index === 0 ? '♛' : index + 1 }}
           </span>
-          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
+          <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
           <div class="disused-ranking-copy">
             <h3>{{ itemName(item) }}</h3>
             <span>{{ tf('出現在 {count} 篇 OOTD', { count:item.ootd_count }) }}</span>
@@ -169,7 +169,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useStatsStore } from '@/stores/stats';
 import { labels } from '@/constants';
 import { t, tf, locale } from '@/i18n';
-import { itemName } from '@/services/itemPresentation';
+import { itemName, itemPhoto } from '@/services/itemPresentation';
+import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -512,3 +513,6 @@ watch(
   }
 );
 </script>
+<style scoped>
+#statsPage .top-worn-item .product-image,#statsPage .disused-ranking-item .product-image{object-fit:contain;background:#fff;padding:10px;box-sizing:border-box}
+</style>

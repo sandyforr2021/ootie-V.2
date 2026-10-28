@@ -22,6 +22,11 @@ export class CommerceRepository {
     return (await this.request('ootie_youcam_jobs', query, { method: 'PATCH', body: { result_path: null } }))?.[0];
   }
   async budget() { return (await this.request('ootie_youcam_budget', '?id=eq.true&limit=1'))?.[0]; }
+  async pointBalance(userId) {
+    const result=await this.rpc('ootie_platform_point_balance',{p_user_id:userId});
+    if(result===null || result==='' || !Number.isSafeInteger(Number(result)))throw new GatewayError('POINTS_UNAVAILABLE',503);
+    return Number(result);
+  }
   async userQuota(userId) { return this.rpc('get_ootie_youcam_user_quota', { p_user_id: userId }); }
   releaseReservation(id, lease, errorCode) { return this.rpc('release_ootie_youcam_reservation', { p_id: id, p_lease: lease, p_error_code: errorCode }); }
   beginPhotoDeletion(userId, personPath, lease) { return this.rpc('begin_ootie_youcam_photo_deletion', { p_user_id: userId, p_person_path: personPath, p_lease: lease }); }

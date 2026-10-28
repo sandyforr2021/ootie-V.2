@@ -1,12 +1,12 @@
 <template>
-  <section class="page active" id="closetPage">
-    <header class="closet-page-header">
-      <div>
+  <section class="page active app-page" id="closetPage">
+    <header class="closet-page-header ootie-page-heading">
+      <div class="closet-title-group">
         <h1>{{ $t("我的衣櫥") }}</h1>
+        <ClosetVisibility v-if="!showWishlist" compact />
       </div>
       <button v-if="!showWishlist" type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
     </header>
-    <ClosetVisibility v-if="!showWishlist" />
 
     <nav class="closet-collections" :aria-label="$t('我的衣櫥')">
       <router-link :to="{path:'/closet',query:{lang:route.query.lang}}" :aria-current="!showWishlist ? 'page' : undefined">{{ $t('衣櫥衣物') }}</router-link>
@@ -136,13 +136,15 @@
 
     <div v-if="!isWholeClosetEmpty" class="closet-meta">
       <strong>{{ closetStore.filteredItems.length }} {{ $t("件單品") }}</strong>
+      <div class="closet-view-mode" :aria-label="$t('衣櫥檢視')"><button type="button" :aria-pressed="closetView==='rack'" @click="closetView='rack'">{{ $t('衣架') }}</button><button type="button" :aria-pressed="closetView==='cards'" @click="closetView='cards'">{{ $t('圖卡') }}</button></div>
       <div v-if="hasActiveClosetFilters" class="closet-meta-actions">
         <button v-if="hasActiveClosetFilters" class="clear" @click="clearAllFilters">{{ $t("清除篩選") }}</button>
       </div>
     </div>
 
     <!-- Items Grid -->
-    <div class="grid">
+    <WardrobeRack v-if="closetView==='rack' && closetStore.filteredItems.length" :items="closetStore.filteredItems" @open="openDetail" @favorite="closetStore.toggleFavorite" />
+    <div v-else class="grid">
       <template v-if="closetStore.filteredItems.length">
         <article
           v-for="(item, index) in closetStore.filteredItems"
@@ -167,13 +169,13 @@
             >
               <Heart :size="19" :stroke-width="1.7" :fill="item.favorite ? 'currentColor' : 'none'" aria-hidden="true" />
             </button>
-            <img
+            <WardrobeCutout
               class="product-image"
-              :src="item.photo"
+              :src="itemPhoto(item)" :category="item.category"
               :alt="`${item.brand || '未標示品牌'} ${itemName(item)}`"
               loading="lazy"
               decoding="async"
-            />
+ />
           </div>
           <div class="item-info">
             <h3>{{ itemName(item) }}</h3>
@@ -200,7 +202,9 @@
 
 <script setup>
 import ClosetVisibility from '@/components/closet/ClosetVisibility.vue';
-import { itemName } from '@/services/itemPresentation';
+import { itemName, itemPhoto } from '@/services/itemPresentation';
+import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
+import WardrobeRack from '@/components/closet/WardrobeRack.vue';
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Heart } from '@lucide/vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
@@ -217,6 +221,7 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
 const route = useRoute();
+const closetView = ref('rack');
 const showWishlist = computed(() => route.query.tab === 'wishlist');
 const styleOptions = computed(() => [...new Set(['Minimal', 'Casual', 'Smart Casual', 'Chic', ...appStore.items.map(item => item.style).filter(Boolean)])]);
 

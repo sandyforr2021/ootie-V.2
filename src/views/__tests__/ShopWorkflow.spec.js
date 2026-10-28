@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth';
 import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, products: [], jobs: [] }));
+const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, products: [], jobs: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
@@ -33,10 +33,10 @@ describe('Shopping studio workflow', () => {
     localStorage.clear(); sessionStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
     const auth=useAuthStore(); auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
     auth.profileIdentity={status:'PROFILE_READY',profileId:'profile-unit',profile:{id:'profile-unit'}};
-    fixture.credits=100; fixture.jobs=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
+    fixture.credits=100; fixture.points=100; fixture.jobs=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
-      if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,costs:{try_on:2,skin_tone:20}};
+      if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,pointBalance:fixture.points,costs:{try_on:2,skin_tone:20}};
       if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
   });
@@ -60,6 +60,19 @@ describe('Shopping studio workflow', () => {
     await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain('額度不足');
+  });
+  it('does not treat provider units as personal points',async()=>{
+    fixture.points=1; await render(); await selectPiece();
+    await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('平台點數不足');
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs' && body)).toEqual([]);
+  });
+  it('does not submit when the personal point balance is unavailable',async()=>{
+    fixture.points=null; await render(); await selectPiece();
+    await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('點數紀錄暫時無法載入。');
   });
   it('opens the wishlist form and preserves a blocked product URL for manual upload',async()=>{
     await render(WishlistPanel,'/closet?tab=wishlist');

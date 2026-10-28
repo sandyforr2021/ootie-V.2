@@ -1,0 +1,21 @@
+/* Shared main-page heading, based on the fitting studio. Page-specific controls
+   keep their semantics; geometry and title typography are defined only here. */
+#main-content .app-page{max-width:1260px;margin-inline:auto;margin-top:0;padding-top:0}
+#main-content .ootie-page-heading{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:24px;min-height:116px;width:100%;margin:8px 0 28px;padding:24px 28px;border:0;border-radius:12px;background:var(--gradient-celebration);box-shadow:none;overflow:visible;animation:none;transform:none}
+#main-content .ootie-page-heading h1{font-family:var(--font-display);font-size:40px;font-weight:500;line-height:1.4;letter-spacing:.01em;color:var(--ink);margin:0;padding:0;min-width:0;max-width:none;text-align:left;text-wrap:balance;overflow-wrap:anywhere}
+#main-content .ootie-page-heading>div{min-width:0}
+#main-content .ootie-page-heading .closet-title-group{gap:10px 20px;flex:1}
+#main-content .ootie-page-heading .dashboard-clock{flex-shrink:0}
+#main-content .ootie-page-heading .balance-card{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px 12px;max-width:46%;padding:0;border:0;border-radius:0;min-width:0;background:none;box-shadow:none;color:var(--ink)}
+#main-content .ootie-page-heading .balance-card>span,#main-content .ootie-page-heading .balance-card p,#main-content .ootie-page-heading .balance-card a{color:var(--muted);font-size:12px;margin:0}
+#main-content .ootie-page-heading .personal-balance{display:inline;font-size:30px;line-height:1.2;margin:0;color:var(--ink)}
+#main-content .ootie-page-heading .balance-card .membership-rule{flex-basis:100%;text-align:right}
+#main-content .ootie-page-heading .balance-card .secondary{color:var(--ink);border-color:var(--line)}
+@media(max-width:900px){#main-content .ootie-page-heading:has(.studio-account){flex-wrap:wrap}.ootie-page-heading .studio-account{align-items:flex-start}.ootie-page-heading .studio-account-row{justify-content:flex-start}}
+@media(max-width:760px){
+ #main-content .ootie-page-heading{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:14px;min-height:100px;margin:8px 0 24px;padding:22px}
+ #main-content .ootie-page-heading h1{font-size:32px;line-height:1.4;flex-basis:auto}
+ #main-content .ootie-page-heading .balance-card{max-width:100%;justify-content:flex-start}
+ #main-content .ootie-page-heading .balance-card .membership-rule{text-align:left}
+ #main-content .ootie-page-heading .dashboard-clock{align-items:flex-start}
+}

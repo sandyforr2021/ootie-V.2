@@ -83,7 +83,7 @@ describe('ItemFormModal remote write confirmation', () => {
     const wrapper = mount(ItemFormModal);
 
     expect(wrapper.find('.capture-guide').exists()).toBe(true);
-    expect(wrapper.text()).toContain('不需要棚拍');
+    expect(wrapper.text()).toContain('整件入鏡');
 
     await wrapper.find('.capture-guide-skip').trigger('click');
     expect(wrapper.find('.capture-guide').exists()).toBe(false);

@@ -60,6 +60,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
         if (method === 'POST' && path === '/v1/shop/preview') return ok(await commerceService.preview(body));
         if (method === 'POST' && path === '/v1/shop/products') return ok({ product: await commerceService.createProduct(user, body) }, 201);
         if (method === 'POST' && path === '/v1/shop/jobs') return ok({ jobs: await commerceService.enqueue(user, body) }, 202);
+        if (method === 'POST' && path === '/v1/shop/cleanup') return ok({ jobs: await commerceService.cleanupGarment(user, body) }, 202);
         if (method === 'POST' && path === '/v1/shop/posts') return ok({ post: await commerceService.publish(user, body) }, 201);
         if (method === 'POST' && path === '/v1/shop/events') return ok(await commerceService.recordEvent(user, body));
         const deleteResult = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/result$/i.exec(path);

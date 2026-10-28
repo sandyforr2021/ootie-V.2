@@ -65,18 +65,16 @@
         <p class="sos-closet-notice" v-else>{{ t('目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。') }}</p>
 
         <div class="form-field sos-cover-choice">
-          <label for="sosCoverMode">{{ t('求救主圖（選填）') }}</label>
-          <select id="sosCoverMode" v-model="coverMode">
-            <option value="none">{{ t('不使用主圖') }}</option>
-            <option value="upload">{{ t('上傳圖片') }}</option>
+          <label class="sos-image-toggle"><input v-model="coverEnabled" type="checkbox" :disabled="submitting" />{{ t('上傳圖片') }}</label>
+          <select v-if="coverEnabled" id="sosCoverMode" v-model="coverMode" :aria-label="t('圖片來源')" :disabled="submitting">
+            <option value="upload">{{ t('從裝置選擇') }}</option>
             <option value="closet">{{ t('從公開衣物選擇') }}</option>
           </select>
-          <input v-if="coverMode==='upload'" type="file" accept="image/jpeg,image/png,image/webp" @change="chooseCover" />
-          <select v-if="coverMode==='closet'" v-model="coverItemId" :aria-label="t('選擇主圖衣物')">
-            <option value="">{{ t('選擇主圖衣物') }}</option>
+          <input v-if="coverMode==='upload'" type="file" accept="image/jpeg,image/png,image/webp" :disabled="submitting" :aria-label="t('上傳圖片')" @change="chooseCover" />
+          <select v-if="coverMode==='closet'" v-model="coverItemId" :disabled="submitting" :aria-label="t('選擇衣物圖片')">
+            <option value="">{{ t('選擇衣物圖片') }}</option>
             <option v-for="item in appStore.items.filter(i=>selectedClosetItemIds.includes(i.id))" :key="item.id" :value="item.id">{{ item.name_zh || item.name }}</option>
           </select>
-          <p v-if="coverMode !== 'none'">{{ t('發布後，選用的主圖會公開顯示。') }}</p>
         </div>
 
         <div class="form-actions">
@@ -112,6 +110,7 @@ const selectedClosetItemIds = ref([]);
 const loadingCloset = ref(false);
 const closetLoadFailed = ref(false);
 const coverMode=ref('none'), coverFile=ref(null), coverItemId=ref(''), submitting=ref(false);
+const coverEnabled = computed({ get:()=>coverMode.value!=='none', set:enabled=>{coverMode.value=enabled?'upload':'none';coverFile.value=null;coverItemId.value='';} });
 let openVersion = 0;
 
 const contextItem = computed(() => {
@@ -194,7 +193,7 @@ const handleSubmit = async () => {
   }
 
   if ((coverMode.value==='upload' && !coverFile.value) || (coverMode.value==='closet' && !selectedClosetItemIds.value.includes(coverItemId.value))) {
-    appStore.showToast(t('請選擇主圖或改為不使用主圖。'), {type:'warning'}); return;
+    appStore.showToast(t('請選擇圖片，或取消勾選「上傳圖片」。'), {type:'warning'}); return;
   }
   submitting.value=true; let uploaded=null; let success=false;
   try {
@@ -217,7 +216,7 @@ const handleSubmit = async () => {
   });
     // A network failure can happen after the server commits the post. Do not
     // remove the uploaded cover on an ambiguous result and break a published post.
-  } catch { appStore.showToast(t('主圖上傳失敗，請再試一次。'), {type:'error'}); }
+  } catch { appStore.showToast(t('圖片上傳失敗，請再試一次。'), {type:'error'}); }
   finally { submitting.value=false; }
 
   if (success) {

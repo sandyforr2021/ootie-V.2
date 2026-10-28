@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ootie-shell-v1';
+const CACHE_NAME = 'ootie-shell-v2';
 const SHELL = ['/offline.html', '/ootie-icon.svg', '/manifest.webmanifest'];
 const PRIVATE_PATH = /\/(ai|tryon|profile|settings|membership|bookmarks|stats)(\/|$)/;
 const API_HOST = /supabase|googleapis/i;

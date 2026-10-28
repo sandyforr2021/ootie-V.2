@@ -12,6 +12,7 @@ import { watch } from 'vue';
 
 import '@/assets/main.css';
 import '@/assets/atelier.css';
+import '@/assets/page-headings.css';
 
 const app = createApp(App);
 const pinia = createPinia();

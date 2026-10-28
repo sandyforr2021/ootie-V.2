@@ -1,4 +1,127 @@
 export const interfaceMessages = `
+每件 2 點・每日最多 2 次|2 points per item · Up to 2 generations daily|衣類1点につき2ポイント・1日2回まで|2 puntos por prenda · Hasta 2 generaciones diarias
+每天最多生成 {limit} 次，今天還可生成 {remaining} 次。|You can generate up to {limit} times a day, with {remaining} remaining today.|生成は1日{limit}回まで。本日はあと{remaining}回利用できます。|Puedes generar hasta {limit} veces al día; hoy te quedan {remaining}.
+每天最多生成 2 次，仍需扣點。|Up to 2 generations a day. Points still apply.|生成は1日2回まで。ポイントを消費します。|Hasta 2 generaciones al día. Se descuentan puntos.
+整套算一次，按衣物件數扣點；台灣時間午夜重置。|An outfit counts as one generation, charged per garment. Resets at midnight Taiwan time.|コーデは1回として数え、衣類ごとにポイントを消費。台湾時間の午前0時にリセット。|Un conjunto cuenta como una generación; se cobra por prenda. Se reinicia a medianoche en Taiwán.
+已達每日 2 次生成上限。|Daily limit of 2 generations reached.|1日2回の生成上限に達しました。|Has alcanzado el límite de 2 generaciones diarias.
+今日剩餘 {count} 次|{count} generations left today|本日あと{count}回|Quedan {count} generaciones hoy
+月費會員|Monthly membership|月額メンバーシップ|Membresía mensual
+價格以新臺幣計算|Prices in TWD|料金は台湾ドル（TWD）|Precios en dólares taiwaneses (TWD)
+／月|/ month|／月|/ mes
+每月 {points} 點|{points} points each month|毎月{points}ポイント|{points} puntos al mes
+可用於 {count} 件 AI 處理|Enough for {count} AI item treatments|衣類{count}点分のAI処理|Para procesar {count} prendas con IA
+AI 試穿與衣物整理共用點數|Use points for AI try-on or garment cleanup|AI試着と衣類整理でポイントを共用|Puntos para pruebas y mejora de prendas con IA
+尚未開放訂閱|Subscriptions coming soon|定期購入は準備中|Suscripciones próximamente
+方案預告，尚未開放付款。|Plans preview. Payments are not available yet.|プランのご案内。お支払いはまだ利用できません。|Avance de planes. Los pagos aún no están disponibles.
+加購點數|Extra points|ポイント追加購入|Puntos adicionales
+一次性購買|One-time purchase|1回限りの購入|Compra única
+{points} 點補給包|{points}-point pack|{points}ポイントパック|Paquete de {points} puntos
+尚未開放加購|Top-ups coming soon|追加購入は準備中|Recargas próximamente
+方案與點數|Plans & points|プランとポイント|Planes y puntos
+目前點數|Available points|利用可能ポイント|Puntos disponibles
+查看點數紀錄|View point history|ポイント履歴を見る|Ver historial de puntos
+使用方案|Ways to use OOTIE|OOTIEの使い方|Cómo usar OOTIE
+依使用量扣點|Points per use|利用分のポイントを消費|Puntos por uso
+衣櫥與社群|Wardrobe & community|クローゼットとコミュニティ|Armario y comunidad
+整理衣櫥，分享日常穿搭。|Organize your wardrobe. Share your everyday outfits.|クローゼットを整理して、日々のコーデをシェア。|Organiza tu armario y comparte tus conjuntos.
+免費去背與品名辨識|Free background removal and item identification|無料の背景除去と衣類の識別|Fondo e identificación sin coste
+穿搭紀錄與衣櫥統計|Outfit history and wardrobe insights|コーデ記録とクローゼット統計|Historial de conjuntos y estadísticas
+點／件|points / item|ポイント／点|puntos / prenda
+點／張|points / image|ポイント／枚|puntos / imagen
+先試穿，再決定。|Try it on. Then decide.|試着してから、決める。|Pruébatelo. Luego decide.
+結果存入私人相簿|Results saved to your private album|結果はプライベートアルバムに保存|Resultados en tu álbum privado
+AI 衣物整理|AI garment cleanup|AI衣類整理|Mejora de prendas con IA
+將衣物照片整理為單品照。|Turn garment photos into clean product shots.|衣類の写真をすっきりした単品写真に。|Convierte tus fotos en imágenes de producto.
+上傳時選擇 AI 整理|Choose AI cleanup when uploading|アップロード時にAI整理を選択|Elige mejorar con IA al subir
+確認結果後再使用|Review the result before using it|結果を確認してから使用|Revisa el resultado antes de usarlo
+無法讀取處理後照片。|Could not read the processed photo.|処理後の写真を読み込めません。|No se pudo leer la foto procesada.
+單件 2 點，三件整套 6 點。|2 points for one item, 6 for a three-item outfit.|1点の衣類は2ポイント、3点のコーデは6ポイント。|2 puntos por una prenda; 6 por un conjunto de tres.
+免費去背與品名辨識不扣點。|Background removal and garment identification are free.|背景除去と衣類の識別は無料です。|Eliminar el fondo e identificar prendas es gratis.
+JPEG、PNG、WebP · 上限 20 MB|JPEG, PNG, WebP · Up to 20 MB|JPEG・PNG・WebP · 最大20 MB|JPEG, PNG, WebP · Máximo 20 MB
+請確認品名與分類。|Review the name and category.|名前とカテゴリーをご確認ください。|Revisa el nombre y la categoría.
+無法確定分類，請自行選擇。|Category uncertain. Please choose one.|カテゴリーを特定できません。選択してください。|Categoría incierta. Selecciona una.
+正在檢查照片…|Checking photo…|写真を確認中…|Comprobando foto…
+正在取消…|Cancelling…|キャンセル中…|Cancelando…
+照片已選擇|Photo selected|写真を選択しました|Foto seleccionada
+照片已準備完成|Photo ready|写真の準備ができました|Foto lista
+尚未儲存完成|Not saved yet|まだ保存されていません|Aún no se ha guardado
+這張照片目前無法使用|This photo cannot be used|この写真は使用できません|Esta foto no se puede usar
+已儲存到衣櫥|Saved to wardrobe|クローゼットに保存しました|Guardado en el armario
+處理未完成，照片與表單內容已保留|Not completed. Your photo and entries are kept.|未完了。写真と入力内容は保持されています。|No se completó. Se conservan la foto y los datos.
+請輸入品牌名稱。|Enter a brand name.|ブランド名を入力してください。|Introduce una marca.
+照片處理失敗，請重新選擇。|Could not process photo. Choose another.|写真を処理できませんでした。選び直してください。|No se pudo procesar la foto. Elige otra.
+儲存失敗，照片與表單內容已保留，可再次嘗試。|Could not save. Your photo and entries are kept. Try again.|保存できませんでした。写真と入力内容は保持されています。再試行してください。|No se pudo guardar. Se conservan la foto y los datos. Reinténtalo.
+請選擇圖片檔案。|Choose an image file.|画像ファイルを選んでください。|Selecciona un archivo de imagen.
+圖片檔案是空的，請重新選擇。|The image file is empty. Choose another.|空のファイルです。選び直してください。|El archivo está vacío. Elige otro.
+原始照片需小於 20 MB。|Photo must be under 20 MB.|写真は20 MB未満にしてください。|La foto debe tener menos de 20 MB.
+此照片格式目前無法直接處理，請改用 JPEG、PNG 或 WebP，或從相簿另存後再上傳。|Use a JPEG, PNG or WebP image.|JPEG、PNG、WebPの画像を使用してください。|Usa una imagen JPEG, PNG o WebP.
+圖片內容無法辨識；僅支援 JPEG、PNG 或 WebP。|Unreadable image. Use JPEG, PNG or WebP.|画像を読み取れません。JPEG、PNG、WebPを使用してください。|Imagen ilegible. Usa JPEG, PNG o WebP.
+圖片內容與檔案格式不一致。|Image content does not match its file type.|画像とファイル形式が一致しません。|La imagen no coincide con el tipo de archivo.
+照片有點暗，建議在亮一點的地方重拍。|Too dark. Try better lighting.|暗すぎます。明るい場所で撮影してください。|Demasiado oscura. Prueba con más luz.
+照片可能過亮，衣物細節不容易看清楚。|Check that bright areas retain fabric detail.|明るい部分の生地の細部をご確認ください。|Comprueba los detalles en las zonas claras.
+圖片可能有些模糊，建議確認衣物細節是否清楚。|Check that garment details are sharp.|衣類の細部が鮮明か確認してください。|Comprueba que la prenda se vea nítida.
+衣物邊緣可能被裁到，請確認袖口、下擺或提把都有入鏡。|Check that the entire item is in frame.|アイテム全体が写っているか確認してください。|Comprueba que se vea la prenda completa.
+此瀏覽器無法安全處理照片方向，請改用較新的瀏覽器。|Update your browser to process this photo.|写真を処理するにはブラウザーを更新してください。|Actualiza el navegador para procesar esta foto.
+圖片解析度太低，請使用至少 128 × 128 的照片。|Use a photo of at least 128 × 128 pixels.|128 × 128ピクセル以上の写真を使用してください。|Usa una foto de al menos 128 × 128 píxeles.
+解析度較低，之後放大時可能不清楚。|Low resolution. Enlarging may look blurry.|低解像度のため、拡大するとぼやける場合があります。|Resolución baja. Puede verse borrosa al ampliar.
+處理後照片仍超過 6 MB，請改用較小的照片。|Processed photo exceeds 6 MB. Choose a smaller one.|処理後の写真が6 MBを超えています。小さい写真を選んでください。|La foto procesada supera 6 MB. Elige una más pequeña.
+AI 整理 · 2 點|AI cleanup · 2 points|AI 整理 · 2ポイント|Mejorar con IA · 2 puntos
+整理這件衣物 · 2 點|Clean up garment · 2 points|衣類を整理 · 2ポイント|Mejorar prenda · 2 puntos
+同意將這張照片交由影像服務處理，可能改變衣物細節。|I agree to image processing, which may alter garment details.|画像処理に同意します。衣類の細部が変わる場合があります。|Acepto el procesamiento de imagen, que puede cambiar detalles de la prenda.
+未完成，點數已退回。|Unsuccessful. Points refunded.|未完了。ポイントを返還しました。|No se completó. Puntos devueltos.
+結果核對中，請勿重新送出。|Result under review. Do not resubmit.|結果を確認中です。再送信しないでください。|Resultado en revisión. No lo vuelvas a enviar.
+處理中，可稍後到私人相簿查看。|Processing. Find the result in your private album.|処理中。結果はプライベートアルバムで確認できます。|Procesando. El resultado aparecerá en tu álbum privado.
+連線中斷，請查詢原工作。|Connection interrupted. Check the existing job.|接続が中断しました。元の処理を確認してください。|Conexión interrumpida. Consulta el trabajo existente.
+平台點數不足。|Not enough platform points.|ポイントが不足しています。|No tienes suficientes puntos.
+查詢原工作|Check existing job|処理を確認|Consultar trabajo
+整理結果|Cleanup result|整理結果|Resultado de la mejora
+使用這張圖片|Use this image|この画像を使用|Usar esta imagen
+單品照片預覽|Garment preview|衣類のプレビュー|Vista previa de la prenda
+建議確認|Please review|要確認|Revisar
+清晰可用|Ready to use|使用可能|Lista para usar
+平台點數|Platform points|ポイント|Puntos
+每件 2 點，失敗退點。|2 points per item. Refunded on failure.|1点の衣類につき2ポイント。失敗時は返還。|2 puntos por prenda. Se devuelven si falla.
+發現穿搭|Discover outfits|コーデを見つける|Descubre conjuntos
+圖片來源|Image source|画像の選択元|Origen de la imagen
+從裝置選擇|Choose from device|端末から選択|Elegir del dispositivo
+選擇衣物圖片|Choose an item photo|服の写真を選択|Elegir foto de una prenda
+請選擇圖片，或取消勾選「上傳圖片」。|Choose an image or uncheck Upload image.|画像を選ぶか「画像をアップロード」のチェックを外してください。|Elige una imagen o desmarca Subir imagen.
+圖片上傳失敗，請再試一次。|Image upload failed. Try again.|画像をアップロードできませんでした。再試行してください。|No se pudo subir la imagen. Inténtalo de nuevo.
+今日搭配|Today's outfits|今日のコーデ|Conjuntos de hoy
+搭配 {number}|Outfit {number}|コーデ {number}|Conjunto {number}
+點數與額度|Points & credits|ポイントと利用枠|Puntos y créditos
+我的點數|My points|マイポイント|Mis puntos
+點數紀錄|Point history|ポイント履歴|Historial de puntos
+點數紀錄暫時無法載入。|Point history is temporarily unavailable.|ポイント履歴を読み込めません。|El historial de puntos no está disponible.
+目前試穿使用共享額度，未扣個人點數。|Try-ons currently use shared credits, not your personal points.|現在の試着は共有利用枠を使用し、個人ポイントは消費しません。|Las pruebas usan créditos compartidos, sin descontar tus puntos personales.
+生日點數|Birthday points|誕生日ポイント|Puntos de cumpleaños
+方案點數|Plan points|プランポイント|Puntos del plan
+點數補給|Points added|ポイント追加|Puntos añadidos
+活動贈點|Promotional points|キャンペーンポイント|Puntos promocionales
+試穿使用|Try-on usage|試着利用|Uso en pruebas
+AI 圖片處理|AI image processing|AI画像処理|Procesamiento de imágenes con IA
+點數調整|Point adjustment|ポイント調整|Ajuste de puntos
+退還點數|Points refunded|ポイント返還|Puntos devueltos
+尚無點數紀錄。|No point history yet.|ポイント履歴はまだありません。|Aún no hay historial de puntos.
+衣櫥檢視|Wardrobe view|クローゼット表示|Vista del armario
+衣架|Rack|ラック|Perchero
+圖卡|Cards|カード|Tarjetas
+包款與配件|Bags & accessories|バッグと小物|Bolsos y accesorios
+向左滑動|Scroll left|左にスクロール|Desplazar a la izquierda
+向右滑動|Scroll right|右にスクロール|Desplazar a la derecha
+日常|Everyday|日常|Diario
+戶外散步|Outdoor walk|散歩|Paseo al aire libre
+近期穿搭紀錄暫時無法載入。|Recent outfit history is unavailable.|最近のコーデ記録を読み込めません。|No se puede cargar el historial reciente.
+重新去背|Remove background again|背景除去を再試行|Volver a quitar el fondo
+自動去背，原照片可隨時還原。|Backgrounds are removed automatically. You can restore the original photo.|背景を自動で除去します。元の写真に戻すこともできます。|El fondo se elimina automáticamente. Puedes restaurar la foto original.
+首次使用需下載去背模型，照片留在此裝置。|Downloading the background model on first use. Photos stay on this device.|初回は背景除去モデルをダウンロードします。写真は端末内で処理します。|Descargando el modelo la primera vez. Las fotos permanecen en este dispositivo.
+等待自動去背…|Waiting to remove the background…|背景除去を待っています…|Esperando para quitar el fondo…
+正在自動去背…|Removing the background…|背景を除去しています…|Eliminando el fondo…
+去背未完成，可重試或保留原照片。|Background removal did not finish. Retry or keep the original.|背景除去が完了しませんでした。再試行するか元の写真を使用してください。|No se completó la eliminación del fondo. Reintenta o conserva la foto original.
+探索更多|Explore more|もっと見る|Explorar más
+查看貼文|View post|投稿を見る|Ver publicación
+資料來源|Data sources|データ提供元|Fuentes de datos
+目前位置|Current location|現在地|Ubicación actual
 這個品類暫不支援試穿。|Try-on is not available for this category yet.|このカテゴリーは現在試着に対応していません。|Esta categoría aún no admite pruebas virtuales.
 查看最愛|View favorites|お気に入りを見る|Ver favoritos
 試穿額度|Try-on credits|試着クレジット|Créditos de prueba

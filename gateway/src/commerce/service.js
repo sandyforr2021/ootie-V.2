@@ -32,10 +32,11 @@ export class CommerceService {
     this.reviewerUserIds = new Set(reviewerUserIds); this.download = download;
   }
   async capabilities(user) {
-    const [budget, quota, providerBalance] = await Promise.all([
+    const [budget, quota, providerBalance, pointBalance] = await Promise.all([
       this.repository.budget(),
       user ? this.repository.userQuota(user.id) : null,
-      this.provider?.balanceSnapshot ? this.provider.balanceSnapshot().catch(() => null) : null
+      this.provider?.balanceSnapshot ? this.provider.balanceSnapshot().catch(() => null) : null,
+      user && this.repository.pointBalance ? this.repository.pointBalance(user.id).catch(() => null) : null
     ]);
     const isReviewer = !!user && this.reviewerUserIds.has(user.id);
     const dbRemaining = Math.max(0, (budget?.unit_limit || 0) - (budget?.allocated_units || 0));
@@ -45,11 +46,15 @@ export class CommerceService {
     const providerRemaining = providerBalance === null ? 0 : Math.max(0, providerBalance - reserve);
     const remaining = Math.min(Math.max(0, dbRemaining - reserve), providerRemaining, quotaRemaining);
     const active = !!budget?.expires_at && Date.parse(budget.expires_at) > Date.now();
-    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= 2,
+    const pointsReady=Number.isSafeInteger(pointBalance) && pointBalance >= 0;
+    const generationRemaining=Math.max(0,Number(quota?.generationLimit ?? 2)-Number(quota?.generationUsed ?? 0));
+    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= 2 && pointsReady && generationRemaining>0,
+      dailyGenerationRemaining:generationRemaining,dailyGenerationLimit:2,generationTimezone:'Asia/Taipei',
       remainingUnits: active && underConcurrencyLimit ? remaining : 0, dailyRemainingUnits: quotaRemaining,
       activeJobs: Number(quota?.activeCount || 0), activeJobLimit: Number(quota?.activeLimit || 0),
       providerBalance, balanceVerified: providerBalance !== null, reviewerReserveUnits: Number(budget?.reviewer_reserve_units || 0),
-      costs: { try_on: 2, skin_tone: 20 }, expiresAt: budget?.expires_at || null, provider: 'youcam', automaticTopUp: false };
+      platformPointsPerImage:2,pointBalance:pointsReady?pointBalance:null,
+      costs: { try_on: 2, skin_tone: 20, garment_cleanup:1 }, expiresAt: budget?.expires_at || null, provider: 'youcam', automaticTopUp: false };
   }
   async withPublicAuthors(posts) {
     const users=[...new Set(posts.map(post=>post.user_id).filter(isUuid))];
@@ -69,6 +74,26 @@ export class CommerceService {
     const page = await this.download(publicHttpUrl(body?.url), { maxBytes: 2 * 1024 * 1024 });
     assert(page.mimeType === 'text/html', 'PRODUCT_CONTENT_UNSUPPORTED', 422, '此頁面無法讀取，請手動填寫商品。');
     return parseProductHtml(page.buffer.toString('utf8'), page.url);
+  }
+  async cleanupGarment(user, body) {
+    assert(this.enabled, 'YOUCAM_DISABLED', 503);
+    assert(isUuid(body?.batchId), 'INVALID_BATCH', 400);
+    assert(body?.consent === true, 'PHOTO_CONSENT_REQUIRED', 400);
+    // Replays keep the original source and never start a second charge/task.
+    const existing=await this.repository.request('ootie_youcam_batches', `?id=eq.${body.batchId}&select=user_id`);
+    const path=`shop/${user.id}/cleanup-${body.batchId}.jpg`;
+    if(existing.length) {
+      assert(existing[0].user_id===user.id,'BATCH_CONFLICT',409);
+    } else {
+      const image=parseImageDataUrl(body.imageData);
+      const normalized=await normalizeGarmentImageForAi(image.buffer,image.mimeType);
+      try { await this.storage.uploadPrivate(path,normalized,{upsert:false}); }
+      catch(error) {
+        const previous=await this.storage.downloadPrivate(path).catch(()=>null);
+        if(!previous || !previous.buffer.equals(normalized.buffer))throw error;
+      }
+    }
+    return this.repository.rpc('enqueue_ootie_youcam',{p_batch_id:body.batchId,p_user_id:user.id,p_person_path:path,p_product_ids:[],p_kind:'garment_cleanup',p_is_reviewer:this.reviewerUserIds.has(user.id)});
   }
   async createProduct(user, body) {
     const title = String(body?.title || '').trim();

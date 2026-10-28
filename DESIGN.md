@@ -261,3 +261,15 @@ The editorial image can tilt only for a fine mouse pointer with hover and no red
 - **Don't** use the generated sidecar tonal ramps as new production colors without a deliberate design change.
 
 Not canonized or repaired: existing eyebrow/kicker treatments, residual glyph icons in the language/more/modal controls, local focus-ring differences, and base-component styling drift remain in the code. They are not rules for new surfaces. This documentation-only pass also does not resolve missing font weights or guarantee cross-device CJK font delivery.
+
+## Approved pastel gradients — October 28
+
+The requested digital finish uses lavender–blush–cream gradients on the page canvas, sidebar and section heroes. Berry–plum action gradients retain readable white labels. Garment images keep neutral white surfaces; intro doors and motion remain unchanged. Tokens live in `src/assets/atelier.css`: `--gradient-celebration`, `--gradient-navigation`, `--gradient-action`, `--gradient-canvas`.
+
+Membership uses a wide pastel hero, dark personal-balance card, three aligned plan cards and a separate one-time top-up row. Cards stack on mobile. Until payment integration exists, paid plans show an explicit availability label without an inert purchase button. Prices remain denominated in TWD in all languages.
+
+## Shared page headings — October 28 follow-up
+
+All nine main member pages now use `.ootie-page-heading` from `src/assets/page-headings.css`, matching the fitting studio: 116px minimum height, 24px/28px padding, 12px radius and the same pastel gradient. Titles use the display family at 40px with 1.4 line height; mobile titles use 32px and controls wrap below. Heading entrance translations are disabled to keep the title stationary between routes; the wardrobe opening remains intact. Membership balance is now a compact right-hand control inside this shared heading, replacing the earlier standalone dark balance treatment.
+
+Product actions in the studio use labelled SVG icon controls with 44px targets and tooltips. Profile captions initially show original text with a quiet translation trigger; source-language controls appear only after a translation request. Statistics use the same `itemPhoto` resolver and `WardrobeCutout` rendering as the wardrobe, contained on white.

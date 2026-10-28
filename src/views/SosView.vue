@@ -1,6 +1,6 @@
 <template>
-  <section class="page active" id="sosPage">
-    <header class="core-page-hero sos-page-hero">
+  <section class="page active app-page" id="sosPage">
+    <header class="core-page-hero sos-page-hero ootie-page-heading">
       <div>
         <h1>{{ $t("穿搭求救") }}</h1>
       </div>
@@ -55,7 +55,7 @@
             <div class="sos-feed-avatar"><img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" /><span v-else>{{ post.initials }}</span></div>
             <div>
               <strong>{{ post.display_name || post.username }}</strong>
-              <span>{{ $t("穿搭求救") }}<em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
+              <span><em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
                   {{ t(post.status === 'CLOSED' ? '已結束' : '公開中') }}
                 </em>
               </span>

@@ -53,7 +53,7 @@ describe('mobile navigation information architecture', () => {
     await wrapper.find('.mobile-more-trigger').trigger('click');
 
     const destinationLabels = wrapper.findAll('.mobile-more-destinations .mobile-more-link strong').map((item) => item.text());
-    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '衣櫥統計', '帳號設定', '通知']);
+    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '衣櫥統計', '方案與點數', '帳號設定', '通知']);
     for (const label of ['首頁', '探索', '衣櫥', 'SOS']) {
       expect(destinationLabels).not.toContain(label);
     }

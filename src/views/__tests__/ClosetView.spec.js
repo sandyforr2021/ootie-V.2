@@ -26,7 +26,7 @@ describe('ClosetView.vue Integration Test', () => {
     await router.isReady();
   });
 
-  it('renders closet page title and item grid', () => {
+  it('renders the wardrobe rack and can switch to image cards', async () => {
     const wrapper = mount(ClosetView, {
       global: {
         plugins: [router]
@@ -34,6 +34,8 @@ describe('ClosetView.vue Integration Test', () => {
     });
 
     expect(wrapper.text()).toContain('我的衣櫥');
+    expect(wrapper.find('.wardrobe-rack').exists()).toBe(true);
+    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
     expect(wrapper.find('.grid').exists()).toBe(true);
     expect(wrapper.findAll('.item-card').length).toBeGreaterThan(0);
   });
@@ -50,7 +52,7 @@ describe('ClosetView.vue Integration Test', () => {
 
     await topsBtn.trigger('click');
 
-    const cards = wrapper.findAll('.item-card');
+    const cards = wrapper.findAll('.rack-row');
     cards.forEach((card) => {
       expect(card.text()).toContain('上衣');
     });
@@ -64,7 +66,7 @@ describe('ClosetView.vue Integration Test', () => {
       }
     });
 
-    const firstImageCard = wrapper.find('.item-image');
+    const firstImageCard = wrapper.find('.rack-piece');
     await firstImageCard.trigger('click');
 
     expect(appStore.isDetailOpen).toBe(true);
@@ -133,7 +135,7 @@ describe('ClosetView.vue Integration Test', () => {
       await flushPromises();
 
       expect(readItems).not.toHaveBeenCalled();
-      expect(wrapper.findAll('.item-card').length).toBeGreaterThan(0);
+      expect(wrapper.findAll('.rack-item').length).toBeGreaterThan(0);
       expect(wrapper.text()).toContain('白色經典襯衫');
     });
 

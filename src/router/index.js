@@ -32,7 +32,7 @@ const routes = [
   { path: '/tryon', name: 'Tryon', redirect: '/shop' },
   { path: '/profile', name: 'Profile', component: ProfileView },
   { path: '/profile/help-history', name: 'HelpHistory', component: HelpHistoryView },
-  { path: '/membership', name: 'Membership', redirect: '/shop?tab=activity' },
+  { path: '/membership', name: 'Membership', redirect: '/credits' },
   { path: '/settings', name: 'Settings', component: SettingsView },
   { path: '/legal/:document(privacy|terms|ai)', name: 'Legal', component: LegalView },
   { path: '/ootd/:id', name: 'OotdDetail', component: OotdDetailView },

@@ -5,6 +5,7 @@ import {useAuthStore} from '@/stores/auth';
 import {updatePublicProfile} from '@/services/profileRepository';
 import {t} from '@/i18n';
 const appStore=useAppStore(),authStore=useAuthStore();
+defineProps({ compact: Boolean });
 const isMember=computed(()=>authStore.isMember);
 const openLoginGate=()=>appStore.openLoginGate('SOCIAL_AUTH_REQUIRED','/closet');
 const changingVisibility = ref(false);
@@ -27,7 +28,7 @@ const togglePublicCloset = async () => {
 };
 
 </script>
-<template>    <section class="profile-settings" v-if="isMember">
+<template>    <section :class="['profile-settings', { compact }]" v-if="isMember">
       <div class="setting-row">
         <div>
           <strong>{{ $t("公開我的衣櫥") }}</strong>

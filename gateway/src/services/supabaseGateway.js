@@ -40,11 +40,14 @@ export class SupabaseGateway {
     }
     const body = await parseResponseBody(response);
     if (!response.ok) {
-      const commerceCodes = ['FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT',
+      const commerceCodes = ['DAILY_GENERATION_LIMIT','INSUFFICIENT_POINTS','POINT_ACCOUNT_REQUIRED','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT',
         'BATCH_CONFLICT','PRODUCT_NOT_OWNED','INVALID_BATCH','PERSON_IMAGE_NOT_OWNED','PERSON_IMAGE_IN_USE','PERSON_IMAGE_DELETING'];
       const commerceCode = commerceCodes.find((code) => body?.message === code);
-      if (commerceCode) throw new GatewayError(commerceCode, ['FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT'].includes(commerceCode) ? 429 : 409, {
+      if (commerceCode) throw new GatewayError(commerceCode, ['DAILY_GENERATION_LIMIT','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT'].includes(commerceCode) ? 429 : 409, {
+        DAILY_GENERATION_LIMIT: '已達每日 2 次生成上限。',
         FREE_BUDGET_EXHAUSTED: '可用免費額度不足或已到期，本次沒有送出生成。',
+        INSUFFICIENT_POINTS: '平台點數不足。',
+        POINT_ACCOUNT_REQUIRED: '請先完成帳號設定。',
         REVIEWER_RESERVE_PROTECTED: '這些點數已保留給評審使用，本次沒有送出生成。',
         USER_DAILY_LIMIT: '已達今日試穿額度上限，請明天再試。',
         USER_ACTIVE_LIMIT: '目前有太多等待中的工作，完成或核對後再提交。',

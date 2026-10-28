@@ -5,6 +5,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../HomeView.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
+import { useSocialStore } from '@/stores/social';
+import { useOotdStore } from '@/stores/ootd';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
 
 const router = createRouter({
@@ -58,6 +60,41 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/membership"]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('取得 AI 穿搭建議');
+    wrapper.unmount();
+  });
+
+  it('offers distinct authors to a new member and switches to followed posts after following', async () => {
+    const auth = useAuthStore();
+    const app = useAppStore();
+    const social = useSocialStore();
+    auth.session = { user: { id: 'member-auth' } };
+    auth.user = auth.session.user;
+    auth.profileIdentity = { status: IDENTITY_STATUS.PROFILE_READY, authUserId: auth.user.id, profileId: 'member-profile', profile: { id: 'member-profile' }, error: null };
+    vi.spyOn(useOotdStore(), 'loadRemotePosts').mockResolvedValue();
+    app.ootdPosts = ['member-profile', 'a', 'a', 'b', 'c', 'd'].map((author, index) => ({
+      id: `discovery-${index}`, user_id: author, username: author,
+      image: '/images/outfit.webp', caption: `Outfit ${index}`, avatar_url: '/images/avatar.webp'
+    }));
+    const follow = vi.spyOn(social, 'toggleFollow').mockImplementation(async target => {
+      social.followingProfiles.push({ following_id: target.id, following: target });
+      return true;
+    });
+    const wrapper = mount(HomeView, { global: { plugins: [router] } });
+    await flushPromises();
+    expect(wrapper.text()).toContain('發現穿搭');
+    expect(wrapper.findAll('.following-author').map(author => author.text())).toEqual(['a', 'b', 'c']);
+    expect(wrapper.findAll('.discovery-follow')).toHaveLength(3);
+    await wrapper.find('.discovery-follow').trigger('click');
+    await flushPromises();
+    expect(follow).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }));
+    expect(wrapper.text()).toContain('追蹤中的貼文');
+    expect(wrapper.findAll('.following-card')).toHaveLength(2);
+    expect(wrapper.find('.discovery-follow').exists()).toBe(false);
+    app.ootdPosts = [];
+    await flushPromises();
+    expect(wrapper.find('.following-journal').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('追蹤中的貼文');
+    expect(wrapper.text()).not.toContain('追蹤衣友後，就能在這裡看到他們的貼文。');
     wrapper.unmount();
   });
 });

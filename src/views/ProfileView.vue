@@ -1,16 +1,12 @@
 <template>
-  <section v-if="isSelf && !isMember" class="page active profile-locked-state" id="profilePage">
-    <h1>{{ t("登入後查看你的個人檔案") }}</h1>
+  <section v-if="isSelf && !isMember" class="page active profile-locked-state app-page" id="profilePage">
+    <header class="ootie-page-heading"><h1>{{ t("登入後查看你的個人檔案") }}</h1></header>
     <p class="intro">{{ t("登入會員即可管理個人資料、衣櫥設定與自己的 OOTD。") }}</p>
     <button type="button" class="primary" @click="openLoginGate">{{ $t("登入／註冊") }}</button>
   </section>
 
-  <section v-else class="page active" id="profilePage">
-    <div class="profile-top-bar" v-if="!isSelf">
-      <router-link to="/explore" class="back-link">← {{ t('返回探索') }}</router-link>
-    </div>
-
-    <h1>{{ isSelf ? $t('個人檔案') : (targetProfile.name || targetProfile.display_name) }}</h1>
+  <section v-else class="page active app-page" id="profilePage">
+    <header class="ootie-page-heading"><h1>{{ isSelf ? $t('個人檔案') : (targetProfile.name || targetProfile.display_name) }}</h1><router-link v-if="!isSelf" to="/explore" class="back-link"><AppIcon name="back" :size="16" />{{ t('返回探索') }}</router-link></header>
 
     <div class="profile-header">
       <div class="profile-avatar" :class="{ 'has-image': targetProfile.avatar_url }">
@@ -89,7 +85,7 @@
             <img class="ootd-photo" :src="post.image" :alt="tf('{user} 的 OOTD', { user: post.username })" loading="lazy" decoding="async" />
           </router-link>
           <div class="ootd-body">
-            <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" />
+            <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" reveal-source-on-translate understated />
             <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
               {{ post.hashtags.join('　') }}
             </div>

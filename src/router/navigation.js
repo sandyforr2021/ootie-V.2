@@ -6,6 +6,7 @@ export const NAVIGATION_ITEMS = Object.freeze([
   { routeName: 'Sos', path: '/sos', label: '穿搭求救', shortLabel: 'SOS', icon: '♡', mobile: 'more' },
   { routeName: 'Profile', path: '/profile', label: '個人檔案', shortLabel: '我的', icon: '◯', mobile: 'more' },
   { routeName: 'Stats', path: '/stats', label: '衣櫥統計', shortLabel: '統計', icon: '▥', mobile: 'more' },
+  { routeName: 'Credits', path: '/credits', label: '方案與點數', shortLabel: '點數', icon: '◇', mobile: 'more' },
   { routeName: 'Settings', path: '/settings', label: '帳號設定', shortLabel: '設定', icon: '⚙', mobile: 'more' }
 ]);
 

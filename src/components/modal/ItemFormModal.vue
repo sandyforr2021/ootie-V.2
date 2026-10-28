@@ -24,7 +24,6 @@
             <div class="capture-guide-heading">
               <div>
                 <h3 id="captureGuideTitle">{{ $t("讓衣服完整入鏡就好") }}</h3>
-                <p>{{ $t("不需要棚拍，也不用整理成商品照。自然拍攝，OOTIE 會保留你的真實衣櫥。") }}</p>
               </div>
               <button type="button" class="capture-guide-skip" @click="dismissCaptureGuide">{{ $t("先略過") }}</button>
             </div>
@@ -38,7 +37,7 @@
 
           <div class="upload-zone">
             <strong>{{ photoPreview ? $t('已選擇照片') : $t('加入一張單品照片') }}</strong>
-            <span>{{ $t("可直接拍照或選擇既有照片，支援 JPEG、PNG、WebP；單檔上限 20 MB") }}</span>
+            <span>{{ $t('JPEG、PNG、WebP · 上限 20 MB') }}</span>
             <div class="upload-choice-row">
               <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openCameraInput">{{ photoPreview ? $t('重新拍攝') : $t('拍照') }}</button>
               <button type="button" class="secondary" :disabled="mediaBusy || isSubmitting" @click="openGalleryInput">{{ photoPreview ? $t('重新選擇') : $t('從相簿選擇') }}</button>
@@ -65,23 +64,24 @@
               :key="photoPreview"
               :class="['upload-preview', 'product-image', { visible: photoPreview }]"
               :src="photoPreview"
-              :alt="form.name ? `${form.name}照片預覽` : '單品照片預覽'"
+              :alt="$t('單品照片預覽')"
             />
             <div v-if="preparedMedia" class="upload-choice-row">
-              <button v-if="!backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="tryBackgroundRemoval">{{ backgroundBusy ? $t('正在處理背景…') : $t('嘗試去除單色背景') }}</button>
+              <button v-if="!backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="tryBackgroundRemoval">{{ backgroundBusy ? $t('正在處理背景…') : $t('重新去背') }}</button>
               <button v-else type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="restoreBackground">{{ $t('還原照片') }}</button>
             </div>
             <p v-if="backgroundMessage" role="status">{{ backgroundMessage }}</p>
+            <GarmentCleanup v-if="preparedMedia && !backgroundBusy" :key="selectionSequence" :blob="originalDisplay?.displayBlob" @result="useDisplayBlob" />
           </div>
 
           <div class="media-status-region" role="status" aria-live="polite" aria-atomic="true">
             <div v-if="mediaStatus !== 'idle'" :class="['media-lifecycle', `is-${mediaStatus}`]">
               <span class="media-lifecycle-dot" aria-hidden="true"></span>
-              <span>{{ mediaStatusText }}</span>
+              <span>{{ $t(mediaStatusText) }}<template v-if="mediaStatus === 'uploading' && uploadProgress !== null"> {{ uploadProgress }}%</template></span>
             </div>
             <div v-if="mediaError" class="media-error" role="alert">
-              <strong>{{ mediaErrorTitle }}</strong>
-              <p>{{ mediaError }}</p>
+              <strong>{{ $t(mediaErrorTitle) }}</strong>
+              <p>{{ $t(mediaError) }}</p>
               <button type="button" class="secondary" @click="openGalleryInput">{{ $t("重新選擇") }}</button>
             </div>
             <section v-if="preparedMedia" class="capture-review" aria-labelledby="captureReviewTitle">
@@ -91,13 +91,12 @@
                   <p>{{ preparedMedia.width }} × {{ preparedMedia.height }} · {{ formattedSourceSize }}</p>
                 </div>
                 <span :class="['quality-badge', { 'has-warning': qualityWarnings.length }]">
-                  {{ qualityWarnings.length ? '建議確認' : '清晰可用' }}
+                  {{ $t(qualityWarnings.length ? '建議確認' : '清晰可用') }}
                 </span>
               </div>
               <ul v-if="qualityWarnings.length" class="quality-warning-list">
-                <li v-for="warning in qualityWarnings" :key="warning.code">{{ warning.message }}</li>
+                <li v-for="warning in qualityWarnings" :key="warning.code">{{ $t(warning.message) }}</li>
               </ul>
-              <p v-else class="quality-pass">{{ $t("亮度、清晰度與解析度的初步檢查均可使用。") }}</p>
               <label class="single-item-check">
                 <input v-model="singleItemConfirmed" type="checkbox" />
                 <span>{{ $t("我已確認畫面以一件主要衣物為主") }}</span>
@@ -111,13 +110,12 @@
             </section>
           </div>
 
-          <p class="capture-privacy-note">{{ $t('照片不會自動發布。原圖保留私有；顯示版本會校正方向、縮放及壓縮，可選擇嘗試去除單色背景。') }}</p>
+          <p class="capture-privacy-note">{{ $t('自動去背，原照片可隨時還原。') }}</p>
         </div>
 
         <div v-if="preparedMedia" class="vision-controls">
           <button type="button" class="secondary" :disabled="visionBusy || isSubmitting" @click="recognizeGarment">{{ $t(visionState==='loading'?'正在載入辨識模型…':visionState==='analyzing'?'正在辨識衣物…':'辨識品名與分類') }}</button>
           <button v-if="visionBusy" type="button" class="text-button" @click="visionController?.abort();visionState='idle'">{{ $t('取消') }}</button>
-          <p class="form-hint">{{ $t('辨識在你的裝置上完成；首次使用會下載模型，照片不會傳送至辨識服務。') }}</p>
           <p v-if="visionMessage" role="status">{{ visionMessage }}</p>
         </div>
         <div class="form-grid">
@@ -172,24 +170,24 @@
               <button type="button" class="secondary" @click="addCustomBrand">{{ $t("加入") }}</button>
               <button type="button" class="text-button" @click="isAddingBrand = false">{{ $t("取消") }}</button>
             </div>
-            <p v-if="brandError" class="form-hint form-hint-error">{{ brandError }}</p>
+            <p v-if="brandError" class="form-hint form-hint-error">{{ $t(brandError) }}</p>
           </div>
 
           <div class="form-field">
             <label for="primary_color">{{ $t("主要顏色") }}</label>
             <select id="primary_color" v-model="form.primary_color" required @change="handleColorChange">
               <option value="">{{ $t("請選擇主要顏色") }}</option>
-              <option v-for="color in availableColors" :key="color" :value="color">{{ color }}</option>
+              <option v-for="color in availableColors" :key="color" :value="color">{{ $t(color) }}</option>
             </select>
           </div>
           <div class="form-field">
             <label for="secondary_color">{{ $t("色系") }}</label>
-            <input id="secondary_color" v-model="form.secondary_color" readonly :placeholder="$t(&quot;選擇主要顏色後自動帶入&quot;)" />
+            <input id="secondary_color" :value="$t(form.secondary_color)" readonly :placeholder="$t(&quot;選擇主要顏色後自動帶入&quot;)" />
           </div>
 
           <div v-if="colorAnalysisState !== 'idle'" class="image-intelligence-status" aria-live="polite">
             <span v-if="colorAnalysisState === 'loading'">{{ $t("正在分析圖片主色…") }}</span>
-            <span v-else-if="colorAnalysisState === 'success'">{{ $t("圖片主色建議：") }}{{ colorSuggestion.primaryColor }}（{{ colorSuggestion.colorFamily }}{{ $t("），可手動修改") }}</span>
+            <span v-else-if="colorAnalysisState === 'success'">{{ $t("圖片主色建議：") }}{{ $t(colorSuggestion.primaryColor) }}</span>
             <span v-else>{{ $t("無法自動辨識主色，請使用上方手動選擇。") }}</span>
           </div>
 
@@ -226,7 +224,7 @@
           <button v-else-if="isSubmitting" type="button" class="secondary" disabled>{{ $t("完成儲存中") }}</button>
           <button v-else type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
           <button type="submit" class="primary" :disabled="isSubmitting || mediaBusy || backgroundBusy || (!!mediaError && !preparedMedia)">
-            {{ submitButtonText }}
+            {{ $t(submitButtonText) }}
           </button>
         </div>
       </form>
@@ -245,7 +243,8 @@ import { analyzeImageColor } from '@/services/colorDetection';
 import { prepareClothingImage, blobToDataUrl } from '@/services/clothingMedia';
 import { suggestFromClothingFilename } from '@/services/clothingSuggestions';
 import { identifyClothing } from '@/services/clothingVision';
-import { removeSimpleBackground } from '@/services/simpleBackgroundRemoval';
+import { removeClothingBackground } from '@/services/clothingCutout';
+import GarmentCleanup from '@/components/closet/GarmentCleanup.vue';
 
 const appStore = useAppStore();
 const closetStore = useClosetStore();
@@ -295,6 +294,7 @@ const uploadCancelRequested = ref(false);
 const uploadProgress = ref(null);
 const categoryEdited = ref(false);
 const backgroundBusy = ref(false);
+let backgroundController;
 const backgroundRemoved = ref(false);
 const backgroundMessage = ref('');
 const filenameSuggestion = ref(false);
@@ -333,14 +333,12 @@ const mediaErrorTitle = computed(() => preparedMedia.value ? '尚未儲存完成
 const mediaBusy = computed(() => ['validating', 'processing'].includes(mediaStatus.value));
 const mediaStatusText = computed(() => ({
   selected: '照片已選擇',
-  validating: '正在檢查檔案格式與內容…',
-  processing: '正在校正方向並建立顯示用版本…',
-  ready: qualityWarnings.value.length ? '照片可使用，請查看下方建議' : '照片已準備完成',
-  uploading: uploadProgress.value === null
-    ? '正在安全上傳原圖與顯示用版本…'
-    : `正在安全上傳原圖… ${uploadProgress.value}%`,
-  saving: '正在儲存衣櫥資料…',
-  cancelling: '正在停止並清理未完成的上傳…',
+  validating: '正在檢查照片…',
+  processing: '正在處理…',
+  ready: qualityWarnings.value.length ? '建議確認' : '照片已準備完成',
+  uploading: '正在上傳…',
+  saving: '正在儲存…',
+  cancelling: '正在取消…',
   complete: '已儲存到衣櫥',
   error: '處理未完成，照片與表單內容已保留'
 }[mediaStatus.value] || ''));
@@ -361,6 +359,7 @@ const releasePreviewUrl = () => {
 };
 
 const resetMediaSelection = ({ keepExistingPreview = false } = {}) => {
+  backgroundController?.abort();
   visionController?.abort(); visionController=null; visionState.value='idle'; visionMessage.value='';
   selectionSequence += 1;
   releasePreviewUrl();
@@ -419,18 +418,20 @@ const applyColorSuggestion = (suggestion) => {
   form.secondary_color = suggestion.colorFamily;
 };
 
-const recognizeGarment = async () => {
+const recognizeGarment = async ({ automatic = false } = {}) => {
   if(!preparedMedia.value || visionBusy.value)return;
   const sequence=selectionSequence, originalName=form.name, originalCategory=form.category;
+  const allowName=!automatic || !originalName || originalName===lastSuggestedName;
+  const allowCategory=!automatic || !categoryEdited.value;
   visionController?.abort(); visionController=new AbortController(); visionMessage.value=''; visionState.value='loading';
   try {
-    const suggestion=await identifyClothing(preparedMedia.value.displayBlob,{signal:visionController.signal,onState:state=>{visionState.value=state;}});
+    const suggestion=await identifyClothing(preparedMedia.value.displayBlob,{signal:visionController.signal,onState:state=>{if(sequence===selectionSequence)visionState.value=state;}});
     if(sequence!==selectionSequence || !appStore.isItemFormOpen)return;
     if(suggestion){
-      if(form.name===originalName){form.name=t(suggestion.nameKey);lastSuggestedName=form.name;}
-      if(form.category===originalCategory){form.category=suggestion.category;categoryWasSuggested=true;categoryEdited.value=false;}
-      filenameSuggestion.value=false;visionMessage.value=t('已提供品名與分類建議，請確認後儲存。');
-    } else visionMessage.value=t('這張照片的分類不明確，請手動確認品名與分類。');
+      if(allowName && form.name===originalName){form.name=t(suggestion.nameKey);lastSuggestedName=form.name;}
+      if(allowCategory && !categoryEdited.value && form.category===originalCategory){form.category=suggestion.category;categoryWasSuggested=true;}
+      filenameSuggestion.value=false;visionMessage.value=t('請確認品名與分類。');
+    } else visionMessage.value=t('無法確定分類，請自行選擇。');
     visionState.value='done';
   } catch(error){if(error.name!=='AbortError' && sequence===selectionSequence){visionState.value='error';visionMessage.value=t('辨識暫時無法完成，你仍可自行填寫。');}}
 };
@@ -477,18 +478,23 @@ const tryBackgroundRemoval = async () => {
   const sequence = selectionSequence;
   backgroundBusy.value = true;
   backgroundMessage.value = '';
+  backgroundController = new AbortController();
   try {
-    const result = await removeSimpleBackground(originalDisplay.displayBlob);
+    const result = await removeClothingBackground(originalDisplay.displayBlob, {
+      category: form.category,
+      signal: backgroundController.signal,
+      onState: state => { if (sequence === selectionSequence) backgroundMessage.value = t(state === 'loading' ? '首次使用需下載去背模型，照片留在此裝置。' : state === 'queued' ? '等待自動去背…' : '正在自動去背…'); }
+    });
     if (sequence !== selectionSequence) return;
     if (!result) {
-      backgroundMessage.value = t('背景較複雜，請使用原照片。');
+      backgroundMessage.value = t('去背未完成，可重試或保留原照片。');
       return;
     }
     useDisplayBlob(result);
     backgroundRemoved.value = true;
-    backgroundMessage.value = t('請確認衣物邊緣完整；不理想可還原照片。');
+    backgroundMessage.value = '';
   } catch {
-    if (sequence === selectionSequence) backgroundMessage.value = t('背景較複雜，請使用原照片。');
+    if (sequence === selectionSequence) backgroundMessage.value = t('去背未完成，可重試或保留原照片。');
   } finally {
     if (sequence === selectionSequence) backgroundBusy.value = false;
   }
@@ -561,6 +567,7 @@ watch(
 const handleFileChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  backgroundController?.abort();
   rememberCaptureGuide();
   visionController?.abort(); visionState.value='idle'; visionMessage.value='';
   const sequence = ++selectionSequence;
@@ -601,6 +608,8 @@ const handleFileChange = async (e) => {
     warningsAcknowledged.value = nextMedia.warnings.length === 0;
     mediaStatus.value = 'ready';
     void analyzeSelectedImage(previewObjectUrl, sequence);
+    await tryBackgroundRemoval();
+    if(sequence === selectionSequence && appStore.isItemFormOpen && !isEdit.value) void recognizeGarment({automatic:true});
   } catch (error) {
     if (sequence !== selectionSequence) return;
     mediaStatus.value = 'error';

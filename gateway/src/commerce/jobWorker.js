@@ -33,7 +33,7 @@ export class CommerceJobWorker {
       } else if (result?.task_status === 'success') {
         let resultPath = null;
         let resultData = null;
-        if (job.kind === 'try_on') {
+        if (job.kind === 'try_on' || job.kind === 'garment_cleanup') {
           const image = await this.provider.resultImage(result);
           resultPath = `ai-generated/${job.user_id}/${job.id}.jpg`;
           await this.storage.uploadPrivate(resultPath, image, { upsert: true });

@@ -186,8 +186,9 @@ describe('SOS clothing preview and selection UX', () => {
     await flushPromises();
     await wrapper.find('#sosTitle').setValue('A day out');
     await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('.sos-image-toggle input').setValue(true);
     await wrapper.find('#sosCoverMode').setValue('closet');
-    await wrapper.find('select[aria-label]').setValue(item.id);
+    await wrapper.find('select[aria-label="選擇衣物圖片"]').setValue(item.id);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(upload).toHaveBeenCalledOnce();
@@ -212,8 +213,9 @@ describe('SOS clothing preview and selection UX', () => {
     await flushPromises();
     await wrapper.find('#sosTitle').setValue('A day out');
     await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('.sos-image-toggle input').setValue(true);
     await wrapper.find('#sosCoverMode').setValue('closet');
-    await wrapper.find('select[aria-label]').setValue(item.id);
+    await wrapper.find('select[aria-label="選擇衣物圖片"]').setValue(item.id);
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(publish).not.toHaveBeenCalled();

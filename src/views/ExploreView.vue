@@ -1,6 +1,6 @@
 <template>
-  <section class="page active" id="explorePage">
-    <header class="explore-hero">
+  <section class="page active app-page" id="explorePage">
+    <header class="explore-hero ootie-page-heading">
       <div>
         <h1>{{ $t("探索") }}</h1>
       </div>
