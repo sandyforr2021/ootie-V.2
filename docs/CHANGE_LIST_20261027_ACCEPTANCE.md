@@ -44,3 +44,10 @@
 ## 發布
 
 本輪以遠端 88ab7dc 合併既有工作，保留遠端的天氣與翻譯等改動。發布狀態須以 Render live 與 X-OOTIE-Revision 相符為準；推送完成本身不代表網站已更新。部署完成後追加確切版本。
+
+### 2026-10-28 線上驗證
+
+- 程式版本：fd374a2363183a375b0bc78b659deb97058a52fd；Render deploy dep-dbgpvu7lk1mc7396pnk0 於 07:12:14 UTC 進入 live。原網址與免費方案維持。
+- /healthz、/closet、/shop?tab=album、/credits 回傳 200，網頁的 X-OOTIE-Revision 與上述版本相同。辨識 WASM 資源 200、application/wasm；部署後查詢的 error 級日誌為空。
+- 舊備份評審帳密回傳 invalid_credentials，沒有重設帳號。使用者改以現行帳密登入後，線上實際看見 Maya 的 20 件衣物、3 件想買商品及私人相簿：整套結果 3/3、目前可用 16 units。這次線上驗收只讀取既有結果，沒有重送產圖。
+- 本機、GitHub 與線上程式已對齊；之後僅追加此驗收文件，不需要再次部署同一份程式。
