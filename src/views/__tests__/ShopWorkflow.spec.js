@@ -3,10 +3,11 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useAppStore } from '@/stores/app';
 import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, products: [], jobs: [] }));
+const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, products: [], jobs: [], saved: [], savedClothing: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
@@ -14,10 +15,12 @@ vi.mock('@/services/aiGateway', () => ({
 }));
 vi.mock('@/stores/closet', () => ({ useClosetStore: () => ({ loadRemoteItems: vi.fn() }) }));
 vi.mock('@/stores/ootd', () => ({ useOotdStore: () => ({ loadRemotePosts: vi.fn(async()=>true) }) }));
-vi.mock('@/services/socialMetrics', () => ({ listSavedOutfits: vi.fn(async()=>[]) }));
+vi.mock('@/services/socialMetrics', () => ({ listSavedOutfits: vi.fn(async()=>fixture.saved) }));
+vi.mock('@/services/clothingRepository', async importOriginal => ({ ...await importOriginal(), getPublicItemsByIds: vi.fn(async()=>fixture.savedClothing) }));
 import ShopView from '../ShopView.vue';
 import WishlistPanel from '@/components/closet/WishlistPanel.vue';
 import { aiGateway } from '@/services/aiGateway';
+import { getPublicItemsByIds } from '@/services/clothingRepository';
 let wrapper;
 async function render(component=ShopView, path='/shop') {
   const router = createRouter({ history:createMemoryHistory(), routes:[{path:'/shop',component:ShopView},{path:'/closet',component:WishlistPanel}] });
@@ -33,14 +36,27 @@ describe('Shopping studio workflow', () => {
     localStorage.clear(); sessionStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
     const auth=useAuthStore(); auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
     auth.profileIdentity={status:'PROFILE_READY',profileId:'profile-unit',profile:{id:'profile-unit'}};
-    fixture.credits=100; fixture.points=100; fixture.jobs=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
+    fixture.credits=100; fixture.points=100; fixture.jobs=[]; fixture.saved=[]; fixture.savedClothing=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
       if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,pointBalance:fixture.points,costs:{try_on:2,skin_tone:20}};
       if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
   });
-  afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); });
+  afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+  it('resolves saved public clothing independently of the general feed image limit',async()=>{
+    vi.stubEnv('VITE_SUPABASE_URL','https://project.supabase.co');
+    const item={id:'saved-shirt',name:'Posted green top',category:'Tops',photo:'https://project.supabase.co/storage/v1/object/public/ootie-ootd-images/ootd/top.webp'};
+    fixture.saved=[{target_type:'OOTD',target_id:'saved-post'}]; fixture.savedClothing=[item];
+    useAppStore().ootdPosts=[{id:'saved-post',item_ids:[item.id],wearing:[item],tagged_items:[]}];
+    await render(); await wrapper.findAll('.studio-source-tabs button')[2].trigger('click');
+    expect(getPublicItemsByIds).toHaveBeenCalledWith([item.id]);
+    expect(wrapper.text()).toContain(item.name);
+    await wrapper.find('.shop-product-image').trigger('click');
+    await wrapper.find('.studio-next button').trigger('click');
+    expect(wrapper.text()).toContain('選擇模特兒');
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs' && body)).toEqual([]);
+  });
   it('does not allow progressing to a photo or submitting without an item',async()=>{
     await render();
     expect(wrapper.findAll('.studio-steps button')[1].attributes('disabled')).toBeDefined();

@@ -1,3 +1,5 @@
+import { publicClothingSource } from '../../shared/publicClothingSource.js';
+
 const asId = (value) => String(value || '').trim();
 
 export const resolvePostTaggedItems = (post, availableItems = []) => {
@@ -33,7 +35,7 @@ export const resolvePostTaggedItems = (post, availableItems = []) => {
       brand: item?.brand || snapshot?.brand || '',
       category: item?.category || snapshot?.category || '',
       primary_color: item?.primary_color || snapshot?.primary_color || '',
-      can_try_on: Boolean(item?.photo_display_path),
+      can_try_on: Boolean(item?.photo_display_path || publicClothingSource(item?.photo, import.meta.env.VITE_SUPABASE_URL)),
       removed: !item && !snapshot
     };
   });

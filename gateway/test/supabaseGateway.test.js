@@ -64,6 +64,27 @@ test('unshared or revoked clothing never falls back to service-role row access',
   assert.equal(calls.length, 1);
 });
 
+test('published older clothing is supported only after viewer row authorization', async () => {
+  const itemId = '33333333-3333-4333-8333-333333333333';
+  const profileId = '22222222-2222-4222-8222-222222222222';
+  const image = await sharp({ create: { width: 256, height: 256, channels: 3, background: 'white' } }).webp().toBuffer();
+  const calls = [];
+  let photo = 'https://project.supabase.co/storage/v1/object/public/ootie-ootd-images/ootd/shirt.webp';
+  const gateway = new SupabaseGateway({ config, fetchImpl: async (url, options) => {
+    calls.push({ url, options });
+    if (url.includes('/ootie_clothing_items?')) return Response.json([{ id: itemId, owner_id: profileId, photo }]);
+    if (url.includes('/ootie_profiles?')) return Response.json([{ user_id: USER_ID }]);
+    return new Response(image, { headers: { 'content-type': 'image/webp' } });
+  } });
+  assert.equal((await gateway.sharedClothingImage({ accessToken: 'viewer-session' }, itemId)).mimeType, 'image/jpeg');
+  assert.equal(calls[0].options.headers.Authorization, 'Bearer viewer-session');
+  assert.equal(calls[2].url, 'https://project.supabase.co/storage/v1/object/authenticated/ootie-ootd-images/ootd/shirt.webp');
+  photo = 'https://project.supabase.co/storage/v1/object/public/ootie-ai-private/person.jpg';
+  const countBefore = calls.length;
+  await assert.rejects(gateway.sharedClothingImage({ accessToken: 'viewer-session' }, itemId), { code: 'ITEM_NOT_FOUND' });
+  assert.equal(calls.length, countBefore + 1);
+});
+
 test('shared clothing rejects originals and forged cross-owner display references before storage access', async () => {
   const itemId = '33333333-3333-4333-8333-333333333333';
   for (const path of [`closet/${USER_ID}/${itemId}/op/original.jpg`, `closet/99999999-9999-4999-8999-999999999999/${itemId}/op/display.jpg`]) {

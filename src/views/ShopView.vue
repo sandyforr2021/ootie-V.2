@@ -9,6 +9,8 @@ import { useAppStore } from '@/stores/app';
 import { useClosetStore } from '@/stores/closet';
 import { useOotdStore } from '@/stores/ootd';
 import { listSavedOutfits } from '@/services/socialMetrics';
+import { getPublicItemsByIds } from '@/services/clothingRepository';
+import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
 import { aiGateway, createGenerationId } from '@/services/aiGateway';
 import { preprocessPersonImage } from '@/services/imageUpload';
 import { prepareClothingImage } from '@/services/clothingMedia';
@@ -23,6 +25,7 @@ const isCommunity=computed(()=>route.name==='TryonCommunity');
 const tab = ref(['album','community','activity','wardrobe','saved','links'].includes(route.query.tab) ? route.query.tab : (isCommunity.value?'community':'wishlist'));
 const products = ref([]); const jobs = ref([]); const photos = ref([]); const posts = ref([]);
 const images = ref({}); const selected = ref([]); const selectedClothing = ref([]); const selectedSaved = ref([]); const savedEntries = ref([]); const selectionSource = ref('wishlist'); const selectedPhoto = ref(''); const consent = ref(false);
+const savedClothing = ref([]);
 const capabilities = ref({ enabled:false, remainingUnits:0, costs:{ try_on:2, skin_tone:20 } });
 const metrics = ref(null); const busy = ref(''); const loading = ref(false); const error = ref(''); const notice = ref('');
 let initialStepResolved = false;
@@ -41,7 +44,7 @@ const savedItems = computed(() => {
   const found = new Map();
   for (const entry of savedEntries.value.filter(item=>item.target_type==='OOTD')) {
     const post=app.ootdPosts.find(item=>String(item.id)===String(entry.target_id));
-    for (const item of post?.tagged_items || []) if (item.id && item.can_try_on && !item.removed && !found.has(item.id)) found.set(item.id,{...item,postId:post.id});
+    for (const item of resolvePostTaggedItems(post, savedClothing.value)) if (item.id && item.can_try_on && !item.removed && !found.has(item.id)) found.set(item.id,{...item,postId:post.id});
   }
   return [...found.values()];
 });
@@ -204,7 +207,15 @@ async function refresh() {
       const [saved] = await Promise.all([listSavedOutfits(identity.profileId),ootd.loadRemotePosts()]);
       if (!identityCurrent(identity)) return;
       savedEntries.value = saved;
-    } catch { if (!identityCurrent(identity)) return; savedEntries.value=[]; }
+      const savedPostIds = new Set(saved.filter(entry => entry.target_type === 'OOTD').map(entry => String(entry.target_id)));
+      const itemIds = [...new Set(app.ootdPosts.filter(post => savedPostIds.has(String(post.id))).flatMap(post => post.item_ids || []))];
+      const readableItems = [];
+      for (let offset = 0; offset < itemIds.length; offset += 100) {
+        readableItems.push(...await getPublicItemsByIds(itemIds.slice(offset, offset + 100)));
+        if (!identityCurrent(identity)) return;
+      }
+      savedClothing.value = readableItems;
+    } catch { if (!identityCurrent(identity)) return; savedEntries.value=[]; savedClothing.value=[]; }
     const nextMetrics=await api('metrics',undefined,identity.accessToken);
     if (identityCurrent(identity)) metrics.value=nextMetrics;
   } catch(err) { if (identityCurrent(identity)) report(err); }
@@ -424,6 +435,7 @@ watch([productLimit,jobLimit,step,tab,choosePhoto],hydrateVisible);
 watch(selectedPhoto,()=>{consent.value=false;});
 watch(()=>[auth.session?.user?.id,auth.profileId],()=>{
   sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; savedEntries.value=[]; selectedPhoto.value=''; pendingBatch.value=readPending(auth.session?.user?.id); metrics.value=null; matchingProduct.value=null; shareJob.value=null; purchasedProduct.value=null; consent.value=false; busy.value=''; loading.value=false; error.value=''; notice.value=''; comparisonIds.value=[]; form.value={title:'',sourceUrl:'',imageUrl:'',imageData:'',category:'upper_body',color:'#c8bba9'};
+  savedClothing.value=[];
   for(const url of urls.values()) URL.revokeObjectURL(url); urls.clear(); images.value={};
 },{flush:'sync',immediate:true});
 watch(()=>[auth.session?.user?.id,auth.user?.id,auth.profileIdentity?.authUserId,auth.profileId,auth.isMember],()=>{if(identityReady()) void refresh();},{immediate:true});

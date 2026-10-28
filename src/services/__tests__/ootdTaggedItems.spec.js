@@ -1,7 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolvePostTaggedItems } from '../ootdTaggedItems';
 
 describe('canonical OOTD tagged item resolver', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it('enables published older images only from a readable canonical row', () => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://project.supabase.co');
+    const source = { id: 'shirt', photo: 'https://project.supabase.co/storage/v1/object/public/ootie-ootd-images/ootd/shirt.webp' };
+    const post = { item_ids: ['shirt'], wearing: [source] };
+    expect(resolvePostTaggedItems(post, [source])[0].can_try_on).toBe(true);
+    expect(resolvePostTaggedItems(post)[0].can_try_on).toBe(false);
+    expect(resolvePostTaggedItems(post, [{ ...source, photo: 'https://other.example/shirt.webp' }])[0].can_try_on).toBe(false);
+  });
   it('matches public snapshots by item id rather than array position', () => {
     const resolved = resolvePostTaggedItems({
       item_ids: ['item-b', 'item-a'],
