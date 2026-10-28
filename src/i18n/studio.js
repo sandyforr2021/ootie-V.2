@@ -1,4 +1,5 @@
 export const studioMessages = `
+登入狀態已失效，請重新登入。|Your session has expired. Please sign in again.|ログインの有効期限が切れました。もう一度ログインしてください。|Tu sesión ha caducado. Vuelve a iniciar sesión.
 衣櫥搭配|Wardrobe pairings|ワードローブでコーデ|Combinar mi armario
 收藏靈感|Saved inspiration|保存したアイデア|Inspiración guardada
 收藏的商品連結|Saved product links|保存した商品リンク|Enlaces guardados

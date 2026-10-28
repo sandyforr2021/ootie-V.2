@@ -79,8 +79,9 @@ export class SupabaseGateway {
       throw new GatewayError('AUTH_UNAVAILABLE', 503, 'Supabase Auth could not be reached');
     }
     if (!response.ok) {
-      const failure=await response.json().catch(()=>null);
-      const code=typeof failure?.code==='string' && /^[a-z_]{1,64}$/i.test(failure.code)?failure.code:undefined;
+      const failure = await response.json().catch(() => null);
+      const rawCode = typeof failure?.code === 'string' ? failure.code : failure?.error_code;
+      const code = typeof rawCode === 'string' && /^[a-z_]{1,64}$/i.test(rawCode) ? rawCode : undefined;
       throw new GatewayError('AUTH_REQUIRED',401,'Supabase session is invalid or expired',{status:response.status,code});
     }
     const user = await response.json();

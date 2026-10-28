@@ -13,6 +13,29 @@ const config = {
   }
 };
 
+test('revoked sessions fail closed with sanitized legacy and versioned Auth errors', async () => {
+  for (const failure of [
+    { code: 403, error_code: 'session_not_found', msg: 'private upstream details' },
+    { code: 'session_not_found', message: 'private upstream details' },
+    { code: 403, error_code: 'unsafe: private upstream details' }
+  ]) {
+    let calls = 0;
+    const gateway = new SupabaseGateway({ config, fetchImpl: async () => {
+      calls += 1;
+      return Response.json(failure, { status: 403 });
+    } });
+    await assert.rejects(gateway.verifyAccessToken('Bearer revoked-session'), error => {
+      assert.equal(error.code, 'AUTH_REQUIRED');
+      assert.equal(error.status, 401);
+      assert.equal(error.details.status, 403);
+      assert.equal(error.details.code, failure.error_code?.startsWith('unsafe:') ? undefined : 'session_not_found');
+      assert.ok(!JSON.stringify(error).includes('private upstream details'));
+      return true;
+    });
+    assert.equal(calls, 1);
+  }
+});
+
 test('shared clothing authorizes with the viewer JWT before reading only the owner display image', async () => {
   const itemId = '33333333-3333-4333-8333-333333333333';
   const profileId = '22222222-2222-4222-8222-222222222222';

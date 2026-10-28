@@ -15,7 +15,7 @@
 | `.audit-local.json`、`.test-unit-merge.json` | 2 份本機驗證輸出 | 不納入網站或這次 GitHub 提交；若不再需要可列入本機回收清單。 |
 | `artifacts/qa/` | 本機驗收截圖 | 不部署、不納入這次 GitHub 提交；可自行留作比對。 |
 | `.codex/` | 本機工作輔助資料 | 不部署、不納入提交，不自動刪除。 |
-| `public/demo/garments/`、`public/demo/ootd/` | 43 件衣物、36 張穿搭 | 舊資料來源與測試仍有引用；不能只刪圖片。應與舊帳號、貼文、constants 和測試一起做下一次完整移除。 |
+| `public/demo/garments/`、`public/demo/ootd/` | 43 件衣物、36 張穿搭 | 指定內建帳號、貼文與測試仍有引用，全部保留；不因路徑含 demo 就列為舊資料。 |
 | `supabase/personal_baseline/` 及既有 migration | 資料庫基線與歷史 | 不是垃圾檔；驗證使用 SHA-256 與檔名登錄，不刪除或重編版本。 |
 
 本機目前沒有 `/usr/bin/trash`。依目前 AGENTS.md，實際移除本機檔案前須先決定可用的回收方式；這不影響部署與清單盤點。

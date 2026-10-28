@@ -98,6 +98,7 @@ function clearPending() {
 }
 
 const errorMessages = {
+  AUTH_REQUIRED:['登入狀態已失效，請重新登入。','Your session has expired. Please sign in again.'],
   INSUFFICIENT_POINTS:['平台點數不足。','Not enough platform points.'],
   DAILY_GENERATION_LIMIT:['已達每日 2 次生成上限。','Daily limit of 2 generations reached.'],
   FREE_BUDGET_EXHAUSTED:['免費額度不足，這次沒有送出新的產圖。','There are not enough available credits. No new image job was submitted.'],
