@@ -13,7 +13,10 @@ export function createCommerceClient({ baseUrl = import.meta.env.VITE_OOTIE_AI_G
       });
     } catch { throw new AiGatewayError('NETWORK_UNCERTAIN', '連線中斷。重新確認工作列表後，可用同一提交編號重試。'); }
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new AiGatewayError(data?.error?.code || 'COMMERCE_UNAVAILABLE', data?.error?.message || '暫時無法完成，請稍後再試。', response.status);
+    if (!response.ok) {
+      console.warn(JSON.stringify({event:'studio_request_failed',status:response.status,code:data?.error?.code || 'COMMERCE_UNAVAILABLE'}));
+      throw new AiGatewayError(data?.error?.code || 'COMMERCE_UNAVAILABLE', data?.error?.message || '暫時無法完成，請稍後再試。', response.status);
+    }
     return data;
   };
   return { request };
