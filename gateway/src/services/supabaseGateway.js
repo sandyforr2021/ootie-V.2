@@ -85,11 +85,11 @@ export class SupabaseGateway {
     return rows[0];
   }
 
-  async sharedClothingImage(user, itemId) {
+  async accessibleSharedClothing(user, itemId) {
     assert(user?.accessToken, 'AUTH_REQUIRED', 401);
     assert(UUID_PATTERN.test(itemId), 'ITEM_NOT_FOUND', 404);
     // Authorize the row with the viewer JWT, never with service-role bypass.
-    const response = await this.fetchImpl(`${this.url}/rest/v1/ootie_clothing_items?id=eq.${encodeURIComponent(itemId)}&select=id,owner_id,photo_display_path&limit=1`, {
+    const response = await this.fetchImpl(`${this.url}/rest/v1/ootie_clothing_items?id=eq.${encodeURIComponent(itemId)}&select=id,owner_id,name,name_zh,category,photo_display_path&limit=1`, {
       headers: { apikey: this.publishableKey, Authorization: `Bearer ${user.accessToken}` },
       signal: AbortSignal.timeout(15000)
     });
@@ -98,6 +98,11 @@ export class SupabaseGateway {
     assert(item?.id === itemId && UUID_PATTERN.test(item.owner_id), 'ITEM_NOT_FOUND', 404);
     // Only a display derivative can cross this bridge; original paths are ignored.
     assert(typeof item.photo_display_path === 'string' && /\/display\.(?:jpe?g|png|webp)$/i.test(item.photo_display_path), 'ITEM_NOT_FOUND', 404);
+    return item;
+  }
+
+  async sharedClothingImage(user, itemId) {
+    const item = await this.accessibleSharedClothing(user,itemId);
     const owners = await this.serviceRequest(`/rest/v1/ootie_profiles?id=eq.${encodeURIComponent(item.owner_id)}&select=user_id&limit=1`);
     const ownerUserId = owners?.[0]?.user_id;
     assert(UUID_PATTERN.test(ownerUserId || ''), 'ITEM_NOT_FOUND', 404);

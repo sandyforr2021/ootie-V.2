@@ -54,7 +54,7 @@
       </div>
       <button v-if="isSelf" type="button" class="profile-stat profile-stat-button" @click="openSavedOutfits">
         <strong>{{ formatMetric(profileMetrics.saved) }}</strong>
-        <span>{{ t("我收藏的穿搭") }}</span>
+        <span>{{ t("我的收藏") }}</span>
         <small v-if="profileMetrics.savedError">{{ t("暫時無法取得") }}</small>
       </button>
       <button v-if="isSelf" type="button" class="profile-stat profile-stat-button" @click="openHelpHistory">
@@ -74,6 +74,8 @@
       </div>
     </div>
 
+    <SavedOutfitsCollection v-if="isSelf && route.query.tab === 'saved'" embedded />
+
     <router-link v-if="isSelf" to="/shop?tab=activity" class="profile-membership-card">
       <div>
 
@@ -85,7 +87,7 @@
 
     <section class="profile-settings" v-if="isSelf">
       <h2>{{ $t("衣櫥設定") }}</h2>
-      <div class="setting-row">
+      <div id="closet-privacy" class="setting-row">
         <div>
           <strong>{{ $t("公開我的衣櫥") }}</strong>
           <p>{{ $t("讓衣友可以查看你的單品並提供穿搭建議。") }}</p>
@@ -149,6 +151,7 @@
 
 <script setup>
 import { t, tf, formatDate } from '@/i18n';
+import SavedOutfitsCollection from '@/components/bookmarks/SavedOutfitsCollection.vue';
 import { isFixtureContent } from '@/services/contentAuthenticity';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -300,7 +303,7 @@ watch(() => authStore.profileId, async (profileId) => {
 const formatMetric = (value) => value === null || value === undefined ? '—' : value;
 
 const openSavedOutfits = () => {
-  router.push({ path: '/shop', query: { tab: 'saved' } });
+  router.push({ path: '/profile', query: { tab: 'saved' } });
 };
 
 const openHelpHistory = () => {

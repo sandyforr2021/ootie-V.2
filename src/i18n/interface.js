@@ -1,4 +1,64 @@
 export const interfaceMessages = `
+這個品類暫不支援試穿。|Try-on is not available for this category yet.|このカテゴリーは現在試着に対応していません。|Esta categoría aún no admite pruebas virtuales.
+查看最愛|View favorites|お気に入りを見る|Ver favoritos
+試穿額度|Try-on credits|試着クレジット|Créditos de prueba
+查看試穿額度|View try-on credits|試着クレジットを見る|Ver créditos de prueba
+查看目前可用的共享試穿額度。|View the shared credits currently available for try-ons.|現在利用できる共有試着クレジットを確認できます。|Consulta los créditos compartidos disponibles para pruebas.
+登入後查看試穿額度。|Sign in to view try-on credits.|試着クレジットを見るにはログインしてください。|Inicia sesión para ver los créditos de prueba.
+額度資訊暫時無法載入。|Credit information is temporarily unavailable.|クレジット情報を読み込めません。|La información de créditos no está disponible temporalmente.
+可用共享額度|Available shared credits|利用可能な共有クレジット|Créditos compartidos disponibles
+這是網站目前設定的共享預算，並非你的個人餘額。服務送出前還會核對實際可用額度。|This is the site's shared budget, not your personal balance. Availability is checked again before a job is sent.|これはサイトの共有予算であり、個人残高ではありません。送信前に利用可能なクレジットを再確認します。|Este es el presupuesto compartido del sitio, no tu saldo personal. La disponibilidad se comprueba antes del envío.
+使用方式|How it works|利用方法|Cómo funciona
+每件試穿預留 {count} 額度。|Each try-on reserves {count} credits.|1回の試着につき{count}クレジットを確保します。|Cada prueba reserva {count} créditos.
+有效期限|Expires|有効期限|Vencimiento
+目前沒有付款或自動加值。|There are no payments or automatic top-ups.|現在、決済や自動チャージはありません。|Actualmente no hay pagos ni recargas automáticas.
+返回試穿工作室|Back to try-on studio|試着スタジオに戻る|Volver al estudio de prueba
+求救主圖（選填）|Cover image (optional)|カバー画像（任意）|Imagen de portada (opcional)
+不使用主圖|No cover image|カバー画像なし|Sin imagen de portada
+從公開衣物選擇|Choose a shared wardrobe item|公開アイテムから選ぶ|Elegir una prenda compartida
+選擇主圖衣物|Choose a wardrobe cover|カバーにするアイテムを選ぶ|Elige una prenda para la portada
+發布後，選用的主圖會公開顯示。|The selected cover will be visible publicly after posting.|投稿後、選択したカバー画像は公開されます。|La portada elegida será pública después de publicar.
+請選擇主圖或改為不使用主圖。|Choose a cover image or select no cover.|カバー画像を選ぶか、画像なしを選択してください。|Elige una portada o selecciona no usar portada.
+主圖上傳失敗，請再試一次。|Could not upload the cover. Please try again.|カバー画像をアップロードできませんでした。|No se pudo subir la portada. Inténtalo de nuevo.
+求救貼文已刪除。|Style request deleted.|スタイル相談を削除しました。|Solicitud de estilo eliminada.
+貼文已刪除，但主圖清理尚未完成。|The request was deleted, but its cover could not yet be removed.|投稿は削除されましたが、カバー画像の削除は完了していません。|La solicitud se eliminó, pero aún no se pudo borrar la portada.
+求救主圖|Style request cover|スタイル相談のカバー|Portada de la solicitud
+確定刪除這則求救及其搭配建議？此動作無法復原。|Delete this request and its outfit suggestions? This cannot be undone.|この相談とコーデ提案を削除しますか？元に戻せません。|¿Eliminar esta solicitud y sus sugerencias? No se puede deshacer.
+選擇衣物來源|Choose a source|アイテムの選択元|Elige el origen de las prendas
+收藏穿搭|Saved outfits|保存したコーデ|Conjuntos guardados
+收藏的穿搭目前沒有可選擇的公開衣物。|There are no available shared garments in your saved outfits.|保存したコーデに選択できる公開アイテムはありません。|No hay prendas compartidas disponibles en tus conjuntos guardados.
+這件衣物已從衣櫥選取。|This item is already selected from your wardrobe.|このアイテムはワードローブから選択済みです。|Ya seleccionaste esta prenda de tu armario.
+這件衣物已從收藏穿搭選取。|This item is already selected from a saved outfit.|このアイテムは保存したコーデから選択済みです。|Ya seleccionaste esta prenda de un conjunto guardado.
+試穿模擬|Virtual try-on|バーチャル試着|Prueba virtual
+選擇模特兒|Choose a model|モデルを選ぶ|Elige una modelo
+模擬試穿|Try on|試着する|Probar
+下一步：模擬試穿|Next: try on|次へ：試着する|Siguiente: prueba virtual
+我的收藏|My saved items|保存したアイテム|Mis guardados
+衣櫥衣物|My wardrobe|ワードローブの服|Mi armario
+收藏想買的商品，之後再試穿。|Save pieces you love and try them on later.|気になる商品を保存して後で試着できます。|Guarda tus prendas favoritas y pruébatelas después.
+想買清單還沒有商品。|Your wishlist is empty.|ほしいものリストはまだ空です。|Tu lista de deseos está vacía.
+想買清單暫時無法載入。|Your wishlist is temporarily unavailable.|ほしいものリストを読み込めません。|La lista de deseos no está disponible temporalmente.
+確定刪除這張試穿結果？此動作無法復原。|Delete this try-on result? This cannot be undone.|この試着結果を削除しますか？元に戻せません。|¿Eliminar este resultado de prueba? Esta acción no se puede deshacer.
+試穿結果已刪除。|Try-on result deleted.|試着結果を削除しました。|Resultado de prueba eliminado.
+自訂風格|Custom style|カスタムスタイル|Estilo personalizado
+輸入自訂風格|Enter a custom style|スタイルを入力|Escribe un estilo personalizado
+請先開啟「公開衣櫥」功能，才能發布求救。|Turn on “Share my wardrobe” before posting a style request.|スタイル相談を投稿するには「ワードローブを公開」をオンにしてください。|Activa «Compartir mi armario» antes de publicar una solicitud.
+前往我的衣櫥|Go to my wardrobe|ワードローブへ|Ir a mi armario
+目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。|Your wardrobe is shared. Others can suggest outfits using your clothes.|ワードローブは公開中です。ほかの人があなたの服でコーデを提案できます。|Tu armario está compartido. Otras personas pueden sugerir conjuntos con tus prendas.
+追蹤中的貼文|Posts from people you follow|フォロー中の投稿|Publicaciones de personas que sigues
+追蹤衣友後，就能在這裡看到他們的貼文。|Follow people to see their posts here.|フォローすると、ここに投稿が表示されます。|Sigue a otras personas para ver sus publicaciones aquí.
+OOTD 熱門單品|Most featured in OOTDs|OOTDによく登場するアイテム|Prendas más usadas en OOTD
+OOTD 出現次數 Top 5|Top 5 by OOTD appearances|OOTD登場回数トップ5|Las 5 prendas más presentes en OOTD
+OOTD 單品紀錄|OOTD item history|OOTDアイテム履歴|Historial de prendas en OOTD
+出現在 {count} 篇 OOTD|Featured in {count} OOTD posts|{count}件のOOTDに登場|Aparece en {count} publicaciones OOTD
+尚無標記衣物的 OOTD。|No OOTD posts with tagged items yet.|アイテムをタグ付けしたOOTDはまだありません。|Aún no hay publicaciones OOTD con prendas etiquetadas.
+OOTD 統計暫時無法載入。|OOTD statistics are temporarily unavailable.|OOTD統計を読み込めません。|Las estadísticas OOTD no están disponibles temporalmente.
+留言選項|Comment options|コメントのオプション|Opciones del comentario
+檢舉|Report|報告|Denunciar
+檢舉功能準備中。|Reporting is coming soon.|報告機能は準備中です。|La función de denuncia estará disponible próximamente.
+留言刪除失敗，請再試一次。|Could not delete the comment. Please try again.|コメントを削除できませんでした。もう一度お試しください。|No se pudo eliminar el comentario. Inténtalo de nuevo.
+加入最愛|Add to favorites|お気に入りに追加|Añadir a favoritos
+移除最愛|Remove from favorites|お気に入りから削除|Quitar de favoritos
 首頁|Home|ホーム|Inicio
 購物試穿|Shopping studio|ショッピングスタジオ|Estudio de compras
 探索|Explore|見つける|Explorar

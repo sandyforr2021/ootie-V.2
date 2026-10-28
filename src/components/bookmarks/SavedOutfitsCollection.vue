@@ -2,7 +2,7 @@
   <section class="page active saved-outfits-page" :class="{'studio-collection':embedded}">
     <header class="core-page-hero saved-outfits-page-hero">
       <div>
-                <h2>{{ $t('收藏靈感') }}</h2>
+                <h2>{{ $t('我的收藏') }}</h2>
         <p class="intro">{{ $t('收藏的穿搭與衣友求救，隨時回來找靈感。') }}</p>
       </div>
       <p class="core-page-note" aria-hidden="true">looks worth<br />remembering ♡</p>

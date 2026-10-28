@@ -3,7 +3,7 @@
     <BrandMark class="mobile-brand" />
     <div class="top-actions">
       <LanguageSelect />
-      <button class="icon-button" :aria-label="$t(&quot;通知&quot;)" :disabled="!authStore.initialized" :aria-busy="!authStore.initialized" @click="openNotifications">
+      <button class="icon-button topbar-notification" :aria-label="$t(&quot;通知&quot;)" :disabled="!authStore.initialized" :aria-busy="!authStore.initialized" @click="openNotifications">
         <svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
         </svg>
@@ -39,13 +39,15 @@
     <div v-if="isProfileMenuOpen" class="popover-backdrop open" @click.self="closeProfileMenu">
       <section class="popover profile-popover">
         <button class="popover-close" :aria-label="$t(&quot;關閉&quot;)" @click="closeProfileMenu">×</button>
-        <div class="popover-avatar">
-          <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="appStore.profile.name" />
-          <template v-else>{{ appStore.profile.initials || 'O' }}</template>
-        </div>
-        <div class="popover-copy">
-          <strong>{{ appStore.profile.name || $t('我的帳號') }}</strong>
-          <span>{{ appStore.profile.username || '' }}</span>
+        <div class="popover-identity">
+          <div class="popover-avatar">
+            <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="appStore.profile.name" />
+            <template v-else>{{ appStore.profile.initials || 'O' }}</template>
+          </div>
+          <div class="popover-copy">
+            <strong>{{ appStore.profile.name || $t('我的帳號') }}</strong>
+            <span>{{ appStore.profile.username || '' }}</span>
+          </div>
         </div>
         <div class="popover-stats">
           <div class="popover-stat">
@@ -128,6 +130,9 @@ watch(() => authStore.profileId, (profileId) => {
 </script>
 
 <style scoped>
+.topbar-notification { display:grid; place-items:center; border:0; background:transparent; box-shadow:none; }
+.topbar-notification:hover { background:var(--accent-pink-soft); box-shadow:none; }
+.topbar-notification .notification-badge { top: 1px; right: 1px; margin: 0; }
 .auth-btn-sm {
   border: 1px solid var(--ink);
   padding: 9px 17px;
@@ -246,7 +251,7 @@ watch(() => authStore.profileId, (profileId) => {
   width: 44px;
   height: 44px;
   border: none;
-  background: var(--accent-pink-soft);
+  background: transparent;
   color: var(--ink);
   border-radius: 50%;
   font-size: 16px;
@@ -265,8 +270,8 @@ watch(() => authStore.profileId, (profileId) => {
   color: #111;
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 14px;
   overflow: hidden;
+  flex: 0 0 52px;
 }
 .popover-avatar img {
   width: 100%;
@@ -274,11 +279,24 @@ watch(() => authStore.profileId, (profileId) => {
   object-fit: cover;
 }
 
+.popover-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 40px;
+  margin-bottom: 20px;
+}
 .popover-copy {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 4px;
+}
+.popover-copy strong,
+.popover-copy span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .popover-copy strong {
   font-size: 1rem;

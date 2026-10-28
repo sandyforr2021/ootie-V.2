@@ -5,11 +5,18 @@
     <p v-else-if="error" role="alert">{{ error }} <button type="button" class="text-link" @click="refresh">{{ $t('重試') }}</button></p>
     <ol v-else-if="comments.length" class="inline-comment-list">
       <li v-for="comment in comments" :key="comment.id">
-        <router-link :to="{path:'/profile',query:{user:comment.user}}" class="inline-comment-author">
-          <img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
-          <strong>{{ comment.display_name || comment.user }}</strong>
-        </router-link>
-        <p>{{ comment.text }}</p><time v-if="comment.created_at" :datetime="comment.created_at">{{ formatDate(comment.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</time>
+        <div class="inline-comment-header">
+          <router-link :to="{path:'/profile',query:{user:comment.user}}" class="inline-comment-author">
+            <img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
+            <strong>{{ comment.display_name || comment.user }}</strong>
+          </router-link>
+          <time v-if="comment.created_at" :datetime="comment.created_at">{{ commentTime(comment.created_at) }}</time>
+          <details class="comment-menu"><summary :aria-label="$t('留言選項')">⋯</summary><div>
+            <button v-if="auth.profileId === comment.profile_id" type="button" @click="store.removeComment(post.id, comment)">{{ $t('刪除') }}</button>
+            <button type="button" @click="app.showToast($t('檢舉功能準備中。'), {type:'info'})">{{ $t('檢舉') }}</button>
+          </div></details>
+        </div>
+        <p>{{ comment.text }}</p>
       </li>
     </ol>
     <p v-else>{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -23,7 +30,6 @@
 </template>
 <script setup>
 import {ref,computed,watch} from 'vue';
-import {formatDate} from '@/i18n';
 import {useAppStore} from '@/stores/app';
 import {useAuthStore} from '@/stores/auth';
 import {useOotdStore} from '@/stores/ootd';
@@ -32,6 +38,11 @@ const app=useAppStore(), auth=useAuthStore(), store=useOotdStore();
 const section=ref(null),composer=ref(null),draft=ref(''),loading=ref(false),error=ref(''),sending=ref(false);
 let draftId=crypto.randomUUID(), version=0;
 const comments=computed(()=>props.post.commentList || []);
+function commentTime(value){
+  const d=new Date(value); if(Number.isNaN(d.getTime()))return '';
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
 watch(draft,()=>{if(!sending.value)draftId=crypto.randomUUID();});
 async function refresh(){
   const sequence=++version;loading.value=true;error.value='';
@@ -55,4 +66,5 @@ defineExpose({focusComposer});
 </script>
 <style scoped>
 .inline-comments{margin-top:32px;padding-top:26px;border-top:1px solid var(--line);scroll-margin-top:28px}.inline-comments h3{font-size:20px;display:flex;gap:10px;align-items:center}.inline-comments h3 span{font-size:13px;color:var(--muted)}.inline-comments>p{color:var(--muted);font-size:14px}.inline-comment-list{list-style:none;margin:20px 0 28px;padding:0;display:grid;gap:22px}.inline-comment-author{display:inline-flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-size:14px}.inline-comment-author img,.inline-comment-initials{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0}.inline-comment-initials{display:grid;place-items:center;background:var(--accent-lavender-soft);font-size:11px}.inline-comment-list p{margin:8px 0 6px 44px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:14px}.inline-comment-list time{display:block;margin-left:44px;font-size:11px;color:var(--muted)}.inline-comment-form{display:grid;gap:10px}.inline-comment-form label{font-size:13px;font-weight:600}.inline-comment-form textarea{resize:vertical;min-height:96px;max-height:320px;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:14px;font:inherit;line-height:1.6;color:var(--ink)}.inline-comment-form button{justify-self:end;min-width:96px}.inline-comment-form textarea:focus-visible{outline:2px solid var(--accent-violet-ink);outline-offset:3px}
+.inline-comment-header{display:flex;align-items:center;gap:8px}.inline-comment-header .inline-comment-author{min-width:0;flex:1}.inline-comment-header time{margin:0;font-size:11px;white-space:nowrap}.comment-menu{position:relative}.comment-menu summary{list-style:none;display:grid;place-items:center;width:36px;height:36px;cursor:pointer}.comment-menu summary::-webkit-details-marker{display:none}.comment-menu>div{position:absolute;z-index:2;right:0;min-width:110px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--surface-raised);box-shadow:var(--shadow)}.comment-menu button{display:block;width:100%;border:0;background:transparent;padding:10px;text-align:left;cursor:pointer}@media(max-width:480px){.inline-comment-header{flex-wrap:wrap}.inline-comment-header time{font-size:10px}}
 </style>

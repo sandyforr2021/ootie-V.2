@@ -6,6 +6,7 @@ import { useAppStore } from '@/stores/app';
 import { useClosetStore } from '@/stores/closet';
 import * as colorDetection from '@/services/colorDetection';
 import * as clothingMedia from '@/services/clothingMedia';
+import * as backgroundRemoval from '@/services/simpleBackgroundRemoval';
 
 describe('ItemForm brand and image intelligence foundations', () => {
   beforeEach(() => {
@@ -113,5 +114,50 @@ describe('ItemForm brand and image intelligence foundations', () => {
       photo: 'data:image/webp;base64,processed'
     }));
     expect(appStore.isItemFormOpen).toBe(false);
+  });
+
+  it('updates only automatic name and category when changing images, preserving manual edits', async () => {
+    vi.spyOn(colorDetection, 'analyzeImageColor').mockResolvedValue(null);
+    mockPreparedMedia();
+    const { wrapper } = await openForm();
+    const photoInput = wrapper.find('#photoFile');
+    const selectFile = async (name) => {
+      Object.defineProperty(photoInput.element, 'files', { value: [new File(['image'], name, { type: 'image/png' })], configurable: true });
+      await photoInput.trigger('change');
+      await flushPromises();
+    };
+    await selectFile('blue-shirt.png');
+    expect(wrapper.find('#name').element.value).toBe('blue shirt');
+    expect(wrapper.find('#category').element.value).toBe('Tops');
+    await selectFile('black-jeans.png');
+    expect(wrapper.find('#name').element.value).toBe('black jeans');
+    expect(wrapper.find('#category').element.value).toBe('Bottoms');
+    await selectFile('IMG_1234.png');
+    expect(wrapper.find('#name').element.value).toBe('');
+    expect(wrapper.find('#category').element.value).toBe('');
+    await wrapper.find('#name').setValue('My own title');
+    await wrapper.find('#category').setValue('Bags');
+    await selectFile('white-shirt.png');
+    expect(wrapper.find('#name').element.value).toBe('My own title');
+    expect(wrapper.find('#category').element.value).toBe('Bags');
+  });
+
+  it('keeps the original and lets the user undo a background removal preview', async () => {
+    vi.spyOn(colorDetection, 'analyzeImageColor').mockResolvedValue(null);
+    mockPreparedMedia();
+    const removed = new Blob(['transparent'], { type: 'image/png' });
+    vi.spyOn(backgroundRemoval, 'removeSimpleBackground').mockResolvedValue({ displayBlob: removed, width: 900, height: 1200 });
+    const { wrapper } = await openForm();
+    const photoInput = wrapper.find('#photoFile');
+    Object.defineProperty(photoInput.element, 'files', { value: [new File(['image'], 'shirt.png', { type: 'image/png' })] });
+    await photoInput.trigger('change');
+    await flushPromises();
+    const button = () => wrapper.findAll('.upload-zone button').find((item) => item.text().includes('去除單色背景'));
+    await button().trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('還原照片');
+    expect(URL.createObjectURL).toHaveBeenLastCalledWith(removed);
+    await wrapper.findAll('.upload-zone button').find((item) => item.text().includes('還原照片')).trigger('click');
+    expect(URL.createObjectURL).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'image/webp' }));
   });
 });

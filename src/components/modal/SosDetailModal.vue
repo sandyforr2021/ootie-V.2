@@ -5,6 +5,7 @@
 
       <div class="sos-detail-heading">
         <h2>{{ targetPost.title }}</h2>
+        <img v-if="targetPost.cover_url || coverItem?.photo" class="sos-cover-image" :src="targetPost.cover_url || coverItem.photo" :alt="t('求救主圖')" />
 
         <div class="sos-detail-user">
           <div class="sos-feed-avatar"><img v-if="targetPost.avatar_url" :src="targetPost.avatar_url" alt="" /><span v-else>{{ targetPost.initials }}</span></div>
@@ -38,7 +39,6 @@
         <div v-if="publicItems.length" class="sos-detail-gallery-grid">
           <div v-for="item in publicItems" :key="item.id" class="sos-detail-gallery-item">
             <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
-            <span>{{ item.name_zh || item.name }}</span>
           </div>
         </div>
         <p v-else style="color:var(--muted); font-size:13px; font-style:italic;">
@@ -49,9 +49,11 @@
       <!-- Actions for Owner vs Responder -->
       <div style="margin: 20px 0; display:flex; gap:12px; justify-content: flex-end;">
         <button type="button" class="secondary" @click="shareSos">{{ $t("分享連結") }}</button>
-        <button type="button" class="secondary" @click="toggleSave">
-          {{ targetPost.saved ? '▣ ' + t('已收藏') : '♡ ' + t('收藏') }}
+        <button type="button" class="secondary sos-save-button" :aria-pressed="Boolean(targetPost.saved)" @click="toggleSave">
+          <Heart :size="16" :stroke-width="1.7" :fill="targetPost.saved ? 'currentColor' : 'none'" aria-hidden="true" />
+          {{ t(targetPost.saved ? '已收藏' : '收藏') }}
         </button>
+        <button v-if="isOwner" type="button" class="secondary" @click="deleteRequest">{{ t('刪除') }}</button>
         <button
           v-if="isOwner && targetPost.status === 'OPEN'"
           class="secondary"
@@ -144,6 +146,7 @@
 
 <script setup>
 import { t, tf, formatDate } from '@/i18n';
+import { Heart } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
@@ -160,6 +163,10 @@ const targetPost = computed(() => {
 const isOwner = computed(() => {
   return targetPost.value && targetPost.value.sender_id === appStore.profile.id;
 });
+const coverItem = computed(() => sosStore.getPublicItemsForSos(targetPost.value).find(item => String(item.id) === String(targetPost.value?.cover_item_id)));
+const deleteRequest = async () => {
+  if (confirm(t('確定刪除這則求救及其搭配建議？此動作無法復原。')) && await sosStore.deleteSosPost(targetPost.value.id)) close();
+};
 
 const publicItems = computed(() => {
   if (!targetPost.value || !targetPost.value.closet_item_ids) return [];

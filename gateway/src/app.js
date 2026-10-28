@@ -64,6 +64,8 @@ export function createGatewayApp({ config, supabase, provider, generationService
         if (method === 'POST' && product) return ok({ product: await commerceService.updateProduct(user, product[1], body) });
         const cancel = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/cancel$/i.exec(path);
         if (method === 'POST' && cancel) return ok(await commerceService.cancel(user, cancel[1]));
+        const resultDelete = /^\/v1\/shop\/jobs\/([\da-f-]{36})\/delete-result$/i.exec(path);
+        if (method === 'POST' && resultDelete) return ok(await commerceService.deleteResult(user, resultDelete[1]));
         throw new GatewayError('NOT_FOUND', 404);
       }
 

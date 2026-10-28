@@ -7,9 +7,11 @@ import { useAppStore } from './app';
 import { useAuthStore } from './auth';
 import { createSavedOutfit, deleteSavedOutfit } from '@/services/socialMetrics';
 import { getPublicItemsByIds } from '@/services/clothingRepository';
+import { removeOotdImage } from '@/services/ootdMedia';
 import {
   fetchSosPostsFromSupabase,
   insertSosPostToSupabase,
+  deleteSosPostFromSupabase,
   updateSosStatusInSupabase,
   updateAdoptedSuggestionInSupabase,
   fetchOutfitSuggestionsFromSupabase,
@@ -91,6 +93,7 @@ export const useSosStore = defineStore('sos', () => {
           when_label: p.when_label || '未設定',
           vibes: Array.isArray(p.vibes) ? p.vibes : [],
           closet_item_ids: Array.isArray(p.closet_item_ids) ? p.closet_item_ids : [],
+          cover_url: p.cover_url || '', cover_path: p.cover_path || '', cover_item_id: p.cover_item_id || '',
           details: p.details || '',
           status: p.status === 'CLOSED' ? 'CLOSED' : 'OPEN',
           adopted_suggestion_id: p.picked_suggestion_id || p.adopted_suggestion_id || null,
@@ -181,7 +184,7 @@ export const useSosStore = defineStore('sos', () => {
   };
 
   // Actions
-  const createSosPost = async ({ title, occasion, weather, when_label, vibes, details, closet_item_ids }) => {
+  const createSosPost = async ({ title, occasion, weather, when_label, vibes, details, closet_item_ids, cover_url, cover_path, cover_item_id }) => {
     const profileId = requireMember();
     if (!profileId) return false;
     const requestedItemIds = Array.isArray(closet_item_ids)
@@ -211,6 +214,8 @@ export const useSosStore = defineStore('sos', () => {
       when_label,
       vibes: vibes || [],
       closet_item_ids: finalItemIds,
+      cover_url: cover_url || null, cover_path: cover_path || null,
+      cover_item_id: finalItemIds.includes(String(cover_item_id || '')) ? cover_item_id : null,
       details: (details || '').trim(),
       status: 'OPEN',
       adopted_suggestion_id: null,
@@ -299,8 +304,23 @@ export const useSosStore = defineStore('sos', () => {
       () => { post.status = 'CLOSED'; }, '該筆穿搭求救已結束並同步');
   };
 
+  const deleteSosPost = async sosId => {
+    const post=ownedPost(sosId); if (!post) return false;
+    const authUserId=authStore.user?.id;
+    const ok=await persist(`post:${sosId}`, () => deleteSosPostFromSupabase(sosId,authStore.profileId), () => {
+      sosPosts.value=sosPosts.value.filter(item=>item.id!==sosId);
+      outfitSuggestions.value=outfitSuggestions.value.filter(item=>item.sos_id!==sosId);
+    }, '求救貼文已刪除。');
+    if (ok && post.cover_path && authUserId) {
+      try { await removeOotdImage(post.cover_path,authUserId); }
+      catch { appStore.showToast(t('貼文已刪除，但主圖清理尚未完成。'),{type:'warning'}); }
+    }
+    return ok;
+  };
+
   return {
     pending,
+    deleteSosPost,
     initFromSupabase,
     activeTab,
     searchQuery,

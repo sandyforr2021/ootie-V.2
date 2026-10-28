@@ -28,7 +28,7 @@
           </button>
           <span v-else :class="['notification-icon', `is-${notificationKind(notification)}`]" aria-hidden="true">{{ notificationIcon(notification) }}</span>
           <span class="notification-copy">
-            <span class="notification-badge">{{ notificationLabel(notification) }}</span>
+            <span v-if="notificationKind(notification) !== 'follow'" class="notification-badge">{{ notificationLabel(notification) }}</span>
             <span class="notification-message">
               <template v-for="(part, index) in notificationParts(notification)" :key="`${notification.id}-${index}`">
                 <button v-if="part.user" type="button" class="notification-user-link" :data-user="part.text" @click.stop="openUser(part.text)">{{ part.text }}</button>

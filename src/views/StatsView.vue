@@ -8,8 +8,6 @@
       <p class="core-page-note" aria-hidden="true">your closet<br />in numbers ♡</p>
     </header>
 
-    <WardrobeCosts />
-
     <!-- 個人統計區塊 -->
     <section class="profile-insights" aria-labelledby="closetStatsTitle">
       <div class="profile-ootd-heading">
@@ -114,10 +112,10 @@
     <!-- 我的百搭神器 Top 5 -->
     <section class="profile-insights top-worn-section" aria-labelledby="topWornTitle">
       <div class="profile-ootd-heading">
-        <h2 id="topWornTitle">{{ $t('最常穿著的衣物') }}</h2>
-        <span class="eyebrow">{{ $t('穿著次數 Top 5') }}</span>
+        <h2 id="topWornTitle">{{ $t('OOTD 熱門單品') }}</h2>
+        <span class="eyebrow">{{ $t('OOTD 出現次數 Top 5') }}</span>
       </div>
-      <div class="top-worn-list" v-if="topWornItems.length && topWornItems.some(i => i.wear_count > 0)">
+      <div class="top-worn-list" v-if="topWornItems.length">
         <article
           v-for="(item, index) in topWornItems.slice(0, 5)"
           :key="item.id"
@@ -129,24 +127,24 @@
           <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
           <div class="top-worn-copy">
             <h3>{{ itemName(item) }}</h3>
-            <p>{{ tf('已記錄 {count} 次穿著', { count: item.wear_count }) }}</p>
+            <p>{{ tf('出現在 {count} 篇 OOTD', { count: item.ootd_count }) }}</p>
           </div>
         </article>
       </div>
       <div v-else class="top-worn-empty">
-        {{ $t('尚無穿著紀錄，從下一次穿搭開始記錄。') }}
+        {{ $t(ootdStatsError ? 'OOTD 統計暫時無法載入。' : '尚無標記衣物的 OOTD。') }}
       </div>
     </section>
 
     <!-- 冷宮衣物排名 完整清單 -->
     <section class="profile-insights disused-ranking-section" aria-labelledby="disusedRankingTitle">
       <div class="profile-ootd-heading">
-        <h2 id="disusedRankingTitle">{{ $t('穿著紀錄回顧') }}</h2>
+        <h2 id="disusedRankingTitle">{{ $t('OOTD 單品紀錄') }}</h2>
         <span class="eyebrow">{{ $t('完整清單') }}</span>
       </div>
-      <div class="disused-ranking" v-if="disusedRanking.length">
+      <div class="disused-ranking" v-if="topWornItems.length">
         <article
-          v-for="(item, index) in disusedRanking"
+          v-for="(item, index) in topWornItems"
           :key="item.id"
           class="disused-ranking-item"
         >
@@ -156,12 +154,11 @@
           <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
           <div class="disused-ranking-copy">
             <h3>{{ itemName(item) }}</h3>
-            <p>{{ getDisusedMessage(item) }}</p>
-            <span>{{ tf('已記錄 {count} 次穿著', { count:item.wear_count || 0 }) }}</span>
+            <span>{{ tf('出現在 {count} 篇 OOTD', { count:item.ootd_count }) }}</span>
           </div>
         </article>
       </div>
-      <div v-else class="disused-empty">{{ $t('目前沒有需要回顧的穿著紀錄。') }}</div>
+      <div v-else class="disused-empty">{{ $t(ootdStatsError ? 'OOTD 統計暫時無法載入。' : '尚無標記衣物的 OOTD。') }}</div>
     </section>
   </section>
 </template>
@@ -169,10 +166,9 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import Chart from 'chart.js/auto';
-import WardrobeCosts from '@/components/closet/WardrobeCosts.vue';
+import { fetchProfileOotdPosts } from '@/services/supabase';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useClosetStore } from '@/stores/closet';
 import { useStatsStore } from '@/stores/stats';
 import { labels } from '@/constants';
 import { t, tf, locale } from '@/i18n';
@@ -180,7 +176,6 @@ import { itemName } from '@/services/itemPresentation';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
-const closetStore = useClosetStore();
 const statsStore = useStatsStore();
 
 // Chart canvas refs
@@ -200,7 +195,7 @@ const categoryStats = ref([]);
 const brandStats = ref([]);
 const brandHighlight = ref('');
 const topWornItems = ref([]);
-const disusedRanking = ref([]);
+const ootdStatsError = ref(false);
 
 // Yearly summary states
 const availableYears = ref([]);
@@ -220,17 +215,6 @@ const hasBrandStats = computed(() => {
   const namedCount = named.reduce((sum, e) => sum + e.count, 0);
   return named.length > 0 && unnamed < namedCount;
 });
-
-const getDisusedMessage = (item) => {
-  const days = closetStore.getDaysSinceLastWorn(item.last_worn);
-  if (item.wear_count === 0 && !item.last_worn) {
-    return t('尚無穿著紀錄');
-  }
-  if (days !== null) {
-    return tf('距上次記錄已過 {days} 天', {days});
-  }
-  return tf('已記錄 {count} 次穿著', {count:Number(item.wear_count || 0)});
-};
 
 const destroyCharts = () => {
   Object.keys(charts).forEach((key) => {
@@ -471,11 +455,18 @@ const loadData = async () => {
   const mostWorn = [...namedBrands].sort((a, b) => b.totalWearCount - a.totalWearCount)[0];
   brandHighlight.value = mostWorn && mostWorn.totalWearCount > 0 ? tf('{brand} · {count} 件衣物，累計記錄 {wears} 次穿著', {brand:mostWorn.brand,count:mostWorn.count,wears:mostWorn.totalWearCount}) : '';
 
-  // 3. Top worn items
-  topWornItems.value = await statsStore.getTopWornItems();
-
-  // 5. Disused ranking
-  disusedRanking.value = await statsStore.getDisusedRanking();
+  // OOTD post item_ids are the persisted source of truth; count each item once per post.
+  const profileId = authStore.profileId;
+  const posts = profileId ? await fetchProfileOotdPosts(profileId) : [];
+  if (profileId !== authStore.profileId) return;
+  ootdStatsError.value = profileId && !Array.isArray(posts);
+  const counts = new Map();
+  for (const post of posts || []) {
+    for (const id of new Set((post.item_ids || []).map(String))) counts.set(id, (counts.get(id) || 0) + 1);
+  }
+  topWornItems.value = statsStore.getSourceItems().map(item => ({ ...item, ootd_count: counts.get(String(item.id)) || 0 }))
+    .filter(item => item.ootd_count > 0 && item.hidden !== true && item.hidden !== 'true')
+    .sort((a, b) => b.ootd_count - a.ootd_count);
 
   // 6. Calculate available years for yearly report
   const yearsSet = new Set();

@@ -1,5 +1,5 @@
 import { genuineContent } from '@/services/contentAuthenticity';
-import { listPostComments, insertPostComment } from '@/services/postComments';
+import { listPostComments, insertPostComment, deletePostComment } from '@/services/postComments';
 import { t } from '@/i18n';
 import { editorialLook } from '@/services/editorial';
 import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
@@ -210,6 +210,19 @@ export const useOotdStore = defineStore('ootd', () => {
     }
   };
 
+  const removeComment = async (postId, comment) => {
+    const auth = useAuthStore();
+    if (!auth.isMember || !auth.profileId || comment.profile_id !== auth.profileId) return false;
+    try {
+      await deletePostComment({ id: comment.id, postId, profileId: auth.profileId });
+      await loadComments(postId);
+      return true;
+    } catch {
+      appStore.showToast(t('留言刪除失敗，請再試一次。'), { type: 'error', syncStatus: 'REMOTE_FAILED' });
+      return false;
+    }
+  };
+
   const resolveOwnedItems = async (selectedItemIds, profileId) => {
     const uniqueIds = [...new Set((selectedItemIds || []).map(String))];
     if (!uniqueIds.length) return [];
@@ -405,6 +418,7 @@ export const useOotdStore = defineStore('ootd', () => {
     toggleLike,
     toggleSave,
     addComment,
+    removeComment,
     loadComments,
     commentsLoading,
     commentsError,

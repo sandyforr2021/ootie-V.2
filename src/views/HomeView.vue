@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
+import { useSocialStore } from '@/stores/social';
 import { uniquePostsById, useOotdStore } from '@/stores/ootd';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import EditorialVisual from '@/components/ui/EditorialVisual.vue';
@@ -16,10 +17,14 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
 const ootdStore = useOotdStore();
+const socialStore = useSocialStore();
 const isMember = computed(() => authStore.isMember);
 const firstName = computed(() => (appStore.profile.name || '').split(' ')[0]);
 const recentItems = computed(() => appStore.items.slice(0, 4));
 const trendingPosts = computed(() => uniquePostsById(genuineContent(appStore.ootdPosts)).filter(post => post.image).slice(0, 4));
+const followingPosts = computed(() => uniquePostsById(genuineContent(appStore.ootdPosts))
+  .filter(post => post.image && socialStore.isFollowing({id: post.user_id, username: post.username}))
+  .sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 4));
 const openPost = post => router.push({ name: 'OotdDetail', params: { id: post.id }, query: { user: post.username, from: 'home' } });
 const openDetail = id => { appStore.selectedItemId = id; appStore.isDetailOpen = true; };
 watch(() => authStore.profileId, id => { if (id) void closetStore.loadRemoteItems(id); }, { immediate: true });
@@ -29,6 +34,11 @@ onMounted(() => { void ootdStore.loadRemotePosts(); });
 <template>
   <section class="page active atelier-home" id="homePage">
     <header class="home-edition"><span>{{ $t('每天，都更像自己。') }}</span><span>OOTIE</span></header>
+    <section v-if="isMember" class="home-section">
+      <div class="section-heading"><h2>{{ $t('追蹤中的貼文') }}</h2><router-link class="atelier-text-link" to="/explore">{{ $t('探索更多 →') }}</router-link></div>
+      <div v-if="followingPosts.length" class="atelier-journal"><button v-for="post in followingPosts" :key="post.id" class="trending-card" @click="openPost(post)"><img :src="post.image" :alt="post.caption || post.username" loading="lazy" /><span>{{ post.display_name || post.username }}</span><strong>{{ $t(post.caption) }}</strong><AppIcon name="arrow" :size="18" /></button></div>
+      <p v-else>{{ $t('追蹤衣友後，就能在這裡看到他們的貼文。') }}</p>
+    </section>
     <section class="atelier-hero">
       <div class="atelier-hero-copy">
         <h1>{{ $t('買之前，') }}<em>{{ $t('先穿進自己的生活。') }}</em></h1>

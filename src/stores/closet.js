@@ -1,7 +1,8 @@
 import { categoryFamily } from '@/services/commerce';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAppStore } from './app';
+import { useAuthStore } from './auth';
 import {
   DISUSED_DAYS_THRESHOLD,
   DISUSED_WEAR_COUNT_THRESHOLD,
@@ -55,6 +56,7 @@ export const useClosetStore = defineStore('closet', () => {
   const appStore = useAppStore();
 
   const activeCategory = ref('All');
+  const favoritesOnly = ref(false);
   const searchQuery = ref('');
   const colorFamilyFilter = ref('');
   const colorFilter = ref('');
@@ -65,13 +67,20 @@ export const useClosetStore = defineStore('closet', () => {
   const dataMode = ref(CLOSET_DATA_MODE.LOCAL);
   let activeRemoteProfileId = null;
   let activeRemoteRead = null;
+  let remoteReadVersion = 0;
+  const invalidateRemoteRead = () => { remoteReadVersion++; activeRemoteProfileId = null; activeRemoteRead = null; };
+  const authStore = useAuthStore();
+  watch(() => authStore.session?.user?.id || null, () => {
+    invalidateRemoteRead();
+    if (appStore.isRemoteItemsActive) appStore.items = [];
+    releasePrivateClothingPhotoUrls();
+  }, { flush: 'sync' });
 
   const useLocalItems = () => {
     releasePrivateClothingPhotoUrls();
     appStore.restoreLocalItems();
     dataMode.value = CLOSET_DATA_MODE.LOCAL;
-    activeRemoteProfileId = null;
-    activeRemoteRead = null;
+    invalidateRemoteRead();
     remoteState.value = createAsyncState();
   };
 
@@ -79,8 +88,7 @@ export const useClosetStore = defineStore('closet', () => {
     releasePrivateClothingPhotoUrls();
     appStore.loadGuestItems();
     dataMode.value = CLOSET_DATA_MODE.GUEST;
-    activeRemoteProfileId = null;
-    activeRemoteRead = null;
+    invalidateRemoteRead();
     remoteState.value = createAsyncState();
   };
 
@@ -93,8 +101,7 @@ export const useClosetStore = defineStore('closet', () => {
     releasePrivateClothingPhotoUrls();
     const normalized = normalizeServiceError(error);
     dataMode.value = CLOSET_DATA_MODE.BLOCKED;
-    activeRemoteProfileId = null;
-    activeRemoteRead = null;
+    invalidateRemoteRead();
     remoteState.value = failedState(normalized, {
       remote: true,
       syncStatus: SYNC_STATUS.REMOTE_FAILED,
@@ -250,6 +257,7 @@ export const useClosetStore = defineStore('closet', () => {
       if (item.hidden === true || item.hidden === 'true') return false;
       const searchable = normalizeFilterValue(`${item.name} ${item.name_zh || ''} ${item.brand || ''} ${item.category}`);
       return (
+        (!favoritesOnly.value || item.favorite) &&
         (!query || searchable.includes(query)) &&
         (cat === 'All' || matchesFilterValue(item.category, cat) || (cat !== 'Bags' && cat !== 'Accessories' && categoryFamily(item.category) === categoryFamily(cat))) &&
         matchesFilterValue(item.secondary_color, colorFamily) &&
@@ -435,7 +443,7 @@ export const useClosetStore = defineStore('closet', () => {
       const primaryColor = itemData.primary_color || target.primary_color;
       const secondaryColor = itemData.secondary_color || getColorFamilyForPrimaryColor(primaryColor) || target.secondary_color;
       const colorHex = colorHexValues[primaryColor] || itemData.color_hex || target.color_hex;
-      const rawPrice = itemData.price !== undefined && itemData.price !== null && itemData.price !== '' ? Number(itemData.price) : null;
+      const rawPrice = itemData.price === undefined ? target.price : itemData.price !== null && itemData.price !== '' ? Number(itemData.price) : null;
 
       const changes = {
         ...itemData,
@@ -522,11 +530,13 @@ export const useClosetStore = defineStore('closet', () => {
     appStore.beginRemoteItems();
     dataMode.value = CLOSET_DATA_MODE.REMOTE;
     activeRemoteProfileId = profileId;
+    const requestVersion = ++remoteReadVersion;
 
     remoteState.value = loadingState(remoteState.value);
     const request = (async () => {
       try {
         const items = await getCurrentUserItems(profileId);
+        if (requestVersion !== remoteReadVersion || activeRemoteProfileId !== profileId) return { ok: false, stale: true };
         appStore.items = items;
         // Auth hydration can briefly emit PROFILE_LOADING after this request
         // begins. A verified successful owner-scoped response is authoritative.
@@ -534,6 +544,7 @@ export const useClosetStore = defineStore('closet', () => {
         remoteState.value = successState(items, { syncStatus: SYNC_STATUS.SYNCED });
         return { ok: true, data: items };
       } catch (err) {
+        if (requestVersion !== remoteReadVersion || activeRemoteProfileId !== profileId) return { ok: false, stale: true };
         const normalized = normalizeServiceError(err);
         remoteState.value = failedState(normalized, {
           remote: true,
@@ -556,6 +567,7 @@ export const useClosetStore = defineStore('closet', () => {
 
   const clearFilters = () => {
     activeCategory.value = 'All';
+    favoritesOnly.value = false;
     searchQuery.value = '';
     colorFamilyFilter.value = '';
     colorFilter.value = '';
@@ -565,6 +577,7 @@ export const useClosetStore = defineStore('closet', () => {
 
   return {
     activeCategory,
+    favoritesOnly,
     searchQuery,
     colorFamilyFilter,
     colorFilter,

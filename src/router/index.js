@@ -15,11 +15,13 @@ const SettingsView = () => import('@/views/SettingsView.vue');
 const LegalView = () => import('@/views/LegalView.vue');
 const NotFoundView = () => import('@/views/NotFoundView.vue');
 const ShopView = () => import('@/views/ShopView.vue');
+const CreditView = () => import('@/views/CreditView.vue');
 
 const routes = [
   { path: '/', name: 'Home', component: HomeView },
   { path: '/home', redirect: '/' },
   { path: '/shop', name: 'Shop', component: ShopView },
+  { path: '/credits', name: 'Credits', component: CreditView },
   { path: '/closet', name: 'Closet', component: ClosetView },
   { path: '/bookmarks', name: 'Bookmarks', redirect: (to) => ({ path: '/shop', query: { ...to.query, tab: to.query.tab === 'outfits' ? 'saved' : 'links' } }) },
   { path: '/stats', name: 'Stats', component: StatsView },

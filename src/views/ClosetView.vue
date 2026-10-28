@@ -5,8 +5,15 @@
         <h1>{{ $t("我的衣櫥") }}</h1>
         <p>{{ $t("把擁有的每一件衣服，準備成下一套日常。") }}</p>
       </div>
-      <button type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
+      <button v-if="!showWishlist" type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
     </header>
+
+    <nav class="closet-collections" :aria-label="$t('我的衣櫥')">
+      <router-link :to="{path:'/closet',query:{lang:route.query.lang}}" :aria-current="!showWishlist ? 'page' : undefined">{{ $t('衣櫥衣物') }}</router-link>
+      <router-link :to="{path:'/closet',query:{tab:'wishlist',lang:route.query.lang}}" :aria-current="showWishlist ? 'page' : undefined">{{ $t('想買清單') }}</router-link>
+    </nav>
+    <WishlistPanel v-if="showWishlist" />
+    <template v-else>
 
     <section
       v-if="!canShowClosetData"
@@ -21,60 +28,6 @@
     </section>
 
     <template v-else>
-    <!-- 冷宮衣物提醒區塊 -->
-    <details v-if="!isRemoteEmpty" class="disused-section">
-      <summary>
-        <strong id="disusedTitle">{{ $t("冷宮衣物提醒") }}</strong>
-        <span class="disused-count">
-          {{ closetStore.disusedItems.length ? `${closetStore.disusedItems.length} ${$t('件尚未常穿')}` : $t('目前沒有冷宮單品') }}
-        </span>
-      </summary>
-
-      <div v-if="closetStore.disusedItems.length" class="disused-grid">
-        <article
-          v-for="(item, index) in closetStore.disusedItems.slice(0, 3)"
-          :key="item.id"
-          class="disused-card"
-          :style="{ animationDelay: `${index * 45}ms` }"
-        >
-          <img class="product-image" :src="item.photo" :alt="itemName(item)" loading="lazy" />
-          <div class="disused-card-body">
-            <h3>{{ itemName(item) }}</h3>
-            <p>{{ getDisusedMessage(item) }}</p>
-            <span class="disused-meta">{{ $t("穿著") }}{{ item.wear_count || 0 }}{{ $t("次") }}{{
-                closetStore.getDaysSinceLastWorn(item.last_worn) !== null
-                  ? ` · ${closetStore.getDaysSinceLastWorn(item.last_worn)} 天前`
-                  : ' · 尚未穿過'
-              }}
-            </span>
-            <div class="disused-actions">
-              <button class="primary" type="button" @click="sendToSos(item.id)">
-                <span class="disused-action-wide">{{ $t("丟到 SOS 求救") }}</span>
-                <span class="disused-action-compact">{{ $t("SOS 求救") }}</span>
-              </button>
-              <button
-                :class="['secondary', { 'is-marked': isMarkedClearance(item) }]"
-                type="button"
-                :disabled="isMarkedClearance(item)"
-                @click="closetStore.markItemForClearance(item.id)"
-              >
-                <span class="disused-action-wide">{{ isMarkedClearance(item) ? '已標記待出清' : '標記為考慮出清' }}</span>
-                <span class="disused-action-compact">{{ isMarkedClearance(item) ? '已標記' : '考慮出清' }}</span>
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
-      <div v-else class="disused-empty">{{ $t("太棒了！你的每件衣服都很常穿，衣櫥利用率很高！") }}</div>
-
-      <router-link
-        v-if="closetStore.disusedItems.length > 3"
-        class="disused-more-link"
-        style="display: inline-block;"
-        to="/stats"
-      >{{ $t("查看完整冷宮排名 →") }}</router-link>
-    </details>
-
     <!-- Toolbar & Filters -->
     <div v-if="!isWholeClosetEmpty" :class="['toolbar', { 'filters-open': isFilterPanelOpen }]">
       <label class="search">
@@ -164,15 +117,13 @@
 
       <select v-model="closetStore.styleFilter" class="select" :aria-label="$t(&quot;依風格篩選&quot;)">
         <option value="">{{ $t("風格") }}</option>
-        <option value="Minimal">{{ $t("極簡") }}</option>
-        <option value="Casual">{{ $t("休閒") }}</option>
-        <option value="Smart Casual">{{ $t("簡約正式") }}</option>
-        <option value="Chic">{{ $t("時髦") }}</option>
+        <option v-for="style in styleOptions" :key="style" :value="style">{{ $t(labels[style] || style) }}</option>
       </select>
     </div>
 
     <!-- Category Tabs -->
     <div v-if="!isWholeClosetEmpty" class="category-row" :aria-label="$t(&quot;單品分類&quot;)">
+      <button type="button" :class="['category', 'favorite-filter', { active: closetStore.favoritesOnly }]" :aria-pressed="closetStore.favoritesOnly" :aria-label="$t('查看最愛')" @click="closetStore.favoritesOnly = !closetStore.favoritesOnly"><Heart :size="18" :stroke-width="1.7" :fill="closetStore.favoritesOnly ? 'currentColor' : 'none'" aria-hidden="true" /></button>
       <button
         v-for="cat in categories"
         :key="cat"
@@ -210,10 +161,11 @@
           >
             <button
               :class="['favorite', { 'is-favorite': item.favorite }]"
-              :aria-label="`${$t(item.favorite ? '取消收藏' : '收藏')} ${itemName(item)}`"
+              :aria-label="`${$t(item.favorite ? '移除最愛' : '加入最愛')} ${itemName(item)}`"
+              :aria-pressed="Boolean(item.favorite)"
               @click.stop="closetStore.toggleFavorite(item.id)"
             >
-              {{ item.favorite ? '♥' : '♡' }}
+              <Heart :size="19" :stroke-width="1.7" :fill="item.favorite ? 'currentColor' : 'none'" aria-hidden="true" />
             </button>
             <img
               class="product-image"
@@ -227,7 +179,6 @@
             <h3>{{ itemName(item) }}</h3>
             <p v-if="item.brand" class="item-brand">{{ item.brand }}</p>
             <p class="item-meta">{{ $t(labels[item.category] || item.category) }} · {{ $t(labels[item.primary_color] || item.primary_color || '') }}</p>
-            <span v-if="isMarkedClearance(item)" class="item-state-chip">{{ $t("待出清") }}</span>
           </div>
         </article>
       </template>
@@ -243,14 +194,17 @@
       </div>
     </div>
     </template>
+    </template>
   </section>
 </template>
 
 <script setup>
 import { itemName } from '@/services/itemPresentation';
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { Heart } from '@lucide/vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
-import { useRouter } from 'vue-router';
+import WishlistPanel from '@/components/closet/WishlistPanel.vue';
+import { useRoute } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
@@ -261,7 +215,9 @@ import { categories, labels, colorFamilies, colorDetailGroups } from '@/constant
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
-const router = useRouter();
+const route = useRoute();
+const showWishlist = computed(() => route.query.tab === 'wishlist');
+const styleOptions = computed(() => [...new Set(['Minimal', 'Casual', 'Smart Casual', 'Chic', ...appStore.items.map(item => item.style).filter(Boolean)])]);
 
 const isColorMenuOpen = ref(false);
 const isFilterPanelOpen = ref(false);
@@ -275,6 +231,7 @@ const activeFilterCount = computed(() => [
 
 const hasActiveClosetFilters = computed(() => Boolean(
   closetStore.searchQuery ||
+  closetStore.favoritesOnly ||
   activeFilterCount.value ||
   closetStore.activeCategory !== categories[0]
 ));
@@ -395,25 +352,6 @@ const retryClosetLoad = async () => {
   requestedRemoteProfileId = null;
   await closetStore.loadRemoteItems(profileId);
   requestedRemoteProfileId = profileId;
-};
-
-const isMarkedClearance = (item) => {
-  return String(item.notes || '').includes('[待出清]');
-};
-
-const getDisusedMessage = (item) => {
-  const days = closetStore.getDaysSinceLastWorn(item.last_worn);
-  if (item.wear_count === 0 && !item.last_worn) {
-    return '你從來沒穿過耶！';
-  }
-  if (days !== null) {
-    return `已經 ${days} 天沒穿囉！`;
-  }
-  return `只穿過 ${Number(item.wear_count || 0)} 次。`;
-};
-
-const sendToSos = (itemId) => {
-  router.push({ path: '/sos', query: { item_id: itemId } });
 };
 
 const openAddForm = () => {

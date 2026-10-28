@@ -35,24 +35,26 @@
         <div class="form-grid" style="margin-top:16px">
           <div class="form-field">
             <label for="sosOccasion">{{ t("場合") }}</label>
-            <select id="sosOccasion" v-model="occasion">
+            <input id="sosOccasion" v-model.trim="occasion" list="sos-occasions" maxlength="80" required />
+            <datalist id="sos-occasions">
               <option value="約會">{{ t("約會") }}</option>
               <option value="工作">{{ t("工作") }}</option>
               <option value="上課">{{ t("上課") }}</option>
               <option value="聚餐">{{ t("聚餐") }}</option>
               <option value="戶外活動">{{ t("戶外活動") }}</option>
               <option value="旅行">{{ t("旅行") }}</option>
-            </select>
+            </datalist>
           </div>
           <div class="form-field">
             <label for="sosWeather">{{ t("預期天氣") }}</label>
-            <select id="sosWeather" v-model="weather">
+            <input id="sosWeather" v-model.trim="weather" list="sos-weather-options" maxlength="80" required />
+            <datalist id="sos-weather-options">
               <option value="晴天">{{ t("晴天") }}</option>
               <option value="涼爽">{{ t("涼爽") }}</option>
               <option value="炎熱">{{ t("炎熱") }}</option>
               <option value="下雨">{{ t("下雨") }}</option>
               <option value="微涼有風">{{ t("微涼有風") }}</option>
-            </select>
+            </datalist>
           </div>
           <div class="form-field">
             <label for="sosWhen">{{ t("穿著時機") }}</label>
@@ -77,6 +79,27 @@
               {{ t(vibe) }}
             </label>
           </div>
+        </div>
+
+        <p class="sos-closet-notice" v-if="!appStore.profile.public_closet">
+          {{ t('請先開啟「公開衣櫥」功能，才能發布求救。') }}
+          <router-link :to="{ path: '/profile', hash: '#closet-privacy' }" @click="close">{{ t('前往我的衣櫥') }}</router-link>
+        </p>
+        <p class="sos-closet-notice" v-else>{{ t('目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。') }}</p>
+
+        <div class="form-field sos-cover-choice">
+          <label for="sosCoverMode">{{ t('求救主圖（選填）') }}</label>
+          <select id="sosCoverMode" v-model="coverMode">
+            <option value="none">{{ t('不使用主圖') }}</option>
+            <option value="upload">{{ t('上傳圖片') }}</option>
+            <option value="closet">{{ t('從公開衣物選擇') }}</option>
+          </select>
+          <input v-if="coverMode==='upload'" type="file" accept="image/jpeg,image/png,image/webp" @change="chooseCover" />
+          <select v-if="coverMode==='closet'" v-model="coverItemId" :aria-label="t('選擇主圖衣物')">
+            <option value="">{{ t('選擇主圖衣物') }}</option>
+            <option v-for="item in appStore.items.filter(i=>selectedClosetItemIds.includes(i.id))" :key="item.id" :value="item.id">{{ item.name_zh || item.name }}</option>
+          </select>
+          <p v-if="coverMode !== 'none'">{{ t('發布後，選用的主圖會公開顯示。') }}</p>
         </div>
 
         <!-- Public Closet Items Selection -->
@@ -119,7 +142,7 @@
 
         <div class="form-actions">
           <button type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
-          <button type="submit" class="primary">{{ $t("發布求救") }}</button>
+          <button type="submit" class="primary" :disabled="!appStore.profile.public_closet || submitting">{{ $t("發布求救") }}</button>
         </div>
         </fieldset>
       </form>
@@ -134,6 +157,7 @@ import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
+import { uploadOotdImage, validateOotdImage } from '@/services/ootdMedia';
 
 const appStore = useAppStore();
 const sosStore = useSosStore();
@@ -152,6 +176,7 @@ const selectedClosetItemIds = ref([]);
 const showValidation = ref(false);
 const loadingCloset = ref(false);
 const closetLoadFailed = ref(false);
+const coverMode=ref('none'), coverFile=ref(null), coverItemId=ref(''), submitting=ref(false);
 let openVersion = 0;
 
 const contextItem = computed(() => {
@@ -173,6 +198,7 @@ watch(
     selectedClosetItemIds.value = [];
     showValidation.value = false;
     closetLoadFailed.value = false;
+    coverMode.value='none'; coverFile.value=null; coverItemId.value='';
     loadingCloset.value = authStore.isMember && !!profileId;
     if (loadingCloset.value) {
       let result;
@@ -206,12 +232,33 @@ const clearClosetItems = () => {
 };
 
 const close = () => {
+  if (submitting.value) return;
   appStore.isSosFormOpen = false;
   appStore.sosTargetItemId = null;
 };
 
+const chooseCover = (event) => {
+  const file=event.target.files?.[0]; coverFile.value=null;
+  if (!file) return;
+  try { validateOotdImage(file); coverFile.value=file; }
+  catch (error) { appStore.showToast(error?.userMessage || t('照片處理失敗，請重新選擇。'), {type:'error'}); event.target.value=''; }
+};
+
+// Publish a separate copy of the selected display photo. Closet originals and
+// their private storage paths never become the public SOS cover.
+const selectedCoverFile = async () => {
+  const item = appStore.items.find(entry => String(entry.id) === String(coverItemId.value));
+  if (!item?.photo) throw new Error('COVER_UNAVAILABLE');
+  const response = await fetch(item.photo);
+  if (!response.ok) throw new Error('COVER_UNAVAILABLE');
+  const blob = await response.blob();
+  const file = new File([blob], 'sos-cover', { type: blob.type });
+  validateOotdImage(file);
+  return file;
+};
+
 const handleSubmit = async () => {
-  if (loadingCloset.value || closetLoadFailed.value) return;
+  if (loadingCloset.value || closetLoadFailed.value || !appStore.profile.public_closet || submitting.value) return;
   if (!selectedVibes.value.length) {
     appStore.showToast(t('至少選一個想呈現的風格'));
     return;
@@ -222,15 +269,30 @@ const handleSubmit = async () => {
     return;
   }
 
-  const success = await sosStore.createSosPost({
+  if ((coverMode.value==='upload' && !coverFile.value) || (coverMode.value==='closet' && !selectedClosetItemIds.value.includes(coverItemId.value))) {
+    appStore.showToast(t('請選擇主圖或改為不使用主圖。'), {type:'warning'}); return;
+  }
+  submitting.value=true; let uploaded=null; let success=false;
+  try {
+    if (coverMode.value !== 'none') {
+      const file = coverMode.value === 'upload' ? coverFile.value : await selectedCoverFile();
+      uploaded = await uploadOotdImage(file, authStore.user.id);
+    }
+    success = await sosStore.createSosPost({
     title: title.value,
     details: details.value,
     occasion: occasion.value,
     weather: weather.value,
     when_label: whenLabel.value,
     vibes: selectedVibes.value,
-    closet_item_ids: selectedClosetItemIds.value
+    closet_item_ids: selectedClosetItemIds.value,
+    cover_url:uploaded?.publicUrl || null, cover_path:uploaded?.path || null,
+    cover_item_id:coverMode.value==='closet' ? coverItemId.value : null
   });
+    // A network failure can happen after the server commits the post. Do not
+    // remove the uploaded cover on an ambiguous result and break a published post.
+  } catch { appStore.showToast(t('主圖上傳失敗，請再試一次。'), {type:'error'}); }
+  finally { submitting.value=false; }
 
   if (success) {
     close();

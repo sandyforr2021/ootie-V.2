@@ -30,6 +30,16 @@ describe('Stats Store & Aizhen Features', () => {
     expect(stats.categoryStats.length).toBeGreaterThan(0);
   });
 
+  it('uses the named color for chart segments even when an old saved hex is wrong', async () => {
+    localStorage.setItem(GUEST_CLOSET_STORAGE_KEY, JSON.stringify([
+      { ...defaultItems[0], primary_color: '黑色', color_hex: '#ff0000' },
+      { ...defaultItems[1], primary_color: 'Blue', color_hex: '#ff0000' }
+    ]));
+    const { colorStats } = await useStatsStore().getClosetStats();
+    expect(colorStats.find(entry => entry.color === '黑色').color_hex).toBe('#242321');
+    expect(colorStats.find(entry => entry.color === 'Blue').color_hex).toBe('#3B5998');
+  });
+
   it('should calculate brand statistics correctly', async () => {
     const statsStore = useStatsStore();
     const brandStats = await statsStore.getBrandStats();

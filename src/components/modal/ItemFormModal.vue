@@ -69,6 +69,11 @@
               :src="photoPreview"
               :alt="form.name ? `${form.name}照片預覽` : '單品照片預覽'"
             />
+            <div v-if="preparedMedia" class="upload-choice-row">
+              <button v-if="!backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="tryBackgroundRemoval">{{ backgroundBusy ? $t('正在處理背景…') : $t('嘗試去除單色背景') }}</button>
+              <button v-else type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="restoreBackground">{{ $t('還原照片') }}</button>
+            </div>
+            <p v-if="backgroundMessage" role="status">{{ backgroundMessage }}</p>
           </div>
 
           <div class="media-status-region" role="status" aria-live="polite" aria-atomic="true">
@@ -108,21 +113,19 @@
             </section>
           </div>
 
-          <div v-if="preparedMedia" class="background-choice" :aria-label="$t(&quot;圖片處理方式&quot;)">
-            <span class="background-choice-option is-active">{{ $t("保留原圖") }}</span>
-            <span class="background-choice-option is-disabled" aria-disabled="true">{{ $t("整理背景（尚未提供）") }}</span>
-          </div>
-          <p class="capture-privacy-note">{{ $t("上傳不會自動發布。會員照片會保留私有原檔，顯示用版本只做方向校正、縮放與適度壓縮，不會套用改色濾鏡。") }}</p>
+          <p class="capture-privacy-note">{{ $t('照片不會自動發布。原圖保留私有；顯示版本會校正方向、縮放及壓縮，可選擇嘗試去除單色背景。') }}</p>
         </div>
 
         <div class="form-grid">
           <div class="form-field">
             <label for="name">{{ $t("單品名稱") }}</label>
             <input id="name" v-model="form.name" required :placeholder="$t(&quot;例如：亞麻襯衫&quot;)" />
+            <p v-if="filenameSuggestion" class="form-hint">{{ $t('名稱與分類參考檔名，請確認後修改。') }}</p>
           </div>
           <div class="form-field">
             <label for="category">{{ $t("分類") }}</label>
-            <select id="category" v-model="form.category">
+            <select id="category" v-model="form.category" required @change="categoryEdited = true">
+              <option value="" disabled>{{ $t('請選擇分類') }}</option>
               <option value="Tops">{{ $t("上衣") }}</option>
               <option value="Bottoms">{{ $t("下身") }}</option>
               <option value="Dress">{{ $t("洋裝") }}</option>
@@ -187,41 +190,15 @@
           </div>
 
           <div class="form-field">
-            <label for="shape">{{ $t("版型／款式") }}</label>
-            <input id="shape" v-model="form.shape" :placeholder="$t(&quot;例如：寬鬆版型&quot;)" />
-          </div>
-          <div class="form-field">
             <label for="style">{{ $t("風格") }}</label>
-            <select id="style" v-model="form.style">
+            <select id="style" v-model="styleChoice">
               <option value="Minimal">{{ $t("極簡") }}</option>
               <option value="Casual">{{ $t("休閒") }}</option>
               <option value="Smart Casual">{{ $t("簡約正式") }}</option>
               <option value="Chic">{{ $t("時髦") }}</option>
+              <option value="custom">{{ $t("自訂風格") }}</option>
             </select>
-          </div>
-
-          <div class="form-field">
-            <label for="price">{{ $t("購買價格（選填）") }}</label>
-            <input
-              id="price"
-              v-model="form.price"
-              type="number"
-              min="0"
-              :step="currencyDigits(form.currency) === 0 ? '1' : '0.01'"
-              inputmode="decimal"
-              :placeholder="$t(&quot;例如：1280&quot;)"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="purchaseCurrency">{{ $t('購買幣別') }}</label>
-            <select id="purchaseCurrency" v-model="form.currency">
-              <option v-for="currency in CURRENCIES" :key="currency" :value="currency">{{ currency }}</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="purchaseDate">{{ $t('購買日期') }}</label>
-            <input id="purchaseDate" v-model="form.purchase_date" type="date" />
+            <input v-if="styleChoice === 'custom'" v-model.trim="form.style" :aria-label="$t('自訂風格')" :placeholder="$t('輸入自訂風格')" maxlength="80" required />
           </div>
 
           <div class="form-field">
@@ -244,7 +221,7 @@
           <button v-if="isSubmitting && mediaStatus === 'uploading'" type="button" class="secondary" @click="requestUploadCancel">{{ $t("取消上傳") }}</button>
           <button v-else-if="isSubmitting" type="button" class="secondary" disabled>{{ $t("完成儲存中") }}</button>
           <button v-else type="button" class="secondary" @click="close">{{ $t("取消") }}</button>
-          <button type="submit" class="primary" :disabled="isSubmitting || mediaBusy || (!!mediaError && !preparedMedia)">
+          <button type="submit" class="primary" :disabled="isSubmitting || mediaBusy || backgroundBusy || (!!mediaError && !preparedMedia)">
             {{ submitButtonText }}
           </button>
         </div>
@@ -255,13 +232,15 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onUnmounted } from 'vue';
-import { CURRENCIES, defaultCurrency, currencyDigits, validPurchaseAmount } from '@/services/money';
+import { defaultCurrency } from '@/services/money';
 import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
 import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
 import { getColorFamilyForPrimaryColor, legacyColorNames } from '@/constants';
 import { analyzeImageColor } from '@/services/colorDetection';
 import { prepareClothingImage, blobToDataUrl } from '@/services/clothingMedia';
+import { suggestFromClothingFilename } from '@/services/clothingSuggestions';
+import { removeSimpleBackground } from '@/services/simpleBackgroundRemoval';
 
 const appStore = useAppStore();
 const closetStore = useClosetStore();
@@ -309,12 +288,20 @@ const warningsAcknowledged = ref(false);
 const singleItemConfirmed = ref(false);
 const uploadCancelRequested = ref(false);
 const uploadProgress = ref(null);
+const categoryEdited = ref(false);
+const backgroundBusy = ref(false);
+const backgroundRemoved = ref(false);
+const backgroundMessage = ref('');
+const filenameSuggestion = ref(false);
+let originalDisplay = null;
+let lastSuggestedName = '';
+let categoryWasSuggested = false;
 let abortActiveUpload = null;
 let previewObjectUrl = '';
 let selectionSequence = 0;
 const form = reactive({
   name: '',
-  category: 'Tops',
+  category: '',
   brand: '',
   primary_color: '白色',
   secondary_color: '無彩色系',
@@ -326,6 +313,11 @@ const form = reactive({
   season: 'All year',
   notes: '',
   photo: ''
+});
+const standardStyles = ['Minimal', 'Casual', 'Smart Casual', 'Chic'];
+const styleChoice = computed({
+  get: () => standardStyles.includes(form.style) ? form.style : 'custom',
+  set: (value) => { form.style = value === 'custom' ? '' : value; }
 });
 
 const qualityWarnings = computed(() => preparedMedia.value?.warnings || []);
@@ -370,6 +362,11 @@ const resetMediaSelection = ({ keepExistingPreview = false } = {}) => {
   singleItemConfirmed.value = false;
   uploadCancelRequested.value = false;
   uploadProgress.value = null;
+  backgroundBusy.value = false;
+  backgroundRemoved.value = false;
+  backgroundMessage.value = '';
+  originalDisplay = null;
+  filenameSuggestion.value = false;
   abortActiveUpload = null;
   if (!keepExistingPreview) photoPreview.value = '';
   if (galleryInputRef.value) galleryInputRef.value.value = '';
@@ -413,9 +410,10 @@ const applyColorSuggestion = (suggestion) => {
   form.secondary_color = suggestion.colorFamily;
 };
 
-const analyzeSelectedImage = async (source) => {
+const analyzeSelectedImage = async (source, sequence) => {
   colorAnalysisState.value = 'loading';
   const suggestion = await analyzeImageColor(source);
+  if (sequence !== selectionSequence) return;
   colorSuggestion.value = suggestion;
   if (suggestion) {
     applyColorSuggestion(suggestion);
@@ -442,6 +440,42 @@ const openGalleryInput = () => {
   galleryInputRef.value?.click();
 };
 
+const useDisplayBlob = (media) => {
+  releasePreviewUrl();
+  preparedMedia.value = { ...preparedMedia.value, ...media, displayMimeType: media.displayBlob.type, displayBytes: media.displayBlob.size };
+  previewObjectUrl = URL.createObjectURL(media.displayBlob);
+  photoPreview.value = previewObjectUrl;
+};
+
+const tryBackgroundRemoval = async () => {
+  if (!preparedMedia.value || backgroundBusy.value) return;
+  const sequence = selectionSequence;
+  backgroundBusy.value = true;
+  backgroundMessage.value = '';
+  try {
+    const result = await removeSimpleBackground(originalDisplay.displayBlob);
+    if (sequence !== selectionSequence) return;
+    if (!result) {
+      backgroundMessage.value = t('背景較複雜，請使用原照片。');
+      return;
+    }
+    useDisplayBlob(result);
+    backgroundRemoved.value = true;
+    backgroundMessage.value = t('請確認衣物邊緣完整；不理想可還原照片。');
+  } catch {
+    if (sequence === selectionSequence) backgroundMessage.value = t('背景較複雜，請使用原照片。');
+  } finally {
+    if (sequence === selectionSequence) backgroundBusy.value = false;
+  }
+};
+
+const restoreBackground = () => {
+  if (!originalDisplay) return;
+  useDisplayBlob(originalDisplay);
+  backgroundRemoved.value = false;
+  backgroundMessage.value = '';
+};
+
 watch(
   () => appStore.isItemFormOpen,
   (open) => {
@@ -451,6 +485,9 @@ watch(
     brandError.value = '';
     colorSuggestion.value = null;
     colorAnalysisState.value = 'idle';
+    lastSuggestedName = '';
+    categoryWasSuggested = false;
+    categoryEdited.value = !!appStore.editingItemId;
     resetMediaSelection({ keepExistingPreview: true });
     showCaptureGuide.value = !appStore.editingItemId && localStorage.getItem(CAPTURE_GUIDE_KEY) !== 'true';
     if (appStore.editingItemId) {
@@ -477,7 +514,7 @@ watch(
     } else {
       Object.assign(form, {
         name: '',
-        category: 'Tops',
+        category: '',
         brand: '',
         primary_color: '白色',
         secondary_color: '無彩色系',
@@ -502,6 +539,11 @@ const handleFileChange = async (e) => {
   const sequence = ++selectionSequence;
   releasePreviewUrl();
   preparedMedia.value = null;
+  originalDisplay = null;
+  filenameSuggestion.value = false;
+  backgroundBusy.value = false;
+  backgroundRemoved.value = false;
+  backgroundMessage.value = '';
   mediaError.value = '';
   warningsAcknowledged.value = false;
   singleItemConfirmed.value = false;
@@ -513,12 +555,25 @@ const handleFileChange = async (e) => {
     const nextMedia = await prepareClothingImage(file);
     if (sequence !== selectionSequence) return;
     preparedMedia.value = nextMedia;
+    originalDisplay = { displayBlob: nextMedia.displayBlob, width: nextMedia.width, height: nextMedia.height };
+    if (!isEdit.value) {
+      const suggestion = suggestFromClothingFilename(file.name);
+      filenameSuggestion.value = !!suggestion;
+      if (!form.name || (lastSuggestedName && form.name === lastSuggestedName)) {
+        form.name = suggestion?.name || '';
+        lastSuggestedName = form.name;
+      }
+      if (!categoryEdited.value) {
+        if (suggestion) { form.category = suggestion.category; categoryWasSuggested = true; }
+        else if (categoryWasSuggested) { form.category = ''; categoryWasSuggested = false; }
+      }
+    }
     previewObjectUrl = URL.createObjectURL(nextMedia.displayBlob);
     photoPreview.value = previewObjectUrl;
     form.photo = '';
     warningsAcknowledged.value = nextMedia.warnings.length === 0;
     mediaStatus.value = 'ready';
-    void analyzeSelectedImage(previewObjectUrl);
+    void analyzeSelectedImage(previewObjectUrl, sequence);
   } catch (error) {
     if (sequence !== selectionSequence) return;
     mediaStatus.value = 'error';
@@ -552,14 +607,6 @@ const handleSubmit = async () => {
       return;
     }
   }
-  if (form.price !== '' && form.price !== null) {
-    const numPrice = Number(form.price);
-    if (!validPurchaseAmount(numPrice, form.currency)) {
-      appStore.showToast(t('請輸入符合幣別的小數位數及非負金額。'));
-      return;
-    }
-  }
-
   isSubmitting.value = true;
   uploadCancelRequested.value = false;
   uploadProgress.value = null;
@@ -567,6 +614,14 @@ const handleSubmit = async () => {
   mediaError.value = '';
   try {
     const payload = { ...form };
+    // These fields are no longer editable. Never write their hidden values back
+    // when editing an existing item, so old purchase data is preserved.
+    if (isEdit.value) {
+      delete payload.shape;
+      delete payload.price;
+      delete payload.currency;
+      delete payload.purchase_date;
+    }
     if (preparedMedia.value) {
       if (closetStore.dataMode === CLOSET_DATA_MODE.REMOTE) {
         payload.__preparedMedia = preparedMedia.value;

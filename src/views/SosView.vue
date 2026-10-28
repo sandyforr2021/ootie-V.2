@@ -67,6 +67,8 @@
 
           <h2>{{ post.title }}</h2>
 
+          <img v-if="coverImage(post)" class="sos-cover-image" :src="coverImage(post)" :alt="t('求救主圖')" loading="lazy" />
+
           <div class="sos-meta">
             <span>{{ t("場合") }} · {{ t(post.occasion) }}</span>
             <span>{{ t("天氣") }} · {{ t(post.weather) }}</span>
@@ -74,28 +76,6 @@
           </div>
 
           <div class="sos-vibes">{{ t('想呈現的風格') }} · {{ (post.vibes || []).map(v => t(v)).join(' · ') }}</div>
-
-          <!-- Public closet items preview thumbnails -->
-          <div v-if="getPublicItemThumbs(post).length" class="sos-card-clothing-preview">
-            <div class="sos-card-clothing-list">
-              <div
-                v-for="item in getPublicItemThumbs(post).slice(0, 5)"
-                :key="item.id"
-                class="sos-card-clothing-thumb"
-              >
-                <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" loading="lazy" decoding="async" />
-                <span>{{ item.name_zh || item.name }}</span>
-              </div>
-              <button
-                v-if="getPublicItemThumbs(post).length > 5"
-                type="button"
-                class="sos-card-clothing-more"
-                :aria-label="tf('查看另外 {count} 件公開衣物', { count: getPublicItemThumbs(post).length - 5 })"
-                @click="openSuggestion(post.id)"
-              >
-                ＋{{ getPublicItemThumbs(post).length - 5 }} {{ $t("更多") }}</button>
-            </div>
-          </div>
 
           <div class="sos-card-footer">
             <span class="sos-available">
@@ -106,10 +86,12 @@
             <div class="sos-card-actions">
               <button
                 type="button"
-                :class="['sos-cta', 'secondary-btn', { saved: post.saved }]"
+                :class="['sos-cta', 'secondary-btn', 'sos-save-button', { saved: post.saved }]"
+                :aria-pressed="Boolean(post.saved)"
                 @click="sosStore.toggleSave(post.id)"
               >
-                {{ post.saved ? '▣ ' + t('已收藏') : '♡ ' + t('收藏') }}
+                <Heart :size="16" :stroke-width="1.7" :fill="post.saved ? 'currentColor' : 'none'" aria-hidden="true" />
+                {{ t(post.saved ? '已收藏' : '收藏') }}
               </button>
               <!-- View detail button -->
               <button class="sos-cta secondary-btn" @click="openSosDetail(post.id)">
@@ -134,6 +116,7 @@
               >
                 {{ t("結束求救") }}
               </button>
+              <button v-if="sosStore.activeTab === 'sent'" class="sos-cta secondary-btn" @click="deletePost(post.id)">{{ t('刪除') }}</button>
             </div>
           </div>
         </article>
@@ -148,6 +131,7 @@
 
 <script setup>
 import { t, tf } from '@/i18n';
+import { Heart } from '@lucide/vue';
 import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '@/stores/app';
@@ -158,8 +142,10 @@ const appStore = useAppStore();
 const sosStore = useSosStore();
 const authStore = useAuthStore();
 const route = useRoute();
-
-const getPublicItemThumbs = (post) => sosStore.getPublicItemsForSos(post);
+const coverImage = post => post.cover_url || sosStore.getPublicItemsForSos(post).find(item=>String(item.id)===String(post.cover_item_id))?.photo || '';
+const deletePost = async id => {
+  if (confirm(t('確定刪除這則求救及其搭配建議？此動作無法復原。'))) await sosStore.deleteSosPost(id);
+};
 
 const openSosForm = (itemId = null) => {
   if (itemId) {

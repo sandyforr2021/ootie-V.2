@@ -9,12 +9,18 @@ export class CommerceRepository {
     });
   }
   rpc(name, body) { return this.request(`rpc/${name}`, '', { method: 'POST', body }); }
-  listProducts(userId) { return this.request('ootie_shop_products', `?user_id=eq.${userId}&order=created_at.desc&limit=200`); }
+  listProducts(userId) { return this.request('ootie_shop_products', `?user_id=eq.${userId}&state=neq.tryon_only&order=created_at.desc&limit=200`); }
   async product(id, userId) { return (await this.request('ootie_shop_products', `?id=eq.${id}&user_id=eq.${userId}&limit=1`))?.[0]; }
   async createProduct(row) { return (await this.request('ootie_shop_products', '', { method: 'POST', body: row }))[0]; }
   async updateProduct(id, userId, changes) { return (await this.request('ootie_shop_products', `?id=eq.${id}&user_id=eq.${userId}`, { method: 'PATCH', body: changes }))[0]; }
-  listJobs(userId) { return this.request('ootie_youcam_jobs', `?user_id=eq.${userId}&select=id,batch_id,product_id,kind,status,units,result_path,result_data,error_code,created_at,completed_at&order=created_at.desc&limit=200`); }
+  listJobs(userId) { return this.request('ootie_youcam_jobs', `?user_id=eq.${userId}&select=id,batch_id,product_id,kind,status,units,result_path,result_data,error_code,created_at,completed_at,product:ootie_shop_products(title)&order=created_at.desc&limit=200`); }
   async job(id, userId) { return (await this.request('ootie_youcam_jobs', `?id=eq.${id}&user_id=eq.${userId}&limit=1`))?.[0]; }
+  async savedOutfit(profileId, postId) { return (await this.request('ootie_saved_outfits', `?profile_id=eq.${profileId}&target_type=eq.OOTD&target_id=eq.${postId}&select=id&limit=1`))?.[0]; }
+  async outfit(postId) { return (await this.request('ootie_ootd_posts', `?id=eq.${postId}&select=id,item_ids&limit=1`))?.[0]; }
+  async clearJobResult(id, userId, resultPath) {
+    const query = `?id=eq.${id}&user_id=eq.${userId}&status=eq.succeeded&result_path=eq.${encodeURIComponent(resultPath)}`;
+    return (await this.request('ootie_youcam_jobs', query, { method: 'PATCH', body: { result_path: null } }))?.[0];
+  }
   async budget() { return (await this.request('ootie_youcam_budget', '?id=eq.true&limit=1'))?.[0]; }
   async claim(lease) { return (await this.rpc('claim_ootie_youcam_job', { p_lease: lease }))?.[0]; }
   async updateJob(id, lease, changes) {

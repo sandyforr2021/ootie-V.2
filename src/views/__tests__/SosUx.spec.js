@@ -11,6 +11,7 @@ import { useSosStore } from '@/stores/sos';
 import { setLocale } from '@/i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
+import * as ootdMedia from '@/services/ootdMedia';
 
 const createRouterForSos = () => createRouter({
   history: createWebHistory(),
@@ -36,60 +37,26 @@ const makePost = (id, itemCount, senderId = 'profile-other') => ({
 });
 
 describe('SOS clothing preview and selection UX', () => {
-  afterEach(() => setLocale('zh-TW'));
+  afterEach(() => { setLocale('zh-TW'); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
     installLocalInteractionFixtures();
   });
 
-  it('shows all public items up to five without a more button', async () => {
-    const router = createRouterForSos();
-    const appStore = useAppStore();
-    appStore.sosPosts = [makePost('sos-five', 5)];
-    useSosStore();
-    await router.push('/sos');
-
-    const wrapper = mount(SosView, { global: { plugins: [router] } });
-    await flushPromises();
-
-    expect(wrapper.findAll('.sos-card-clothing-thumb')).toHaveLength(5);
-    expect(wrapper.find('.sos-card-clothing-more').exists()).toBe(false);
-  });
-
-  it('shows five items and routes plus-three-more into the suggestion flow', async () => {
+  it('keeps wardrobe thumbnails out of the feed and opens the selected request', async () => {
     const router = createRouterForSos();
     const appStore = useAppStore();
     appStore.sosPosts = [makePost('sos-eight', 8)];
     useSosStore();
     await router.push('/sos');
-
     const wrapper = mount(SosView, { global: { plugins: [router] } });
     await flushPromises();
-
-    const moreButton = wrapper.find('.sos-card-clothing-more');
-    expect(wrapper.findAll('.sos-card-clothing-thumb')).toHaveLength(5);
-    expect(moreButton.text()).toContain('＋3 更多');
-
-    await moreButton.trigger('click');
-    expect(appStore.activeSosId).toBe('sos-eight');
-    expect(appStore.isSuggestionFormOpen).toBe(true);
-  });
-
-  it('keeps the self-SOS guard when more is clicked from sent posts', async () => {
-    const router = createRouterForSos();
-    const appStore = useAppStore();
-    appStore.sosPosts = [makePost('sos-self', 8, appStore.profile.id)];
-    const sosStore = useSosStore();
-    sosStore.activeTab = 'sent';
-    await router.push('/sos');
-
-    const wrapper = mount(SosView, { global: { plugins: [router] } });
-    await flushPromises();
-    await wrapper.find('.sos-card-clothing-more').trigger('click');
-
-    expect(appStore.isSuggestionFormOpen).toBe(false);
-    expect(appStore.toastMessage).toContain('不能為自己的求救');
+    expect(wrapper.find('.sos-card-clothing-preview').exists()).toBe(false);
+    const detail = wrapper.findAll('button').find(button => button.text().includes('查看詳情'));
+    await detail.trigger('click');
+    expect(appStore.activeSosDetailId).toBe('sos-eight');
+    expect(appStore.isSosDetailOpen).toBe(true);
   });
 
   it('renders the SOS publish picker as an image selection grid', async () => {
@@ -194,6 +161,57 @@ describe('SOS clothing preview and selection UX', () => {
     await flushPromises();
     expect(wrapper.find('fieldset').element.disabled).toBe(true);
     expect(wrapper.find('[role="alert"]').text()).toContain('衣櫥無法載入');
+    wrapper.unmount();
+  });
+
+  it('publishes a separate copy of a selected wardrobe image as the SOS cover', async () => {
+    const app = useAppStore();
+    const auth = useAuthStore();
+    auth.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    auth.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    app.profile.public_closet = true;
+    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'blob:private-item' };
+    vi.spyOn(useClosetStore(), 'loadRemoteItems').mockImplementation(async () => { app.items = [item]; return { ok: true }; });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(['image'], { type: 'image/jpeg' }) }));
+    const upload = vi.spyOn(ootdMedia, 'uploadOotdImage').mockResolvedValue({ path: 'ootd/owner/sos.jpg', publicUrl: 'https://example.org/sos.jpg' });
+    const publish = vi.spyOn(useSosStore(), 'createSosPost').mockResolvedValue(true);
+    const wrapper = mount(SosFormModal, { global: { stubs: ['router-link'] } });
+    app.isSosFormOpen = true;
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('A day out');
+    await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('#sosCoverMode').setValue('closet');
+    await wrapper.find('select[aria-label]').setValue(item.id);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(upload).toHaveBeenCalledOnce();
+    expect(upload.mock.calls[0][0]).toBeInstanceOf(File);
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ cover_item_id: item.id, cover_url: 'https://example.org/sos.jpg' }));
+    expect(app.isSosFormOpen).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('does not publish when a selected wardrobe photo cannot be read', async () => {
+    const app = useAppStore();
+    const auth = useAuthStore();
+    auth.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    auth.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    app.profile.public_closet = true;
+    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'https://example.org/private.jpg' };
+    vi.spyOn(useClosetStore(), 'loadRemoteItems').mockImplementation(async () => { app.items = [item]; return { ok: true }; });
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('CORS')));
+    const publish = vi.spyOn(useSosStore(), 'createSosPost').mockResolvedValue(true);
+    const wrapper = mount(SosFormModal, { global: { stubs: ['router-link'] } });
+    app.isSosFormOpen = true;
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('A day out');
+    await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('#sosCoverMode').setValue('closet');
+    await wrapper.find('select[aria-label]').setValue(item.id);
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(publish).not.toHaveBeenCalled();
+    expect(app.isSosFormOpen).toBe(true);
     wrapper.unmount();
   });
 

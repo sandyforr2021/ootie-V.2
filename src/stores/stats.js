@@ -3,7 +3,7 @@ import { useAppStore } from './app';
 import { CLOSET_DATA_MODE, useClosetStore } from './closet';
 import { useAuthStore } from './auth';
 import { ASYNC_STATUS } from '@/contracts/asyncState';
-import { labels, getColorFamilyForPrimaryColor } from '@/constants';
+import { labels, getColorFamilyForPrimaryColor, colorHexValues, legacyColorNames } from '@/constants';
 
 export const useStatsStore = defineStore('stats', () => {
   const appStore = useAppStore();
@@ -75,7 +75,7 @@ export const useStatsStore = defineStore('stats', () => {
           }
           groups[groupValue].count += 1;
           if (includeColor && !groups[groupValue].color_hex) {
-            groups[groupValue].color_hex = item.color_hex || '#D8D2C8';
+            groups[groupValue].color_hex = colorHexValues[legacyColorNames[groupValue] || groupValue] || item.color_hex || '#D8D2C8';
           }
           return groups;
         }, {})

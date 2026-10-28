@@ -25,3 +25,10 @@ export async function insertPostComment({id, postId, profileId, text}, client = 
   if (!data?.id) throw new Error('COMMENT_NOT_CONFIRMED');
   return data;
 }
+
+export async function deletePostComment({id, postId, profileId}, client = supabase) {
+  const { data, error } = await client.from('ootie_post_comments').delete()
+    .eq('id', id).eq('post_id', postId).eq('profile_id', profileId).select('id');
+  if (error) throw error;
+  if (!data?.length) throw new Error('COMMENT_NOT_DELETED');
+}

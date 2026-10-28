@@ -357,6 +357,9 @@ export async function insertSosPostToSupabase(sosData) {
       when_label: sosData.when_label,
       vibes: sosData.vibes || [],
       closet_item_ids: sosData.closet_item_ids || [],
+      cover_url: sosData.cover_url || null,
+      cover_path: sosData.cover_path || null,
+      cover_item_id: sosData.cover_item_id || null,
       status: sosData.status || 'OPEN',
       created_at: sosData.created_at || new Date().toISOString()
     };
@@ -376,6 +379,14 @@ export async function insertSosPostToSupabase(sosData) {
     console.error('Supabase SOS insert failed:', err);
     return null;
   }
+}
+
+export async function deleteSosPostFromSupabase(sosId, profileId) {
+  if (!isUuid(sosId) || !isUuid(profileId)) return false;
+  const { data, error } = await supabase.from('ootie_sos_posts').delete()
+    .eq('id',sosId).eq('user_id',profileId).select('id');
+  if (error) throw error;
+  return Boolean(data?.length);
 }
 
 /**

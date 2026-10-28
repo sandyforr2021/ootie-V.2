@@ -6,6 +6,7 @@ import { atelierMessages } from './atelier.js';
 import { connectedMessages } from './connected.js';
 import { sosMessages } from './sos.js';
 import { accountMessages } from './account.js';
+import { clothingImageMessages } from './clothingImage.js';
 
 // Reviewed, local dictionaries. Changing language never sends text to a paid API.
 export function rowsToMessages(rows) {
@@ -15,4 +16,4 @@ export function rowsToMessages(rows) {
     return [zh, { 'zh-TW': zh, en, ja, es }];
   }));
 }
-export const messages = { ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages), ...rowsToMessages(studioMessages) };
+export const messages = { ...rowsToMessages(shopMessages), ...rowsToMessages(interfaceMessages), ...rowsToMessages(atelierMessages), ...rowsToMessages(connectedMessages), ...rowsToMessages(sosMessages), ...rowsToMessages(accountMessages), ...rowsToMessages(wardrobeInsightsMessages), ...rowsToMessages(studioMessages), ...rowsToMessages(clothingImageMessages) };
