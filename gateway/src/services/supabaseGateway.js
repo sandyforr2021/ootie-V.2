@@ -78,7 +78,11 @@ export class SupabaseGateway {
     } catch {
       throw new GatewayError('AUTH_UNAVAILABLE', 503, 'Supabase Auth could not be reached');
     }
-    if (!response.ok) throw new GatewayError('AUTH_REQUIRED', 401, 'Supabase session is invalid or expired');
+    if (!response.ok) {
+      const failure=await response.json().catch(()=>null);
+      const code=typeof failure?.code==='string' && /^[a-z_]{1,64}$/i.test(failure.code)?failure.code:undefined;
+      throw new GatewayError('AUTH_REQUIRED',401,'Supabase session is invalid or expired',{status:response.status,code});
+    }
     const user = await response.json();
     assert(UUID_PATTERN.test(user?.id || ''), 'AUTH_REQUIRED', 401, 'Supabase user identity is invalid');
     assert(!user?.is_anonymous, 'MEMBER_REQUIRED', 403, 'A permanent OOTIE member account is required');

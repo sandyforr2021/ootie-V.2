@@ -193,7 +193,7 @@ export function createGatewayApp({ config, supabase, provider, generationService
       const response = toErrorResponse(error);
       // Record only diagnostic codes and a redacted route, never tokens, bodies,
       // private object paths, profile IDs or upstream error descriptions.
-      if(response.status>=400 && ![401,404].includes(response.status)) {
+      if(response.status>=400 && response.status!==404) {
         const route=path.startsWith('/v1/private-images/')?'/v1/private-images/:path':path.split('/').slice(0,4).map(part=>/^[\da-f-]{36}$/i.test(part)||part.length>64?':id':part).join('/');
         console.warn(JSON.stringify({event:'gateway_request_failed',method,route,status:response.status,code:response.body.error.code,upstreamStatus:error?.details?.status,upstreamCode:error?.details?.code}));
       }
