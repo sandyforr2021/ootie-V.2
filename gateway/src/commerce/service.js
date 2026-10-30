@@ -53,9 +53,16 @@ export class CommerceService {
     const allowance = {pointBalance:pointsReady?pointBalance:null,generationPolicyVersion:newPolicy?2:1,
       dailyGenerationRemaining:generationRemaining,
       dailyFreeGenerationRemaining:newPolicy?Math.max(0,DAILY_FREE_IMAGES-Number(quota.freeGenerationUsed)):null};
-    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= (newPolicy?1:2) && generationQuote(allowance).allowed,
+    const quote = generationQuote(allowance);
+    const unavailableReason = !this.enabled ? 'YOUCAM_DISABLED'
+      : !active ? 'FREE_BUDGET_EXPIRED'
+      : providerBalance === null ? 'PROVIDER_BALANCE_UNAVAILABLE'
+      : !underConcurrencyLimit ? 'USER_ACTIVE_LIMIT'
+      : remaining < (newPolicy?1:2) ? 'FREE_BUDGET_EXHAUSTED'
+      : !quote.allowed ? quote.reason : null;
+    return { enabled: !unavailableReason, unavailableReason,
       ...allowance, pointGenerationsUnlimited:newPolicy,dailyFreeGenerationLimit:newPolicy?DAILY_FREE_IMAGES:null,
-      dailyGenerationRemaining:generationRemaining,dailyGenerationLimit:2,generationTimezone:'Asia/Taipei',
+      dailyGenerationRemaining:generationRemaining,dailyGenerationLimit:2,generationTimezone:quota?.generationTimezone || (newPolicy?'America/Los_Angeles':'Asia/Taipei'),
       remainingUnits: active && underConcurrencyLimit ? remaining : 0, dailyRemainingUnits: quotaRemaining,
       activeJobs: Number(quota?.activeCount || 0), activeJobLimit: Number(quota?.activeLimit || 0),
       providerBalance, balanceVerified: providerBalance !== null, reviewerReserveUnits: Number(budget?.reviewer_reserve_units || 0),

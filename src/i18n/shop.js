@@ -1,4 +1,9 @@
 export const shopMessages = `
+本次使用免費額度 1 張|Uses 1 free image this time|今回は無料枠を1枚使用|Esta vez se usa 1 imagen gratis
+網站共用生成額度不足，請稍後再試；不代表你的每日免費額度已用完。|Shared generation capacity is unavailable. Try again later; your personal daily free allowance may still be available.|サービス全体の生成枠が不足しています。しばらくしてからお試しください。個人の無料枠を使い切ったという意味ではありません。|La capacidad compartida no está disponible. Inténtalo más tarde; tu cupo diario gratuito puede seguir disponible.
+試穿服務的贈送額度已到期，請聯絡管理員。|The service credit grant has expired. Contact the administrator.|サービスの無料クレジットが期限切れです。管理者にご連絡ください。|Los créditos gratuitos del servicio han caducado. Contacta al administrador.
+暫時無法確認試穿服務額度，請稍後再試。|Service capacity could not be verified. Try again later.|サービスの残り枠を確認できません。しばらくしてからお試しください。|No se pudo verificar la capacidad del servicio. Inténtalo más tarde.
+試穿服務暫時無法使用，請稍後再試。|Try-on is temporarily unavailable. Try again later.|試着サービスは一時的に利用できません。しばらくしてからお試しください。|El servicio de prueba no está disponible temporalmente. Inténtalo más tarde.
 上衣|Tops|トップス|Tops
 下身|Bottoms|ボトムス|Prendas inferiores
 連身服飾|Full outfit|ワンピース・つなぎ|Prendas de una pieza

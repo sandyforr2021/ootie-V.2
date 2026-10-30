@@ -1,11 +1,12 @@
 <script setup>
-import {computed,ref,onMounted,onBeforeUnmount,watch} from 'vue';
+import {computed,ref,toRef,nextTick,onMounted,onBeforeUnmount,watch} from 'vue';
 import {useWeatherStore} from '@/stores/weather';
 import {getBrowserPosition,searchWeatherPlaces} from '@/services/weather';
 import {locale,t} from '@/i18n';
 import AppIcon from '@/components/ui/AppIcon.vue';
 const weather=useWeatherStore();
-const expanded=ref(false),locating=ref(false),query=ref(''),searching=ref(false),places=ref([]),error=ref('');
+const expanded=toRef(weather,'locationPickerOpen'),locating=ref(false),query=ref(''),searching=ref(false),places=ref([]),error=ref('');
+watch(expanded,async open=>{if(open){await nextTick();document.getElementById('home-weather-city')?.focus();}});
 let searchVersion=0,locationVersion=0;
 onBeforeUnmount(()=>{searchVersion++;locationVersion++;});
 const city=computed(()=>['目前位置','Current location'].includes(weather.current?.city)?t('目前位置'):weather.current?.city);

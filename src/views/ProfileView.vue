@@ -86,6 +86,7 @@
       <div v-else class="profile-ootd-empty">
         {{ t(isSelf ? '你發布的 OOTD 會顯示在這裡。' : '此使用者尚未發布 OOTD。') }}
       </div>
+      <button v-if="userPosts.length && ootdStore.hasMore" type="button" class="secondary profile-load-more" :disabled="ootdStore.loading || ootdStore.loadingMore" @click="ootdStore.loadMorePosts()">{{ t(ootdStore.loadingMore ? '載入中…' : '載入更多') }}</button>
     </section>
   </section>
 </template>
@@ -134,30 +135,22 @@ const profileMetrics = ref({
 });
 
 const loadPublicProfile = async () => {
-  if (!route.query.user) {
-    remotePublicProfile.value = null;
-    return;
-  }
+  const username = route.query.user;
+  remotePublicProfile.value = null;
+  if (!username) return;
   try {
-    const profile = await getPublicProfileByUsername(route.query.user);
+    const profile = await getPublicProfileByUsername(username);
+    if (route.query.user !== username) return;
     remotePublicProfile.value = isFixtureContent(profile) ? null : profile;
   } catch (error) {
     // Keep the public page usable when the optional profile read is unavailable;
     // no private account fields are ever used in the local presentation fallback.
-    remotePublicProfile.value = null;
+    if (route.query.user === username) remotePublicProfile.value = null;
   }
 };
 
 onMounted(() => {
   if(route.query.tab==='saved')void router.replace('/profile/saved');
-  ootdStore.loadRemotePosts();
-  loadPublicProfile().then(loadProfileMetrics);
-});
-
-watch(() => route.query.user, async () => {
-  connectionsKind.value='';
-  await loadPublicProfile();
-  await loadProfileMetrics();
 });
 
 const isSelf = computed(() => {
@@ -244,9 +237,17 @@ const loadProfileMetrics = async () => {
   };
 };
 
-watch(() => authStore.profileId, async (profileId) => {
-  if (!profileId) return;
-  await loadProfileMetrics();
+watch([() => route.query.user, () => authStore.profileId], async (_, __, onCleanup) => {
+  let cancelled = false;
+  onCleanup(() => { cancelled = true; });
+  connectionsKind.value = '';
+  await loadPublicProfile();
+  if (cancelled) return;
+  const authorId = isSelf.value ? authStore.profileId : remotePublicProfile.value?.id;
+  await Promise.all([
+    loadProfileMetrics(),
+    ootdStore.loadRemotePosts({ authorIds: authorId ? [authorId] : [] })
+  ]);
 }, { immediate: true });
 
 const formatMetric = (value) => value === null || value === undefined ? '—' : value;
@@ -317,6 +318,7 @@ const shareOotd = (postId) => {
 </script>
 
 <style scoped>
+.profile-load-more { display:block; margin:24px auto 0; }
 .profile-membership-card { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin: 0 0 24px; padding: 18px 0; border-bottom: 1px solid var(--line); transition: color .18s ease; }
 .profile-membership-card:hover { color: var(--accent-violet-ink); }
 .profile-membership-card strong, .profile-membership-card small { display: block; }

@@ -6,6 +6,7 @@ export const useWeatherStore = defineStore('weather', () => {
   const current = ref(null);
   const loading = ref(false);
   const error = ref('');
+  const locationPickerOpen = ref(false);
   let version = 0;
   const advice = computed(() => weatherWardrobeAdvice(current.value));
   async function selectPlace(place) {
@@ -16,5 +17,6 @@ export const useWeatherStore = defineStore('weather', () => {
     catch (failure) { if (request === version) error.value = failure.name === 'WeatherError' ? failure.message : '天氣服務暫時無法使用。'; }
     finally { if (request === version) loading.value = false; }
   }
-  return { current, loading, error, advice, selectPlace };
+  const openLocationPicker = () => { locationPickerOpen.value = true; };
+  return { current, loading, error, advice, selectPlace, locationPickerOpen, openLocationPicker };
 });

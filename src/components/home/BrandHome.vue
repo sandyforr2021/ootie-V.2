@@ -7,7 +7,7 @@ import BrandMark from '@/components/layout/BrandMark.vue';
 import LanguageSelect from '@/components/layout/LanguageSelect.vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import BrandProductPreview from './BrandProductPreview.vue';
-import HeroEditorial from './HeroEditorial.vue';
+import EditorialVisual from '@/components/ui/EditorialVisual.vue';
 const auth = useAuthStore();
 const app=useAppStore();
 const router = useRouter();
@@ -47,7 +47,7 @@ const features = [
        <div class="brand-hero-icons"><a v-for="feature in features" :key="feature.id" :href="`#${feature.id}`"><span class="brand-soft-icon"><AppIcon :name="feature.icon" :size="25"/></span><span>{{ $t(feature.label) }}</span></a></div>
        <div class="brand-hero-actions"><button class="brand-join" type="button" @click="signIn('register')">{{ $t('加入 OOTie') }}<AppIcon name="chevron" :size="18"/></button><a class="brand-feature-link" href="#core-experiences">{{ $t('探索核心功能') }}<AppIcon name="Explore" :size="18"/></a></div>
       </div>
-      <div class="brand-hero-visual"><HeroEditorial/></div>
+      <div class="brand-hero-visual brand-hero-portrait"><EditorialVisual/></div>
     </section>
 
     <section id="core-experiences" class="brand-overview brand-container" aria-labelledby="brand-overview-title"><h2 id="brand-overview-title">{{ $t('你的穿搭日常，都在這裡。') }}</h2><div class="brand-core-grid"><a v-for="feature in features" :key="feature.id" :href="`#${feature.id}`"><AppIcon :name="feature.icon" :size="24"/><h3>{{ $t(feature.label) }}</h3><p>{{ $t(feature.summary) }}</p><AppIcon class="brand-core-arrow" name="chevron" :size="19"/></a></div></section>

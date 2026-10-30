@@ -70,3 +70,8 @@
 /* User-supplied transparent editorial composition; preserve every item. */
 .brand-hero-visual{align-items:center;min-width:0}
 @media(max-width:700px){.brand-hero-visual{height:auto;aspect-ratio:4/3;max-width:520px}}
+
+/* Restore the original portrait card while keeping the supplied cloud background. */
+.brand-hero-portrait{height:auto;aspect-ratio:auto;max-width:440px;justify-self:center;padding-left:14px}
+.brand-hero-portrait :deep(.editorial-visual){width:100%}
+@media(max-width:700px){.brand-hero-portrait{max-width:400px;margin-block:12px 32px}}

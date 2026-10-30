@@ -2105,7 +2105,7 @@ h1 {
 .sos-closet-notice { margin: 24px 0 0; line-height: 1.7; }
 .sos-closet-notice a { color: var(--accent-violet-ink); font-weight: 700; text-underline-offset: 3px; }
 .sos-cover-choice{margin-top:22px;display:grid;gap:8px}.sos-cover-choice p{color:var(--muted);font-size:12px;margin:0;line-height:1.6}
-.sos-cover-image{display:block;width:100%;max-height:400px;object-fit:cover;border-radius:12px;margin:16px 0}
+.sos-cover-image{display:block;width:100%;height:auto;max-height:400px;object-fit:contain;object-position:center;background:#f7f7f7;border-radius:12px;margin:16px 0}
 .closet-collections{display:flex;gap:8px;margin:24px 0}.closet-collections a{padding:10px 16px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--ink)}.closet-collections a[aria-current=page]{background:var(--ink);color:var(--white);border-color:var(--ink)}
 
 .profile-ootd {

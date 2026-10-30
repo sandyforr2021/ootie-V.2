@@ -38,15 +38,15 @@ test('Explore, Closet and OOTD Detail preserve safe fashion-media framing', asyn
 test('Home uses a dedicated responsive hero asset while the feed keeps canonical unique posts', async () => {
   const home = await readFile(join(root, 'src/views/HomeView.vue'), 'utf8');
   const brand = await readFile(join(root, 'src/components/home/BrandHome.vue'), 'utf8');
-  const visual = await readFile(join(root, 'src/components/home/HeroEditorial.vue'), 'utf8');
+  const visual = await readFile(join(root, 'src/components/ui/EditorialVisual.vue'), 'utf8');
   assert.match(home, /<BrandHome/);
-  assert.match(brand, /<HeroEditorial/);
-  assert.match(visual, /wardrobe-editorial-v2-480\.webp 480w/);
-  assert.match(visual, /wardrobe-editorial-v2-900\.webp 900w/);
+  assert.match(brand, /<EditorialVisual/);
+  assert.match(visual, /ootie-home-hero-v2-720\.webp 720w/);
+  assert.match(visual, /ootie-home-hero-v2-1024\.webp 1024w/);
   assert.doesNotMatch(home, /:src="heroPost\?\.image"/);
   assert.match(home, /uniquePostsById\(genuineContent\(appStore\.ootdPosts\)\)/);
-  assert.ok((await stat(join(root, 'public/assets/brand/wardrobe-editorial-v2-480.webp'))).size < 160_000);
-  assert.ok((await stat(join(root, 'public/assets/brand/wardrobe-editorial-v2-900.webp'))).size < 300_000);
+  assert.ok((await stat(join(root, 'public/assets/ootie-home-hero-v2-720.webp'))).size < 160_000);
+  assert.ok((await stat(join(root, 'public/assets/ootie-home-hero-v2-1024.webp'))).size < 300_000);
 });
 
 test('brand opening V2 is session-only, reduced-motion aware and intentionally timed', async () => {

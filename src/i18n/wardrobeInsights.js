@@ -75,6 +75,7 @@ OOTIE Style Crew · 團隊策展穿搭故事|OOTIE Style Crew · A team-curated 
 搜尋地區|Find a place|地域を検索|Buscar lugar
 搜尋中…|Searching…|検索中…|Buscando…
 選擇地區|Choose a place|地域を選択|Elegir lugar
+先選擇所在地區，查看適合當地天氣的穿搭。|Choose your location to see outfit suggestions for the local weather.|地域を選んで、現地の天気に合うコーディネートを確認しましょう。|Elige tu ubicación para ver conjuntos adecuados al tiempo local.
 正在取得當地天氣…|Checking local weather…|現地の天気を取得中…|Consultando el tiempo…
 體感|Feels like|体感|Sensación
 今日|Today|今日|Hoy

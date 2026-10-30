@@ -62,7 +62,14 @@ async function goStep(value) {
 }
 const generationAllowance = computed(() => generationQuote(capabilities.value, selectionCount.value));
 const allowanceError = reason => t({DAILY_FREE_LIMIT:'今日免費額度已用完，可使用點數繼續生成。',DAILY_GENERATION_LIMIT:'已達每日 2 次生成上限。',POINTS_UNAVAILABLE:'點數紀錄暫時無法載入。',INSUFFICIENT_POINTS:'平台點數不足。'}[reason] || '平台點數不足。');
-const submitHint = computed(() => !selectionCount.value ? t('選擇至少一件商品，再繼續。') : !selectedOutfit.value.valid ? t('整套試穿請各選最多一件上衣、下身與外套。') : !generationAllowance.value.allowed ? allowanceError(generationAllowance.value.reason) : capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on ? t('額度不足，請減少本次試穿商品。') : (!selectedPhoto.value || !consent.value) ? t('選擇一張私人照片，並同意本次處理後即可送出。') : '');
+const serviceUnavailableHint = computed(() => {
+  const reason = capabilities.value.unavailableReason;
+  if (reason && errorMessages[reason]) return t(...errorMessages[reason]);
+  if (!generationAllowance.value.allowed) return allowanceError(generationAllowance.value.reason);
+  if (capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on) return t('網站共用生成額度不足，請稍後再試；不代表你的每日免費額度已用完。');
+  return t('試穿服務暫時無法使用，請稍後再試。');
+});
+const submitHint = computed(() => !selectionCount.value ? t('選擇至少一件商品，再繼續。') : !selectedOutfit.value.valid ? t('整套試穿請各選最多一件上衣、下身與外套。') : !generationAllowance.value.allowed ? allowanceError(generationAllowance.value.reason) : !capabilities.value.enabled || capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on ? serviceUnavailableHint.value : (!selectedPhoto.value || !consent.value) ? t('選擇一張私人照片，並同意本次處理後即可送出。') : '');
 const comparisonIds = ref([]); const pendingBatch = ref(null); const sharedPost = ref(null);
 let pollTimer; let disposed = false; let sessionVersion = 0;
 const identityReady = () => auth.isMember && !!token.value && auth.user?.id === auth.session?.user?.id && (!auth.profileIdentity?.authUserId || auth.profileIdentity.authUserId === auth.session?.user?.id);
@@ -111,8 +118,10 @@ const errorMessages = {
   INSUFFICIENT_POINTS:['平台點數不足。','Not enough platform points.'],
   DAILY_FREE_LIMIT:['今日免費額度已用完，可使用點數繼續生成。','Your daily free images are used up. Use points to continue.'],
   DAILY_GENERATION_LIMIT:['已達每日 2 次生成上限。','Daily limit of 2 generations reached.'],
-  FREE_BUDGET_EXHAUSTED:['免費額度不足，這次沒有送出新的產圖。','There are not enough available credits. No new image job was submitted.'],
-  REVIEWER_RESERVE_PROTECTED:['這些點數已保留給評審使用。','These credits are reserved for the judges.'],
+  FREE_BUDGET_EXHAUSTED:['網站共用生成額度不足，請稍後再試；不代表你的每日免費額度已用完。','Shared generation capacity is unavailable. Try again later; your personal daily free allowance may still be available.'],
+  REVIEWER_RESERVE_PROTECTED:['網站共用生成額度不足，請稍後再試；不代表你的每日免費額度已用完。','Shared generation capacity is unavailable. Try again later; your personal daily free allowance may still be available.'],
+  FREE_BUDGET_EXPIRED:['試穿服務的贈送額度已到期，請聯絡管理員。','The service credit grant has expired. Contact the administrator.'],
+  PROVIDER_BALANCE_UNAVAILABLE:['暫時無法確認試穿服務額度，請稍後再試。','Service capacity could not be verified. Try again later.'],
   USER_DAILY_LIMIT:['已達今日試穿上限，請明天再試。','You have reached today’s try-on limit. Try again tomorrow.'],
   USER_ACTIVE_LIMIT:['等待中的工作較多，完成或核對後再提交。','Too many jobs are waiting. Submit again after they finish or are reviewed.'],
   PERSON_IMAGE_IN_USE:['這張照片仍被工作使用，暫時不能刪除。','This photo is still used by a job and cannot be deleted yet.'],
@@ -539,9 +548,9 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
         <section v-if="step===4" class="shop-fitting shop-panel">
         <h2>{{ t('模擬試穿') }}</h2>
         <label class="shop-consent"><input v-model="consent" type="checkbox"><span>{{ t('我有權使用選用的照片，同意由 OOTIE 及其影像處理服務供應商進行這次試穿或色彩分析。原始照片保持私人。') }}</span></label>
-        <div class="shop-selection-summary"><strong>{{ selectionCount }} / 3</strong><span>{{ t('件候選商品','selected products') }}</span><small v-if="generationAllowance.mode === 'daily_free'">{{ t('免費額度 1 張') }}</small><small v-else>{{ selectionCount * 2 }} {{ t('平台點數') }}</small></div>
+        <div class="shop-selection-summary"><strong>{{ selectionCount }} / 3</strong><span>{{ t('件候選商品','selected products') }}</span><small v-if="generationAllowance.mode === 'daily_free'">{{ t('本次使用免費額度 1 張') }}</small><small v-else>{{ selectionCount * 2 }} {{ t('平台點數') }}</small></div>
         <p v-if="submitHint" id="submit-hint" class="shop-hint">{{ submitHint }}</p><button :aria-describedby="submitHint ? 'submit-hint' : undefined" class="shop-primary shop-wide" :disabled="!canSubmit" @click="submit()">{{ busy==='submit'?t('加入工作池…','Adding to queue…'):t('送出試穿工作','Queue try-ons') }}</button>
-        <p v-if="auth.isMember && !capabilities.enabled" class="shop-hint">{{ t('試穿尚未開放或免費額度不足，仍可整理商品與搭配。','Try-on is not available or free credits are exhausted. You can still organize and pair products.') }}</p>
+        <p v-if="auth.isMember && !capabilities.enabled && !submitHint" class="shop-hint">{{ serviceUnavailableHint }}</p>
         <p class="shop-hint">{{ t('送出後可離開頁面，完成的圖片會保存在私人相簿。AI 圖片僅供視覺參考，尺寸請查看商品資訊。','Leave the page after submitting; results will appear in your private album. AI previews illustrate a look, not sizing or fit.') }}</p>
 
         </section>

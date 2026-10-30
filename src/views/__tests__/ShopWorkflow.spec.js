@@ -105,12 +105,12 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain('點數紀錄暫時無法載入。');
   });
-  it('allows a zero-point member to submit with a free daily image',async()=>{
-    fixture.points=0;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:2};
+  it.each([1,2])('allows a zero-point member with %i free daily images remaining',async remaining=>{
+    fixture.points=0;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:remaining};
     await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeUndefined();
-    expect(wrapper.text()).toContain('今日免費額度 2／2 張');
-    expect(wrapper.find('.shop-selection-summary').text()).toContain('免費額度 1 張');
+    expect(wrapper.text()).toContain(`今日免費額度 ${remaining}／2 張`);
+    expect(wrapper.find('.shop-selection-summary').text()).toContain('本次使用免費額度 1 張');
     expect(wrapper.find('.shop-selection-summary').text()).not.toContain('2 平台點數');
     await wrapper.find('.shop-fitting .shop-wide').trigger('click');await flushPromises();
     expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body)).toHaveLength(1);
@@ -120,6 +120,16 @@ describe('Shopping studio workflow', () => {
     await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain('今日免費額度已用完');
+  });
+  it('distinguishes shared capacity exhaustion from a member\'s free daily allowance',async()=>{
+    fixture.credits=0;fixture.points=0;
+    fixture.allowance={enabled:false,unavailableReason:'FREE_BUDGET_EXHAUSTED',generationPolicyVersion:2,dailyFreeGenerationRemaining:2};
+    await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('今日免費額度 2／2 張');
+    expect(wrapper.text()).toContain('網站共用生成額度不足');
+    expect(wrapper.text()).not.toContain('今日免費額度已用完');
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body)).toHaveLength(0);
   });
   it('allows points after the daily free allowance has been spent',async()=>{
     fixture.points=2;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:0,dailyGenerationRemaining:0};

@@ -72,6 +72,10 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.text()).not.toContain('取得 AI 穿搭建議');
     expect(wrapper.find('.brand-home').exists()).toBe(false);
     expect(wrapper.find('.quick-actions').exists()).toBe(false);
+    expect(wrapper.find('.weather-wardrobe').text()).toContain('先選擇所在地區');
+    expect(wrapper.find('.weather-wardrobe .outfit-empty').exists()).toBe(false);
+    await wrapper.find('.outfit-location-prompt button').trigger('click');
+    expect(wrapper.find('#home-weather-city').exists()).toBe(true);
     wrapper.unmount();
   });
 
