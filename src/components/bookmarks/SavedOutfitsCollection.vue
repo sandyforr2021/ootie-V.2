@@ -1,20 +1,22 @@
 <template>
   <section class="page active saved-outfits-page" :class="{'studio-collection':embedded}">
-    <header class="core-page-hero saved-outfits-page-hero">
+    <router-link v-if="!embedded" class="back-link" to="/profile">{{ $t('返回個人檔案') }}</router-link>
+    <header :class="['core-page-hero','saved-outfits-page-hero',{'ootie-page-heading':!embedded}]">
       <div>
-                <h2>{{ $t('我的收藏') }}</h2>
+                <component :is="embedded?'h2':'h1'">{{ $t('我的收藏') }}</component>
         <p class="intro">{{ $t('收藏的穿搭與衣友求救，隨時回來找靈感。') }}</p>
       </div>
 
     </header>
 
+    <nav class="saved-type-filter" :aria-label="$t('收藏分類')"><button v-for="option in [['all','全部'],['OOTD','OOTD'],['SOS','穿搭求救']]" :key="option[0]" class="secondary" :aria-pressed="filter===option[0]" @click="setFilter(option[0])">{{ $t(option[1]) }}</button></nav>
     <p v-if="loading" class="saved-outfits-state">{{ $t('正在載入收藏穿搭…') }}</p>
     <div v-else-if="errorMessage" class="saved-outfits-state is-error">
       <p>{{ errorMessage }}</p>
       <p class="saved-outfits-hint">{{ $t("收藏喜歡的穿搭，隨時回來找靈感。") }}</p>
     </div>
-    <div v-else-if="entries.length" class="saved-outfits-grid">
-      <article v-for="entry in entries" :key="entry.key" class="saved-outfit-card">
+    <div v-else-if="filteredEntries.length" class="saved-outfits-grid">
+      <article v-for="entry in filteredEntries" :key="entry.key" class="saved-outfit-card">
         <p class="eyebrow">{{ entry.target_type === 'SOS' ? $t('衣友求救') : 'OOTD' }}</p>
         <template v-if="entry.target">
           <img v-if="entry.target.image" class="saved-outfit-image" :src="entry.target.image" :alt="entry.title" />
@@ -26,20 +28,22 @@
           <h2>{{ $t('此內容已不存在') }}</h2>
           <p>{{ $t('原始貼文或求救已無法取得。') }}</p>
         </template>
-        <button type="button" class="text-button" @click="removeEntry(entry)">{{ $t('移除收藏') }}</button>
+        <button type="button" class="secondary" @click="pendingRemove=entry">{{ $t('移除收藏') }}</button>
       </article>
     </div>
     <div v-else class="saved-outfits-state">
       <h2>{{ $t('還沒有收藏的穿搭') }}</h2>
       <p>{{ $t('在探索或衣友求救板按下收藏，就會顯示在這裡。') }}</p>
     </div>
+    <BaseConfirmDialog :open="!!pendingRemove" :title="$t('移除收藏？')" :message="$t('你可以稍後重新收藏。')" confirm-label="移除收藏" :busy="removing" @cancel="pendingRemove=null" @confirm="removeEntry(pendingRemove)"/>
   </section>
 </template>
 
 <script setup>
 defineProps({embedded:{type:Boolean,default:false}});
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import BaseConfirmDialog from '@/components/ui/BaseConfirmDialog.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
@@ -50,10 +54,14 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
 useSosStore(); // Hydrates public SOS targets used by saved entries.
-const router = useRouter();
+const router = useRouter(),route=useRoute();
+const filter=computed(()=>['OOTD','SOS'].includes(route.query.type)?route.query.type:'all');
+const setFilter=type=>router.replace({path:route.path,query:{...route.query,type:type==='all'?undefined:type}});
+const pendingRemove=ref(null),removing=ref(false);
 const remoteEntries = ref([]);
 const loading = ref(false);
 const errorMessage = ref('');
+let loadVersion=0;onBeforeUnmount(()=>loadVersion++);
 
 const findTarget = (entry) => entry.target_type === 'OOTD'
   ? appStore.ootdPosts.find((post) => String(post.id) === String(entry.target_id))
@@ -78,23 +86,29 @@ const entries = computed(() => {
   });
 });
 
+const filteredEntries=computed(()=>entries.value.filter(entry=>filter.value==='all'||entry.target_type===filter.value));
 const load = async () => {
-  if (!authStore.isMember || !authStore.profileId) return;
-  loading.value = true;
+  const version=++loadVersion,id=authStore.profileId;
+  if (!authStore.isMember || !id) return;
+  loading.value = true;errorMessage.value='';
   errorMessage.value = '';
   try {
-    remoteEntries.value = await listSavedOutfits(authStore.profileId);
+    const result=await listSavedOutfits(id,{limit:1000});if(version===loadVersion&&id===authStore.profileId)remoteEntries.value=result;
   } catch (error) {
-    errorMessage.value = error?.userMessage || '收藏資料暫時無法取得。';
+    if(version===loadVersion)errorMessage.value = error?.userMessage || '收藏資料暫時無法取得。';
   } finally {
-    loading.value = false;
+    if(version===loadVersion)loading.value = false;
   }
 };
 
 const removeEntry = async (entry) => {
+  if(!entry||removing.value)return;
+  const profileId=authStore.profileId;removing.value=true;
+  try {
   if (authStore.isMember && authStore.profileId) {
     try {
-      await deleteSavedOutfit(authStore.profileId, entry);
+      await deleteSavedOutfit(profileId, entry);
+      if(profileId!==authStore.profileId)return;
       remoteEntries.value = remoteEntries.value.filter((item) => item.id !== entry.id);
     } catch (error) {
       appStore.showToast(error?.userMessage || '無法移除收藏。', { type: 'error', syncStatus: 'REMOTE_FAILED' });
@@ -103,15 +117,16 @@ const removeEntry = async (entry) => {
   }
   const target = findTarget(entry);
   if (target) target.saved = false;
+  } finally {removing.value=false;pendingRemove.value=null;}
 };
 
 const openEntry = (entry) => {
   if (entry.target_type === 'OOTD') {
-    router.push({ path: `/ootd/${entry.target_id}`, query: { user: entry.target?.username, from: 'shop' } });
+    router.push({ path: `/ootd/${entry.target_id}`, query: { user: entry.target?.username, from: 'saved', type:filter.value } });
   } else {
     appStore.activeSosDetailId = entry.target_id;
     appStore.isSosDetailOpen = true;
-    router.push('/sos');
+    router.push({path:'/sos',query:{sos:entry.target_id,from:'saved',type:filter.value}});
   }
 };
 
@@ -120,7 +135,7 @@ onMounted(async () => {
 });
 
 watch(() => authStore.profileId, (profileId) => {
-  if (profileId) load();
+  loadVersion++;pendingRemove.value=null;remoteEntries.value=[];if (profileId) load();
 }, { immediate: true });
 </script>
 
@@ -141,3 +156,5 @@ watch(() => authStore.profileId, (profileId) => {
 .text-button { min-height:44px; margin-top:10px; color:var(--accent-violet-ink); background:none; border:0; padding:8px 0; cursor:pointer; }
 @media (max-width:760px) { .saved-outfits-page { padding-bottom:36px; }.saved-outfits-grid { grid-template-columns:1fr; gap:14px; } }
 </style>
+
+<style scoped>.saved-type-filter{display:flex;gap:10px;margin:24px 0}.saved-type-filter [aria-pressed=true]{background:var(--ink);color:white}.saved-outfit-card>.secondary{margin:8px 8px 0 0}</style>

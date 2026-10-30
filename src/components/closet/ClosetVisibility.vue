@@ -31,7 +31,7 @@ const togglePublicCloset = async () => {
 <template>    <section :class="['profile-settings', { compact }]" v-if="isMember">
       <div class="setting-row">
         <div>
-          <strong>{{ $t("公開我的衣櫥") }}</strong>
+          <strong>{{ $t("設定公開") }}</strong>
         </div>
         <button
           :class="['switch', { on: appStore.profile.public_closet }]"

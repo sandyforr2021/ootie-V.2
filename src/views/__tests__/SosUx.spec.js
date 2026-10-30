@@ -65,7 +65,7 @@ describe('SOS clothing preview and selection UX', () => {
     appStore.isSosFormOpen = true;
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.find('.sos-selection-grid').exists()).toBe(false);
+    expect(wrapper.findAll('.sos-selection-check')).toHaveLength(0);
     appStore.profile.public_closet=false;
     await wrapper.vm.$nextTick();
     expect(wrapper.find('button[type="submit"]').element.disabled).toBe(true);
@@ -89,6 +89,9 @@ describe('SOS clothing preview and selection UX', () => {
     expect(sosStore.sosPosts.find((post) => post.id === 'sos-01').closet_item_ids).toHaveLength(5);
     expect(wrapper.findAll('.sos-selection-card')).toHaveLength(5);
     expect(wrapper.findAll('.sos-selection-card .product-image')).toHaveLength(5);
+    expect(wrapper.findAll('.sos-selection-check')).toHaveLength(0);
+    await wrapper.find('.sos-selection-card input').setValue(true);
+    expect(wrapper.findAll('.sos-selection-check')).toHaveLength(1);
   });
 
   it('uses the other owner shared wardrobe even when the helper owns no matching pieces', async () => {
@@ -151,7 +154,7 @@ describe('SOS clothing preview and selection UX', () => {
     finish({ ok: true });
     await flushPromises();
     expect(wrapper.find('fieldset').element.disabled).toBe(false);
-    expect(wrapper.find('.sos-selection-grid').exists()).toBe(false);
+    expect(wrapper.findAll('.sos-selection-check')).toHaveLength(0);
     expect(wrapper.find('[role="status"]').exists()).toBe(false);
     wrapper.unmount();
   });
@@ -186,6 +189,7 @@ describe('SOS clothing preview and selection UX', () => {
     await flushPromises();
     await wrapper.find('#sosTitle').setValue('A day out');
     await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('.sos-public-selection input[type=checkbox]').setValue(true);
     await wrapper.find('.sos-image-toggle input').setValue(true);
     await wrapper.find('#sosCoverMode').setValue('closet');
     await wrapper.find('select[aria-label="選擇衣物圖片"]').setValue(item.id);
@@ -213,6 +217,7 @@ describe('SOS clothing preview and selection UX', () => {
     await flushPromises();
     await wrapper.find('#sosTitle').setValue('A day out');
     await wrapper.find('#sosDetails').setValue('Help me choose');
+    await wrapper.find('.sos-public-selection input[type=checkbox]').setValue(true);
     await wrapper.find('.sos-image-toggle input').setValue(true);
     await wrapper.find('#sosCoverMode').setValue('closet');
     await wrapper.find('select[aria-label="選擇衣物圖片"]').setValue(item.id);

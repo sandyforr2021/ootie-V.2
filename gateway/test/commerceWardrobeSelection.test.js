@@ -54,10 +54,17 @@ test('existing real garment categories map to supported provider categories',asy
  for (const [category, expected] of [
   ['Tops','upper_body'],['Knitwear','upper_body'],['Jackets','upper_body'],['Outerwear','upper_body'],['上身','upper_body'],['外套','upper_body'],
   ['Bottoms','lower_body'],['Trousers','lower_body'],['Shorts','lower_body'],['下身','lower_body'],
-  ['Dress','full_body'],['Dresses','full_body'],['洋裝','full_body'],['Shoes','shoes'],['Sneakers','shoes'],['鞋子','shoes']
+  ['Dress','full_body'],['Dresses','full_body'],['洋裝','full_body']
  ]) {
   const f=setup(); f.storage.findOwnedItems=async()=>[{id:itemId,name:'Garment',category}];
   await f.service.enqueue({id:userId},body());
   assert.equal([...f.products.values()][0].category,expected,category);
+ }
+});
+test('unsupported footwear is rejected before copying wardrobe images',async()=>{
+ for(const category of ['Shoes','Sneakers','鞋子']){
+  const f=setup();f.storage.findOwnedItems=async()=>[{id:itemId,name:'Shoes',category}];
+  await assert.rejects(f.service.enqueue({id:userId},body()),{code:'UNSUPPORTED_GARMENT_CATEGORY'});
+  assert.equal(f.products.size,0);assert.deepEqual(f.calls,[]);
  }
 });

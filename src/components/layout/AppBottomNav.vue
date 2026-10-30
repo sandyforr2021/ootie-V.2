@@ -24,8 +24,9 @@
           :key="item.routeName"
           :to="item.path"
           class="mobile-more-link"
-          active-class="active"
-          exact-active-class="active"
+          :class="{active:isNavigationActive(item, route)}"
+          active-class=""
+          exact-active-class=""
           @click.prevent="navigateTo(item.path)"
         >
           <AppIcon :name="item.routeName" />
@@ -66,7 +67,7 @@
         v-for="item in MOBILE_PRIMARY_ITEMS"
         :key="item.routeName"
         :to="item.path"
-        :class="{ active: route.name === item.routeName || (item.routeName === 'Explore' && route.name === 'OotdDetail') }"
+        :class="{ active: isNavigationActive(item, route) }"
         active-class=""
         exact-active-class=""
       >
@@ -91,7 +92,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useSocialStore } from '@/stores/social';
-import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS } from '@/router/navigation';
+import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS, isNavigationActive } from '@/router/navigation';
 import { GUEST_CLOSET_LIMIT, readGuestCloset } from '@/services/guestAccess';
 import AppIcon from '@/components/ui/AppIcon.vue';
 
@@ -104,7 +105,7 @@ const router = useRouter();
 const isMoreMenuOpen = ref(false);
 const moreCloseButton = ref(null);
 const moreTrigger = ref(null);
-const isSecondaryRouteActive = computed(() => MOBILE_MORE_ITEMS.some((item) => item.routeName === route.name));
+const isSecondaryRouteActive = computed(() => MOBILE_MORE_ITEMS.some((item) => isNavigationActive(item, route)));
 const unreadCount = computed(() => authStore.isMember ? socialStore.unreadCount : 0);
 
 const closeMoreMenu = () => {

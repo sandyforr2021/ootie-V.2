@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import {createListImage,listImagePath} from './listImage';
 import { SERVICE_ERROR_CODE, ServiceError, normalizeServiceError } from './serviceError';
 
 export const AVATAR_BUCKET = 'ootie-profile-avatars';
@@ -20,9 +21,14 @@ export async function uploadAvatar(file, authUserId, client = supabase) {
   }
   const path = `avatars/${authUserId}/${makeUuid()}.${AVATAR_MIME_TYPES[file.type]}`;
   try {
-    const { data, error } = await client.storage.from(AVATAR_BUCKET).upload(path, file, { upsert: false, contentType: file.type });
+    const { data, error } = await client.storage.from(AVATAR_BUCKET).upload(path, file, { upsert: false, contentType: file.type,cacheControl:'31536000' });
     if (error) throw normalizeServiceError(error, SERVICE_ERROR_CODE.REMOTE_WRITE_FAILED);
     const publicUrl = client.storage.from(AVATAR_BUCKET).getPublicUrl(path)?.data?.publicUrl || '';
+    const thumbnail=await createListImage(file,160);
+    if(thumbnail){
+      const result=await client.storage.from(AVATAR_BUCKET).upload(listImagePath(path),thumbnail,{upsert:false,contentType:thumbnail.type,cacheControl:'31536000'});
+      if(!result.error)return {path:data?.path||path,publicUrl:client.storage.from(AVATAR_BUCKET).getPublicUrl(listImagePath(path))?.data?.publicUrl||publicUrl};
+    }
     return { path: data?.path || path, publicUrl };
   } catch (error) {
     throw normalizeServiceError(error, SERVICE_ERROR_CODE.REMOTE_WRITE_FAILED);

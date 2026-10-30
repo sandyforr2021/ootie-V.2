@@ -16,14 +16,18 @@ const LegalView = () => import('@/views/LegalView.vue');
 const NotFoundView = () => import('@/views/NotFoundView.vue');
 const ShopView = () => import('@/views/ShopView.vue');
 const CreditView = () => import('@/views/CreditView.vue');
+const BrandHome = () => import('@/components/home/BrandHome.vue');
 
 const routes = [
   { path: '/', name: 'Home', component: HomeView },
+  { path: '/welcome', name: 'BrandHome', component: BrandHome },
   { path: '/home', redirect: '/' },
   { path: '/shop', name: 'Shop', component: ShopView },
   { path: '/community/tryons', name: 'TryonCommunity', component: ShopView },
   { path: '/credits', name: 'Credits', component: CreditView },
   { path: '/closet', name: 'Closet', component: ClosetView },
+  { path: '/wishlist', name: 'Wishlist', redirect: { path: '/closet', query: { tab: 'wishlist' } } },
+  { path: '/shopping-activity', name: 'Activity', redirect: { path: '/shop', query: { tab: 'activity' } } },
   { path: '/bookmarks', name: 'Bookmarks', component: () => import('@/views/BookmarksView.vue') },
   { path: '/stats', name: 'Stats', component: StatsView },
   { path: '/explore', name: 'Explore', component: ExploreView },
@@ -31,6 +35,7 @@ const routes = [
   { path: '/ai', name: 'Ai', redirect: '/shop' },
   { path: '/tryon', name: 'Tryon', redirect: '/shop' },
   { path: '/profile', name: 'Profile', component: ProfileView },
+  { path: '/profile/saved', name: 'SavedOutfits', component: () => import('@/components/bookmarks/SavedOutfitsCollection.vue') },
   { path: '/profile/help-history', name: 'HelpHistory', component: HelpHistoryView },
   { path: '/membership', name: 'Membership', redirect: '/credits' },
   { path: '/settings', name: 'Settings', component: SettingsView },
@@ -42,7 +47,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash && ['Home','BrandHome'].includes(to.name)) {
+      return { el:to.hash, top:112, behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' };
+    }
     return { top: 0 };
   }
 });

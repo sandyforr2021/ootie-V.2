@@ -101,7 +101,7 @@ export const useSosStore = defineStore('sos', () => {
           created_at: p.created_at || new Date().toISOString()
         }));
         const referencedIds = remotePosts.flatMap((post) => Array.isArray(post.closet_item_ids) ? post.closet_item_ids : []);
-        const items = await getPublicItemsByIds(referencedIds);
+        const items = await getPublicItemsByIds(referencedIds,undefined,{defer:true});
         if (version !== loadVersion) return;
         publicClosetItems.value = items;
       }

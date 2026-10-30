@@ -20,7 +20,8 @@ const router = createRouter({
     { path: '/ai', component: { template: '<div>AI</div>' } },
     { path: '/tryon', component: { template: '<div>Tryon</div>' } },
     { path: '/membership', component: { template: '<div>Membership</div>' } },
-    { path: '/ootd/:id', name: 'OotdDetail', component: { template: '<div>Post</div>' } }
+    { path: '/ootd/:id', name: 'OotdDetail', component: { template: '<div>Post</div>' } },
+    { path: '/legal/:document', component: { template: '<div>Policy</div>' } }
   ]
 });
 
@@ -33,17 +34,26 @@ describe('HomeView guest/member presentation', () => {
     await router.isReady();
   });
 
-  it('shows working entry points without invented community activity', () => {
+  it('introduces all four experiences with anchors and working account entry points', async () => {
+    const auth=useAuthStore();
+    const opening=vi.spyOn(auth,'openAuthModal');
     const wrapper = mount(HomeView, { global: { plugins: [router] } });
-    expect(wrapper.text()).toContain('買之前，');
-    expect(wrapper.text()).toContain('先穿進自己的生活。');
-    expect(wrapper.text()).toContain('開始購物試穿');
+    expect(wrapper.find('h1').text()).toContain('你的衣櫥，更多穿搭可能。');
+    expect(wrapper.findAll('.brand-feature')).toHaveLength(4);
+    expect(wrapper.find('.brand-journey').exists()).toBe(false);
+    for (const link of wrapper.findAll('.brand-core-grid a')) {
+      expect(wrapper.find(link.attributes('href')).exists()).toBe(true);
+    }
     expect(wrapper.findAll('.trending-card')).toHaveLength(0);
-    expect(wrapper.find('.hero-photo img').attributes('src')).toBe('/assets/ootie-home-hero-v2-1024.webp');
-    expect(wrapper.find('.hero-photo img').attributes('fetchpriority')).toBe('high');
-    expect(wrapper.find('a[href="/shop?tab=album"]').exists()).toBe(true);
-    expect(wrapper.find('a[href="/shop?tab=community"]').exists()).toBe(true);
+    expect(wrapper.find('.magic-wardrobe').exists()).toBe(false);
+    expect(wrapper.find('.weather-wardrobe').exists()).toBe(false);
+    expect(wrapper.find('a[href="/shop"]').exists()).toBe(true);
+    expect(wrapper.find('a[href="/closet?tab=wishlist"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(false);
+    await wrapper.find('.brand-hero-actions .brand-join').trigger('click');
+    expect(opening).toHaveBeenLastCalledWith('register',null,'/');
+    await wrapper.find('.brand-login').trigger('click');
+    expect(opening).toHaveBeenLastCalledWith('login',null,'/');
     wrapper.unmount();
   });
 
@@ -60,6 +70,8 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/membership"]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('取得 AI 穿搭建議');
+    expect(wrapper.find('.brand-home').exists()).toBe(false);
+    expect(wrapper.find('.quick-actions').exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -84,6 +96,9 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.text()).toContain('發現穿搭');
     expect(wrapper.findAll('.following-author').map(author => author.text())).toEqual(['a', 'b', 'c']);
     expect(wrapper.findAll('.discovery-follow')).toHaveLength(3);
+    const weather=wrapper.find('.weather-wardrobe').element;
+    const feed=wrapper.find('.following-journal').element;
+    expect(weather.compareDocumentPosition(feed) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await wrapper.find('.discovery-follow').trigger('click');
     await flushPromises();
     expect(follow).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }));

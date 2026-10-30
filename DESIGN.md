@@ -273,3 +273,16 @@ Membership uses a wide pastel hero, dark personal-balance card, three aligned pl
 All nine main member pages now use `.ootie-page-heading` from `src/assets/page-headings.css`, matching the fitting studio: 116px minimum height, 24px/28px padding, 12px radius and the same pastel gradient. Titles use the display family at 40px with 1.4 line height; mobile titles use 32px and controls wrap below. Heading entrance translations are disabled to keep the title stationary between routes; the wardrobe opening remains intact. Membership balance is now a compact right-hand control inside this shared heading, replacing the earlier standalone dark balance treatment.
 
 Product actions in the studio use labelled SVG icon controls with 44px targets and tooltips. Profile captions initially show original text with a quiet translation trigger; source-language controls appear only after a translation request. Statistics use the same `itemPhoto` resolver and `WardrobeCutout` rendering as the wardrobe, contained on white.
+
+
+## Homepage surfaces — 2026-10-29
+
+The guest brand page retains the shared sidebar and uses the same serif display voice, berry actions, pastel icon tiles and colored feature cards. Its header logo hides while the desktop sidebar is expanded and reappears when collapsed; mobile keeps the header logo. Separate cumulus-cloud and transparent model assets create the welcome banner, fading to white between colored sections. Feature rows cap their width at 1000px to avoid excessive gaps on wide screens. All images preserve their complete composition; animated preview figures contain no fabricated activity counts, customer claims or generated-result claims. Motion honors reduced-motion preferences. The wardrobe showcase uses a real sign-in/add-clothing action rather than a pause control.
+
+The member homepage remains an operating surface: keep the shared heading geometry, with weather and relocation near the clock and the existing white outfit collage below. New wishlist and shopping-activity sidebar entries must highlight independently of their parent closet/studio routes. Keep the wardrobe opening animation and its reduced-motion behavior. No new dashboard quick actions, alerts or unpublished contact information are included in this local iteration.
+
+## Welcome refinement — 2026-10-29 follow-up
+
+The community preview now uses four 720px-wide derivatives of existing original editorial PNGs, not the missing `.webp` paths or 199px thumbnails. A namespaced, fixed-ratio horizontal track replaces vertical masonry movement. The community chapter assigns more width to the visual column. Hero copy has a white radial reading surface over the separate cumulus background. The hero model is now an original Parisian-style editorial cutout (`public/assets/brand/paris-model-v2.webp`). Core feature cards use distinct pastel gradients.
+
+`BrandStudioDemo.vue` animates selection, model choice, progress and a private-album illustration with an authored cursor. It runs only while visible, stops in hidden tabs, honors reduced motion and cleans up timers/listeners. The illustration is explicitly labelled and sends no generation requests. Shopping previews have no decorative action icons. Real entry links have visible button surfaces; canvas, actionable and text cursors retain distinct meanings.

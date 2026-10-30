@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import {createListImage,listImagePath} from './listImage';
 import {
   SERVICE_ERROR_CODE,
   ServiceError,
@@ -59,7 +60,7 @@ export async function uploadOotdImage(file, authUserId, client = supabase) {
   try {
     const { error } = await client.storage
       .from(OOTD_IMAGE_BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false });
+      .upload(path, file, { contentType: file.type, cacheControl:'31536000', upsert: false });
     if (error) throw error;
 
     const { data } = client.storage.from(OOTD_IMAGE_BUCKET).getPublicUrl(path);
@@ -67,6 +68,11 @@ export async function uploadOotdImage(file, authUserId, client = supabase) {
       throw new ServiceError(SERVICE_ERROR_CODE.REMOTE_WRITE_FAILED, {
         userMessage: '圖片已上傳，但無法取得公開網址。'
       });
+    }
+    const thumbnail=await createListImage(file,640);
+    if(thumbnail){
+      const result=await client.storage.from(OOTD_IMAGE_BUCKET).upload(listImagePath(path),thumbnail,{contentType:thumbnail.type,cacheControl:'31536000',upsert:false});
+      if(!result.error)return {path,publicUrl:data.publicUrl+'?ootie_list=v1'};
     }
     return { path, publicUrl: data.publicUrl };
   } catch (error) {

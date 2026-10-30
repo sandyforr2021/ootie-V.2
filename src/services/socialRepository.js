@@ -80,3 +80,15 @@ export async function markAllNotificationsRead(profileId, client = supabase) {
   if (error) throw normalizeServiceError(error, SERVICE_ERROR_CODE.REMOTE_WRITE_FAILED);
   return true;
 }
+
+export async function loadProfileConnections(profileId, kind, {offset=0,limit=40}={}, client=supabase) {
+  requireUuid(profileId,'個人檔案 ID');
+  if(!['followers','following'].includes(kind))throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR);
+  const followers=kind==='followers';
+  const field=followers?'follower_id':'following_id';
+  const {data,error}=await client.from('ootie_profile_follows')
+    .select(`${field},created_at,profile:ootie_profiles!ootie_profile_follows_${field}_fkey(id,username,display_name,avatar_url,initials)`)
+    .eq(followers?'following_id':'follower_id',profileId).order('created_at',{ascending:false}).range(offset,offset+limit-1);
+  if(error)throw normalizeServiceError(error);
+  return (data||[]).filter(row=>row.profile).map(row=>row.profile);
+}

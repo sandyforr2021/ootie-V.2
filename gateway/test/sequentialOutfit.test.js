@@ -10,7 +10,7 @@ test('outfit selection orders supported layers and rejects duplicate or unsuppor
   assert.deepEqual(orderedOutfit([outer,bottom,top]).items.map(i=>i.id),['t','b','o']);
   assert.equal(orderedOutfit([top,{...top,id:'another'}]).valid,false);
   assert.equal(orderedOutfit([top,{category:'shoes'}]).valid,false);
-  assert.equal(orderedOutfit([{category:'shoes'}]).valid,true);
+  assert.equal(orderedOutfit([{category:'shoes'}]).valid,false);
   assert.equal(orderedOutfit([top,{category:'Trousers'},outer]).valid,true);
   assert.equal(orderedOutfit([top,{category:'Shorts'},outer]).valid,true);
 });

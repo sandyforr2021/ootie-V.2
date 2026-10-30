@@ -25,9 +25,9 @@
                 v-model="selectedIds"
                 :aria-label="tf('搭配 {name}', { name: item.name_zh || item.name })"
               />
-              <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+              <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
               <span class="sos-selection-card-name">{{ item.name_zh || item.name }}</span>
-              <span class="sos-selection-check" aria-hidden="true">✓</span>
+              <span v-if="selectedIds.includes(item.id)" class="sos-selection-check" aria-hidden="true">✓</span>
             </label>
           </div>
           <div v-else style="padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 12px; text-align: center;">
@@ -41,7 +41,7 @@
             <div class="current-outfit-images">
               <template v-for="(item, idx) in selectedItems" :key="item.id">
                 <span v-if="idx > 0" class="outfit-plus">＋</span>
-                <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+                <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
               </template>
             </div>
             <p class="current-outfit-names">
@@ -70,6 +70,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { t, tf } from '@/i18n';
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';

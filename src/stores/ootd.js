@@ -49,6 +49,8 @@ export const useOotdStore = defineStore('ootd', () => {
   const commentsLoading = ref(false);
   const commentsError = ref('');
   let loadSequence = 0;
+  const hasMore=ref(true),loadingMore=ref(false);
+  const PAGE_SIZE=24;let feedOffset=0,feedOwner=null,feedFilters={};
   const interactionPending = new Set();
 
   const getWearingName = (entry) => typeof entry === 'string' ? entry : entry?.name || '';
@@ -93,24 +95,30 @@ export const useOotdStore = defineStore('ootd', () => {
     return [...alternateAuthors(matches.filter(post=>!post.editorial)),...matches.filter(post=>post.editorial)];
   });
 
-  const loadRemotePosts = async () => {
+  const loadRemotePosts = async ({append=false,search,authorIds,unfiltered=false}={}) => {
+    if(append && (loadingMore.value || !hasMore.value || loading.value))return false;
+    if(!append)feedFilters=unfiltered?{}:{search:search||'',...(authorIds!==undefined?{authorIds}:{})};
+    const owner=useAuthStore().profileId||'';
+    if(owner!==feedOwner){feedOffset=0;feedOwner=owner;appStore.ootdPosts=[];}
+    if(append)loadingMore.value=true;
+    const offset=append?feedOffset:0;
     const requestId = ++loadSequence;
-    loading.value = true;
+    loading.value = !append;
     loadError.value = '';
     try {
-      const remotePosts = genuineContent(await fetchProfileOotdPosts(null));
+      const remotePosts = genuineContent(await fetchProfileOotdPosts(null,{offset,limit:PAGE_SIZE,...feedFilters}));
       if (!Array.isArray(remotePosts)) throw new Error('FEED_UNAVAILABLE');
       const authStore = useAuthStore();
       let interactionState = { likedPostIds: new Set(), savedPostIds: new Set() };
       if (authStore.isMember && authStore.profileId) interactionState = await loadPostInteractionState(authStore.profileId);
-      if (requestId !== loadSequence) return false;
+      if (requestId !== loadSequence || (useAuthStore().profileId||'')!==owner) return false;
       const itemIds = [...new Set(remotePosts.flatMap((post) => Array.isArray(post.item_ids) ? post.item_ids : []).map(String))];
       let publicItems = [];
       if (itemIds.length) {
-        try { publicItems = await getPublicItemsByIds(itemIds); } catch (_) { /* public snapshots remain available by canonical id */ }
+        try { publicItems = await getPublicItemsByIds(itemIds,undefined,{defer:true}); } catch (_) { /* public snapshots remain available by canonical id */ }
       }
-      if (requestId !== loadSequence) return false;
-      appStore.ootdPosts = uniquePostsById(remotePosts).sort((a,b) => (editorialLook(a)?.sort || 0) - (editorialLook(b)?.sort || 0)).map((remote) => {
+      if (requestId !== loadSequence || (useAuthStore().profileId||'')!==owner) return false;
+      const nextPosts = uniquePostsById(remotePosts).sort((a,b) => (editorialLook(a)?.sort || 0) - (editorialLook(b)?.sort || 0)).map((remote) => {
         const taggedItems = (Array.isArray(remote.item_ids) ? remote.item_ids : [])
           .map((id) => publicItems.find((item) => String(item.id) === String(id)))
           .filter(Boolean);
@@ -120,12 +128,15 @@ export const useOotdStore = defineStore('ootd', () => {
           saved: interactionState.savedPostIds.has(String(remote.id))
         };
       });
+      appStore.ootdPosts=append?uniquePostsById([...appStore.ootdPosts,...nextPosts]):nextPosts;
+      feedOffset=offset+remotePosts.length;hasMore.value=remotePosts.length===PAGE_SIZE;
       return true;
     } catch (error) {
+      if (requestId !== loadSequence || (useAuthStore().profileId||'')!==owner) return false;
       loadError.value = error?.userMessage || '穿搭動態暫時無法載入。';
       return false;
     } finally {
-      if (requestId === loadSequence) loading.value = false;
+      if (requestId === loadSequence) {loading.value=false;loadingMore.value=false;}
     }
   };
 
@@ -419,6 +430,8 @@ export const useOotdStore = defineStore('ootd', () => {
     shareSheetPostId,
     filteredPosts,
     loadRemotePosts,
+    hasMore,loadingMore,
+    loadMorePosts:()=>loadRemotePosts({append:true}),
     toggleLike,
     toggleSave,
     addComment,

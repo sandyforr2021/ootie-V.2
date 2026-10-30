@@ -7,7 +7,7 @@ import { useAppStore } from '@/stores/app';
 import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, products: [], jobs: [], saved: [], savedClothing: [] }));
+const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, allowance:{}, products: [], jobs: [], saved: [], savedClothing: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
@@ -21,6 +21,7 @@ import ShopView from '../ShopView.vue';
 import WishlistPanel from '@/components/closet/WishlistPanel.vue';
 import { aiGateway } from '@/services/aiGateway';
 import { getPublicItemsByIds } from '@/services/clothingRepository';
+import * as remotePosts from '@/services/supabase';
 let wrapper;
 async function render(component=ShopView, path='/shop') {
   const router = createRouter({ history:createMemoryHistory(), routes:[{path:'/shop',component:ShopView},{path:'/closet',component:WishlistPanel}] });
@@ -28,32 +29,46 @@ async function render(component=ShopView, path='/shop') {
 }
 async function selectPiece() {
   await wrapper.find('.shop-product-image').trigger('click');
-  await wrapper.find('.studio-next button').trigger('click');
+  await wrapper.find('.studio-sidebar-next button').trigger('click');
   await wrapper.find('.shop-fitting .shop-wide').trigger('click');
 }
 describe('Shopping studio workflow', () => {
   beforeEach(() => {
     localStorage.clear(); sessionStorage.clear(); setActivePinia(createPinia()); setLocale('zh-TW');
-    const auth=useAuthStore(); auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
+    const auth=useAuthStore(); auth.initialized=true; auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
     auth.profileIdentity={status:'PROFILE_READY',profileId:'profile-unit',profile:{id:'profile-unit'}};
-    fixture.credits=100; fixture.points=100; fixture.jobs=[]; fixture.saved=[]; fixture.savedClothing=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
+    fixture.credits=100; fixture.points=100; fixture.allowance={}; fixture.jobs=[]; fixture.saved=[]; fixture.savedClothing=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
-      if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,pointBalance:fixture.points,costs:{try_on:2,skin_tone:20}};
+      if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,pointBalance:fixture.points,costs:{try_on:2,skin_tone:20},...fixture.allowance};
       if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
   });
   afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+  it('opens shopping activity directly and restores the studio when returning',async()=>{
+    vi.mocked(aiGateway.listPersonPhotos).mockClear();
+    await render(ShopView,'/shop?tab=activity');
+    expect(wrapper.find('h1').text()).toBe('購物足跡');
+    expect(wrapper.find('.shop-tabs').exists()).toBe(false);
+    expect(fixture.request).toHaveBeenCalledWith('metrics','unit-only',undefined);
+    expect(fixture.request.mock.calls.some(([path])=>path==='products')).toBe(false);
+    expect(aiGateway.listPersonPhotos).not.toHaveBeenCalled();
+    await wrapper.vm.$router.push('/shop');await flushPromises();
+    expect(wrapper.find('h1').text()).toBe('試穿工作室');
+    expect(wrapper.find('.shop-tabs').exists()).toBe(true);
+    expect(fixture.request).toHaveBeenCalledWith('products','unit-only',undefined);
+  });
   it('resolves saved public clothing independently of the general feed image limit',async()=>{
     vi.stubEnv('VITE_SUPABASE_URL','https://project.supabase.co');
     const item={id:'saved-shirt',name:'Posted green top',category:'Tops',photo:'https://project.supabase.co/storage/v1/object/public/ootie-ootd-images/ootd/top.webp'};
     fixture.saved=[{target_type:'OOTD',target_id:'saved-post'}]; fixture.savedClothing=[item];
     useAppStore().ootdPosts=[{id:'saved-post',item_ids:[item.id],wearing:[item],tagged_items:[]}];
+    vi.spyOn(remotePosts,'fetchOotdPostsByIds').mockImplementation(async ids=>useAppStore().ootdPosts.filter(post=>ids.includes(post.id)));
     await render(); await wrapper.findAll('.studio-source-tabs button')[2].trigger('click');
-    expect(getPublicItemsByIds).toHaveBeenCalledWith([item.id]);
+    expect(getPublicItemsByIds).toHaveBeenCalledWith([item.id],undefined,{defer:true});
     expect(wrapper.text()).toContain(item.name);
     await wrapper.find('.shop-product-image').trigger('click');
-    await wrapper.find('.studio-next button').trigger('click');
+    await wrapper.find('.studio-sidebar-next button').trigger('click');
     expect(wrapper.text()).toContain('選擇模特兒');
     expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs' && body)).toEqual([]);
   });
@@ -90,9 +105,31 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain('點數紀錄暫時無法載入。');
   });
+  it('allows a zero-point member to submit with a free daily image',async()=>{
+    fixture.points=0;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:2};
+    await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeUndefined();
+    expect(wrapper.text()).toContain('今日免費額度 2／2 張');
+    expect(wrapper.find('.shop-selection-summary').text()).toContain('免費額度 1 張');
+    expect(wrapper.find('.shop-selection-summary').text()).not.toContain('2 平台點數');
+    await wrapper.find('.shop-fitting .shop-wide').trigger('click');await flushPromises();
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body)).toHaveLength(1);
+  });
+  it('blocks a zero-point member after the free allowance is spent',async()=>{
+    fixture.points=0;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:0};
+    await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('今日免費額度已用完');
+  });
+  it('allows points after the daily free allowance has been spent',async()=>{
+    fixture.points=2;fixture.allowance={generationPolicyVersion:2,dailyFreeGenerationRemaining:0,dailyGenerationRemaining:0};
+    await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeUndefined();
+    expect(wrapper.text()).toContain('點數生成不限每日張數');
+  });
   it('opens the wishlist form and preserves a blocked product URL for manual upload',async()=>{
     await render(WishlistPanel,'/closet?tab=wishlist');
-    await wrapper.find('.wishlist-heading .primary').trigger('click');
+    await wrapper.find('.wishlist-toolbar-actions .primary').trigger('click');
     fixture.request.mockImplementationOnce(async()=>{throw new Error('Merchant blocked');});
     const url='https://www.net-fashion.net/product/692239';
     await wrapper.find('.wishlist-link input').setValue(url); await wrapper.find('.wishlist-link button').trigger('click'); await flushPromises();
@@ -113,7 +150,7 @@ describe('Shopping studio workflow', () => {
     aiGateway.uploadPersonPhoto.mockClear();
     await render();
     await wrapper.find('.shop-product-image').trigger('click');
-    await wrapper.find('.studio-next button').trigger('click');
+    await wrapper.find('.studio-sidebar-next button').trigger('click');
     const input=wrapper.find('.shop-person-upload input');
     Object.defineProperty(input.element,'files',{value:[new File(['image'],'private.jpg',{type:'image/jpeg'})]});
     await input.trigger('change');
@@ -127,7 +164,7 @@ describe('Shopping studio workflow', () => {
     let finish;
     vi.spyOn(imageUpload,'preprocessPersonImage').mockReturnValue(new Promise(resolve=>{finish=resolve;}));
     await render(WishlistPanel,'/closet?tab=wishlist');
-    await wrapper.find('.wishlist-heading .primary').trigger('click');
+    await wrapper.find('.wishlist-toolbar-actions .primary').trigger('click');
     await wrapper.findAll('.wishlist-method button')[1].trigger('click');
     const input=wrapper.find('.wishlist-dialog input[type=file]');
     Object.defineProperty(input.element,'files',{value:[new File(['image'],'private.jpg',{type:'image/jpeg'})]});
@@ -137,7 +174,7 @@ describe('Shopping studio workflow', () => {
     finish({dataUrl:'data:image/jpeg;base64,cHJpdmF0ZQ=='});
     await flushPromises();
     expect(wrapper.find('.wishlist-dialog').exists()).toBe(false);
-    await wrapper.find('.wishlist-heading .primary').trigger('click');
+    await wrapper.find('.wishlist-toolbar-actions .primary').trigger('click');
     expect(wrapper.find('.wishlist-preview').exists()).toBe(false);
     expect(wrapper.find('.wishlist-dialog input[maxlength]').element.value).toBe('');
   });
@@ -193,5 +230,37 @@ describe('Shopping studio workflow', () => {
     await flushPromises();
     expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(1);
     expect(wrapper.find('[role=alert]').exists()).toBe(true);
+  });
+  it('removes and restores a wishlist product through its owner-scoped state endpoint',async()=>{
+    await render(WishlistPanel,'/closet?tab=wishlist');
+    await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
+    expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'dismissed'});
+    expect(wrapper.find('.wishlist-card').exists()).toBe(false);
+    await wrapper.find('.wishlist-undo button').trigger('click');await flushPromises();
+    expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'wishlist'});
+    expect(wrapper.find('.wishlist-card').exists()).toBe(true);
+  });
+  it('keeps a wishlist product visible when removal fails',async()=>{
+    await render(WishlistPanel,'/closet?tab=wishlist');
+    fixture.request.mockRejectedValueOnce(new Error('offline'));
+    await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
+    expect(wrapper.find('.wishlist-card').exists()).toBe(true);expect(wrapper.find('[role=alert]').exists()).toBe(true);
+  });
+  it('hides unsupported shoes from try-on without removing them from the wishlist',async()=>{
+    fixture.products.push({id:'shoe',title:'Boots',category:'shoes',state:'wishlist'});
+    await render();expect(wrapper.findAll('.shop-product-image')).toHaveLength(1);expect(wrapper.text()).not.toContain('Boots');
+    wrapper.unmount();await render(WishlistPanel,'/closet?tab=wishlist');expect(wrapper.text()).toContain('Boots');
+  });
+  it('lets the member remove a selected garment at the final step without deleting it',async()=>{
+    await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
+    await wrapper.find('.studio-selected-product>button').trigger('click');await flushPromises();
+    expect(wrapper.find('.studio-selected-product').exists()).toBe(false);
+    expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body)).toHaveLength(0);
+  });
+  it('puts personal color results before album images',async()=>{
+    fixture.jobs=[{id:'tone',kind:'skin_tone',status:'succeeded',result_data:{}}];
+    await render(ShopView,'/shop?tab=album');
+    const html=wrapper.html();expect(html.indexOf('shop-tone-results')).toBeLessThan(html.indexOf('shop-album-grid'));
   });
 });

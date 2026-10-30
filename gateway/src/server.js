@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {endResponse} from './httpResponse.js';
 import {createReadStream} from 'node:fs';
 import {pipeline} from 'node:stream/promises';
 import {createWorkLimiter} from './workLimiter.js';
@@ -50,7 +51,6 @@ process.on('SIGTERM', () => { stopWorker(); server.close(); });
 const mediaWork=createWorkLimiter({concurrency:2,maxQueue:16});
 const memoryLog=()=>{const m=process.memoryUsage();console.log(JSON.stringify({event:'runtime_memory',rssMiB:Math.round(m.rss/1048576),heapMiB:Math.round(m.heapUsed/1048576),externalMiB:Math.round(m.external/1048576),mediaActive:mediaWork.active,mediaQueued:mediaWork.queued}));};
 const memoryTimer=setInterval(memoryLog,60000);memoryTimer.unref();
-const endResponse=(response,bytes)=>new Promise(resolve=>{const done=()=>{response.off('finish',done);response.off('close',done);resolve();};response.once('finish',done);response.once('close',done);response.end(bytes);});
 const server = http.createServer(async (request, response) => {
   let release;const cancelled=new AbortController();const onClose=()=>cancelled.abort();response.once('close',onClose);
   try {
@@ -75,6 +75,7 @@ const server = http.createServer(async (request, response) => {
       headers: request.headers,
       body
     });
+    if(response.destroyed || cancelled.signal.aborted)return;
     response.writeHead(result.status, result.headers);
     await endResponse(response,result.rawBody || (result.body === null ? '' : JSON.stringify(result.body)));
   } catch (error) {

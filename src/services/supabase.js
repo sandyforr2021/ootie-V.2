@@ -206,13 +206,35 @@ export async function deleteItemFromSupabase(itemId, userId) {
 /**
  * Fetch OOTD posts from Supabase ootie_ootd_posts table
  */
-export async function fetchProfileOotdPosts(userId) {
+export async function fetchProfileOotdPosts(userId, options = {}) {
   try {
     let query = supabase
       .from('ootie_ootd_posts')
       .select('*,ootie_profiles!ootie_ootd_posts_user_id_fkey(username,display_name,initials,avatar_url),ootie_post_likes(count),ootie_post_comments(count)')
       .order('created_at', { ascending: false });
     if (isUuid(userId)) query = query.eq('user_id', userId);
+    if(Array.isArray(options.authorIds)){
+      const ids=options.authorIds.filter(isUuid);if(!ids.length)return [];
+      query=query.in('user_id',ids);
+    }
+    const term=String(options.search||'').trim().slice(0,80);
+    if(term){
+      const pattern='%'+term.replace(/[\\%_]/g,'\\$&')+'%';
+      const searches=[['ootie_profiles','username'],['ootie_profiles','display_name'],['ootie_clothing_items','name'],['ootie_clothing_items','name_zh']];
+      const matches=await Promise.all(searches.map(([table,column])=>supabase.from(table).select('id').ilike(column,pattern).limit(100)));
+      if(matches.some(result=>result.error))throw new Error('FEED_SEARCH_UNAVAILABLE');
+      const authors=[...new Set(matches.slice(0,2).flatMap(result=>result.data||[]).map(row=>row.id).filter(isUuid))];
+      const items=[...new Set(matches.slice(2).flatMap(result=>result.data||[]).map(row=>row.id).filter(isUuid))];
+      const filters=[`caption.ilike.${JSON.stringify(pattern)}`];
+      if(authors.length)filters.push(`user_id.in.(${authors.join(',')})`);
+      if(items.length)filters.push(`item_ids.ov.{${items.join(',')}}`);
+      query=query.or(filters.join(','));
+    }
+
+    if (options.limit) {
+      const offset=Math.max(0,Number(options.offset)||0),limit=Math.min(48,Math.max(1,Number(options.limit)||24));
+      query=query.order('id',{ascending:false}).range(offset,offset+limit-1);
+    }
     const { data, error } = await query;
 
     if (error) {
@@ -808,4 +830,13 @@ export async function fetchSavedSosIds(profileId) {
     .select('target_id').eq('profile_id',profileId).eq('target_type','SOS');
   if(error) throw error;
   return new Set((data || []).map(row=>row.target_id));
+}
+
+export async function fetchOotdPostsByIds(ids){
+ const unique=[...new Set(ids.filter(isUuid))];const rows=[];
+ for(let index=0;index<unique.length;index+=50){
+  const {data,error}=await supabase.from('ootie_ootd_posts').select('id,item_ids,wearing').in('id',unique.slice(index,index+50));
+  if(error)throw error;rows.push(...(data||[]));
+ }
+ return rows;
 }

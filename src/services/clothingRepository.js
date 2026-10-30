@@ -104,7 +104,7 @@ const requireUuid = (value, userMessage) => {
  * @param {object} [client=supabase] - Supabase client instance.
  * @returns {Promise<Array>} List of items from ootie_clothing_items.
  */
-export async function getCurrentUserItems(profileId, client = supabase) {
+export async function getCurrentUserItems(profileId, client = supabase, options = {}) {
   if (!isUuid(profileId)) {
     throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, {
       message: '無效的個人檔案擁有者 ID。',
@@ -123,7 +123,7 @@ export async function getCurrentUserItems(profileId, client = supabase) {
       throw normalizeServiceError(error);
     }
 
-    return await hydratePrivateClothingPhotos(genuineContent(data || []), client);
+    return await hydratePrivateClothingPhotos(genuineContent(data || []), client, options);
   } catch (err) {
     throw normalizeServiceError(err);
   }
@@ -138,16 +138,16 @@ export const fetchClothingItems = getCurrentUserItems;
  * Resolves clothing referenced by public social content. Database RLS remains
  * the source of truth: private or non-readable rows are simply not returned.
  */
-export async function getPublicItemsByIds(itemIds, client = supabase) {
+export async function getPublicItemsByIds(itemIds, client = supabase, options = {}) {
   const ids = [...new Set((Array.isArray(itemIds) ? itemIds : []).filter(isUuid))].slice(0, 100);
   if (!ids.length) return [];
   try {
     const { data, error } = await client
       .from('ootie_clothing_items')
-      .select('id,owner_id,name,name_zh,brand,category,primary_color,photo,photo_display_path')
+      .select('id,owner_id,name,name_zh,brand,category,primary_color,photo,photo_display_path,photo_updated_at,source_url')
       .in('id', ids);
     if (error) throw normalizeServiceError(error);
-    return await hydrateSharedClothingPhotos(genuineContent(data || []), client);
+    return await hydrateSharedClothingPhotos(genuineContent(data || []), client, options);
   } catch (err) {
     throw normalizeServiceError(err);
   }

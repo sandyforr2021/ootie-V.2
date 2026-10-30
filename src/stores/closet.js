@@ -526,7 +526,6 @@ export const useClosetStore = defineStore('closet', () => {
       }
     }
 
-    releasePrivateClothingPhotoUrls();
     appStore.beginRemoteItems();
     dataMode.value = CLOSET_DATA_MODE.REMOTE;
     activeRemoteProfileId = profileId;
@@ -535,7 +534,7 @@ export const useClosetStore = defineStore('closet', () => {
     remoteState.value = loadingState(remoteState.value);
     const request = (async () => {
       try {
-        const items = await getCurrentUserItems(profileId);
+        const items = await getCurrentUserItems(profileId,undefined,{defer:true});
         if (requestVersion !== remoteReadVersion || activeRemoteProfileId !== profileId) return { ok: false, stale: true };
         appStore.items = items;
         // Auth hydration can briefly emit PROFILE_LOADING after this request

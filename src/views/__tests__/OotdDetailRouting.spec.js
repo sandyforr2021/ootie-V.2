@@ -67,7 +67,10 @@ describe('OOTD author profile context routing', () => {
     const wrapper = mount(ProfileView, { global: { plugins: [router] } });
     await flushPromises();
 
-    expect(decodeHref(wrapper.find('.ootd-card-link'))).toContain('/ootd/post-sandy-b?user=@sandy');
+    await wrapper.find('.ootd-photo-button').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.path).toBe('/ootd/post-sandy-b');
+    expect(router.currentRoute.value.query).toMatchObject({user:'@sandy',from:'profile'});
   });
 
   it('routes the viewer own post to the viewer profile', async () => {

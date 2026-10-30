@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+const a='11111111-1111-4111-8111-111111111111',b='22222222-2222-4222-8222-222222222222',post='33333333-3333-4333-8333-333333333333';
+test('comment notifications preserve actor/recipient ownership, distinct comments, self suppression and private function access',async()=>{
+ const db=new PGlite();try{
+ await db.exec(`create role anon;create role authenticated;create schema private;create table public.ootie_profiles(id uuid primary key,username text,display_name text);create table public.ootie_ootd_posts(id uuid primary key,user_id uuid);create table public.ootie_sos_posts(id uuid primary key,user_id uuid);create table public.ootie_profile_follows(id uuid default gen_random_uuid(),follower_id uuid,following_id uuid);create table public.ootie_post_likes(id uuid default gen_random_uuid(),user_id uuid,post_id uuid);create table public.ootie_outfit_suggestions(id uuid default gen_random_uuid(),user_id uuid,sos_id uuid);create table public.ootie_post_comments(id uuid primary key default gen_random_uuid(),post_id uuid,profile_id uuid);create table public.ootie_notifications(id uuid default gen_random_uuid(),user_id uuid,text text,meta text,read boolean,event_type text,actor_profile_id uuid,entity_id uuid,target_path text);create unique index notification_dedup on public.ootie_notifications(user_id,event_type,actor_profile_id,entity_id) where event_type is not null and actor_profile_id is not null and entity_id is not null;insert into public.ootie_profiles values('${a}','alice','Alice'),('${b}','bob','Bob');insert into public.ootie_ootd_posts values('${post}','${a}');insert into public.ootie_sos_posts values('${post}','${a}');`);
+ const sql=await readFile(new URL('../../docs/sql/ootie_comment_notifications.sql',import.meta.url),'utf8');await db.exec(sql);await db.exec(sql);
+ await db.exec(`insert into public.ootie_post_comments(post_id,profile_id) values('${post}','${b}'),('${post}','${b}'),('${post}','${a}');`);
+ const rows=(await db.query('select * from public.ootie_notifications')).rows;assert.equal(rows.length,2);assert.notEqual(rows[0].entity_id,rows[1].entity_id);for(const row of rows){assert.equal(row.user_id,a);assert.equal(row.actor_profile_id,b);assert.equal(row.event_type,'OOTD_COMMENT');assert.equal(row.target_path,`/ootd/${post}?comment=1`);assert.ok(row.text.includes('bob'));}
+ assert.equal((await db.query("select has_function_privilege('anon','private.create_ootie_social_notification()','EXECUTE') as allowed")).rows[0].allowed,false);
+ await db.exec(`create trigger test_sos after insert on public.ootie_outfit_suggestions for each row execute function private.create_ootie_social_notification();insert into public.ootie_outfit_suggestions(user_id,sos_id) values('${b}','${post}');`);assert.ok((await db.query("select text from public.ootie_notifications where event_type='SOS_SUGGESTION'")).rows[0].text.includes('SOS'));
+ }finally{await db.close();}
+});

@@ -39,7 +39,7 @@ describe('OOTD media storage contract', () => {
     expect(bucket.upload).toHaveBeenCalledWith(
       `ootd/${authUserId}/22222222-2222-4222-8222-222222222222.jpg`,
       expect.any(File),
-      { contentType: 'image/jpeg', upsert: false }
+      { contentType: 'image/jpeg', cacheControl:'31536000', upsert: false }
     );
     expect(result.publicUrl).toBe('https://example.test/ootd.jpg');
   });

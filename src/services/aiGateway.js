@@ -163,7 +163,7 @@ export function createAiGatewayClient({
       method: 'DELETE'
     }),
     loadPrivateImage: (token, path) => loadImage(token, `/v1/private-images/${encodeURIComponent(path)}`),
-    loadSharedClothingImage: (token, id) => loadImage(token, `/v1/shared-clothing/${encodeURIComponent(id)}/image`),
+    loadSharedClothingImage: (token, id, {thumbnail=false}={}) => loadImage(token, `/v1/shared-clothing/${encodeURIComponent(id)}/${thumbnail?'thumbnail':'image'}`),
     generateSingleGarmentTryOn: (accessToken, input) => request('/v1/generations/single-try-on', {
       accessToken,
       method: 'POST',

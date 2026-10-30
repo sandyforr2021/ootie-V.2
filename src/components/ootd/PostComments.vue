@@ -7,16 +7,16 @@
       <li v-for="comment in comments" :key="comment.id">
         <div class="inline-comment-header">
           <router-link :to="{path:'/profile',query:{user:comment.user}}" class="inline-comment-author">
-            <img v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
+            <MediaImage v-if="comment.avatar_url" :src="comment.avatar_url" alt="" loading="lazy" /><span v-else class="inline-comment-initials" aria-hidden="true">{{ (comment.display_name || comment.user || '').replace('@','').slice(0,2).toUpperCase() }}</span>
             <strong>{{ comment.display_name || comment.user }}</strong>
           </router-link>
           <time v-if="comment.created_at" :datetime="comment.created_at">{{ commentTime(comment.created_at) }}</time>
           <details class="comment-menu"><summary :aria-label="$t('留言選項')">⋯</summary><div>
-            <button v-if="auth.profileId === comment.profile_id" type="button" class="comment-delete" :disabled="!!deleting" @click="remove(comment)">{{ $t('刪除') }}</button>
+            <button v-if="auth.profileId === comment.profile_id" type="button" class="comment-delete" :disabled="!!deleting" @click="pendingDelete=comment">{{ $t('刪除') }}</button>
             <button type="button" @click="app.showToast($t('檢舉功能準備中。'), {type:'info'})">{{ $t('檢舉') }}</button>
           </div></details>
         </div>
-        <TranslatedText :text="comment.text" :source-language="comment.body_language" />
+        <TranslatedText :content-id="comment.id" kind="comment" :text="comment.text" :source-language="comment.body_language" />
       </li>
     </ol>
     <p v-else>{{ $t('還沒有留言，成為第一個留言的人吧。') }}</p>
@@ -26,10 +26,13 @@
       <button class="primary" type="submit" :disabled="sending || !draft.trim()">{{ $t(sending?'傳送中…':'送出') }}</button>
     </form>
     <button v-else type="button" class="secondary" @click="app.openLoginGate('SOCIAL_AUTH_REQUIRED',`/ootd/${post.id}?comment=1`)">{{ $t('登入後留言') }}</button>
+    <BaseConfirmDialog :open="!!pendingDelete" :title="$t('刪除留言？')" :message="$t('刪除後無法復原。')" confirm-label="刪除" destructive :busy="!!deleting" @cancel="pendingDelete=null" @confirm="remove(pendingDelete)"/>
   </section>
 </template>
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import TranslatedText from '@/components/ootd/TranslatedText.vue';
+import BaseConfirmDialog from '@/components/ui/BaseConfirmDialog.vue';
 import {ref,computed,watch} from 'vue';
 import {deletePostComment} from '@/services/postComments';
 import {t,formatDate} from '@/i18n';
@@ -40,10 +43,11 @@ const props=defineProps({post:{type:Object,required:true}});
 const app=useAppStore(), auth=useAuthStore(), store=useOotdStore();
 const section=ref(null),composer=ref(null),draft=ref(''),loading=ref(false),error=ref(''),sending=ref(false);
 const deleting=ref(null);
+const pendingDelete=ref(null);
 async function remove(comment){
  if(deleting.value || comment.profile_id!==auth.profileId)return;
  deleting.value=comment.id;
- try {await deletePostComment({id:comment.id,profileId:auth.profileId,postId:props.post.id});await refresh();}
+ try {await deletePostComment({id:comment.id,profileId:auth.profileId,postId:props.post.id});pendingDelete.value=null;await refresh();}
  catch {error.value=t('留言未刪除，請重試。','Could not delete this comment. Please retry.');}
  finally {deleting.value=null;}
 }

@@ -56,11 +56,13 @@ const authorProfileRoute = computed(() => {
 });
 
 const backRoute = computed(() => {
+  if(route.query.from==='saved')return {path:'/profile/saved',query:{type:['OOTD','SOS'].includes(route.query.type)?route.query.type:undefined}};
   if (route.query.from === 'explore') return { path: '/explore' };
   return authorProfileRoute.value || { path: '/explore' };
 });
 
 const backLabel = computed(() => {
+  if(route.query.from==='saved')return '← 返回我的收藏';
   return route.query.from === 'explore' ? '← 返回探索' : '← 返回個人檔案';
 });
 
@@ -74,7 +76,7 @@ const hydrateTaggedItems = async (sourcePost) => {
   const itemIds = Array.isArray(sourcePost?.item_ids) ? [...new Set(sourcePost.item_ids.map(String))] : [];
   if (!itemIds.length || sourcePost?.tagged_items?.length) return sourcePost;
   try {
-    const taggedItems = await getPublicItemsByIds(itemIds);
+    const taggedItems = await getPublicItemsByIds(itemIds,undefined,{defer:true});
     Object.assign(sourcePost, { tagged_items: taggedItems });
     return sourcePost;
   } catch (_) {

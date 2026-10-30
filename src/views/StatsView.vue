@@ -10,7 +10,7 @@
     <section class="profile-insights" aria-labelledby="closetStatsTitle">
       <div class="profile-ootd-heading">
         <h2 id="closetStatsTitle">{{ $t("個人統計") }}</h2>
-        <span class="eyebrow">{{ $t("可見單品") }}</span>
+
       </div>
 
       <div class="stats-grid">
@@ -110,17 +110,17 @@
     <!-- 我的百搭神器 Top 5 -->
     <section class="profile-insights top-worn-section" aria-labelledby="topWornTitle">
       <div class="profile-ootd-heading">
-        <h2 id="topWornTitle">{{ $t('OOTD 熱門單品') }}</h2>
-        <span class="eyebrow">{{ $t('OOTD 出現次數 Top 5') }}</span>
+        <h2 id="topWornTitle">{{ $t('OOTD 單品紀錄') }}</h2>
+
       </div>
       <div class="top-worn-list" v-if="topWornItems.length">
         <article
-          v-for="(item, index) in topWornItems.slice(0, 5)"
+          v-for="(item, index) in rankedWornItems"
           :key="item.id"
-          :class="['top-worn-item', { 'is-champion': index === 0 }]"
+          :class="['top-worn-item', { 'is-champion': item.rank === 1 }]"
         >
-          <span :class="['top-worn-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
-            {{ index === 0 ? '♛' : index + 1 }}
+          <span :class="['top-worn-rank', `rank-top-${Math.min(item.rank, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:item.rank})">
+            {{ item.rank === 1 ? '♛' : item.rank }}
           </span>
           <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
           <div class="top-worn-copy">
@@ -134,29 +134,6 @@
       </div>
     </section>
 
-    <!-- 冷宮衣物排名 完整清單 -->
-    <section class="profile-insights disused-ranking-section" aria-labelledby="disusedRankingTitle">
-      <div class="profile-ootd-heading">
-        <h2 id="disusedRankingTitle">{{ $t('OOTD 單品紀錄') }}</h2>
-      </div>
-      <div class="disused-ranking" v-if="topWornItems.length">
-        <article
-          v-for="(item, index) in topWornItems"
-          :key="item.id"
-          class="disused-ranking-item"
-        >
-          <span :class="['disused-rank', `rank-top-${Math.min(index + 1, 5)}`]" :aria-label="tf('第 {rank} 名', {rank:index+1})">
-            {{ index === 0 ? '♛' : index + 1 }}
-          </span>
-          <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
-          <div class="disused-ranking-copy">
-            <h3>{{ itemName(item) }}</h3>
-            <span>{{ tf('出現在 {count} 篇 OOTD', { count:item.ootd_count }) }}</span>
-          </div>
-        </article>
-      </div>
-      <div v-else class="disused-empty">{{ $t(ootdStatsError ? 'OOTD 統計暫時無法載入。' : '尚無標記衣物的 OOTD。') }}</div>
-    </section>
   </section>
 </template>
 
@@ -193,6 +170,7 @@ const categoryStats = ref([]);
 const brandStats = ref([]);
 const brandHighlight = ref('');
 const topWornItems = ref([]);
+const rankedWornItems=computed(()=>topWornItems.value.map((item,index,items)=>({...item,rank:items.findIndex(other=>other.ootd_count===item.ootd_count)+1})));
 const ootdStatsError = ref(false);
 
 // Yearly summary states
@@ -516,3 +494,5 @@ watch(
 <style scoped>
 #statsPage .top-worn-item .product-image,#statsPage .disused-ranking-item .product-image{object-fit:contain;background:#fff;padding:10px;box-sizing:border-box}
 </style>
+
+<style scoped>.stats-page-hero::before,.stats-page-hero::after{content:none!important}.top-worn-list{align-items:stretch}</style>

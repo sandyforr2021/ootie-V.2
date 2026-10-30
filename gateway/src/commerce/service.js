@@ -1,4 +1,4 @@
-import { orderedOutfit, outfitLayer } from '../../../shared/outfitSelection.js';
+import { orderedOutfit, outfitLayer, supportsTryOn } from '../../../shared/outfitSelection.js';
 import { randomUUID, createHash } from 'node:crypto';
 import { assert, GatewayError } from '../errors.js';
 import { parseImageDataUrl, normalizeGarmentImageForAi } from '../image.js';
@@ -6,6 +6,7 @@ import { isUuid } from '../services/supabaseGateway.js';
 import { parseProductHtml } from '../services/productImportService.js';
 import { publicHttpUrl, safeDownload } from './safeDownload.js';
 import { YOUCAM_FEATURES } from './youcamClient.js';
+import { generationQuote, DAILY_FREE_IMAGES } from '../../../shared/generationAllowance.js';
 
 const validPath = (path, prefix) => typeof path === 'string' && path.startsWith(prefix)
   && !path.split('/').some((part) => !part || part === '..' || part === '.' || /[%\\?#]/.test(part));
@@ -44,11 +45,16 @@ export class CommerceService {
     const quotaRemaining = Math.max(0, Number(quota?.dailyLimit || 0) - Number(quota?.dailyUsed || 0));
     const underConcurrencyLimit = Number(quota?.activeCount || 0) < Number(quota?.activeLimit || 0);
     const providerRemaining = providerBalance === null ? 0 : Math.max(0, providerBalance - reserve);
-    const remaining = Math.min(Math.max(0, dbRemaining - reserve), providerRemaining, quotaRemaining);
+    const newPolicy = quota?.generationPolicyVersion === 2;
+    const remaining = Math.min(Math.max(0, dbRemaining - reserve), providerRemaining, newPolicy ? Infinity : quotaRemaining);
     const active = !!budget?.expires_at && Date.parse(budget.expires_at) > Date.now();
     const pointsReady=Number.isSafeInteger(pointBalance) && pointBalance >= 0;
     const generationRemaining=Math.max(0,Number(quota?.generationLimit ?? 2)-Number(quota?.generationUsed ?? 0));
-    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= 2 && pointsReady && generationRemaining>0,
+    const allowance = {pointBalance:pointsReady?pointBalance:null,generationPolicyVersion:newPolicy?2:1,
+      dailyGenerationRemaining:generationRemaining,
+      dailyFreeGenerationRemaining:newPolicy?Math.max(0,DAILY_FREE_IMAGES-Number(quota.freeGenerationUsed)):null};
+    return { enabled: this.enabled && active && providerBalance !== null && underConcurrencyLimit && remaining >= (newPolicy?1:2) && generationQuote(allowance).allowed,
+      ...allowance, pointGenerationsUnlimited:newPolicy,dailyFreeGenerationLimit:newPolicy?DAILY_FREE_IMAGES:null,
       dailyGenerationRemaining:generationRemaining,dailyGenerationLimit:2,generationTimezone:'Asia/Taipei',
       remainingUnits: active && underConcurrencyLimit ? remaining : 0, dailyRemainingUnits: quotaRemaining,
       activeJobs: Number(quota?.activeCount || 0), activeJobLimit: Number(quota?.activeLimit || 0),
@@ -131,6 +137,7 @@ export class CommerceService {
     for (const id of ids) {
       const product = await this.repository.product(id, user.id);
       assert(product && categories.has(product.category) && product.state !== 'tryon_only', 'INVALID_PRODUCT', 400, '請重新選擇想買清單中的商品。');
+      assert(supportsTryOn(product),'UNSUPPORTED_GARMENT_CATEGORY',400,'目前試穿支援上衣、下身、洋裝與外套。');
       selectedProducts.push(product);
     }
     const snapshots=[];
@@ -147,7 +154,7 @@ export class CommerceService {
       // to the clothing model as an assumed upper-body garment.
       for (const item of items) {
         item.tryonCategory = garmentCategory(item.category);
-        assert(item.tryonCategory, 'UNSUPPORTED_GARMENT_CATEGORY', 400, '目前試穿支援衣服與鞋履；請移除包包、配件或無法辨識的分類。');
+        assert(item.tryonCategory && item.tryonCategory!=='shoes', 'UNSUPPORTED_GARMENT_CATEGORY', 400, '目前試穿支援上衣、下身、洋裝與外套。');
       }
       assert(orderedOutfit([...selectedProducts,...items]).valid, 'INVALID_OUTFIT_LAYERS', 400, '整套試穿請各選最多一件上衣、下身與外套。');
       for (const item of items) {

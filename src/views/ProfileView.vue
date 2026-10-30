@@ -10,7 +10,7 @@
 
     <div class="profile-header">
       <div class="profile-avatar" :class="{ 'has-image': targetProfile.avatar_url }">
-        <img
+        <MediaImage
           v-if="targetProfile.avatar_url"
           :src="targetProfile.avatar_url"
           :alt="tf('{name} 的大頭貼', { name: targetProfile.name || targetProfile.display_name })"
@@ -39,14 +39,14 @@
     </div>
 
     <div class="profile-stats">
-      <div class="profile-stat">
+      <button type="button" class="profile-stat profile-stat-button" @click="connectionsKind='followers'">
         <strong>{{ formatMetric(followCounts.followers) }}</strong>
         <span>{{ t("追蹤者") }}</span>
-      </div>
-      <div class="profile-stat">
+      </button>
+      <button type="button" class="profile-stat profile-stat-button" @click="connectionsKind='following'">
         <strong>{{ formatMetric(followCounts.following) }}</strong>
         <span>{{ $t("追蹤中") }}</span>
-      </div>
+      </button>
       <button v-if="isSelf" type="button" class="profile-stat profile-stat-button" @click="openSavedOutfits">
         <strong>{{ formatMetric(profileMetrics.saved) }}</strong>
         <span>{{ t("我的收藏") }}</span>
@@ -69,7 +69,7 @@
       </div>
     </div>
 
-    <SavedOutfitsCollection v-if="isSelf && route.query.tab === 'saved'" embedded />
+    <FollowListDialog :open="!!connectionsKind" :profile-id="isSelf?authStore.profileId:remotePublicProfile?.id" :kind="connectionsKind" @close="connectionsKind=''"/>
 
 
 
@@ -80,39 +80,7 @@
       </div>
 
       <div v-if="userPosts.length" class="ootd-grid">
-        <article v-for="post in userPosts" :key="post.id" class="ootd-card">
-          <router-link :to="{ path: `/ootd/${post.id}`, query: { user: post.username, from: 'profile' } }" class="ootd-card-link">
-            <img class="ootd-photo" :src="post.image" :alt="tf('{user} 的 OOTD', { user: post.username })" loading="lazy" decoding="async" />
-          </router-link>
-          <div class="ootd-body">
-            <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" reveal-source-on-translate understated />
-            <div v-if="post.hashtags && post.hashtags.length" class="ootd-tags">
-              {{ post.hashtags.join('　') }}
-            </div>
-            <p class="ootd-items">
-              {{ post.wearing && post.wearing.length ? tf('穿搭單品：{items}', { items: wearingNames(post).join(' · ') }) : t('尚未標註衣櫥單品') }}
-            </p>
-            <p v-if="post.created_at || post.createdAt" class="ootd-date">
-              {{ formatDate(post.created_at || post.createdAt) }}
-            </p>
-            <div class="ootd-actions">
-              <button type="button" :class="['ootd-action', { liked: post.liked }]" :aria-label="t('喜歡')" :aria-pressed="!!post.liked" @click="ootdStore.toggleLike(post.id)">
-                <AppIcon name="heart" :fill="post.liked ? 'currentColor' : 'none'" /> {{ post.likes || 0 }}
-              </button>
-              <router-link class="ootd-action" :aria-label="t('留言')" :to="{path:`/ootd/${post.id}`,query:{from:'profile',comment:'1'}}"><AppIcon name="comment" /> {{ post.comments || 0 }}</router-link>
-              <button type="button" :class="['ootd-action', { saved: post.saved }]" :aria-label="t('收藏')" :aria-pressed="!!post.saved" @click="ootdStore.toggleSave(post.id)">
-                <AppIcon name="bookmark" :fill="post.saved ? 'currentColor' : 'none'" />
-              </button>
-              <button type="button" class="ootd-action" :aria-label="t('分享')" @click="shareOotd(post.id)"><AppIcon name="share" /></button>
-              <template v-if="isSelf">
-                <button type="button" class="ootd-action" @click="editOotd(post.id)">{{ t("編輯") }}</button>
-                <button type="button" class="ootd-action ootd-delete-action" @click="deleteOotd(post.id)">
-                  {{ t("刪除") }}
-                </button>
-              </template>
-            </div>
-          </div>
-        </article>
+        <OotdFeedCard v-for="post in userPosts" :key="post.id" :post="profilePost(post)" :own="isSelf" :following="isFollowingTarget" :can-follow="!isSelf" @profile="router.push({path:'/profile',query:isSelf?{}:{user:post.username}})" @follow="toggleFollowTarget" @open="openProfilePost(post)" @comments="openProfilePost(post,true)" @like="ootdStore.toggleLike(post.id)" @save="ootdStore.toggleSave(post.id)" @share="shareOotd(post.id)" @edit="editOotd(post.id)" @delete="deleteOotd(post.id)"/>
       </div>
 
       <div v-else class="profile-ootd-empty">
@@ -123,7 +91,8 @@
 </template>
 
 <script setup>
-import TranslatedText from '@/components/ootd/TranslatedText.vue';
+import MediaImage from '@/components/ui/MediaImage.vue';
+import OotdFeedCard from '@/components/ootd/OotdFeedCard.vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { t, tf, formatDate } from '@/i18n';
 import SavedOutfitsCollection from '@/components/bookmarks/SavedOutfitsCollection.vue';
@@ -135,6 +104,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { useSocialStore } from '@/stores/social';
 import { getPublicProfileByUsername, updatePublicProfile } from '@/services/profileRepository';
+import FollowListDialog from '@/components/modal/FollowListDialog.vue';
 import { resolvePostTaggedItems } from '@/services/ootdTaggedItems';
 import {
   countSavedOutfits,
@@ -146,6 +116,7 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
 const socialStore = useSocialStore();
+const connectionsKind=ref('');
 const followCounts = ref({ followers: null, following: null });
 
 const isMember = computed(() => authStore.isMember);
@@ -178,11 +149,13 @@ const loadPublicProfile = async () => {
 };
 
 onMounted(() => {
+  if(route.query.tab==='saved')void router.replace('/profile/saved');
   ootdStore.loadRemotePosts();
   loadPublicProfile().then(loadProfileMetrics);
 });
 
 watch(() => route.query.user, async () => {
+  connectionsKind.value='';
   await loadPublicProfile();
   await loadProfileMetrics();
 });
@@ -279,7 +252,7 @@ watch(() => authStore.profileId, async (profileId) => {
 const formatMetric = (value) => value === null || value === undefined ? '—' : value;
 
 const openSavedOutfits = () => {
-  router.push({ path: '/profile', query: { tab: 'saved' } });
+  router.push('/profile/saved');
 };
 
 const openHelpHistory = () => {
@@ -310,10 +283,8 @@ const userPosts = computed(() => {
 });
 
 
-const wearingNames = (post) => resolvePostTaggedItems(
-  post,
-  [...(post.tagged_items || []), ...appStore.items]
-).map((item) => item.name);
+const profilePost=post=>({...post,avatar_url:post.avatar_url||targetProfile.value.avatar_url,display_name:post.display_name||targetProfile.value.name||targetProfile.value.display_name,initials:post.initials||targetProfile.value.initials,tagged_items:resolvePostTaggedItems(post,[...(post.tagged_items||[]),...appStore.items])});
+const openProfilePost=(post,comments=false)=>router.push({path:`/ootd/${post.id}`,query:{user:post.username,from:'profile',...(comments?{comment:'1'}:{})}});
 
 const openEditProfile = () => {
   appStore.isProfileEditOpen = true;

@@ -26,7 +26,7 @@
           @click="toggleProfileMenu"
         >
           <span class="avatar is-logged-in" :class="{ 'has-image': appStore.profile.avatar_url }">
-            <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="`${appStore.profile.name} 的大頭貼`" />
+            <MediaImage v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="`${appStore.profile.name} 的大頭貼`" />
             <span v-else>{{ appStore.profile.initials || 'O' }}</span>
           </span>
           <span class="account-name">{{ appStore.profile.name || appStore.profile.username || $t('我的帳號') }}</span>
@@ -41,7 +41,7 @@
         <button class="popover-close" :aria-label="$t(&quot;關閉&quot;)" @click="closeProfileMenu">×</button>
         <div class="popover-identity">
           <div class="popover-avatar">
-            <img v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="appStore.profile.name" />
+            <MediaImage v-if="appStore.profile.avatar_url" :src="appStore.profile.avatar_url" :alt="appStore.profile.name" />
             <template v-else>{{ appStore.profile.initials || 'O' }}</template>
           </div>
           <div class="popover-copy">
@@ -74,8 +74,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import MediaImage from '@/components/ui/MediaImage.vue';
+import { ref, computed } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useSocialStore } from '@/stores/social';
@@ -85,7 +85,6 @@ import LanguageSelect from './LanguageSelect.vue';
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const socialStore = useSocialStore();
-const router = useRouter();
 const isProfileMenuOpen = ref(false);
 
 const unreadCount = computed(() => {
@@ -99,6 +98,7 @@ const openNotifications = () => {
     return;
   }
   appStore.isNotificationOpen = true;
+  void socialStore.refresh(authStore.profileId);
 };
 
 const toggleProfileMenu = () => {
@@ -115,18 +115,6 @@ const handleLogout = async () => {
   appStore.showToast('已登出');
 };
 
-onMounted(() => {
-  authStore.initAuth().then(() => {
-    if (authStore.profileId) socialStore.refresh(authStore.profileId);
-    const returnTo = authStore.consumeOAuthReturnTo();
-    if (returnTo && returnTo !== '/') router.replace(returnTo);
-  });
-});
-
-watch(() => authStore.profileId, (profileId) => {
-  if (profileId) socialStore.refresh(profileId);
-  else socialStore.clear();
-});
 </script>
 
 <style scoped>

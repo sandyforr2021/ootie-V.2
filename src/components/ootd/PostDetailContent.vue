@@ -8,7 +8,7 @@
         :aria-label="`查看 ${authorUsername} 的個人主頁`"
       >
         <span class="ootd-avatar" aria-hidden="true">
-          <img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="eager" decoding="async" />
+          <MediaImage v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="eager" decoding="async" />
           <span v-else>{{ authorInitials }}</span>
         </span>
         <span class="post-detail-author-copy">
@@ -18,7 +18,7 @@
       </router-link>
       <span v-else class="post-detail-author-link is-disabled">
         <span class="ootd-avatar" aria-hidden="true">
-          <img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="eager" decoding="async" />
+          <MediaImage v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="eager" decoding="async" />
           <span v-else>{{ authorInitials }}</span>
         </span>
         <span class="post-detail-author-copy">
@@ -41,8 +41,8 @@
     </header>
 
     <div class="ootd-detail-image-frame">
-      <img
-        class="ootd-photo ootd-detail-image"
+      <MediaImage
+        full class="ootd-photo ootd-detail-image"
         :src="post.image"
         :alt="`${authorUsername || '作者'} 的完整 OOTD 穿搭`"
         loading="eager"
@@ -91,7 +91,7 @@
         </div>
         <div class="ootd-tagged-items">
           <article v-for="item in taggedItems" :key="item.key" :class="['ootd-tagged-item', { removed: item.removed }]">
-            <img v-if="item.photo" class="product-image" :src="item.photo" :alt="item.name" loading="lazy" decoding="async" />
+            <MediaImage v-if="item.photo" class="product-image" :src="item.photo" :alt="item.name" loading="lazy" decoding="async" />
             <span class="ootd-tagged-copy">
               <strong>{{ item.name }}</strong>
               <small v-if="item.brand || item.category || item.primary_color">
@@ -117,6 +117,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import TranslatedText from '@/components/ootd/TranslatedText.vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { computed, ref } from 'vue';

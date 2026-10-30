@@ -1,26 +1,26 @@
 <template>
-  <div v-if="appStore.isOotdFormOpen" class="modal-backdrop open" @click.self="close">
+  <div v-if="appStore.isOotdFormOpen && !appStore.isItemFormOpen" class="modal-backdrop open" @click.self="close">
     <section v-accessible-modal class="modal ootd-form-modal">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
-      <h2>{{ isEditing ? '編輯 OOTD' : $t('發布 OOTD') }}</h2>
+      <h2>{{ $t(isEditing ? '編輯 OOTD' : '發布 OOTD') }}</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-field">
-          <label for="ootdPhotoFile">穿搭照片</label>
+          <label for="ootdPhotoFile">{{ $t('穿搭照片') }}</label>
           <label class="ootd-upload" for="ootdPhotoFile" :aria-busy="imageStatus === 'loading'">
-            <strong>上傳你的 OOTD</strong>
-            <span>JPEG、PNG 或 WebP，最多 10 MB</span>
+            <strong>{{ $t('上傳你的 OOTD') }}</strong>
+            <span>{{ $t('JPEG、PNG 或 WebP，最多 10 MB') }}</span>
             <input
               id="ootdPhotoFile"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               @change="handleFileChange"
             />
-            <img
+            <MediaImage
               :class="['ootd-upload-preview', { visible: photoPreview }]"
               :src="photoPreview"
-              alt="OOTD 預覽"
+              :alt="$t('OOTD 預覽')"
             />
-            <small v-if="imageStatus === 'loading'" class="ootd-form-status">正在讀取圖片…</small>
+            <small v-if="imageStatus === 'loading'" class="ootd-form-status">{{ $t('正在讀取圖片…') }}</small>
             <small v-else-if="imageError" class="ootd-form-error" role="alert">{{ imageError }}</small>
           </label>
         </div>
@@ -31,7 +31,7 @@
             id="ootdCaption"
             v-model="caption"
             required
-            placeholder="今天這套穿搭，想和衣友分享什麼？"
+            :placeholder="$t('今天這套穿搭，想和衣友分享什麼？')"
           ></textarea>
           <label for="ootdCaptionLanguage">{{ $t('原文語言') }}</label>
           <select id="ootdCaptionLanguage" v-model="captionLanguage"><option v-for="code in CONTENT_LANGUAGES" :key="code" :value="code">{{ languageNames[code] }}</option></select>
@@ -47,9 +47,8 @@
         </div>
 
         <div class="form-field" style="margin-top:16px">
-          <label>標註衣櫥單品</label>
-          <p class="form-help">可不選；發布時會再次確認單品屬於你的遠端衣櫥。</p>
-          <p v-if="closetLoading" class="form-help">正在載入你的遠端衣櫥…</p>
+          <div class="ootd-clothing-heading"><label>{{ $t('標註衣櫥單品') }}</label><button type="button" class="secondary" @click="addWardrobeItem"><AppIcon name="plus" :size="17"/>{{ $t('新增衣物') }}</button></div>
+          <p v-if="closetLoading" class="form-help">{{ $t('正在讀取衣櫥…') }}</p>
           <div v-else-if="remoteClosetItems.length" class="sos-selection-grid ootd-item-selector">
             <label
               v-for="item in remoteClosetItems"
@@ -62,12 +61,12 @@
                 v-model="selectedItemIds"
                 :aria-label="`標註 ${item.name_zh || item.name}`"
               />
-              <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+              <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
               <span class="ootd-item-tag">{{ item.name_zh || item.name }}</span>
-              <span class="sos-selection-check" aria-hidden="true">✓</span>
+              <span v-if="selectedItemIds.includes(item.id)" class="sos-selection-check" aria-hidden="true">✓</span>
             </label>
           </div>
-          <p v-else class="form-help">衣櫥目前沒有可標註的單品，仍可直接發布 OOTD。</p>
+          <p v-else class="form-help">{{ $t('衣櫥目前沒有可標註的單品，仍可直接發布 OOTD。') }}</p>
         </div>
 
         <p v-if="submitError" class="ootd-form-error" role="alert">{{ submitError }}</p>
@@ -75,7 +74,7 @@
         <div class="form-actions">
           <button type="button" class="secondary" :disabled="ootdStore.publishing" @click="close">{{ $t("取消") }}</button>
           <button type="submit" class="primary" :disabled="ootdStore.publishing || imageStatus === 'loading'">
-            {{ ootdStore.publishing ? '正在發布…' : (isEditing ? '儲存修改' : $t('發布 OOTD')) }}
+            {{ $t(ootdStore.publishing ? '正在發布…' : (isEditing ? '儲存修改' : '發布 OOTD')) }}
           </button>
         </div>
       </form>
@@ -84,6 +83,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { ref, computed, watch } from 'vue';
 import { locale } from '@/i18n';
 import { CONTENT_LANGUAGES, languageNames, inferContentLanguage } from '../../../shared/contentLanguages.js';
@@ -92,6 +92,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { validateOotdImage } from '@/services/ootdMedia';
 import { getCurrentUserItems } from '@/services/clothingRepository';
+import AppIcon from '@/components/ui/AppIcon.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -109,6 +110,26 @@ const imageError = ref('');
 const submitError = ref('');
 const remoteClosetItems = ref([]);
 const closetLoading = ref(false);
+let newItemContext=null;
+const addWardrobeItem=()=>{
+ if(!authStore.isMember)return;
+ newItemContext={profileId:authStore.profileId,existingIds:new Set(remoteClosetItems.value.map(item=>item.id))};
+ appStore.editingItemId=null;appStore.isItemFormOpen=true;
+};
+watch(()=>appStore.isItemFormOpen,async(open,previous)=>{
+ if(open||!previous||!newItemContext)return;
+ const context=newItemContext;newItemContext=null;
+ if(!appStore.isOotdFormOpen||context.profileId!==authStore.profileId)return;
+ closetLoading.value=true;
+ try{
+  const items=await getCurrentUserItems(context.profileId);
+  if(!appStore.isOotdFormOpen||context.profileId!==authStore.profileId)return;
+  remoteClosetItems.value=Array.isArray(items)?items:[];
+  const added=remoteClosetItems.value.filter(item=>!context.existingIds.has(item.id)).map(item=>item.id);
+  selectedItemIds.value=[...new Set([...selectedItemIds.value,...added])];
+ }catch{submitError.value='衣櫥無法載入，請關閉後重新開啟。';}
+ finally{closetLoading.value=false;}
+});
 
 const isEditing = computed(() => Boolean(ootdStore.editingPostId));
 
@@ -224,3 +245,7 @@ const handleSubmit = async () => {
 };
 </script>
 
+
+<style scoped>
+.ootd-clothing-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.ootd-clothing-heading button{display:inline-flex;align-items:center;gap:7px}
+</style>

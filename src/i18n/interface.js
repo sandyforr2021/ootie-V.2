@@ -1,4 +1,47 @@
 export const interfaceMessages = `
+每日免費 2 張|2 free images daily|毎日2枚無料|2 imágenes gratis al día
+價格以美金計算|Prices in USD|料金は米ドル（USD）|Precios en dólares estadounidenses (USD)
+每件 2 點；免費額度於美西午夜重置。|2 points per garment. Free allowance resets at midnight Pacific time.|衣類1点につき2ポイント。無料枠は米国太平洋時間の午前0時にリセット。|2 puntos por prenda. El cupo gratuito se renueva a medianoche del Pacífico.
+美金參考換算，尚未開放付款。|USD reference conversion. Payments are not available yet.|米ドルの参考換算額です。お支払いはまだ利用できません。|Conversión de referencia a USD. Los pagos aún no están disponibles.
+
+目前試穿支援上衣、下身、洋裝與外套。|Try-on supports tops, bottoms, dresses and outerwear.|試着はトップス、ボトムス、ワンピース、アウターに対応しています。|Las pruebas admiten partes de arriba, partes de abajo, vestidos y abrigos.
+登入加入衣物|Sign in to add clothes|ログインして衣類を追加|Inicia sesión para añadir prendas
+功能展示|Feature preview|機能の紹介|Vista previa de funciones
+試穿流程展示|Try-on flow preview|試着フローの紹介|Vista previa del proceso de prueba
+穿搭照片|Outfit photo|コーデ写真|Foto del conjunto
+上傳你的 OOTD|Upload your OOTD|OOTDをアップロード|Sube tu OOTD
+JPEG、PNG 或 WebP，最多 10 MB|JPEG, PNG or WebP, up to 10 MB|JPEG・PNG・WebP、最大10MB|JPEG, PNG o WebP, hasta 10 MB
+正在讀取圖片…|Reading image…|画像を読み込み中…|Leyendo imagen…
+OOTD 預覽|OOTD preview|OOTDのプレビュー|Vista previa de OOTD
+今天這套穿搭，想和衣友分享什麼？|What would you like to share about this outfit?|このコーデについて何をシェアしますか？|¿Qué te gustaría compartir sobre este conjunto?
+衣櫥目前沒有可標註的單品，仍可直接發布 OOTD。|No wardrobe items to tag yet. You can still publish your OOTD.|タグ付けできる衣類はありませんが、OOTDを投稿できます。|Aún no hay prendas para etiquetar. Puedes publicar tu OOTD.
+編輯 OOTD|Edit OOTD|OOTDを編集|Editar OOTD
+正在發布…|Publishing…|投稿中…|Publicando…
+儲存修改|Save changes|変更を保存|Guardar cambios
+重新定位|Locate again|現在地を再取得|Volver a localizar
+今日穿搭|Today's outfits|今日のコーデ|Conjuntos de hoy
+衣櫥展示|Wardrobe showcase|クローゼット紹介|Presentación del armario
+服飾展示|Garment showcase|衣類の紹介|Presentación de prendas
+暫停展示|Pause showcase|紹介を一時停止|Pausar presentación
+播放展示|Play showcase|紹介を再生|Reproducir presentación
+取消去背|Cancel background removal|背景除去をキャンセル|Cancelar eliminación de fondo
+去背已取消。|Background removal cancelled.|背景除去をキャンセルしました。|Eliminación de fondo cancelada.
+已從想買清單移除|Removed from wishlist|ほしい物リストから削除しました|Eliminado de la lista de deseos
+復原|Undo|元に戻す|Deshacer
+請至少選擇一件衣物。|Select at least one garment.|衣類を1点以上選択してください。|Selecciona al menos una prenda.
+貼文選單|Post menu|投稿メニュー|Menú de publicación
+貼文互動|Post interactions|投稿の操作|Interacciones
+新增衣物|Add clothing|衣類を追加|Añadir prenda
+標註衣櫥單品|Tag wardrobe items|クローゼットの衣類をタグ付け|Etiquetar prendas del armario
+每日免費 2 張・點數生成不限每日張數|2 free images daily · No daily cap with points|毎日2枚無料・ポイント利用時は1日の枚数制限なし|2 imágenes gratis al día · Sin límite diario con puntos
+每日免費生成 2 張|2 free generated images daily|毎日2枚を無料生成|2 imágenes generadas gratis al día
+免費額度 1 張|1 free image|無料枠1枚|1 imagen gratuita
+今日免費額度 {remaining}／2 張・點數生成不限每日張數|Free images today: {remaining}/2 · No daily cap with points|本日の無料枠 {remaining}／2枚・ポイント利用時は1日の枚数制限なし|Imágenes gratis hoy: {remaining}/2 · Sin límite diario con puntos
+優先扣點，每件 2 點；不足時使用當日免費額度，台灣時間午夜重置。|Points are used first, at 2 per garment. Daily free images apply if points are insufficient and reset at midnight Taiwan time.|衣類1点につき2ポイントを優先使用。不足時は毎日の無料枠を使い、台湾時間の午前0時にリセットします。|Se usan primero 2 puntos por prenda. Si no alcanzan, se usa el cupo gratuito, que se renueva a medianoche en Taiwán.
+今日免費額度已用完，可使用點數繼續生成。|Your daily free images are used up. Use points to continue.|本日の無料枠を使い切りました。ポイントで生成を続けられます。|Has agotado tus imágenes gratis de hoy. Usa puntos para continuar.
+本次使用 1 張免費額度，不扣點。|This uses 1 free image, with no point charge.|今回は無料枠を1枚使用。ポイントは消費しません。|Se usa 1 imagen gratuita, sin descontar puntos.
+整理衣物 · 免費額度 1 張|Clean up garment · 1 free image|衣類を整理・無料枠1枚|Mejorar prenda · 1 imagen gratuita
+未完成，已退還本次點數或免費額度。|Unsuccessful. Your points or free image allowance have been restored.|未完了。今回のポイントまたは無料枠を返還しました。|No se completó. Se han devuelto tus puntos o tu imagen gratuita.
 每件 2 點・每日最多 2 次|2 points per item · Up to 2 generations daily|衣類1点につき2ポイント・1日2回まで|2 puntos por prenda · Hasta 2 generaciones diarias
 每天最多生成 {limit} 次，今天還可生成 {remaining} 次。|You can generate up to {limit} times a day, with {remaining} remaining today.|生成は1日{limit}回まで。本日はあと{remaining}回利用できます。|Puedes generar hasta {limit} veces al día; hoy te quedan {remaining}.
 每天最多生成 2 次，仍需扣點。|Up to 2 generations a day. Points still apply.|生成は1日2回まで。ポイントを消費します。|Hasta 2 generaciones al día. Se descuentan puntos.

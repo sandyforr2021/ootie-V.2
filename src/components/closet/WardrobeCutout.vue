@@ -1,23 +1,25 @@
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { ref, watch, onBeforeUnmount } from 'vue';
 import { clothingCutoutPreview } from '@/services/clothingCutout';
 
-const props = defineProps({ src: String, alt: String, category: String });
+const props = defineProps({ src: String, alt: String, category: String, full:Boolean });
 const preview = ref('');
 const busy = ref(false);
 let version = 0;
 watch(() => props.src, () => { version++; preview.value = ''; busy.value = false; });
 onBeforeUnmount(() => { version++; });
-async function prepare() {
+async function prepare(event) {
+  const source=event?.target?.currentSrc||props.src;
   // These originals were processed and visually checked ahead of time. Do not
   // download a model or repeatedly process them when daily suggestions rotate.
-  if (props.src?.startsWith('/catalog/cutouts/')) return;
+  if (props.src?.startsWith('/catalog/cutouts/') || source?.includes('/assets/media-thumbs/') || source?.includes('/assets/wardrobe-clean-v1/') || props.src?.startsWith('ootie-media:')) return;
   if (preview.value || busy.value || !props.src) return;
   busy.value = true;
   const request = version;
   let image;
   try {
-    const result = await clothingCutoutPreview(props.src, props.category);
+    const result = await clothingCutoutPreview(source, props.category);
     if (request !== version) return;
     image = await createImageBitmap(result.displayBlob);
     const scale = Math.min(1, 480 / Math.max(image.width, image.height));
@@ -48,4 +50,4 @@ async function prepare() {
   finally { image?.close(); if (request === version) busy.value = false; }
 }
 </script>
-<template><img :src="preview || src" :alt="alt" :aria-busy="busy" loading="lazy" @load="prepare" /></template>
+<template><MediaImage :full="full" :src="preview || src" :alt="alt" :aria-busy="busy" loading="lazy" @load="prepare" /></template>

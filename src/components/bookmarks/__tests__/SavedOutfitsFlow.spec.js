@@ -1,0 +1,15 @@
+import {beforeEach,afterEach,it,expect,vi} from 'vitest';
+import {mount,flushPromises} from '@vue/test-utils';
+import {createRouter,createMemoryHistory} from 'vue-router';
+const state=vi.hoisted(()=>({auth:{isMember:true,profileId:'owner'},app:{ootdPosts:[{id:'post',caption:'A walk',username:'maya',image:'/look.webp'}],sosPosts:[{id:'sos',title:'Rainy day'}],showToast:vi.fn()},remove:vi.fn(),list:vi.fn()}));
+vi.mock('@/stores/auth',()=>({useAuthStore:()=>state.auth}));
+vi.mock('@/stores/app',()=>({useAppStore:()=>state.app}));
+vi.mock('@/stores/ootd',()=>({useOotdStore:()=>({loadRemotePosts:vi.fn(async()=>{})})}));
+vi.mock('@/stores/sos',()=>({useSosStore:()=>({})}));
+vi.mock('@/services/socialMetrics',()=>({listSavedOutfits:state.list,deleteSavedOutfit:state.remove}));
+import SavedOutfitsCollection from '../SavedOutfitsCollection.vue';
+let wrapper,router;
+beforeEach(async()=>{state.remove.mockReset().mockResolvedValue(true);state.list.mockResolvedValue([{id:'one',target_id:'post',target_type:'OOTD'},{id:'two',target_id:'sos',target_type:'SOS'}]);router=createRouter({history:createMemoryHistory(),routes:[{path:'/profile/saved',component:SavedOutfitsCollection},{path:'/ootd/:id',component:{template:'<div/>'}},{path:'/sos',component:{template:'<div/>'}}]});await router.push('/profile/saved');wrapper=mount(SavedOutfitsCollection,{global:{plugins:[router]}});await flushPromises();});
+afterEach(()=>wrapper.unmount());
+it('filters saved types and carries the selected category into the detail return context',async()=>{expect(wrapper.findAll('.saved-outfit-card')).toHaveLength(2);await wrapper.findAll('.saved-type-filter button')[1].trigger('click');await flushPromises();expect(wrapper.findAll('.saved-outfit-card')).toHaveLength(1);await wrapper.find('.saved-outfit-card button').trigger('click');await flushPromises();expect(router.currentRoute.value.path).toBe('/ootd/post');expect(router.currentRoute.value.query).toMatchObject({from:'saved',type:'OOTD'});});
+it('keeps saved data when removal is cancelled and only removes after confirmation',async()=>{await wrapper.findAll('.saved-outfit-card button')[1].trigger('click');await flushPromises();expect(state.remove).not.toHaveBeenCalled();await wrapper.find('.confirm-dialog .base-button--secondary').trigger('click');expect(wrapper.findAll('.saved-outfit-card')).toHaveLength(2);await wrapper.findAll('.saved-outfit-card button')[1].trigger('click');await flushPromises();await wrapper.find('.confirm-dialog .base-button--primary').trigger('click');await flushPromises();expect(state.remove).toHaveBeenCalledWith('owner',expect.objectContaining({id:'one',target_id:'post'}));expect(wrapper.findAll('.saved-outfit-card')).toHaveLength(1);});

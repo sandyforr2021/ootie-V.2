@@ -41,10 +41,11 @@ export class SupabaseGateway {
     }
     const body = await parseResponseBody(response);
     if (!response.ok) {
-      const commerceCodes = ['DAILY_GENERATION_LIMIT','INSUFFICIENT_POINTS','POINT_ACCOUNT_REQUIRED','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT',
+      const commerceCodes = ['DAILY_FREE_LIMIT','DAILY_GENERATION_LIMIT','INSUFFICIENT_POINTS','POINT_ACCOUNT_REQUIRED','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT',
         'BATCH_CONFLICT','PRODUCT_NOT_OWNED','INVALID_BATCH','PERSON_IMAGE_NOT_OWNED','PERSON_IMAGE_IN_USE','PERSON_IMAGE_DELETING'];
       const commerceCode = commerceCodes.find((code) => body?.message === code);
-      if (commerceCode) throw new GatewayError(commerceCode, ['DAILY_GENERATION_LIMIT','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT'].includes(commerceCode) ? 429 : 409, {
+      if (commerceCode) throw new GatewayError(commerceCode, ['DAILY_FREE_LIMIT','DAILY_GENERATION_LIMIT','FREE_BUDGET_EXHAUSTED','REVIEWER_RESERVE_PROTECTED','USER_DAILY_LIMIT','USER_ACTIVE_LIMIT'].includes(commerceCode) ? 429 : 409, {
+        DAILY_FREE_LIMIT: '今日免費額度已用完，可使用點數繼續生成。',
         DAILY_GENERATION_LIMIT: '已達每日 2 次生成上限。',
         FREE_BUDGET_EXHAUSTED: '可用免費額度不足或已到期，本次沒有送出生成。',
         INSUFFICIENT_POINTS: '平台點數不足。',
@@ -71,6 +72,7 @@ export class SupabaseGateway {
     let response;
     try {
       response = await this.fetchImpl(`${this.url}/auth/v1/user`, {
+        signal: AbortSignal.timeout(15000),
         headers: {
           apikey: this.publishableKey,
           Authorization: `Bearer ${match[1]}`
@@ -119,12 +121,12 @@ export class SupabaseGateway {
     return item;
   }
 
-  async sharedClothingImage(user, itemId) {
+  async sharedClothingImage(user, itemId, {thumbnail=false}={}) {
     const item = await this.accessibleSharedClothing(user,itemId);
     const owners = await this.serviceRequest(`/rest/v1/ootie_profiles?id=eq.${encodeURIComponent(item.owner_id)}&select=user_id&limit=1`);
     const ownerUserId = owners?.[0]?.user_id;
     assert(UUID_PATTERN.test(ownerUserId || ''), 'ITEM_NOT_FOUND', 404);
-    return this.clothingImage(item, { userId: ownerUserId });
+    return this.clothingImage(item, { userId: ownerUserId, thumbnail });
   }
 
   async listOwnedItems(profileId) {
@@ -302,7 +304,7 @@ export class SupabaseGateway {
     return { bucket: decodeURIComponent(match[1]), path: match[2].split('/').map(decodeURIComponent).join('/') };
   }
 
-  async clothingImage(item, { userId } = {}) {
+  async clothingImage(item, { userId, thumbnail=false } = {}) {
     let storage;
     if (item?.photo_display_path) {
       const path = item.photo_display_path;
@@ -315,7 +317,7 @@ export class SupabaseGateway {
         'CLOTHING_IMAGE_SOURCE_UNSUPPORTED', 422,
         'Private clothing media must belong to this member and item'
       );
-      storage = { bucket: 'ootie-closet-media', path };
+      storage = { bucket: 'ootie-closet-media', path:thumbnail?path.replace(/\/display\.[^.]+$/,'/display.list-v1.webp'):path };
     } else {
       if (typeof item?.photo !== 'string' || !item.photo) {
         throw new GatewayError('CLOTHING_IMAGE_REQUIRED', 422, 'Selected clothing item has no product image');
@@ -340,6 +342,7 @@ export class SupabaseGateway {
     } catch {
       throw new GatewayError('CLOTHING_IMAGE_REQUIRED', 422, 'Clothing image could not be read');
     }
+    if(thumbnail && response.status===404)return this.clothingImage(item,{userId});
     if (!response.ok) throw new GatewayError('CLOTHING_IMAGE_REQUIRED', 422, 'Clothing image could not be read');
     try {
       return await normalizeGarmentImageForAi(

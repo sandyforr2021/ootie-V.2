@@ -30,7 +30,7 @@ Vue 3 / Pinia web application with a Node gateway, Supabase authentication, priv
 
 ## Brand Commitments
 
-OOTIE is a fashion and wardrobe product. The user requested joyful, colorful high fashion: berry, butter yellow, mint and lilac accents with clear typography. Preserve and improve the original opening wardrobe-door animation. Adapt typography and line breaks independently to all four languages. Exclude known seeded people, posts and metrics from live UI; never relabel fixtures as genuine content. Preserve working product behavior while improving the experience.
+OOTIE is a fashion and wardrobe product. The user requested joyful, colorful high fashion: berry, butter yellow, mint and lilac accents with clear typography. Preserve and improve the original opening wardrobe-door animation. Adapt typography and line breaks independently to all four languages. The user confirmed that the 16 team-established accounts and their clothing, posts and interactions are valid content and must be preserved. Do not classify them as obsolete from their names, paths or creation dates. Preserve working product behavior while improving the experience.
 
 ## Evidence on Hand
 
@@ -46,3 +46,22 @@ Six team-prepared editorial posts are available, including four newly generated 
 ## Open Decisions
 
 Production hosting through judging, real demo input photos, merchant agreements, and live user testing remain separate deliverables. This record consolidates the user's existing brief and accepted decisions; it does not infer a new business commitment.
+
+## Homepage scope — 2026-10-29
+
+- Local implementation only. No GitHub push, public deployment or database cleanup. The user separately authorized original welcome-page image generation.
+- The guest homepage retains the shared sidebar, with a brand header, four core experiences, a horizontal four-step journey, account CTAs and existing policy links. The header logo appears when the desktop sidebar is collapsed and remains visible on mobile.
+- The welcome visual uses separate cloud-only cumulus and transparent model assets. Illustrative feature previews move without fabricating member activity or API results; reduced-motion preferences are respected.
+- `/welcome` shows the same public brand introduction while a member remains signed in, so both homepage variants can be reviewed without changing account state.
+- The member homepage retains real content: welcome/date/time with nearby weather and relocation control, outfit suggestions, followed posts (or the established discovery fallback), then recent clothing.
+- The user chose to leave new quick actions and personalized reminders for later discussion. Do not add those sections.
+- Contact information is planned but not displayed until the user provides a public contact channel.
+- Existing opening animation, Google account creation, email account login, privacy boundaries and four-language support remain in use.
+
+## Generation allowance — 2026-10-29
+
+- Every account receives two daily free final images, shared by try-on and AI garment cleanup; reset at midnight America/Los_Angeles (pending database rollout).
+- Use platform points first (2 per garment, 6 for a three-garment outfit), without a daily image count cap. If the complete batch cannot be funded, use an available free image without a partial debit.
+- A sequential outfit is one final image. Pending/uncertain work reserves its free slot; confirmed unsuccessful work restores it. Replays do not consume another slot or debit.
+- Provider gift-budget limits, expiry, concurrent-work limits and no automatic purchasing remain in effect.
+- Implemented as a local migration and isolated SQL tests; not applied to the shared production database in this local-only phase.

@@ -3,16 +3,18 @@
     <header class="closet-page-header ootie-page-heading">
       <div class="closet-title-group">
         <h1>{{ $t("我的衣櫥") }}</h1>
-        <ClosetVisibility v-if="!showWishlist" compact />
+
       </div>
-      <button v-if="!showWishlist" type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
+      <ClosetVisibility v-if="!showWishlist" compact />
     </header>
 
     <nav class="closet-collections" :aria-label="$t('我的衣櫥')">
       <router-link :to="{path:'/closet',query:{lang:route.query.lang}}" :aria-current="!showWishlist ? 'page' : undefined">{{ $t('衣櫥衣物') }}</router-link>
       <router-link :to="{path:'/closet',query:{tab:'wishlist',lang:route.query.lang}}" :aria-current="showWishlist ? 'page' : undefined">{{ $t('想買清單') }}</router-link>
+      <button v-if="!showWishlist" type="button" class="primary closet-header-add" @click="openAddForm">{{ $t("＋ 新增單品") }}</button>
+      <span v-else id="wishlist-toolbar-target" class="closet-wishlist-tools"></span>
     </nav>
-    <WishlistPanel v-if="showWishlist" />
+    <WishlistPanel v-if="showWishlist" toolbar-target="#wishlist-toolbar-target" />
     <template v-else>
 
     <section
@@ -132,11 +134,11 @@
       >
         {{ $t(labels[cat]) }}
       </button>
-    </div>
+<div class="closet-view-mode" :aria-label="$t('衣櫥檢視')"><button type="button" :aria-pressed="closetView==='rack'" @click="closetView='rack'">{{ $t('衣架') }}</button><button type="button" :aria-pressed="closetView==='cards'" @click="closetView='cards'">{{ $t('圖卡') }}</button></div>    </div>
 
     <div v-if="!isWholeClosetEmpty" class="closet-meta">
       <strong>{{ closetStore.filteredItems.length }} {{ $t("件單品") }}</strong>
-      <div class="closet-view-mode" :aria-label="$t('衣櫥檢視')"><button type="button" :aria-pressed="closetView==='rack'" @click="closetView='rack'">{{ $t('衣架') }}</button><button type="button" :aria-pressed="closetView==='cards'" @click="closetView='cards'">{{ $t('圖卡') }}</button></div>
+
       <div v-if="hasActiveClosetFilters" class="closet-meta-actions">
         <button v-if="hasActiveClosetFilters" class="clear" @click="clearAllFilters">{{ $t("清除篩選") }}</button>
       </div>
@@ -391,3 +393,5 @@ onBeforeUnmount(() => {
 
 
 <style scoped>.favorite{display:grid;place-items:center;padding:0}.favorite svg{display:block;pointer-events:none}</style>
+
+<style scoped>.closet-collections{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.closet-collections>.closet-header-add,.closet-wishlist-tools{margin-left:auto}.closet-wishlist-tools{display:flex;gap:10px}.category-row{display:flex;align-items:center;flex-wrap:wrap}.category-row .closet-view-mode{margin-left:auto}#closetPage .item-card{align-self:start}.closet-meta-actions{margin-left:12px}.closet-page-header :deep(.profile-settings){margin:0;border:0;padding:0;background:none}.closet-page-header :deep(.setting-row){gap:12px}</style>

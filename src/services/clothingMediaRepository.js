@@ -1,5 +1,9 @@
 import { supabase } from './supabase';
 import { aiGateway } from './aiGateway';
+import {registerMedia,acquireMedia,clearMediaMemory} from './mediaMemory';
+import {itemPhoto} from './itemPresentation';
+import {mediaEpoch} from './mediaMemory';
+import {createListImage,listImagePath} from './listImage';
 
 export const CLOSET_MEDIA_BUCKET = 'ootie-closet-media';
 export const RESUMABLE_UPLOAD_THRESHOLD_BYTES = 6 * 1024 * 1024;
@@ -10,24 +14,26 @@ let sharedUrlVersion = 0;
 
 export function releaseSharedClothingPhotoUrls() {
   sharedUrlVersion += 1;
+  clearMediaMemory();
   for (const url of sharedObjectUrls) URL.revokeObjectURL(url);
   sharedObjectUrls.clear();
 }
 
-export async function hydrateSharedClothingPhotos(items, client = supabase) {
+export async function hydrateSharedClothingPhotos(items, client = supabase, {defer=false}={}) {
+  items=items.map(item=>{const photo=itemPhoto(item);return photo.startsWith('/')?{...item,photo}:item;});
   if (!items.some(item => item.photo_display_path)) return items;
   const version = sharedUrlVersion;
   const { data } = await client.auth.getSession();
-  const token = data?.session?.access_token;
-  if (!token) return items;
+  const session=data?.session, token=session?.access_token;
+  if (!token || version!==sharedUrlVersion) return items;
   return Promise.all(items.map(async item => {
     if (!item.photo_display_path) return item;
-    try {
-      const photo = await aiGateway.loadSharedClothingImage(token, item.id);
-      if (version !== sharedUrlVersion) { URL.revokeObjectURL(photo); return { ...item, photo: '' }; }
-      sharedObjectUrls.add(photo);
-      return { ...item, photo };
-    } catch { return { ...item, photo: '' }; }
+    const prepared=itemPhoto(item);
+    if(prepared.startsWith('/'))return {...item,photo:prepared};
+    const id=registerMedia(session.user?.id||token,`shared:${item.id}:${item.photo_display_path}:${item.photo_updated_at||''}`,()=>defer?aiGateway.loadSharedClothingImage(token,item.id,{thumbnail:true}):aiGateway.loadSharedClothingImage(token,item.id),()=>aiGateway.loadSharedClothingImage(token,item.id));
+    if(defer)return {...item,photo:id};
+    try {const photo=await acquireMedia(id);return version===sharedUrlVersion?{...item,photo}:{...item,photo:''};}
+    catch{return {...item,photo:''};}
   }));
 }
 
@@ -153,6 +159,12 @@ export async function uploadClothingMedia(itemId, prepared, options = {}, client
     });
     if (displayResult.error) throw displayResult.error;
     uploaded.push(displayPath);
+    const thumbnail=await createListImage(prepared.displayBlob);
+    if(thumbnail){
+      ensureActive();const thumbnailPath=listImagePath(displayPath);
+      const result=await client.storage.from(CLOSET_MEDIA_BUCKET).upload(thumbnailPath,thumbnail,{contentType:thumbnail.type,cacheControl:'3600',upsert:false});
+      if(result.error)throw result.error;uploaded.push(thumbnailPath);
+    }
 
     ensureActive();
     const verification = await client.storage.from(CLOSET_MEDIA_BUCKET).download(displayPath);
@@ -191,9 +203,12 @@ export async function removeReplacedDerivative(path, client = supabase) {
   await removePaths([path], client);
 }
 
-export async function createPrivateClothingPhotoUrl(path, client = supabase) {
+export async function createPrivateClothingPhotoUrl(path, client = supabase, {thumbnail=false}={}) {
+  const epoch=mediaEpoch.value;
   if (!path) return '';
-  const { data, error } = await client.storage.from(CLOSET_MEDIA_BUCKET).download(path);
+  let {data,error}=await client.storage.from(CLOSET_MEDIA_BUCKET).download(thumbnail?listImagePath(path):path);
+  if(thumbnail && error && ['404','NoSuchKey','not_found'].includes(String(error.statusCode||error.status||error.code))){({data,error}=await client.storage.from(CLOSET_MEDIA_BUCKET).download(path));}
+  if(epoch!==mediaEpoch.value)return '';
   if (error || !data || typeof URL?.createObjectURL !== 'function') return '';
   const objectUrl = URL.createObjectURL(data);
   privateObjectUrls.add(objectUrl);
@@ -201,13 +216,25 @@ export async function createPrivateClothingPhotoUrl(path, client = supabase) {
 }
 
 export function releasePrivateClothingPhotoUrls() {
+  clearMediaMemory();
   for (const objectUrl of privateObjectUrls) URL.revokeObjectURL(objectUrl);
   privateObjectUrls.clear();
 }
 
-export async function hydratePrivateClothingPhotos(items, client = supabase) {
+export async function hydratePrivateClothingPhotos(items, client = supabase, {defer=false}={}) {
+  const epoch=mediaEpoch.value;
+  const session=defer?(await client.auth.getSession()).data?.session:null;
+  if(epoch!==mediaEpoch.value)return [];
   return Promise.all((items || []).map(async (item) => {
+    const curated=itemPhoto(item);
+    if(curated.startsWith('/assets/wardrobe-clean-v1/'))return {...item,photo:curated};
     if (!item?.photo_display_path) return item;
+    const prepared=itemPhoto({...item,photo:''});
+    if(prepared.startsWith('/'))return {...item,photo:prepared};
+    if(defer){
+      if(!session?.user?.id)return {...item,photo:''};
+      return {...item,photo:registerMedia(session.user.id,`owned:${item.photo_display_path}:${item.photo_updated_at||''}`,()=>createPrivateClothingPhotoUrl(item.photo_display_path,client,{thumbnail:true}),()=>createPrivateClothingPhotoUrl(item.photo_display_path,client))};
+    }
     const signedUrl = await createPrivateClothingPhotoUrl(item.photo_display_path, client);
     return signedUrl ? { ...item, photo: signedUrl } : item;
   }));

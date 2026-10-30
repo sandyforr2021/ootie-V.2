@@ -85,3 +85,10 @@ playwright-report/
 
 # Generated originals stay local; deploy the un-cropped WebP encodings.
 /public/images/style-crew/*.png
+
+# Local QA captures, generated source images and private audit snapshots.
+/artifacts/
+/.codex/
+/.audit-local.json
+/.test-unit-merge.json
+/public/images/wardrobe-cutouts/

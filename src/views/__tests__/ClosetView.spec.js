@@ -123,7 +123,7 @@ describe('ClosetView.vue Integration Test', () => {
       await flushPromises();
 
       expect(readItems).toHaveBeenCalledTimes(1);
-      expect(readItems).toHaveBeenCalledWith(profileId);
+      expect(readItems).toHaveBeenCalledWith(profileId,undefined,{defer:true});
       expect(useAppStore().items).toEqual(remoteItems);
       expect(wrapper.text()).toContain('遠端西裝外套');
     });

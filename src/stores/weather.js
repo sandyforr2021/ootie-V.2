@@ -11,7 +11,7 @@ export const useWeatherStore = defineStore('weather', () => {
   async function selectPlace(place) {
     if (loading.value) return;
     const request = ++version;
-    loading.value = true; error.value = ''; current.value = null;
+    loading.value = true; error.value = '';
     try { const result = await fetchWeatherAt({ ...place, city: place.label || place.name }); if (request === version) current.value = result; }
     catch (failure) { if (request === version) error.value = failure.name === 'WeatherError' ? failure.message : '天氣服務暫時無法使用。'; }
     finally { if (request === version) loading.value = false; }

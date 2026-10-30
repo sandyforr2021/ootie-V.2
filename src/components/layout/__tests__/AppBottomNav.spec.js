@@ -5,7 +5,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import AppBottomNav from '../AppBottomNav.vue';
 import { useAppStore } from '@/stores/app';
 
-const paths = ['/shop', '/', '/closet', '/explore', '/sos', '/bookmarks', '/stats', '/profile', '/ai', '/tryon', '/membership', '/settings'];
+const paths = ['/shop', '/', '/closet', '/explore', '/sos', '/bookmarks', '/stats', '/profile', '/ai', '/tryon', '/membership', '/settings', '/credits'];
 const routeNames = {
   '/shop': 'Shop',
   '/': 'Home',
@@ -18,7 +18,8 @@ const routeNames = {
   '/ai': 'Ai',
   '/tryon': 'Tryon',
   '/membership': 'Membership',
-  '/settings': 'Settings'
+  '/settings': 'Settings',
+  '/credits': 'Credits'
 };
 
 const makeRouter = () => createRouter({
@@ -53,7 +54,7 @@ describe('mobile navigation information architecture', () => {
     await wrapper.find('.mobile-more-trigger').trigger('click');
 
     const destinationLabels = wrapper.findAll('.mobile-more-destinations .mobile-more-link strong').map((item) => item.text());
-    expect(destinationLabels).toEqual(['穿搭求救', '個人檔案', '衣櫥統計', '方案與點數', '帳號設定', '通知']);
+    expect(destinationLabels).toEqual(['想買清單', '購物足跡', '穿搭求救', '個人檔案', '衣櫥統計', '方案與點數', '帳號設定', '通知']);
     for (const label of ['首頁', '探索', '衣櫥', 'SOS']) {
       expect(destinationLabels).not.toContain(label);
     }

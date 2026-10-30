@@ -14,12 +14,15 @@ describe('active post comment UI',()=>{
   const w=render();await flushPromises();
   expect(w.findAll('.comment-delete')).toHaveLength(1);
   await w.find('.comment-delete').trigger('click');await flushPromises();
+  expect(state.remove).not.toHaveBeenCalled();
+  await w.find('.confirm-dialog .base-button--danger').trigger('click');await flushPromises();
   expect(state.remove).toHaveBeenCalledWith({id:'mine',profileId:'me',postId:'post'});
   expect(state.loadComments).toHaveBeenCalledTimes(2);w.unmount();
  });
  it('shows an error after failed deletion rather than claiming success',async()=>{
   state.remove.mockRejectedValue(new Error('offline'));const w=render();await flushPromises();
   await w.find('.comment-delete').trigger('click');await flushPromises();
+  await w.find('.confirm-dialog .base-button--danger').trigger('click');await flushPromises();
   expect(w.find('[role=alert]').text()).toContain('留言未刪除');
   expect(state.loadComments).toHaveBeenCalledTimes(1);w.unmount();
  });

@@ -61,10 +61,6 @@
           </form>
         </section>
 
-        <section class="settings-panel settings-membership" aria-labelledby="membership-heading">
-          <div class="settings-panel-heading"><div><h2 id="membership-heading">{{ $t("購物足跡") }}</h2><p>{{ $t("查看收藏、試穿與前往商家的紀錄。") }}</p></div></div>
-          <router-link class="primary" to="/shop?tab=activity">{{ $t("前往購物足跡") }}</router-link>
-        </section>
 
         <section class="settings-panel"><ExtensionGuide /></section>
 

@@ -1,6 +1,6 @@
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const SAFE_TARGETS = [
-  new RegExp(`^/ootd/${UUID}$`, 'i'),
+  new RegExp(`^/ootd/${UUID}(?:\\?comment=1)?$`, 'i'),
   new RegExp(`^/sos\\?sos=${UUID}$`, 'i'),
   /^\/profile(?:\?user=%?40?[a-z0-9_-]+)?$/i,
   /^\/(membership|tryon|bookmarks)$/

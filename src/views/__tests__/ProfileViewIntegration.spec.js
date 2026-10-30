@@ -24,6 +24,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
 import * as profileRepository from '@/services/profileRepository';
+import {getCurrentUserItems} from '@/services/clothingRepository';
 
 enableAutoUnmount(afterEach);
 
@@ -77,6 +78,19 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
     });
 
     await router.push('/profile');
+  });
+
+  it('preserves the OOTD draft while adding and tagging a new wardrobe item',async()=>{
+    const app=useAppStore();app.isOotdFormOpen=true;
+    vi.mocked(getCurrentUserItems).mockResolvedValueOnce([]);
+    const form=mount(OotdFormModal,{global:{plugins:[pinia,router]}});await flushPromises();
+    await form.find('#ootdCaption').setValue('A new outfit for today');
+    await form.find('.ootd-clothing-heading button').trigger('click');
+    expect(app.isItemFormOpen).toBe(true);expect(form.find('#ootdCaption').exists()).toBe(false);
+    vi.mocked(getCurrentUserItems).mockResolvedValueOnce([{id:'new-shirt',name:'New shirt',photo:'/shirt.webp'}]);
+    app.isItemFormOpen=false;await flushPromises();
+    expect(form.find('#ootdCaption').element.value).toBe('A new outfit for today');
+    expect(form.find('.ootd-item-option input').element.checked).toBe(true);
   });
 
   it('1. Profile Information & Avatar Upload/Crop Integration', async () => {

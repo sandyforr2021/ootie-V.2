@@ -11,7 +11,7 @@ test('serves SPA routes and assets but never secrets, traversal, or API paths',a
  await writeFile(join(root,'assets','inference.wasm'),new Uint8Array([0,97,115,109]));
  await writeFile(join(root,'.env'),'PRIVATE');
  const serve=createStaticSite(root);
- for(const path of ['/shop','/community/tryons','/bookmarks']){assert.equal((await serve(path)).status,200);assert.match((await serve(path)).headers['Content-Type'],/html/);}
+ for(const path of ['/shop','/community/tryons','/bookmarks','/welcome','/profile/saved','/wishlist','/shopping-activity']){assert.equal((await serve(path)).status,200);assert.match((await serve(path)).headers['Content-Type'],/html/);}
  assert.match((await serve('/shop')).headers['Content-Type'],/html/);
  assert.match((await serve('/assets/app.js')).headers['Cache-Control'],/immutable/);
  assert.equal((await serve('/assets/inference.wasm')).headers['Content-Type'],'application/wasm');

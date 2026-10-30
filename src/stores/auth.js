@@ -105,7 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
       offerGuestImport();
 
       supabase.auth.onAuthStateChange((_event, currentSession) => {
-        if (user.value?.id !== currentSession?.user?.id) releaseSharedClothingPhotoUrls();
+        if (user.value?.id !== currentSession?.user?.id) { releasePrivateClothingPhotoUrls(); releaseSharedClothingPhotoUrls(); }
         // Supabase awaits this callback while holding its auth lock. Start
         // profile requests in a later task so other SDK calls can complete.
         profileResolutionVersion += 1;

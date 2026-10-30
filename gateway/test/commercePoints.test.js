@@ -30,3 +30,27 @@ test('daily submission exhaustion disables generation without hiding balance',as
  const result=await app.capabilities({id:'user'});
  assert.equal(result.enabled,false);assert.equal(result.dailyGenerationRemaining,0);assert.equal(result.pointBalance,100);
 });
+
+test('new policy: paid generations bypass the daily count and legacy per-user units',async()=>{
+ const app=service(async()=>100);
+ app.repository.userQuota=async()=>({generationPolicyVersion:2,freeGenerationUsed:2,dailyLimit:2,dailyUsed:80,activeCount:0,activeLimit:3});
+ const result=await app.capabilities({id:'user'});
+ assert.equal(result.enabled,true);assert.equal(result.pointGenerationsUnlimited,true);
+ assert.equal(result.dailyFreeGenerationRemaining,0);assert.equal(result.remainingUnits,100);
+});
+test('new policy: zero points uses free images and stops at two',async()=>{
+ const app=service(async()=>0);
+ let used=0;
+ app.repository.userQuota=async()=>({generationPolicyVersion:2,freeGenerationUsed:used,dailyLimit:2,dailyUsed:20,activeCount:0,activeLimit:3});
+ assert.equal((await app.capabilities({id:'user'})).enabled,true);
+ used=2;const result=await app.capabilities({id:'user'});
+ assert.equal(result.enabled,false);assert.equal(result.dailyFreeGenerationRemaining,0);
+});
+test('new policy still stops when provider budget, points lookup or free quota is unavailable',async()=>{
+ const app=service(async()=>0);
+ app.repository.userQuota=async()=>({generationPolicyVersion:2,activeCount:0,activeLimit:3});
+ assert.equal((await app.capabilities({id:'user'})).enabled,false);
+ app.repository.userQuota=async()=>({generationPolicyVersion:2,freeGenerationUsed:0,activeCount:0,activeLimit:3});
+ app.provider.balanceSnapshot=async()=>0;
+ assert.equal((await app.capabilities({id:'user'})).enabled,false);
+});

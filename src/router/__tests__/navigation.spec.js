@@ -2,11 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import router from '../index';
-import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS, NAVIGATION_ITEMS } from '../navigation';
+import { MOBILE_MORE_ITEMS, MOBILE_PRIMARY_ITEMS, NAVIGATION_ITEMS, isNavigationActive } from '../navigation';
 
 const mainCss = readFileSync(resolve(process.cwd(), 'src/assets/main.css'), 'utf8');
 
 describe('shared navigation information architecture', () => {
+  it('selects only the wishlist or shopping activity entry on their query routes', () => {
+    const selected=route=>NAVIGATION_ITEMS.filter(item=>isNavigationActive(item,route)).map(item=>item.routeName);
+    expect(selected({name:'Closet',query:{tab:'wishlist'}})).toEqual(['Wishlist']);
+    expect(selected({name:'Closet',query:{}})).toEqual(['Closet']);
+    expect(selected({name:'Shop',query:{tab:'activity'}})).toEqual(['Activity']);
+    expect(selected({name:'Shop',query:{tab:'album'}})).toEqual(['Shop']);
+  });
   it('maps every destination to an existing named route', () => {
     const routeNames = new Set(router.getRoutes().map((route) => route.name));
     for (const item of NAVIGATION_ITEMS) {

@@ -39,7 +39,7 @@ it('discards a shared media response that finishes after logout', async () => {
   aiGateway.loadSharedClothingImage.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
   const client = { auth: { getSession: async () => ({ data: { session: { access_token: 'old-viewer' } } }) } };
   const pending = hydrateSharedClothingPhotos([{ id: itemId, photo_display_path: 'display.webp' }], client);
-  await Promise.resolve();
+  await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
   releaseSharedClothingPhotoUrls();
   finish('blob:late-response');
   const [item] = await pending;

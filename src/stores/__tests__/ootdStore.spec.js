@@ -86,6 +86,24 @@ describe('OOTD publish and actions contract', () => {
     expect(ootdStore.filteredPosts.map((post) => post.id)).toEqual([postId, 'unique-post']);
   });
 
+  it('loads bounded feed pages and resolves only their tagged clothing lazily', async () => {
+    const store=useOotdStore(), app=useAppStore();
+    const first=Array.from({length:24},(_,i)=>({id:`post-${i}`,user_id:'author',caption:'Look',image:'/look.webp',item_ids:[itemId]}));
+    remote.fetchProfileOotdPosts.mockResolvedValueOnce(first).mockResolvedValueOnce([{...first[0],id:'post-24'}]);
+    clothing.getPublicItemsByIds.mockResolvedValue([]);
+    expect(await store.loadRemotePosts()).toBe(true);
+    expect(remote.fetchProfileOotdPosts).toHaveBeenLastCalledWith(null,{offset:0,limit:24,search:''});
+    expect(clothing.getPublicItemsByIds).toHaveBeenLastCalledWith([itemId],undefined,{defer:true});
+    expect(app.ootdPosts).toHaveLength(24);
+    expect(store.hasMore).toBe(true);
+    await store.loadMorePosts();
+    expect(remote.fetchProfileOotdPosts).toHaveBeenLastCalledWith(null,{offset:24,limit:24,search:''});
+    expect(app.ootdPosts).toHaveLength(25);
+    expect(store.hasMore).toBe(false);
+    await store.loadMorePosts();
+    expect(remote.fetchProfileOotdPosts).toHaveBeenCalledTimes(2);
+  });
+
   it('publishes only after upload and remote insert succeed', async () => {
     const { appStore, ootdStore } = prepareMember();
     const before = appStore.ootdPosts.length;

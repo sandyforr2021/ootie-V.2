@@ -3,13 +3,13 @@
   <BrandOpening />
   <GlobalStatus />
 
-  <div class="app">
+  <div :class="['app', { 'app--brand-home': isBrandHome }]">
     <!-- Sidebar -->
     <AppSidebar />
 
     <main id="main-content" tabindex="-1">
       <!-- Topbar -->
-      <AppTopbar />
+      <AppTopbar v-if="!isBrandHome" />
 
       <!-- Page Views -->
       <router-view v-slot="{ Component }">
@@ -47,6 +47,8 @@
 </template>
 
 <script setup>
+import { computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
 import AppTopbar from '@/components/layout/AppTopbar.vue';
 import AppBottomNav from '@/components/layout/AppBottomNav.vue';
@@ -58,10 +60,26 @@ import BaseToast from '@/components/ui/BaseToast.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
+import { useSocialStore } from '@/stores/social';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const ootdStore = useOotdStore();
+const route = useRoute();
+const router = useRouter();
+const socialStore = useSocialStore();
+const isBrandHome = computed(() => route.name === 'BrandHome' || route.name === 'Home' && !authStore.isLoggedIn);
+// Session restoration belongs to the shell, including the public homepage.
+// It must not depend on whether the member topbar is mounted.
+onMounted(async () => {
+  await authStore.initAuth();
+  const returnTo = authStore.consumeOAuthReturnTo();
+  if (returnTo && returnTo !== '/') await router.replace(returnTo);
+});
+watch(() => authStore.profileId, profileId => {
+  if (profileId) void socialStore.refresh(profileId);
+  else socialStore.clear();
+}, { immediate: true });
 const modalLoaders = {
   auth: () => import('@/components/modal/AuthModal.vue'),
   itemDetail: () => import('@/components/modal/ItemDetailModal.vue'),
@@ -79,3 +97,9 @@ const modalLoaders = {
   ootdShare: () => import('@/components/ootd/OotdShareSheet.vue')
 };
 </script>
+
+<style>
+.app.app--brand-home{display:flex}
+.app--brand-home #main-content{max-width:none;width:auto;margin:0;padding:0}
+@media(max-width:900px){.app--brand-home #main-content{padding-bottom:72px}}
+</style>

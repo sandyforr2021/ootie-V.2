@@ -1,5 +1,6 @@
 <template>
   <section class="page active app-page" id="sosPage">
+    <router-link v-if="route.query.from==='saved'||route.query.from==='help'" class="back-link" :to="route.query.from==='saved'?{path:'/profile/saved',query:{type:route.query.type}}:'/profile/help-history'">{{ $t(route.query.from==='saved'?'返回我的收藏':'返回幫助紀錄') }}</router-link>
     <header class="core-page-hero sos-page-hero ootie-page-heading">
       <div>
         <h1>{{ $t("穿搭求救") }}</h1>
@@ -52,7 +53,7 @@
           :style="{ animationDelay: `${index * 45}ms` }"
         >
           <div class="sos-feed-user">
-            <div class="sos-feed-avatar"><img v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" /><span v-else>{{ post.initials }}</span></div>
+            <div class="sos-feed-avatar"><MediaImage v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" /><span v-else>{{ post.initials }}</span></div>
             <div>
               <strong>{{ post.display_name || post.username }}</strong>
               <span><em :class="['sos-status-badge', { 'is-closed': post.status === 'CLOSED' }]">
@@ -64,7 +65,7 @@
 
           <h2>{{ post.title }}</h2>
 
-          <img v-if="coverImage(post)" class="sos-cover-image" :src="coverImage(post)" :alt="t('求救主圖')" loading="lazy" />
+          <MediaImage v-if="coverImage(post)" class="sos-cover-image" :src="coverImage(post)" :alt="t('求救主圖')" loading="lazy" />
 
           <div class="sos-meta">
             <span>{{ t("場合") }} · {{ t(post.occasion) }}</span>
@@ -125,6 +126,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { t, tf } from '@/i18n';
 import { Heart } from '@lucide/vue';
 import { watch } from 'vue';

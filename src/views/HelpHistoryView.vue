@@ -1,58 +1,16 @@
-<template>
-  <section class="page active help-history-page">
-    <router-link to="/profile" class="back-link">← 返回個人檔案</router-link>
-
-    <h1>幫助紀錄</h1>
-    <div class="help-history-tabs" role="tablist" aria-label="幫助紀錄期間">
-      <button :class="{ active: days === 7 }" type="button" @click="load(7)">最近 7 天</button>
-      <button :class="{ active: days === 30 }" type="button" @click="load(30)">最近 30 天</button>
-    </div>
-    <p v-if="loading" class="help-history-state">正在載入幫助紀錄…</p>
-    <p v-else-if="errorMessage" class="help-history-state is-error">{{ errorMessage }}</p>
-    <div v-else-if="records.length" class="help-history-list">
-      <article v-for="record in records" :key="record.id" class="help-history-card">
-
-        <h2>{{ record.ootie_sos_posts?.title || $t('穿搭求救') }}</h2>
-        <p>{{ record.message }}</p>
-        <small>{{ formatDate(record.created_at) }}</small>
-      </article>
-    </div>
-    <div v-else class="help-history-state">最近 {{ days }} 天還沒有幫衣友搭配。</div>
-  </section>
-</template>
-
+<template><section class="page active help-history-page app-page"><router-link to="/profile" class="back-link">{{ $t('返回個人檔案') }}</router-link><header class="ootie-page-heading"><h1>{{ $t('幫助紀錄') }}</h1></header><div class="help-history-tabs" role="tablist" :aria-label="$t('幫助紀錄期間')"><button v-for="period in [7,30]" :key="period" role="tab" :aria-selected="days===period" :class="{active:days===period}" @click="load(period)">{{ $tf('最近 {days} 天',{days:period}) }}</button></div><p v-if="loading" role="status">{{ $t('載入中…') }}</p><p v-else-if="errorMessage" role="alert">{{ errorMessage }} <button class="secondary" @click="load()">{{ $t('重試') }}</button></p><div v-else-if="records.length" class="help-history-list"><article v-for="record in records" :key="record.id" class="help-history-card"><h2>{{ record.ootie_sos_posts?.title||$t('穿搭求救') }}</h2><p>{{ record.message }}</p><div class="help-pieces"><figure v-for="id in record.item_ids||[]" :key="id"><MediaImage v-if="items[id]&&itemPhoto(items[id])" :src="itemPhoto(items[id])" :alt="itemName(items[id])"/><span v-else class="help-image-unavailable">{{ $t('圖片暫時無法顯示') }}</span><figcaption>{{ items[id]?itemName(items[id]):$t('衣物已無法查看') }}</figcaption></figure></div><p v-if="!record.item_ids?.length" class="muted">{{ $t('這筆建議未附衣物。') }}</p><footer><time>{{ formatDate(record.created_at) }}</time><router-link class="secondary" :to="{path:'/sos',query:{sos:record.sos_id,from:'help'}}">{{ $t('查看原求救') }}</router-link></footer></article></div><p v-else>{{ $t('這段期間沒有幫助紀錄。') }}</p></section></template>
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useAuthStore } from '@/stores/auth';
-import { loadHelpHistory } from '@/services/socialMetrics';
-
-const authStore = useAuthStore();
-const days = ref(7);
-const records = ref([]);
-const loading = ref(false);
-const errorMessage = ref('');
-
-const load = async (nextDays = days.value) => {
-  days.value = nextDays;
-  if (!authStore.isMember || !authStore.profileId) {
-    errorMessage.value = '請先登入後查看幫助紀錄。';
-    return;
-  }
-  loading.value = true;
-  errorMessage.value = '';
-  try {
-    records.value = await loadHelpHistory(authStore.profileId, days.value);
-  } catch (error) {
-    errorMessage.value = error?.userMessage || '幫助紀錄暫時無法取得。';
-  } finally {
-    loading.value = false;
-  }
-};
-
-const formatDate = (value) => new Date(value).toLocaleDateString('zh-TW');
-onMounted(load);
+import MediaImage from '@/components/ui/MediaImage.vue';
+import {ref,watch,onBeforeUnmount} from 'vue';
+import {useAuthStore} from '@/stores/auth';
+import {loadHelpHistory} from '@/services/socialMetrics';
+import {getPublicItemsByIds} from '@/services/clothingRepository';
+import {itemName,itemPhoto} from '@/services/itemPresentation';
+import {formatDate,t} from '@/i18n';
+const auth=useAuthStore(),days=ref(7),records=ref([]),items=ref({}),loading=ref(false),errorMessage=ref('');let version=0;
+async function load(period=days.value){days.value=period;const current=++version,id=auth.profileId;records.value=[];items.value={};errorMessage.value='';if(!auth.isMember||!id)return;loading.value=true;try{const rows=await loadHelpHistory(id,period);if(current!==version)return;records.value=rows;const ids=[...new Set(rows.flatMap(row=>row.item_ids||[]))];const clothing=[];for(let i=0;i<ids.length;i+=100)clothing.push(...await getPublicItemsByIds(ids.slice(i,i+100),undefined,{defer:true}));if(current===version)items.value=Object.fromEntries(clothing.map(item=>[item.id,item]));}catch{if(current===version)errorMessage.value=t('幫助紀錄暫時無法取得。');}finally{if(current===version)loading.value=false;}}
+watch(()=>[auth.profileId,auth.isMember],()=>load(),{immediate:true});onBeforeUnmount(()=>version++);
 </script>
+<style scoped>.help-history-tabs{display:flex;gap:8px;margin:24px 0}.help-history-tabs button{border:1px solid var(--line);background:white;border-radius:8px;padding:10px 14px}.help-history-tabs button.active{background:var(--ink);color:white}.help-history-list{display:grid;gap:20px}.help-history-card{padding:24px;border:1px solid var(--line);border-radius:14px;background:white}.help-history-card h2{font-size:20px;margin:0 0 12px}.help-pieces{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.help-pieces figure{margin:0;width:100px}.help-pieces img{width:100px;height:120px;object-fit:contain;background:white}.help-pieces figcaption{font-size:12px;line-height:1.6}.help-history-card footer{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-top:16px}.help-history-card time,.muted{font-size:12px;color:var(--muted)}</style>
 
-<style scoped>
-.help-history-page { animation:rise .45s both; }.help-history-tabs{display:flex;gap:8px;margin:16px 0}.help-history-tabs button{border:1px solid var(--line);background:var(--white);border-radius:999px;padding:8px 14px;cursor:pointer}.help-history-tabs button.active{background:var(--ink);color:#fff}.help-history-list{display:grid;gap:12px}.help-history-card,.help-history-state{border:1px solid var(--line);background:var(--white);border-radius:14px;padding:16px}.help-history-card h2{font-size:16px;margin:6px 0}.help-history-card p{color:var(--muted)}.help-history-state{text-align:center;color:var(--muted)}.is-error{border-color:#c77771}
-</style>
+<style scoped>.help-image-unavailable{display:grid;place-items:center;width:100px;height:120px;text-align:center;padding:10px;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;font-size:11px;line-height:1.6;color:var(--muted);background:var(--paper)}</style>

@@ -84,13 +84,13 @@ export async function fetchWeatherForCity(city, fetchImpl = fetch) {
   return fetchWeatherAt({ latitude: place.latitude, longitude: place.longitude, city: place.name }, fetchImpl);
 }
 
-export function getBrowserPosition(geolocation = typeof navigator !== 'undefined' ? navigator.geolocation : null) {
+export function getBrowserPosition(geolocation = typeof navigator !== 'undefined' ? navigator.geolocation : null, {fresh = false} = {}) {
   if (!geolocation) return Promise.reject(new WeatherError('GEOLOCATION_UNAVAILABLE', '此裝置不支援定位，請手動選擇城市。'));
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
       ({ coords }) => resolve({ latitude: coords.latitude, longitude: coords.longitude }),
       (error) => reject(new WeatherError(error?.code === 1 ? 'PERMISSION_DENIED' : 'GEOLOCATION_UNAVAILABLE', error?.code === 1 ? '定位未授權，請手動選擇城市。' : '目前無法取得位置，請手動選擇城市。')),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 30 * 60 * 1000 }
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: fresh ? 0 : 30 * 60 * 1000 }
     );
   });
 }

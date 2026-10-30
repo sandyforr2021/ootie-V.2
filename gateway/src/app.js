@@ -44,9 +44,9 @@ export function createGatewayApp({ config, supabase, provider, generationService
         return ok({ post });
       }
       const identity = await authenticate(headers);
-      const sharedClothing = method === 'GET' && /^\/v1\/shared-clothing\/([\da-f-]{36})\/image$/i.exec(path);
+      const sharedClothing = method === 'GET' && /^\/v1\/shared-clothing\/([\da-f-]{36})\/(image|thumbnail)$/i.exec(path);
       if (sharedClothing) {
-        const image = await supabase.sharedClothingImage(identity.user, sharedClothing[1]);
+        const image = await (sharedClothing[2]==='thumbnail'?supabase.sharedClothingImage(identity.user,sharedClothing[1],{thumbnail:true}):supabase.sharedClothingImage(identity.user,sharedClothing[1]));
         return { status: 200, headers: { ...corsHeaders, 'Content-Type': image.mimeType,
           'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' }, rawBody: image.buffer };
       }

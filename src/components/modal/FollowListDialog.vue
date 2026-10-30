@@ -1,0 +1,13 @@
+<script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
+import {ref,watch,onBeforeUnmount} from 'vue';
+import BaseModal from '@/components/ui/BaseModal.vue';
+import {loadProfileConnections} from '@/services/socialRepository';
+import {t} from '@/i18n';
+const props=defineProps({open:Boolean,profileId:String,kind:String});const emit=defineEmits(['close']);
+const rows=ref([]),loading=ref(false),error=ref(''),more=ref(false);let version=0;
+async function load(append=false){const current=++version;loading.value=true;error.value='';const offset=append?rows.value.length:0;if(!append)rows.value=[];try{const data=await loadProfileConnections(props.profileId,props.kind,{offset,limit:40});if(current!==version)return;rows.value=append?[...rows.value,...data]:data;more.value=data.length===40;}catch{if(current===version)error.value=t('名單暫時無法載入。');}finally{if(current===version)loading.value=false;}}
+watch(()=>[props.open,props.profileId,props.kind],()=>{version++;rows.value=[];more.value=false;error.value='';if(props.open&&props.profileId)void load();},{immediate:true});onBeforeUnmount(()=>version++);
+</script>
+<template><BaseModal :open="open" :aria-label="$t(kind==='followers'?'追蹤者':'追蹤中')" content-class="connections-modal" @close="emit('close')"><h2>{{ $t(kind==='followers'?'追蹤者':'追蹤中') }}</h2><p v-if="error" role="alert">{{ error }} <button class="secondary" @click="load()">{{ $t('重試') }}</button></p><ul class="connections-list"><li v-for="profile in rows" :key="profile.id"><router-link :to="{path:'/profile',query:{user:profile.username}}" @click="emit('close')"><MediaImage v-if="profile.avatar_url" :src="profile.avatar_url" alt=""/><span v-else class="connection-initials">{{ profile.initials }}</span><span><strong>{{ profile.display_name||profile.username }}</strong><small>{{ profile.username }}</small></span></router-link></li></ul><p v-if="loading" role="status">{{ $t('載入中…') }}</p><p v-else-if="!error&&!rows.length">{{ $t('目前沒有衣友。') }}</p><button v-if="more" class="secondary" :disabled="loading" @click="load(true)">{{ $t('載入更多') }}</button></BaseModal></template>
+<style scoped>.connections-list{list-style:none;margin:20px 0;padding:0;display:grid;gap:8px}.connections-list a{display:flex;gap:14px;align-items:center;padding:10px;border-radius:10px;text-decoration:none;color:var(--ink);background:var(--paper)}.connections-list img,.connection-initials{width:46px;height:46px;border-radius:50%;object-fit:cover;display:grid;place-items:center;background:var(--accent-lavender-soft)}.connections-list small{display:block;color:var(--muted);font-size:12px;margin-top:4px}</style>

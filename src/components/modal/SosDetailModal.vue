@@ -5,10 +5,10 @@
 
       <div class="sos-detail-heading">
         <h2>{{ targetPost.title }}</h2>
-        <img v-if="targetPost.cover_url || coverItem?.photo" class="sos-cover-image" :src="targetPost.cover_url || coverItem.photo" :alt="t('求救主圖')" />
+        <MediaImage v-if="targetPost.cover_url || coverItem?.photo" class="sos-cover-image" :src="targetPost.cover_url || coverItem.photo" :alt="t('求救主圖')" />
 
         <div class="sos-detail-user">
-          <div class="sos-feed-avatar"><img v-if="targetPost.avatar_url" :src="targetPost.avatar_url" alt="" /><span v-else>{{ targetPost.initials }}</span></div>
+          <div class="sos-feed-avatar"><MediaImage v-if="targetPost.avatar_url" :src="targetPost.avatar_url" alt="" /><span v-else>{{ targetPost.initials }}</span></div>
           <div>
             <strong>{{ targetPost.display_name || targetPost.username }}</strong>
             <span>
@@ -36,7 +36,7 @@
         <h3>{{ t('本次公開的衣物') }} ({{ publicItems.length }})</h3>
         <div v-if="publicItems.length" class="sos-detail-gallery-grid">
           <div v-for="item in publicItems" :key="item.id" class="sos-detail-gallery-item">
-            <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+            <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
           </div>
         </div>
         <p v-else style="color:var(--muted); font-size:13px; font-style:italic;">
@@ -90,7 +90,7 @@
               ★ {{ t('發布者已採納') }}
             </div>
 
-            <div class="sos-detail-user"><div class="sos-feed-avatar"><img v-if="sug.avatar_url" :src="sug.avatar_url" alt="" loading="lazy" /><span v-else>{{ sug.initials }}</span></div><strong>{{ sug.display_name || sug.username }}</strong></div>
+            <div class="sos-detail-user"><div class="sos-feed-avatar"><MediaImage v-if="sug.avatar_url" :src="sug.avatar_url" alt="" loading="lazy" /><span v-else>{{ sug.initials }}</span></div><strong>{{ sug.display_name || sug.username }}</strong></div>
             <p style="font-size:14px; color:var(--ink); line-height:1.6; margin:6px 0;">
               " {{ sug.message }} "
             </p>
@@ -102,7 +102,7 @@
                 :key="item.id"
                 class="sos-suggestion-item-thumb"
               >
-                <img class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
+                <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
               </div>
             </div>
 
@@ -143,6 +143,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { t, tf, formatDate } from '@/i18n';
 import { Heart } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';

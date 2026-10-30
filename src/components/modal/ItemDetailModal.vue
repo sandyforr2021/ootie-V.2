@@ -3,7 +3,7 @@
     <article v-accessible-modal class="modal detail-layout">
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <div class="detail-photo">
-        <WardrobeCutout class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
+        <WardrobeCutout full class="product-image" :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" />
       </div>
       <div class="detail-content">
         <h2>{{ itemName(item) }}</h2>

@@ -1,5 +1,6 @@
 <script setup>
-import {ref,onBeforeUnmount} from 'vue';
+import {ref,computed,onBeforeUnmount} from 'vue';
+import {generationQuote} from '../../../shared/generationAllowance.js';
 import {useAuthStore} from '@/stores/auth';
 import {commerceClient} from '@/services/commerce';
 import {aiGateway} from '@/services/aiGateway';
@@ -7,30 +8,42 @@ import {blobToDataUrl} from '@/services/clothingMedia';
 import {t} from '@/i18n';
 const props=defineProps({blob:Blob});const emit=defineEmits(['result']);const auth=useAuthStore();
 const consent=ref(false),busy=ref(false),message=ref(''),result=ref(''),jobId=ref(''),batchId=ref('');
+const capabilities=ref(null),allowanceLoading=ref(false);
+const allowance=computed(()=>generationQuote(capabilities.value));
+async function loadAllowance(event){
+ if(!event.target.open||jobId.value||allowanceLoading.value)return;
+ allowanceLoading.value=true;
+ try{const data=await commerceClient.request('capabilities',auth.session?.access_token);if(alive)capabilities.value=data;}
+ catch{if(alive)capabilities.value=null;}
+ finally{if(alive)allowanceLoading.value=false;}
+}
 let alive=true,timer;onBeforeUnmount(()=>{alive=false;clearTimeout(timer);if(result.value)URL.revokeObjectURL(result.value);});
 async function check(){
  try{
   const data=await commerceClient.request('jobs',auth.session?.access_token);
   const job=data.jobs.find(j=>j.id===jobId.value);if(!alive)return;
   if(job?.status==='succeeded' && job.result_path){result.value=await aiGateway.loadPrivateImage(auth.session.access_token,job.result_path);busy.value=false;message.value='';}
-  else if(['failed','cancelled'].includes(job?.status)){busy.value=false;message.value=t('未完成，點數已退回。');}
+  else if(['failed','cancelled'].includes(job?.status)){busy.value=false;message.value=t('未完成，已退還本次點數或免費額度。');}
   else if(job?.status==='needs_review'){busy.value=false;message.value=t('結果核對中，請勿重新送出。');}
   else {message.value=t('處理中，可稍後到私人相簿查看。');timer=setTimeout(check,10000);}
  }catch{if(alive){busy.value=false;message.value=t('連線中斷，請查詢原工作。');}}
 }
 async function submit(){
- if(busy.value||!props.blob||!consent.value)return;
+ if(busy.value||!props.blob||!consent.value||!capabilities.value?.enabled||!allowance.value.allowed)return;
  busy.value=true;message.value='';batchId.value ||= crypto.randomUUID();
  try{
   const data=await commerceClient.request('cleanup',auth.session?.access_token,{batchId:batchId.value,imageData:await blobToDataUrl(props.blob),consent:true});
   if(!alive)return;jobId.value=data.jobs[0].id;await check();
- }catch(error){if(alive){busy.value=false;message.value=t(error.code==='DAILY_GENERATION_LIMIT'?'已達每日 2 次生成上限。':error.code==='INSUFFICIENT_POINTS'?'平台點數不足。':'連線中斷，請查詢原工作。');}}
+ }catch(error){if(alive){busy.value=false;message.value=t(error.code==='DAILY_FREE_LIMIT'?'今日免費額度已用完，可使用點數繼續生成。':error.code==='DAILY_GENERATION_LIMIT'?'已達每日 2 次生成上限。':error.code==='INSUFFICIENT_POINTS'?'平台點數不足。':'連線中斷，請查詢原工作。');}}
 }
 async function apply(){const blob=await (await fetch(result.value)).blob();const image=await createImageBitmap(blob);emit('result',{displayBlob:blob,width:image.width,height:image.height});image.close();}
 </script>
-<template><details class="cleanup-panel"><summary>{{ t('AI 整理 · 2 點') }}</summary>
+<template><details class="cleanup-panel" @toggle="loadAllowance"><summary>{{ t('AI 衣物整理') }}</summary>
  <label><input v-model="consent" type="checkbox" :disabled="busy || !!jobId" />{{ t('同意將這張照片交由影像服務處理，可能改變衣物細節。') }}</label>
- <button v-if="!jobId" type="button" class="secondary" :disabled="!consent || busy" @click="submit">{{ t('整理這件衣物 · 2 點') }}</button>
+ <p v-if="allowanceLoading" role="status">{{ t('載入中…') }}</p>
+ <p v-else-if="!capabilities" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
+ <p v-else-if="!allowance.allowed" role="status">{{ t(allowance.reason==='DAILY_FREE_LIMIT'?'今日免費額度已用完，可使用點數繼續生成。':'平台點數不足。') }}</p>
+ <button v-if="!jobId" type="button" class="secondary" :disabled="!consent || busy || !capabilities?.enabled || !allowance.allowed" @click="submit">{{ t(allowance.mode==='daily_free'?'整理衣物 · 免費額度 1 張':'整理這件衣物 · 2 點') }}</button>
  <button v-else-if="!busy && !result" type="button" class="secondary" @click="check">{{ t('查詢原工作') }}</button>
  <p v-if="message" role="status">{{ message }}</p>
  <template v-if="result"><img :src="result" :alt="t('整理結果')" /><button type="button" class="secondary" @click="apply">{{ t('使用這張圖片') }}</button></template>

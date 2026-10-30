@@ -1,7 +1,11 @@
 import {describe,it,expect} from 'vitest';
-import {MEMBERSHIP_PLANS,POINT_TOPUP,PAID_CHECKOUT_ENABLED} from '../membershipPlans';
+import {MEMBERSHIP_PLANS,POINT_TOPUP,PAID_CHECKOUT_ENABLED,formatPlanUsd} from '../membershipPlans';
 import {BASE_COSTS,projectMembership} from '../../../scripts/lib/membership-economics.mjs';
 describe('membership pricing guardrails',()=>{
+ it('uses the approved fixed USD prices consistently',()=>{
+  expect(MEMBERSHIP_PLANS.map(plan=>formatPlanUsd(plan.priceUsd))).toEqual(['US$ 6','US$ 12']);
+  expect(formatPlanUsd(POINT_TOPUP.priceUsd)).toBe('US$ 3');
+ });
  it('covers full point redemption with at least 40% contribution under the stated assumptions',()=>{
   for(const offer of [...MEMBERSHIP_PLANS,POINT_TOPUP]){
    expect(offer.points%2).toBe(0);

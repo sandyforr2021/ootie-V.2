@@ -59,7 +59,7 @@
               :disabled="mediaBusy || isSubmitting"
               @change="handleFileChange"
             />
-            <img
+            <MediaImage
               v-if="photoPreview"
               :key="photoPreview"
               :class="['upload-preview', 'product-image', { visible: photoPreview }]"
@@ -67,6 +67,7 @@
               :alt="$t('單品照片預覽')"
             />
             <div v-if="preparedMedia" class="upload-choice-row">
+              <button v-if="backgroundBusy" type="button" class="text-button" @click="cancelBackgroundRemoval">{{ $t('取消去背') }}</button>
               <button v-if="!backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="tryBackgroundRemoval">{{ backgroundBusy ? $t('正在處理背景…') : $t('重新去背') }}</button>
               <button v-else type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="restoreBackground">{{ $t('還原照片') }}</button>
             </div>
@@ -233,6 +234,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { ref, reactive, computed, watch, onUnmounted } from 'vue';
 import { defaultCurrency } from '@/services/money';
 import { t } from '@/i18n';
@@ -296,6 +298,7 @@ const categoryEdited = ref(false);
 const backgroundBusy = ref(false);
 let backgroundController;
 const backgroundRemoved = ref(false);
+const backgroundCancelled = ref(false);
 const backgroundMessage = ref('');
 const filenameSuggestion = ref(false);
 const visionState=ref('idle'), visionMessage=ref('');
@@ -475,6 +478,7 @@ const useDisplayBlob = (media) => {
 
 const tryBackgroundRemoval = async () => {
   if (!preparedMedia.value || backgroundBusy.value) return;
+  backgroundCancelled.value=false;
   const sequence = selectionSequence;
   backgroundBusy.value = true;
   backgroundMessage.value = '';
@@ -493,11 +497,18 @@ const tryBackgroundRemoval = async () => {
     useDisplayBlob(result);
     backgroundRemoved.value = true;
     backgroundMessage.value = '';
-  } catch {
-    if (sequence === selectionSequence) backgroundMessage.value = t('去背未完成，可重試或保留原照片。');
+  } catch (failure) {
+    if (sequence === selectionSequence && failure.name !== 'AbortError') backgroundMessage.value = t('去背未完成，可重試或保留原照片。');
   } finally {
     if (sequence === selectionSequence) backgroundBusy.value = false;
   }
+};
+
+const cancelBackgroundRemoval = () => {
+  backgroundCancelled.value=true;
+  backgroundController?.abort();
+  backgroundBusy.value=false;
+  backgroundMessage.value=t('去背已取消。');
 };
 
 const restoreBackground = () => {
@@ -609,7 +620,7 @@ const handleFileChange = async (e) => {
     mediaStatus.value = 'ready';
     void analyzeSelectedImage(previewObjectUrl, sequence);
     await tryBackgroundRemoval();
-    if(sequence === selectionSequence && appStore.isItemFormOpen && !isEdit.value) void recognizeGarment({automatic:true});
+    if(sequence === selectionSequence && !backgroundCancelled.value && appStore.isItemFormOpen && !isEdit.value) void recognizeGarment({automatic:true});
   } catch (error) {
     if (sequence !== selectionSequence) return;
     mediaStatus.value = 'error';
@@ -637,7 +648,7 @@ const requestUploadCancel = () => {
 };
 
 const handleSubmit = async () => {
-  if (isSubmitting.value) return;
+  if (isSubmitting.value || backgroundBusy.value || mediaBusy.value) return;
   if (!isEdit.value && !form.photo) {
     if (!preparedMedia.value) {
       appStore.showToast('請先上傳單品照片');
@@ -695,6 +706,11 @@ const handleSubmit = async () => {
 };
 
 onUnmounted(releasePreviewUrl);
+onUnmounted(()=>backgroundController?.abort());
 onUnmounted(()=>visionController?.abort());
 </script>
 
+
+<style scoped>
+.upload-zone .upload-preview{background:#fff}
+</style>

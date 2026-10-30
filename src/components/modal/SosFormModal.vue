@@ -4,7 +4,7 @@
       <button class="modal-close" :aria-label="$t(&quot;關閉&quot;)" @click="close">×</button>
       <h2>{{ t("請衣友幫忙搭配") }}</h2>
       <p v-if="contextItem" class="sos-item-context">
-        <img v-if="contextItem.photo" :src="contextItem.photo" :alt="contextItem.name_zh || contextItem.name" style="width:72px;height:90px;object-fit:contain" />{{ tf('已帶入單品：{name}', { name: contextItem.name_zh || contextItem.name }) }}
+        <MediaImage v-if="contextItem.photo" :src="contextItem.photo" :alt="contextItem.name_zh || contextItem.name" style="width:72px;height:90px;object-fit:contain" />{{ tf('已帶入單品：{name}', { name: contextItem.name_zh || contextItem.name }) }}
       </p>
 
       <p v-if="loadingCloset" role="status">{{ t('正在讀取衣櫥…') }}</p>
@@ -59,10 +59,16 @@
         </div>
 
         <p class="sos-closet-notice" v-if="!appStore.profile.public_closet">
+          <AppIcon name="lock" :size="18"/>
           {{ t('請先開啟「公開衣櫥」功能，才能發布求救。') }}
           <router-link to="/closet" @click="close">{{ t('前往我的衣櫥') }}</router-link>
         </p>
-        <p class="sos-closet-notice" v-else>{{ t('目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。') }}</p>
+        <p class="sos-closet-notice" v-else><AppIcon name="Closet" :size="18"/>{{ t('目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。') }}</p>
+
+        <div v-if="appStore.profile.public_closet" class="form-field sos-public-selection">
+          <label>{{ t('本次公開的衣物') }} · {{ selectedClosetItemIds.length }}</label>
+          <div class="sos-selection-grid"><label v-for="item in appStore.items.filter(i=>!i.hidden && i.owner_id===authStore.profileId)" :key="item.id" :class="['sos-selection-card',{selected:selectedClosetItemIds.includes(item.id)}]"><input v-model="selectedClosetItemIds" type="checkbox" :value="item.id" :aria-label="item.name_zh || item.name"/><MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name"/><span v-if="selectedClosetItemIds.includes(item.id)" class="sos-selection-check" aria-hidden="true">✓</span></label></div>
+        </div>
 
         <div class="form-field sos-cover-choice">
           <label class="sos-image-toggle"><input v-model="coverEnabled" type="checkbox" :disabled="submitting" />{{ t('上傳圖片') }}</label>
@@ -88,6 +94,7 @@
 </template>
 
 <script setup>
+import MediaImage from '@/components/ui/MediaImage.vue';
 import { t, tf } from '@/i18n';
 import { ref, computed, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
@@ -95,6 +102,7 @@ import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { uploadOotdImage, validateOotdImage } from '@/services/ootdMedia';
+import AppIcon from '@/components/ui/AppIcon.vue';
 
 const appStore = useAppStore();
 const sosStore = useSosStore();
@@ -140,7 +148,7 @@ watch(
       closetLoadFailed.value = !result?.ok;
     }
     if (!appStore.isSosFormOpen || profileId !== authStore.profileId || closetLoadFailed.value) return;
-    selectedClosetItemIds.value = appStore.items.filter(i => !i.hidden && i.owner_id === profileId).map(i => i.id);
+    selectedClosetItemIds.value = [];
 
     if (contextItem.value) {
       const item = contextItem.value;
@@ -188,7 +196,7 @@ const handleSubmit = async () => {
   const stillCurrent=()=>authStore.user?.id===userId && authStore.profileId===profileId && version===openVersion && appStore.isSosFormOpen;
 
   if (!selectedClosetItemIds.value.length) {
-    appStore.showToast(t('請先在衣櫥加入至少一件衣物。'));
+    appStore.showToast(t('請至少選擇一件衣物。'));
     return;
   }
 

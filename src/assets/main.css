@@ -4517,12 +4517,12 @@ h1 {
   color: #fff;
 }
 
-#explorePage .ootd-grid,
+:is(#explorePage,#profilePage) .ootd-grid,
 #profilePage .ootd-grid {
   column-gap: 20px;
 }
 
-#explorePage .ootd-card,
+:is(#explorePage,#profilePage) .ootd-card,
 #profilePage .ootd-card {
   margin-bottom: 22px;
   border: 1px solid var(--line);
@@ -4531,44 +4531,44 @@ h1 {
   transition: transform .2s ease, box-shadow .2s ease;
 }
 
-#explorePage .ootd-card:hover,
+:is(#explorePage,#profilePage) .ootd-card:hover,
 #profilePage .ootd-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
 }
 
-#explorePage .ootd-photo,
+:is(#explorePage,#profilePage) .ootd-photo,
 #profilePage .ootd-photo {
   transition: transform .28s ease;
 }
 
-#explorePage .ootd-card:hover .ootd-photo,
+:is(#explorePage,#profilePage) .ootd-card:hover .ootd-photo,
 #profilePage .ootd-card:hover .ootd-photo {
   transform: scale(1.015);
 }
 
-#explorePage .ootd-avatar {
+:is(#explorePage,#profilePage) .ootd-avatar {
   background: var(--accent-pink-soft);
   color: var(--ink);
 }
 
-#explorePage .follow-button {
+:is(#explorePage,#profilePage) .follow-button {
   min-height: 30px;
   border-color: var(--ink);
   color: var(--ink);
 }
 
-#explorePage .follow-button.following {
+:is(#explorePage,#profilePage) .follow-button.following {
   background: var(--accent-yellow-soft);
 }
 
-#explorePage .ootd-actions,
+:is(#explorePage,#profilePage) .ootd-actions,
 #profilePage .ootd-actions {
   gap: 8px;
   flex-wrap: wrap;
 }
 
-#explorePage .ootd-action,
+:is(#explorePage,#profilePage) .ootd-action,
 #profilePage .ootd-action {
   min-height: 30px;
   padding: 4px 7px;
@@ -4576,14 +4576,14 @@ h1 {
   transition: color .18s ease, background .18s ease;
 }
 
-#explorePage .ootd-action:hover,
+:is(#explorePage,#profilePage) .ootd-action:hover,
 #profilePage .ootd-action:hover {
   color: var(--ink);
   background: var(--accent-yellow-soft);
 }
 
-#explorePage .ootd-action.liked,
-#explorePage .ootd-action.saved,
+:is(#explorePage,#profilePage) .ootd-action.liked,
+:is(#explorePage,#profilePage) .ootd-action.saved,
 #profilePage .ootd-action.liked,
 #profilePage .ootd-action.saved {
   color: #8d4057;
@@ -4717,7 +4717,7 @@ h1 {
 
   #explorePage .feed-tabs { width: 100%; }
   #explorePage .feed-tab { flex: 1; }
-  #explorePage .ootd-grid,
+  :is(#explorePage,#profilePage) .ootd-grid,
   #profilePage .ootd-grid { columns: 2 170px; column-gap: 14px; }
 
   #profilePage .profile-header {
@@ -4733,7 +4733,7 @@ h1 {
 @media (max-width: 520px) {
   .profile-locked-state { min-height: 320px; margin-top: 18px; padding: 32px 0; }
   .profile-locked-state h1 { font-size: 39px; }
-  #explorePage .ootd-grid,
+  :is(#explorePage,#profilePage) .ootd-grid,
   #profilePage .ootd-grid { columns: 1; }
   #profilePage .profile-header { display: grid; }
   #profilePage .profile-avatar { width: 92px; height: 92px; }
@@ -5239,19 +5239,19 @@ h1 {
   backdrop-filter: none;
 }
 
-#explorePage .ootd-card {
+:is(#explorePage,#profilePage) .ootd-card {
   border: 0;
   animation: none;
 }
 
-#explorePage .ootd-grid {
+:is(#explorePage,#profilePage) .ootd-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   columns: auto;
 }
 
-#explorePage .ootd-user-row {
+:is(#explorePage,#profilePage) .ootd-user-row {
   min-height: 62px;
   display: flex;
   align-items: center;
@@ -5259,7 +5259,7 @@ h1 {
   padding: 12px 14px;
 }
 
-#explorePage .ootd-user {
+:is(#explorePage,#profilePage) .ootd-user {
   min-width: 0;
   min-height: 40px;
   flex: 1 1 auto;
@@ -5273,36 +5273,36 @@ h1 {
   text-align: left;
 }
 
-#explorePage .ootd-avatar {
+:is(#explorePage,#profilePage) .ootd-avatar {
   width: 38px;
   height: 38px;
 }
 
-#explorePage .ootd-user-copy {
+:is(#explorePage,#profilePage) .ootd-user-copy {
   min-width: 0;
   display: grid;
   gap: 3px;
 }
 
-#explorePage .ootd-user-copy strong {
+:is(#explorePage,#profilePage) .ootd-user-copy strong {
   overflow: hidden;
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-#explorePage .ootd-user-copy > span {
+:is(#explorePage,#profilePage) .ootd-user-copy > span {
   margin: 0;
   font-size: 10px;
 }
 
-#explorePage .follow-button {
+:is(#explorePage,#profilePage) .follow-button {
   min-width: 58px;
   min-height: 36px;
   padding: 7px 11px;
 }
 
-#explorePage .ootd-photo-button {
+:is(#explorePage,#profilePage) .ootd-photo-button {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
@@ -5310,11 +5310,11 @@ h1 {
   place-items: center;
   padding: 0;
   border: 0;
-  background: #f1ede8;
+  background: #f7f7f7;
   overflow: hidden;
 }
 
-#explorePage .ootd-photo {
+:is(#explorePage,#profilePage) .ootd-photo {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -5326,11 +5326,11 @@ h1 {
   cursor: pointer;
 }
 
-#explorePage .ootd-body {
+:is(#explorePage,#profilePage) .ootd-body {
   padding: 0 14px 15px;
 }
 
-#explorePage .ootd-actions {
+:is(#explorePage,#profilePage) .ootd-actions {
   min-height: 50px;
   gap: 3px;
   flex-wrap: nowrap;
@@ -5341,7 +5341,7 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 
-#explorePage .ootd-action {
+:is(#explorePage,#profilePage) .ootd-action {
   min-width: 44px;
   min-height: 44px;
   padding: 6px 8px;
@@ -5352,28 +5352,28 @@ h1 {
   white-space: nowrap;
 }
 
-#explorePage .ootd-action span {
+:is(#explorePage,#profilePage) .ootd-action span {
   color: inherit;
   font-variant-numeric: tabular-nums;
 }
 
-#explorePage .ootd-action:disabled,
+:is(#explorePage,#profilePage) .ootd-action:disabled,
 .post-detail-primary-actions .ootd-action:disabled {
   cursor: wait;
   opacity: .5;
 }
 
-#explorePage .post-detail-trigger {
+:is(#explorePage,#profilePage) .post-detail-trigger {
   min-height: 44px;
 }
 
-#explorePage .ootd-caption {
+:is(#explorePage,#profilePage) .ootd-caption {
   margin-bottom: 8px;
   font-size: 13px;
   line-height: 1.62;
 }
 
-#explorePage .ootd-tags {
+:is(#explorePage,#profilePage) .ootd-tags {
   margin-bottom: 10px;
   color: var(--accent-violet-ink);
 }
@@ -5595,7 +5595,7 @@ h1 {
   max-height: none;
   min-height: 0;
   padding: 0;
-  background: #f1ede8;
+  background: #f7f7f7;
 }
 
 #sharedOotdPage .ootd-photo.ootd-detail-image {
@@ -5744,18 +5744,18 @@ h1 {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  #explorePage .ootd-card:hover,
+  :is(#explorePage,#profilePage) .ootd-card:hover,
   #closetPage .item-card:hover {
     transform: translateY(-3px);
   }
 
-  #explorePage .ootd-card:hover .ootd-photo {
+  :is(#explorePage,#profilePage) .ootd-card:hover .ootd-photo {
     transform: scale(1.012);
   }
 }
 
 @media (min-width: 521px) and (max-width: 1180px) {
-  #explorePage .ootd-grid {
+  :is(#explorePage,#profilePage) .ootd-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -5835,39 +5835,39 @@ h1 {
     font-size: 10px;
   }
 
-  #explorePage .ootd-card {
+  :is(#explorePage,#profilePage) .ootd-card {
     margin-bottom: 18px;
     border-radius: 20px;
   }
 
-  #explorePage .ootd-user-row {
+  :is(#explorePage,#profilePage) .ootd-user-row {
     min-height: 56px;
     padding: 8px 12px;
   }
 
-  #explorePage .ootd-avatar {
+  :is(#explorePage,#profilePage) .ootd-avatar {
     width: 34px;
     height: 34px;
   }
 
-  #explorePage .follow-button {
+  :is(#explorePage,#profilePage) .follow-button {
     min-height: 44px;
   }
 
-  #explorePage .ootd-photo-button {
+  :is(#explorePage,#profilePage) .ootd-photo-button {
     aspect-ratio: 1 / 1;
   }
 
-  #explorePage .ootd-body {
+  :is(#explorePage,#profilePage) .ootd-body {
     padding-inline: 12px;
   }
 
-  #explorePage .ootd-actions {
+  :is(#explorePage,#profilePage) .ootd-actions {
     min-height: 46px;
     margin-bottom: 10px;
   }
 
-  #explorePage .ootd-action {
+  :is(#explorePage,#profilePage) .ootd-action {
     min-height: 44px;
     padding-inline: 6px;
     font-size: 10px;
@@ -6124,7 +6124,7 @@ h1 {
 }
 
 @media (max-width: 520px) {
-  #explorePage .ootd-grid {
+  :is(#explorePage,#profilePage) .ootd-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -6138,7 +6138,7 @@ h1 {
     width: 100%;
   }
 
-  #explorePage .ootd-action,
+  :is(#explorePage,#profilePage) .ootd-action,
   .post-detail-primary-actions .ootd-action {
     padding-inline: 4px;
     font-size: 9px;
@@ -6157,9 +6157,9 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #explorePage .ootd-card,
+  :is(#explorePage,#profilePage) .ootd-card,
   #closetPage .item-card,
-  #explorePage .ootd-photo,
+  :is(#explorePage,#profilePage) .ootd-photo,
   #closetPage .item-card,
   .post-detail-primary-actions .ootd-action {
     animation: none !important;
@@ -6167,3 +6167,10 @@ h1 {
   }
 }
 
+
+/* A high-contrast arrow on the canvas; native hand, text and disabled cursors retain their meaning. */
+body{cursor:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='26'%20viewBox='0%200%2024%2026'%3E%3Cpath%20d='M5.3%204.2C3.7%203.5%202.7%204.7%203.3%206.4L8.4%2021C9%2022.7%2011.1%2022.8%2011.8%2021.1L14.2%2015.8L19.5%2013.9C21.2%2013.3%2021.2%2011.2%2019.5%2010.5Z'%20fill='%232b2330'%20stroke='white'%20stroke-width='1.8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E") 4 5,auto}
+a,button,summary,[role=button],select,label[for]{cursor:pointer}button:disabled,[aria-disabled=true]{cursor:not-allowed}input,textarea,[contenteditable=true]{cursor:text}input[type=checkbox],input[type=radio],input[type=file]{cursor:pointer}
+@media(min-width:1001px){.shop-view .studio-selection{position:sticky;top:100px;align-self:start;max-height:calc(100dvh - 125px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}}
+#closetPage .item-card .item-info{flex:none;min-height:0;padding-bottom:16px}#closetPage .grid{align-items:start}
+#closetPage .closet-meta{justify-content:flex-start;gap:12px}#closetPage .closet-meta-actions{margin-left:0}

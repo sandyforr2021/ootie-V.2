@@ -1,5 +1,8 @@
 // A combined outfit is deliberately limited to the three layers reviewed by
-// the owner. Single garment requests retain the provider's existing categories.
+// the owner. Shoes, bags and accessories are not supported by this try-on flow.
+export function supportsTryOn(item = {}) {
+  return !['shoe','shoes','sneaker','sneakers','boot','boots','bag','bags','accessories','accessory','鞋','鞋子','鞋履','包款','配件'].includes(String(item.category || '').trim().toLowerCase());
+}
 export function outfitLayer(item = {}) {
   if (item.outfit_layer) return item.outfit_layer;
   const category = String(item.category || '').trim().toLowerCase();
@@ -11,6 +14,7 @@ export function outfitLayer(item = {}) {
 
 export function orderedOutfit(items) {
   if (!items.length || items.length > 3) return { valid: false, items: [], reason: 'count' };
+  if (items.some(item => !supportsTryOn(item))) return { valid:false,items:[],reason:'unsupported' };
   if (items.length === 1) return { valid: true, items: [...items] };
   const layers = items.map(outfitLayer);
   const order = { top: 0, bottom: 1, outer: 2 };
