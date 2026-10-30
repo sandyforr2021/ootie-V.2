@@ -44,8 +44,8 @@ onBeforeUnmount(() => cancelAnimationFrame(animation));
   border-radius:120px 120px 12px 12px;
 }
 .hero-photo img{display:block;width:100%;height:clamp(340px,38vw,520px);object-fit:cover;object-position:50% 40%}
-.editorial-note{position:absolute;bottom:72px;left:-28px;display:flex;align-items:center;gap:14px;background:var(--accent-yellow);padding:19px 22px;box-shadow:0 12px 35px #30231a22;transform:translateZ(35px) rotate(-3deg);scale:.6;transform-origin:left bottom;max-width:94%}
+.editorial-note{position:absolute;bottom:72px;left:-28px;display:flex;align-items:center;gap:14px;background:var(--accent-yellow);padding:19px 22px;box-shadow:0 12px 35px #30231a22;transform:translateZ(35px) rotate(-3deg) scale(.6);transform-origin:left bottom;max-width:94%}
 .editorial-note strong,.editorial-note span{display:block}.editorial-note strong{font-size:15px;font-weight:600}.editorial-note span{font-size:11px;color:var(--muted);margin-top:5px}
 @media(max-width:600px){.editorial-visual{padding:12px 10px 12px 14px}.hero-photo img{height:360px}.editorial-note{left:-14px;bottom:60px;padding:15px}}
-@media(prefers-reduced-motion:reduce){.editorial-visual,.editorial-note{transform:none!important;transition:none}}
+@media(prefers-reduced-motion:reduce){.editorial-visual{transform:none!important;transition:none}.editorial-note{transform:scale(.6)!important;transition:none}}
 </style>
