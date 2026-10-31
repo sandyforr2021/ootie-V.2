@@ -100,4 +100,22 @@ SOS 連結已複製|Request link copied|相談のリンクをコピーしまし�
 該筆穿搭求救已結束並同步|This styling request is closed.|このコーデ相談を終了しました。|Esta consulta está cerrada.
 這件{name}，想請衣友幫忙搭配|How would you style {name}?|{name} のコーデを相談したい|¿Cómo combinarías {name}?
 我很少穿這件{name}，想請衣友幫我找找適合的搭配。|I would love ideas for styling {name}.|{name} の着こなしのアイデアを教えてください。|Me gustaría recibir ideas para combinar {name}.
+提供搭配建議|Provide styling advice|コーデの提案|Consejos de estilo
+說說為什麼這樣搭，或提醒一些小細節。|Explain why this works or mention small styling tips.|なぜこの組み合わせにしたかや、着こなしのポイントを伝えましょう。|Explica por qué funciona o añade detalles para completarlo.
+返回穿搭求救|Back to styling requests|コーデ相談に戻る|Volver a consultas
+發布穿搭求救|Ask for styling help|コーデ相談を投稿|Pedir ayuda de estilo
+求救附圖（選填，最多一張）|Attach an image (optional, max 1)|相談の画像（任意、1枚まで）|Imagen adjunta (opcional, máx. 1)
+從電腦上傳圖片|Upload from computer|PCから画像をアップロード|Subir desde el ordenador
+從我的衣櫥選擇|Choose from my wardrobe|マイクローゼットから選ぶ|Elegir de mi armario
+移除圖片|Remove image|画像を削除|Eliminar imagen
+已上傳本機圖片|Uploaded local image|ローカル画像をアップロードしました|Imagen local subida
+來自我的衣櫥|From my wardrobe|マイクローゼットから|De mi armario
+更換圖片|Change image|画像を変更|Cambiar imagen
+更換單品|Change garment|アイテムを変更|Cambiar prenda
+選擇一件衣櫥單品作為附圖|Select a wardrobe garment as cover image|添付するクローゼットのアイテムを1点選択|Selecciona una prenda de tu armario como portada
+衣櫥目前沒有可選擇的公開單品。|No public garments available in wardrobe.|クローゼットに選択可能な公開アイテムがありません。|No hay prendas públicas disponibles en el armario.
+請選擇圖片，或點擊「移除圖片」。|Please select an image or remove it.|画像を選択するか「画像を削除」をクリックしてください。|Selecciona una imagen o elimínala.
+請選擇單品，或點擊「移除圖片」。|Please select a garment or remove it.|アイテムを選択するか「画像を削除」をクリックしてください。|Selecciona una prenda o elimínala.
+確認發布|Publish request|相談を公開する|Publicar consulta
+正在發布…|Publishing…|公開中…|Publicando…
 `;

@@ -130,7 +130,7 @@ import MediaImage from '@/components/ui/MediaImage.vue';
 import { t, tf } from '@/i18n';
 import { Heart } from '@lucide/vue';
 import { watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
@@ -139,16 +139,23 @@ const appStore = useAppStore();
 const sosStore = useSosStore();
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 const coverImage = post => post.cover_url || sosStore.getPublicItemsForSos(post).find(item=>String(item.id)===String(post.cover_item_id))?.photo || '';
 const deletePost = async id => {
   if (confirm(t('確定刪除這則求救及其搭配建議？此動作無法復原。'))) await sosStore.deleteSosPost(id);
 };
 
 const openSosForm = (itemId = null) => {
+  if (!authStore.isMember) {
+    appStore.openLoginGate('AUTH_REQUIRED', itemId ? `/sos/create?item_id=${encodeURIComponent(itemId)}` : '/sos/create');
+    return;
+  }
   if (itemId) {
     appStore.sosTargetItemId = itemId;
+    router.push({ path: '/sos/create', query: { item_id: itemId } });
+  } else {
+    router.push('/sos/create');
   }
-  appStore.isSosFormOpen = true;
 };
 
 watch(

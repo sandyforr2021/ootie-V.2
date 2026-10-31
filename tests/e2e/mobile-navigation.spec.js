@@ -78,7 +78,7 @@ test('secondary routes and Quick Add actions keep their real destinations', asyn
 
   for (const [label, expectedUrl] of [
     ['加入單品', /\/closet\?quick=add-item/],
-    ['發布求救', /\/sos\?quick=add-sos/],
+    ['發布求救', /\/sos(?:\/create|\?quick=add-sos)/],
     ['加入書籤', /\/bookmarks\?quick=add-bookmark/]
   ]) {
     await page.goto('/');

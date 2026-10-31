@@ -51,12 +51,12 @@
         </div>
 
         <div class="form-field" style="margin-top:18px">
-          <label for="suggestionMessage">{{ t("你的搭配建議") }}</label>
+          <label for="suggestionMessage">{{ t("提供搭配建議") }}</label>
           <textarea
             id="suggestionMessage"
             v-model="message"
             required
-            :placeholder="t('說說你為什麼這樣搭，或提醒她一些小細節')"
+            :placeholder="t('說說為什麼這樣搭，或提醒一些小細節。')"
           ></textarea>
         </div>
 

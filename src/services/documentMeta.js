@@ -3,7 +3,7 @@ import { t } from '@/i18n';
 const DEFAULT_DESCRIPTION = 'OOTIE 整合數位衣櫥、商品收藏、OOTIE 試穿與穿搭分享，幫助你在購買前做出更適合自己的選擇。';
 const ROUTE_TITLES = {
   Home: 'OOTie｜你的衣櫥，更多穿搭可能。', BrandHome:'OOTie｜你的衣櫥，更多穿搭可能。', Explore: '探索 OOTD｜OOTIE', Closet: '我的衣櫥｜OOTIE',
-  Bookmarks: '書籤與收藏穿搭｜OOTIE', Stats: '衣櫥統計｜OOTIE', Sos: '穿搭 SOS｜OOTIE',
+  Bookmarks: '書籤與收藏穿搭｜OOTIE', Stats: '衣櫥統計｜OOTIE', Sos: '穿搭 SOS｜OOTIE', SosCreate: '發布穿搭求救｜OOTIE',
   Ai: 'AI 穿搭助理｜OOTIE', Tryon: '虛擬試穿｜OOTIE', Profile: '個人檔案｜OOTIE',
   Membership: '方案與點數｜OOTIE', Settings: '帳號設定｜OOTIE', Legal: '資訊與條款｜OOTIE',
   Shop: '購物試穿｜OOTIE', OotdDetail: 'OOTD 詳情｜OOTIE', NotFound: '找不到頁面｜OOTIE',

@@ -32,6 +32,7 @@ const routes = [
   { path: '/stats', name: 'Stats', component: StatsView },
   { path: '/explore', name: 'Explore', component: ExploreView },
   { path: '/sos', name: 'Sos', component: SosView },
+  { path: '/sos/create', name: 'SosCreate', component: () => import('@/views/SosCreateView.vue') },
   { path: '/ai', name: 'Ai', redirect: '/shop' },
   { path: '/tryon', name: 'Tryon', redirect: '/shop' },
   { path: '/profile', name: 'Profile', component: ProfileView },

@@ -167,8 +167,8 @@ const triggerQuickAction = (action) => {
     if (route.path === '/explore') appStore.isOotdFormOpen = true;
     else router.push({ path: '/explore', query: { quick: 'add-ootd' } });
   } else if (action === 'add-sos') {
-    if (route.path === '/sos') appStore.isSosFormOpen = true;
-    else router.push({ path: '/sos', query: { quick: 'add-sos' } });
+    if (route.path === '/sos/create') return;
+    router.push('/sos/create');
   } else if (action === 'add-bookmark') {
     router.push({ path: '/shop', query: { tab: 'wishlist', quick: 'add-product' } });
   }
@@ -182,8 +182,9 @@ watch(
     else if (action === 'add-ootd') {
       if (authStore.isMember) appStore.isOotdFormOpen = true;
       else appStore.openLoginGate('OOTD_PUBLISH_AUTH_REQUIRED', '/explore?quick=add-ootd');
-    } else if (action === 'add-sos') appStore.isSosFormOpen = true;
-    else if (action === 'add-bookmark' && route.path !== '/shop') router.replace({path:'/shop',query:{tab:'wishlist',quick:'add-product'}});
+    } else if (action === 'add-sos') {
+      router.replace('/sos/create');
+    } else if (action === 'add-bookmark' && route.path !== '/shop') router.replace({path:'/shop',query:{tab:'wishlist',quick:'add-product'}});
   },
   { immediate: true }
 );
