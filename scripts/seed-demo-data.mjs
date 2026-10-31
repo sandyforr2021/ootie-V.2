@@ -236,7 +236,7 @@ const savedOutfitTargets = [
 const savedOutfits = savedOutfitTargets.map((target, index) => ({ id: uuid(`saved-outfit-${index}`), profile_id: profileIds[0], ...target, created_at: new Date(Date.now() - index * 86400000).toISOString() }));
 const notificationFixtures = [
   { text: '@anya 喜歡了你的 OOTD。', event_type: 'OOTD_LIKE', actor_profile_id: profileIds[11], entity_id: posts[0].id, target_path: `/ootd/${posts[0].id}` },
-  { text: '@theo 回覆了你的穿搭 SOS。', event_type: 'SOS_SUGGESTION', actor_profile_id: profileIds[10], entity_id: sosPosts[0].id, target_path: `/sos?sos=${sosPosts[0].id}` },
+  { text: `@theo在你的 SOS 求救貼文『${sosPosts[0]?.title || '穿搭求救'}』留言了。`, event_type: 'SOS_SUGGESTION', actor_profile_id: profileIds[10], entity_id: sosPosts[0].id, target_path: `/sos?sos=${sosPosts[0].id}` },
   { text: '@nora 開始追蹤你。', event_type: 'FOLLOW', actor_profile_id: profileIds[3], entity_id: uuid('notification-follow-entity'), target_path: `/profile?user=${encodeURIComponent(people[3][1])}` },
   { text: '本月方案點數已加入。', event_type: 'SUBSCRIPTION', actor_profile_id: null, entity_id: uuid('notification-plan-entity'), target_path: '/membership' },
   { text: '生日點數已到帳。', event_type: 'POINTS', actor_profile_id: null, entity_id: uuid('notification-birthday-entity'), target_path: '/membership' },

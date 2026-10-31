@@ -9,6 +9,7 @@ DECLARE
   recipient_id uuid;
   actor_id uuid;
   actor_name text;
+  sos_title text;
   notification_type text;
   notification_text text;
   notification_entity uuid;
@@ -29,7 +30,7 @@ BEGIN
     notification_entity := NEW.post_id;
     notification_path := '/ootd/' || NEW.post_id::text;
   ELSIF TG_TABLE_NAME = 'ootie_outfit_suggestions' THEN
-    SELECT s.user_id INTO recipient_id
+    SELECT s.user_id, s.title INTO recipient_id, sos_title
     FROM public.ootie_sos_posts AS s
     WHERE s.id = NEW.sos_id;
     notification_type := 'SOS_SUGGESTION';
@@ -48,7 +49,11 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  SELECT coalesce(nullif(username, ''), nullif(display_name, ''), '@衣友')
+  SELECT CASE
+    WHEN username LIKE '@%' THEN username
+    WHEN username IS NOT NULL AND username != '' THEN '@' || username
+    ELSE coalesce(nullif(display_name, ''), '@衣友')
+  END
   INTO actor_name
   FROM public.ootie_profiles
   WHERE id = actor_id;
@@ -57,7 +62,7 @@ BEGIN
     WHEN 'FOLLOW' THEN actor_name || ' 開始追蹤你。'
     WHEN 'OOTD_LIKE' THEN actor_name || ' 喜歡了你的 OOTD。'
     WHEN 'OOTD_COMMENT' THEN actor_name || ' 留言了你的 OOTD。'
-    WHEN 'SOS_SUGGESTION' THEN actor_name || ' 回覆了你的穿搭 SOS。'
+    WHEN 'SOS_SUGGESTION' THEN actor_name || '在你的 SOS 求救貼文『' || coalesce(sos_title, '穿搭求救') || '』留言了。'
   END;
 
   INSERT INTO public.ootie_notifications (
