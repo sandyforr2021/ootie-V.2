@@ -26,7 +26,7 @@ const auth = useAuthStore(); const app = useAppStore(); const closet = useCloset
 const route = useRoute(); const router = useRouter();
 const token = computed(() => auth.session?.access_token || '');
 const isCommunity=computed(()=>route.name==='TryonCommunity');
-const tab = ref(['album','community','activity','wardrobe','saved','links'].includes(route.query.tab) ? route.query.tab : (isCommunity.value?'community':'wishlist'));
+const tab = ref(['album','community','activity','wardrobe','saved','links','tone'].includes(route.query.tab) ? route.query.tab : (isCommunity.value?'community':'wishlist'));
 const products = ref([]); const jobs = ref([]); const photos = ref([]); const posts = ref([]);
 const images = ref({}); const selected = ref([]); const selectedClothing = ref([]); const selectedSaved = ref([]); const savedEntries = ref([]); const selectionSource = ref('wishlist'); const selectedPhoto = ref(''); const consent = ref(false);
 const savedClothing = ref([]),savedPostRows=ref([]);
@@ -77,7 +77,7 @@ const identitySnapshot = () => ({ version:sessionVersion, userId:auth.session?.u
 const identityCurrent = (identity) => !disposed && identity.version === sessionVersion && identity.userId === auth.session?.user?.id && identity.profileId === auth.profileId;
 const urls = new Map(); const loadingImages = new Set();
 const categories = computed(() => [['upper_body',t('上衣','Tops')],['lower_body',t('下身','Bottoms')],['full_body',t('連身服飾','Full outfit')],['shoes',t('鞋子','Shoes')],['auto',t('自動辨識','Auto')]]);
-const tabs = computed(() => [['wishlist',t('試穿模擬')],['album',t('私人相簿','Private album')]]);
+const tabs = computed(() => [['wishlist',t('試穿模擬')],['tone',t('個人色彩分析')],['album',t('私人相簿','Private album')]]);
 const visibleProducts = computed(() => products.value.filter((p) => supportsTryOn(p) && (showPassed.value || p.state !== 'dismissed')).slice(0,productLimit.value));
 const activeJobs = computed(() => jobs.value.filter((j) => ['queued','preparing','submitting','processing'].includes(j.status)));
 const albumJobs = computed(() => jobs.value.filter((j) => (j.sequence_index || 1)===(j.sequence_total || 1) && ['try_on','garment_cleanup'].includes(j.kind) && !j.result_deleted_at && (j.status !== 'succeeded' || j.result_path)).slice(0,jobLimit.value));
@@ -479,7 +479,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
       <h1>{{ t(tab === 'activity' ? '購物足跡' : '試穿工作室') }}</h1>
       <div v-if="tab !== 'activity'" class="studio-account">
         <div class="studio-account-row">
-          <p v-if="auth.isMember" class="studio-credit-summary" role="status">{{ t('平台點數') }}: {{ loading ? '…' : capabilities.pointBalance ?? '—' }} · {{ t('每件 2 點，失敗退點。') }}</p>
+          <p v-if="auth.isMember" class="studio-credit-summary" role="status">{{ t('目前點數') }}: {{ loading ? '…' : capabilities.pointBalance ?? '—' }}</p>
           <router-link class="studio-points-link" to="/credits">{{ t('我的點數') }}<AppIcon name="chevron" :size="16" /></router-link>
         </div>
         <p v-if="auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
@@ -507,22 +507,9 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
         <div v-if="!visibleProducts.length" class="shop-empty"><AppIcon name="Shop" :size="34" /><h3>{{ t('想買清單目前沒有商品') }}</h3><p>{{ t('先在想買清單加入商品，或切換到我的衣櫥挑選衣物。') }}</p></div>
         <div v-else class="shop-product-grid">
           <article v-for="product in visibleProducts" :key="product.id" :class="['shop-product',{selected:selected.includes(product.id)}]">
-            <button class="shop-product-image" :disabled="!!busy || !!pendingBatch" :aria-pressed="selected.includes(product.id)" :aria-label="`${t('選擇試穿','Select for try-on')} ${product.title}`" @click="toggleProduct(product.id)"><MediaImage v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title" loading="lazy" /><span v-else class="shop-image-placeholder">{{ t('商品照片','Product photo') }}</span><span class="shop-select-mark">{{ selected.includes(product.id)?'✓':'＋' }}</span></button>
+            <button class="shop-product-image" :disabled="!supportsTryOn(product)" :aria-pressed="selected.includes(product.id)" :aria-label="`${t('選擇試穿')} ${product.title}`" @click="toggleProduct(product.id)"><MediaImage v-if="images[product.image_path]" :src="images[product.image_path]" :alt="product.title" /><span v-if="supportsTryOn(product)" class="shop-select-mark">{{ selected.includes(product.id)?'✓':'＋' }}</span></button>
             <div class="shop-product-info">
-              <small>{{ product.state==='dismissed'?t('已放下'):product.state==='purchased'?t('已購買','Purchased'):product.state==='kept'?t('保留候選','Shortlisted'):t('想買','Wishlist') }}</small>
               <h3>{{ product.title }}</h3>
-              <div class="shop-product-tools">
-                <div class="shop-product-actions">
-                  <button type="button" class="shop-icon-action" :aria-label="t('搭我的衣櫥')" :title="t('搭我的衣櫥')" @click="matchingProduct=product"><AppIcon name="Closet" /></button>
-                  <a v-if="safeCommerceUrl(product.source_url)" class="shop-icon-action" :href="safeCommerceUrl(product.source_url)" target="_blank" rel="noopener noreferrer" :aria-label="t('前往購買 ↗')" :title="t('前往購買 ↗')" @click="track('purchase_click',{productId:product.id})"><AppIcon name="Shop" /></a>
-                </div>
-                <div class="shop-secondary-actions">
-                  <button v-if="product.state==='dismissed'" type="button" class="shop-icon-action" :disabled="!!busy" :aria-label="t('放回想買清單')" :title="t('放回想買清單')" @click="setState(product,'wishlist')"><AppIcon name="restore" /></button>
-                  <button type="button" class="shop-icon-action" :disabled="!!busy" :aria-pressed="product.state==='kept'" :aria-label="t('保留')" :title="t('保留')" @click="setState(product,'kept')"><AppIcon name="bookmark" /></button>
-                  <button type="button" class="shop-icon-action" :disabled="!!busy" :aria-pressed="product.state==='dismissed'" :aria-label="t('先放下')" :title="t('先放下')" @click="setState(product,'dismissed')"><AppIcon name="pass" /></button>
-                  <button type="button" class="shop-icon-action" :disabled="!!busy" :aria-label="t('買到了，加入衣櫥')" :title="t('買到了，加入衣櫥')" @click="purchasedProduct=product"><AppIcon name="purchased" /></button>
-                </div>
-              </div>
             </div>
           </article>
         </div><button v-if="products.filter(p=>showPassed || p.state!=='dismissed').length>productLimit" class="shop-load-more" @click="productLimit+=12">{{ t('顯示更多','Show more') }}</button>
@@ -534,7 +521,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
         </template>
         <template v-else>
           <div v-if="!savedItems.length" class="shop-empty"><p>{{ t('收藏的穿搭目前沒有可選擇的公開衣物。') }}</p><router-link to="/profile?tab=saved">{{ t('我的收藏') }}</router-link></div>
-          <div v-else class="shop-product-grid"><article v-for="item in savedItems.filter(canTryOnClothing)" :key="item.id" :class="['shop-product',{selected:selectedSaved.some(entry=>entry.itemId===item.id)}]"><button class="shop-product-image" :disabled="!canTryOnClothing(item)" :aria-pressed="selectedSaved.some(entry=>entry.itemId===item.id)" :aria-label="`${t('選擇試穿')} ${item.name}`" @click="toggleSavedItem(item)"><MediaImage v-if="item.photo" :src="item.photo" :alt="item.name" /><span v-if="canTryOnClothing(item)" class="shop-select-mark">{{ selectedSaved.some(entry=>entry.itemId===item.id)?'✓':'＋' }}</span></button><div class="shop-product-info"><h3>{{ item.name }}</h3><p v-if="!canTryOnClothing(item)" class="shop-hint">{{ t('這個品類暫不支援試穿。') }}</p></div></article></div>
+          <div v-else class="shop-product-grid"><article v-for="item in savedItems.filter(canTryOnClothing)" :key="item.id" :class="['shop-product',{selected:selectedSaved.some(entry=>entry.itemId===item.id)}]"><button class="shop-product-image" :disabled="!canTryOnClothing(item)" :aria-pressed="selectedSaved.some(entry=>entry.itemId===item.id)" :aria-label="`${t('選擇試穿')} ${item.name}`" @click="toggleSavedItem(item)"><MediaImage v-if="item.photo" :src="item.photo" :alt="item.name" /><span v-if="canTryOnClothing(item)" class="shop-select-mark">{{ selectedSaved.some(entry=>entry.itemId===item.id)?'✓':'＋' }}</span></button><div class="shop-product-info"><h3>{{ item.name }}</h3></div></article></div>
         </template>
 
         </section>
@@ -558,11 +545,21 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
       </div>
     </section>
 
+    <section v-else-if="tab==='tone'" class="shop-panel shop-tone-section">
+      <div class="shop-section-title"><div><h2>{{ t('個人色彩分析') }}</h2><p>{{ t('檢視您的膚色分析結果與專屬色調建議。') }}</p></div><button :disabled="loading" @click="refresh">{{ t('更新進度','Refresh') }}</button></div>
+      <div v-if="toneJobs.length" class="shop-panel shop-tone-results"><h3>{{ t('個人色彩分析','Personal color analysis') }}</h3><p v-for="job in toneJobs" :key="job.id">{{ stateLabel(job.status) }} · {{ formatDate(job.created_at,{dateStyle:'medium'}) }} <span v-if="job.status==='failed'" class="shop-hint">{{ t('請改用光線均勻、臉部清晰的正面近照。') }}</span> <span v-if="job.result_data?.skin_color" class="shop-skin-swatch" :style="{background:job.result_data.skin_color}"></span></p><div class="shop-palette"><div v-for="color in palette" :key="color.key"><i :style="{background:color.color}"></i><span>{{ t({soft:'柔和',contrast:'對比',neutral:'中性'}[color.key]) }}</span></div></div></div>
+      <p v-if="loading && !toneJobs.length" role="status">{{ t('載入中…') }}</p>
+      <div v-else-if="!toneJobs.length" class="shop-empty">
+        <AppIcon name="album" :size="34" />
+        <h3>{{ t('尚無個人色彩分析紀錄') }}</h3>
+        <p>{{ t('您尚未進行個人色彩分析。') }}</p>
+      </div>
+    </section>
+
     <section v-else-if="tab==='album'" class="shop-album">
       <div class="shop-section-title"><div><h2>{{ t('私人相簿') }}</h2><p>{{ t('最多選取三張照片比較。') }}</p></div><button :disabled="loading" @click="refresh">{{ t('更新進度','Refresh') }}</button></div>
-      <div v-if="toneJobs.length" class="shop-panel shop-tone-results"><h3>{{ t('個人色彩分析','Personal color analysis') }}</h3><p v-for="job in toneJobs" :key="job.id">{{ stateLabel(job.status) }} · {{ formatDate(job.created_at,{dateStyle:'medium'}) }} <span v-if="job.status==='failed'" class="shop-hint">{{ t('請改用光線均勻、臉部清晰的正面近照。') }}</span> <span v-if="job.result_data?.skin_color" class="shop-skin-swatch" :style="{background:job.result_data.skin_color}"></span></p><div class="shop-palette"><div v-for="color in palette" :key="color.key"><i :style="{background:color.color}"></i><span>{{ t({soft:'柔和',contrast:'對比',neutral:'中性'}[color.key]) }}</span></div></div></div>
       <div v-if="comparisons.length" class="shop-comparison"><figure v-for="job in comparisons" :key="job.id"><MediaImage :src="images[job.result_path]" :alt="jobTitle(job)" /><figcaption>{{ jobTitle(job) }}</figcaption></figure></div>
-      <p v-if="loading && !albumJobs.length" role="status">{{ t('載入中…') }}</p><div v-else-if="!albumJobs.length && !toneJobs.length" class="shop-empty"><AppIcon name="album" :size="34" /><h3>{{ t('尚無試穿結果') }}</h3><button @click="selectTab('wishlist')">{{ t('去挑選商品','Choose products') }} →</button></div>
+      <p v-if="loading && !albumJobs.length" role="status">{{ t('載入中…') }}</p><div v-else-if="!albumJobs.length" class="shop-empty"><AppIcon name="album" :size="34" /><h3>{{ t('尚無試穿結果') }}</h3><button @click="selectTab('wishlist')">{{ t('去挑選商品','Choose products') }} →</button></div>
       <div class="shop-album-grid"><article v-for="job in albumJobs" :key="job.id" class="shop-result shop-panel"><div class="shop-result-media"><MediaImage v-if="job.result_path && images[job.result_path]" :src="images[job.result_path]" :alt="jobTitle(job)" loading="lazy" /><div v-else class="shop-job-placeholder"><AppIcon name="sparkle" :size="34" :class="{working:['preparing','submitting','processing'].includes(job.status)}" /><strong>{{ stateLabel(job.status) }}</strong></div><span class="shop-job-state">{{ stateLabel(job.status) }}</span></div><small>{{ formatDate(job.created_at,{dateStyle:'medium',timeStyle:'short'}) }}</small><h3>{{ jobTitle(job) }}</h3><p v-if="job.sequence_total>1" class="shop-hint">{{ $tf('已完成 {done} / {total} 件', {done:jobs.filter(entry=>entry.batch_id===job.batch_id &amp;&amp; entry.status==='succeeded').length,total:job.sequence_total}) }}</p><p v-if="['needs_review','failed'].includes(job.status)" class="shop-hint">{{ job.status==='needs_review'?t('服務正在核對這筆工作，請勿重送相同生成。','The service must reconcile this job. Please do not submit it again.'):t('這次未能完成，請檢查人物照與商品圖。','This job did not finish. Please check the portrait and garment image.') }}</p><div v-if="job.status==='succeeded'" class="shop-result-actions"><button :aria-pressed="comparisonIds.includes(job.id)" @click="compare(job)">{{ comparisonIds.includes(job.id)?'✓ ':'' }}{{ t('比較','Compare') }}</button><button @click="download(job)">{{ t('下載','Download') }}</button><button :disabled="!!busy" @click="removeResult(job)">{{ t('刪除') }}</button></div><button v-if="job.status==='queued' &amp;&amp; jobs.filter(entry=>entry.batch_id===job.batch_id).every(entry=>entry.status==='queued')" :disabled="!!busy" @click="cancel(job)">{{ t('取消等待','Cancel queued job') }}</button></article></div>
       <button v-if="jobs.filter(j=>j.kind==='try_on').length>jobLimit" class="shop-load-more" @click="jobLimit+=12">{{ t('顯示更多','Show more') }}</button>
 

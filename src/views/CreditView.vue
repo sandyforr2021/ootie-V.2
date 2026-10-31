@@ -28,7 +28,6 @@ watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
    <template v-else-if="!auth.isMember"><strong class="personal-balance">—</strong><button class="secondary" @click="auth.openAuthModal('login',null,'/credits')">{{ t('登入／註冊') }}</button></template>
    <div v-else-if="pointsError" role="alert"><p>{{ t('點數紀錄暫時無法載入。') }}</p><button class="secondary" @click="loadPoints">{{ t('重試') }}</button></div>
    <template v-else-if="points"><strong class="personal-balance">{{ points.balance }}</strong><a href="#point-history">{{ t('查看點數紀錄') }}</a></template>
-   <p class="membership-rule">{{ t('每日免費 2 張') }}</p>
   </section>
  </header>
  <section class="membership-options" aria-labelledby="point-options-title">

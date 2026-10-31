@@ -168,6 +168,9 @@ AI 試穿|AI try-on|AI試着|Prueba con IA
 語言|Language|言語|Idioma
 完成並加入衣櫥|Confirm and add to wardrobe|確認してワードローブに追加|Confirmar y añadir al armario
 確認你已擁有這件商品，將照片與名稱加入衣櫥。|Confirm you own this product to add its photo and name to your wardrobe.|購入済みの商品であることを確認し、写真と名前をワードローブに追加してください。|Confirma que tienes este producto para añadir su foto y nombre al armario.
+檢視您的膚色分析結果與專屬色調建議。|View your skin tone analysis results and custom color recommendations.|スキントーンの分析結果とおすすめのカラーを表示します。|Consulta los resultados de tu análisis de tono de piel y recomendaciones de color.
+尚無個人色彩分析紀錄|No personal color analysis history yet.|パーソナルカラー分析の履歴はまだありません。|Aún no hay historial de análisis de color personal.
+您尚未進行個人色彩分析。|You have not performed any personal color analysis yet.|パーソナルカラー分析はまだ実行されていません。|Aún no has realizado ningún análisis de color personal.
 確認已購買|Confirm ownership|所有を確認|Confirmar que lo tienes
 取消|Cancel|キャンセル|Cancelar
 準備試穿服務中，請稍後再試。|The try-on service is being prepared. Please try again later.|試着サービスを準備しています。しばらくしてからお試しください。|Estamos preparando el servicio de prueba. Inténtalo más tarde.
