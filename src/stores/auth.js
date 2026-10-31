@@ -94,36 +94,60 @@ export const useAuthStore = defineStore('auth', () => {
     useAppStore().prepareGuestImport(profileId.value);
   };
 
+  let authListenerInitialized = false;
+
   // Initialize only from the real Supabase session. Runtime mock identity is forbidden.
   const initAuth = async () => {
     try {
-      const { data, error } = await supabase.auth.getSession();
+      let { data, error } = await supabase.auth.getSession();
       if (error) throw error;
+
+      // Handle OAuth redirect token fragment / query parameter race condition
+      const hasOAuthParams = typeof window !== 'undefined' && (
+        window.location.hash.includes('access_token') ||
+        window.location.hash.includes('error') ||
+        window.location.search.includes('code=')
+      );
+
+      if (!data?.session && hasOAuthParams) {
+        for (let i = 0; i < 20; i++) {
+          await new Promise(r => setTimeout(r, 100));
+          const retryRes = await supabase.auth.getSession();
+          if (retryRes.data?.session) {
+            data = retryRes.data;
+            break;
+          }
+        }
+      }
+
       session.value = data?.session || null;
       user.value = data?.session?.user || null;
       await resolveProfileIdentity(session.value);
       offerGuestImport();
 
-      supabase.auth.onAuthStateChange((_event, currentSession) => {
-        if (user.value?.id !== currentSession?.user?.id) { releasePrivateClothingPhotoUrls(); releaseSharedClothingPhotoUrls(); }
-        // Supabase awaits this callback while holding its auth lock. Start
-        // profile requests in a later task so other SDK calls can complete.
-        profileResolutionVersion += 1;
-        const eventVersion = ++authStateEventVersion;
-        session.value = currentSession;
-        user.value = currentSession?.user || null;
-        if (authStateChangeTimer !== null) clearTimeout(authStateChangeTimer);
-        authStateChangeTimer = setTimeout(() => {
-          authStateChangeTimer = null;
-          void resolveProfileIdentity(currentSession)
-            .then(() => {
-              if (eventVersion === authStateEventVersion) offerGuestImport();
-            })
-            .catch((error) => {
-              if (eventVersion === authStateEventVersion) errorMsg.value = getServiceErrorMessage(error);
-            });
-        }, 0);
-      });
+      if (!authListenerInitialized) {
+        authListenerInitialized = true;
+        supabase.auth.onAuthStateChange((_event, currentSession) => {
+          if (user.value?.id !== currentSession?.user?.id) { releasePrivateClothingPhotoUrls(); releaseSharedClothingPhotoUrls(); }
+          // Supabase awaits this callback while holding its auth lock. Start
+          // profile requests in a later task so other SDK calls can complete.
+          profileResolutionVersion += 1;
+          const eventVersion = ++authStateEventVersion;
+          session.value = currentSession;
+          user.value = currentSession?.user || null;
+          if (authStateChangeTimer !== null) clearTimeout(authStateChangeTimer);
+          authStateChangeTimer = setTimeout(() => {
+            authStateChangeTimer = null;
+            void resolveProfileIdentity(currentSession)
+              .then(() => {
+                if (eventVersion === authStateEventVersion) offerGuestImport();
+              })
+              .catch((error) => {
+                if (eventVersion === authStateEventVersion) errorMsg.value = getServiceErrorMessage(error);
+              });
+          }, 0);
+        });
+      }
     } catch (err) {
       errorMsg.value = getServiceErrorMessage(err);
       user.value = null;
