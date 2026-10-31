@@ -7,7 +7,7 @@
       </div>
       <div class="detail-content">
         <h2>{{ itemName(item) }}</h2>
-        <p v-if="item.brand" class="detail-category">{{ item.brand }}</p>
+        <p v-if="item.brand || item.title" class="detail-category">{{ item.brand || item.title }}</p>
         <dl class="detail-fields">
           <div v-for="field in details" :key="field.label">
             <dt>{{ $t(field.label) }}</dt><dd>{{ field.value }}</dd>
@@ -15,16 +15,22 @@
         </dl>
         <p v-if="item.notes" class="detail-notes">{{ item.notes }}</p>
         <div v-if="sourceUrl" class="detail-source-links">
-          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('查看原商品') }} <AppIcon name="ExternalLink" :size="15" /></a>
-          <a href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
+          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('前往商品頁面') }} <AppIcon name="ExternalLink" :size="15" /></a>
+          <a v-if="!isWishlist" href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
         </div>
 
         <div class="modal-actions">
-          <button class="secondary" @click="closetStore.toggleFavorite(item.id)">
-            {{ $t(item.favorite ? '移除最愛' : '加入最愛') }}
-          </button>
-          <button class="secondary" @click="editItem">{{ $t("編輯") }}</button>
-          <button class="danger" @click="deleteItem">{{ $t("刪除") }}</button>
+          <template v-if="isWishlist">
+            <button class="primary" @click="addToCloset">{{ $t('放入我的衣櫥') }}</button>
+            <button class="secondary" @click="deleteItem">{{ $t('刪除') }}</button>
+          </template>
+          <template v-else>
+            <button class="secondary" @click="closetStore.toggleFavorite(item.id)">
+              {{ $t(item.favorite ? '移除最愛' : '加入最愛') }}
+            </button>
+            <button class="secondary" @click="editItem">{{ $t("編輯") }}</button>
+            <button class="danger" @click="deleteItem">{{ $t("刪除") }}</button>
+          </template>
         </div>
       </div>
     </article>
@@ -36,22 +42,34 @@ import { computed } from 'vue';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import { itemName, itemPhoto } from '@/services/itemPresentation';
 import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
-import { safeCommerceUrl } from '@/services/commerce';
+import { safeCommerceUrl, commerceClient } from '@/services/commerce';
 import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { labels } from '@/constants';
 
 const appStore = useAppStore();
+const authStore = useAuthStore();
 const closetStore = useClosetStore();
 
+const isWishlist = computed(() => {
+  return (appStore.wishlistProducts || []).some(p => p.id === appStore.selectedItemId) && !appStore.items.some(i => i.id === appStore.selectedItemId);
+});
+
 const item = computed(() => {
-  return appStore.items.find((i) => i.id === appStore.selectedItemId);
+  return appStore.items.find((i) => i.id === appStore.selectedItemId) || (appStore.wishlistProducts || []).find((p) => p.id === appStore.selectedItemId);
 });
 
 const sourceUrl = computed(() => safeCommerceUrl(item.value?.source_url));
 const details = computed(() => {
   const i = item.value || {};
+  if (isWishlist.value) {
+    return [
+      ['分類', i.category && t(labels[i.category] || i.category)],
+      ['狀態', i.state === 'kept' ? t('保留候選') : t('想買')]
+    ].filter(([,value]) => value !== '' && value != null).map(([label,value]) => ({label,value}));
+  }
   return [
     ['分類', i.category && t(labels[i.category] || i.category)],
     ['主要顏色', i.primary_color && t(labels[i.primary_color] || i.primary_color)],
@@ -72,11 +90,44 @@ const editItem = () => {
   appStore.isItemFormOpen = true;
 };
 
-const deleteItem = () => {
-  if (item.value) {
+const deleteItem = async () => {
+  if (!item.value) return;
+  if (isWishlist.value) {
+    try {
+      await commerceClient.request(`products/${item.value.id}/state`, authStore.session?.access_token, { state: 'dismissed' });
+      appStore.wishlistProducts = (appStore.wishlistProducts || []).filter(p => p.id !== item.value.id);
+      close();
+    } catch {
+      appStore.showToast(t('暫時無法完成，請稍後再試。'), { type: 'error' });
+    }
+  } else {
     closetStore.deleteItem(item.value.id);
+    close();
   }
 };
 
+const addToCloset = async () => {
+  if (!item.value) return;
+  const product = item.value;
+  try {
+    const profileId = authStore.profileId;
+    if (profileId) {
+      await closetStore.loadRemoteItems(profileId);
+    }
+    await closetStore.addItem({
+      id: product.id,
+      name: product.title,
+      name_zh: product.title,
+      category: ({upper_body:'Tops',lower_body:'Bottoms',full_body:'Dresses',shoes:'Shoes',auto:'Other'})[product.category] || 'Other',
+      color_hex: product.color || '#c8bba9',
+      source_url: product.source_url
+    });
+    await commerceClient.request(`products/${product.id}/state`, authStore.session?.access_token, { state: 'purchased' });
+    appStore.wishlistProducts = (appStore.wishlistProducts || []).filter(p => p.id !== product.id);
+    appStore.showToast(t('已加入衣櫥。'), { type: 'success' });
+    close();
+  } catch (err) {
+    appStore.showToast(err?.userMessage || t('暫時無法完成，請稍後再試。'), { type: 'error' });
+  }
+};
 </script>
-
