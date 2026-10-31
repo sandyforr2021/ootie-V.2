@@ -35,7 +35,7 @@ describe('public and member application shell',()=>{
     const auth=useAuthStore();await render();
     expect(auth.initAuth).toHaveBeenCalledTimes(1);
     expect(wrapper.find('[data-shell="topbar"]').exists()).toBe(false);
-    expect(wrapper.find('[data-shell="sidebar"]').exists()).toBe(true);
+    expect(wrapper.find('[data-shell="sidebar"]').exists()).toBe(false);
     auth.user={id:'unit-user'};auth.session={user:auth.user};
     await flushPromises();
     expect(wrapper.find('[data-shell="topbar"]').exists()).toBe(true);
@@ -43,7 +43,8 @@ describe('public and member application shell',()=>{
     expect(auth.initAuth).toHaveBeenCalledTimes(1);
   });
   it('handles a stored OAuth destination even when entering the public homepage',async()=>{
-    vi.mocked(useAuthStore().consumeOAuthReturnTo).mockReturnValue('/closet');
+    const auth=useAuthStore();auth.user={id:'oauth-user'};auth.session={user:auth.user};
+    vi.mocked(auth.consumeOAuthReturnTo).mockReturnValue('/closet');
     const router=await render();await flushPromises();
     expect(router.currentRoute.value.path).toBe('/closet');
     expect(wrapper.find('[data-shell="sidebar"]').exists()).toBe(true);

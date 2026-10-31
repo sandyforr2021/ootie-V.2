@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { useSocialStore } from '@/stores/social';
 import { uniquePostsById, useOotdStore } from '@/stores/ootd';
+import { useSosStore } from '@/stores/sos';
 import AppIcon from '@/components/ui/AppIcon.vue';
 import BrandHome from '@/components/home/BrandHome.vue';
 import { itemName, itemPhoto } from '@/services/itemPresentation';
@@ -20,13 +21,51 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
 const ootdStore = useOotdStore();
+const sosStore = useSosStore();
 const socialStore = useSocialStore();
 const isMember = computed(() => authStore.isMember);
 const firstName = computed(() => (appStore.profile.name || '').split(' ')[0]);
 const recentItems = computed(() => appStore.items.slice(0, 4));
-const followingPosts = computed(() => uniquePostsById(genuineContent(appStore.ootdPosts))
-  .filter(post => post.image && socialStore.isFollowing({id: post.user_id, username: post.username}))
-  .sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 4));
+const followingPosts = computed(() => {
+  const isFollowingAuthor = post => socialStore.isFollowing({ id: post.user_id || post.sender_id, username: post.username }) || appStore.isFollowingUser(post.username);
+
+  const ootd = uniquePostsById(genuineContent(appStore.ootdPosts))
+    .filter(post => post.image && isFollowingAuthor(post))
+    .map(post => ({
+      id: post.id,
+      type: 'ootd',
+      user_id: post.user_id,
+      username: post.username,
+      display_name: post.display_name || post.username,
+      avatar_url: post.avatar_url,
+      initials: post.initials || (post.display_name || post.username || '').slice(0, 2).toUpperCase(),
+      image: post.image,
+      caption: post.caption,
+      caption_language: post.caption_language,
+      created_at: post.created_at
+    }));
+
+  const sosList = (sosStore.sosPosts && sosStore.sosPosts.length) ? sosStore.sosPosts : (appStore.sosPosts || []);
+  const sos = uniquePostsById(genuineContent(sosList))
+    .filter(post => (post.cover_url || post.cover_image || post.image || post.cover_path) && isFollowingAuthor(post))
+    .map(post => ({
+      id: post.id,
+      type: 'sos',
+      user_id: post.user_id || post.sender_id,
+      username: post.username,
+      display_name: post.display_name || post.username,
+      avatar_url: post.avatar_url,
+      initials: post.initials || (post.display_name || post.username || '').slice(0, 2).toUpperCase(),
+      image: post.cover_url || post.cover_image || post.image || post.cover_path,
+      caption: post.title || post.details || '穿搭求救',
+      caption_language: null,
+      created_at: post.created_at
+    }));
+
+  return [...ootd, ...sos]
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 4);
+});
 const discoveryPosts = computed(() => {
   const authors = new Set();
   return uniquePostsById(genuineContent(appStore.ootdPosts)).filter(post => {
@@ -44,7 +83,14 @@ const clockTimer=setInterval(()=>{clock.value=new Date();},1000);
 const clockParts = computed(() => [clock.value.getHours(), clock.value.getMinutes(), clock.value.getSeconds()].map(value => String(value).padStart(2, '0')));
 const clockDate = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric', weekday: 'short' }).format(clock.value));
 onBeforeUnmount(()=>clearInterval(clockTimer));
-const openPost = post => router.push({ name: 'OotdDetail', params: { id: post.id }, query: { user: post.username, from: 'home' } });
+const openPost = post => {
+  if (post.type === 'sos') {
+    appStore.activeSosDetailId = post.id;
+    appStore.isSosDetailOpen = true;
+  } else {
+    router.push({ name: 'OotdDetail', params: { id: post.id }, query: { user: post.username, from: 'home' } });
+  }
+};
 const openDetail = id => { appStore.selectedItemId = id; appStore.isDetailOpen = true; };
 watch(() => authStore.profileId, id => {
   if (id) { void closetStore.loadRemoteItems(id); void ootdStore.loadRemotePosts({unfiltered:true}); }
@@ -66,14 +112,14 @@ watch(() => authStore.profileId, id => {
     <WeatherWardrobe v-if="isMember" />
 
     <section v-if="isMember && homePosts.length" class="home-section">
-      <div class="section-heading"><h2>{{ $t(isDiscovery ? '發現穿搭' : '追蹤中的貼文') }}</h2><router-link class="atelier-text-link" to="/explore">{{ $t('探索更多') }}<AppIcon name="Explore" :size="19" /></router-link></div>
+      <div class="section-heading"><h2>{{ $t(isDiscovery ? '發現穿搭' : '追蹤中的衣友動態') }}</h2><router-link class="atelier-text-link" to="/explore">{{ $t('探索更多') }}<AppIcon name="Explore" :size="19" /></router-link></div>
       <div class="following-journal" :class="{ 'discovery-journal': isDiscovery }">
-        <article v-for="post in homePosts" :key="post.id" class="following-card">
+        <article v-for="post in homePosts" :key="`${post.type || 'ootd'}-${post.id}`" class="following-card">
           <button class="following-photo" :aria-label="$t('查看貼文')" @click="openPost(post)"><MediaImage :src="post.image" :alt="post.caption || post.username" loading="lazy" /></button>
           <div class="following-author"><MediaImage v-if="post.avatar_url" :src="post.avatar_url" alt="" loading="lazy" /><span v-else class="author-initials" aria-hidden="true">{{ (post.display_name || post.username || '').slice(0, 2).toUpperCase() }}</span><span>{{ post.display_name || post.username }}</span></div>
           <button v-if="isDiscovery" class="discovery-follow" :disabled="socialStore.pendingProfileIds.includes(post.user_id)" @click="followAuthor(post)">{{ $t('追蹤') }}</button>
           <TranslatedText :content-id="post.id" :text="post.caption" :source-language="post.caption_language" compact understated hide-source-selector />
-          <button class="following-open" @click="openPost(post)"><AppIcon name="comment" :size="17" /><span>{{ $t('查看貼文') }}</span></button>
+          <button class="following-open" @click="openPost(post)"><AppIcon name="comment" :size="17" /><span>{{ $t(post.type === 'sos' ? '查看求救' : '查看貼文') }}</span></button>
         </article>
       </div>
     </section>

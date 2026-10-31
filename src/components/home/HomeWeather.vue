@@ -1,10 +1,12 @@
 <script setup>
 import {computed,ref,toRef,nextTick,onMounted,onBeforeUnmount,watch} from 'vue';
 import {useWeatherStore} from '@/stores/weather';
+import {useAuthStore} from '@/stores/auth';
 import {getBrowserPosition,searchWeatherPlaces} from '@/services/weather';
 import {locale,t} from '@/i18n';
 import AppIcon from '@/components/ui/AppIcon.vue';
 const weather=useWeatherStore();
+const authStore=useAuthStore();
 const expanded=toRef(weather,'locationPickerOpen'),locating=ref(false),query=ref(''),searching=ref(false),places=ref([]),error=ref('');
 watch(expanded,async open=>{if(open){await nextTick();document.getElementById('home-weather-city')?.focus();}});
 let searchVersion=0,locationVersion=0;
@@ -27,7 +29,34 @@ async function search(){
  finally{if(version===searchVersion)searching.value=false;}
 }
 async function select(place){locationVersion++;await weather.selectPlace(place);places.value=[];if(!weather.error)expanded.value=false;}
-onMounted(()=>{if(!weather.current&&!weather.loading)void relocate(false);});
+
+async function initWeather(){
+ if(weather.current||weather.loading)return;
+ if(authStore.isMember&&authStore.profileId){
+  let privateProfile=authStore.accountPrivate;
+  if(!privateProfile&&!authStore.accountPrivateLoading){
+   privateProfile=await authStore.loadPrivateAccount();
+  }
+  const savedCity=privateProfile?.weather_city;
+  if(savedCity){
+   try{
+    const found=await searchWeatherPlaces(savedCity,locale.value);
+    if(found&&found.length>0){
+     await weather.selectPlace(found[0]);
+     return;
+    }
+   }catch{
+    // Fall back to browser position if saved city cannot be resolved
+   }
+  }
+ }
+ if(!weather.current&&!weather.loading){
+  void relocate(false);
+ }
+}
+
+onMounted(()=>{void initWeather();});
+watch(()=>authStore.profileId,(id)=>{if(id&&!weather.current&&!weather.loading)void initWeather();});
 </script>
 <template>
  <section class="home-weather" :aria-label="t('天氣')">

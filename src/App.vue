@@ -5,11 +5,11 @@
 
   <div :class="['app', { 'app--brand-home': isBrandHome }]">
     <!-- Sidebar -->
-    <AppSidebar />
+    <AppSidebar v-if="authStore.isLoggedIn" />
 
     <main id="main-content" tabindex="-1">
       <!-- Topbar -->
-      <AppTopbar v-if="!isBrandHome" />
+      <AppTopbar v-if="!isBrandHome && authStore.isLoggedIn" />
 
       <!-- Page Views -->
       <router-view v-slot="{ Component }">
@@ -24,7 +24,7 @@
   </div>
 
   <!-- Mobile Bottom Nav -->
-  <AppBottomNav />
+  <AppBottomNav v-if="!isBrandHome" />
 
   <!-- Modals -->
   <DeferredModal :active="authStore.isAuthModalOpen" :loader="modalLoaders.auth" />
@@ -100,6 +100,6 @@ const modalLoaders = {
 
 <style>
 .app.app--brand-home{display:flex}
-.app--brand-home #main-content{max-width:none;width:auto;margin:0;padding:0}
-@media(max-width:900px){.app--brand-home #main-content{padding-bottom:72px}}
+.app--brand-home #main-content{max-width:none;width:100%;margin:0;padding:0}
+@media(max-width:900px){.app--brand-home #main-content{padding-bottom:0}}
 </style>

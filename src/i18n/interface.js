@@ -212,6 +212,8 @@ AI 圖片處理|AI image processing|AI画像処理|Procesamiento de imágenes co
 前往我的衣櫥|Go to my wardrobe|ワードローブへ|Ir a mi armario
 目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。|Your wardrobe is shared. Others can suggest outfits using your clothes.|ワードローブは公開中です。ほかの人があなたの服でコーデを提案できます。|Tu armario está compartido. Otras personas pueden sugerir conjuntos con tus prendas.
 追蹤中的貼文|Posts from people you follow|フォロー中の投稿|Publicaciones de personas que sigues
+追蹤中的衣友動態|Updates from friends you follow|フォロー中の友達のアクティビティ|Novedades de amigos que sigues
+進入 OOTie|Enter OOTie|OOTieに入る|Entrar a OOTie
 追蹤衣友後，就能在這裡看到他們的貼文。|Follow people to see their posts here.|フォローすると、ここに投稿が表示されます。|Sigue a otras personas para ver sus publicaciones aquí.
 OOTD 熱門單品|Most featured in OOTDs|OOTDによく登場するアイテム|Prendas más usadas en OOTD
 OOTD 出現次數 Top 5|Top 5 by OOTD appearances|OOTD登場回数トップ5|Las 5 prendas más presentes en OOTD

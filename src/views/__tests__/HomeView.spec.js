@@ -7,7 +7,9 @@ import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
 import { useSocialStore } from '@/stores/social';
 import { useOotdStore } from '@/stores/ootd';
+import { useSosStore } from '@/stores/sos';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
+import * as api from '@/services/supabase';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -47,12 +49,9 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.findAll('.trending-card')).toHaveLength(0);
     expect(wrapper.find('.magic-wardrobe').exists()).toBe(false);
     expect(wrapper.find('.weather-wardrobe').exists()).toBe(false);
-    expect(wrapper.find('a[href="/shop"]').exists()).toBe(true);
-    expect(wrapper.find('a[href="/closet?tab=wishlist"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/closet?quick=add-item"]').exists()).toBe(false);
-    await wrapper.find('.brand-hero-actions .brand-join').trigger('click');
-    expect(opening).toHaveBeenLastCalledWith('register',null,'/');
-    await wrapper.find('.brand-login').trigger('click');
+    expect(wrapper.find('.brand-hero-actions .brand-explore-text').exists()).toBe(true);
+    await wrapper.find('.brand-enter').trigger('click');
     expect(opening).toHaveBeenLastCalledWith('login',null,'/');
     wrapper.unmount();
   });
@@ -106,14 +105,57 @@ describe('HomeView guest/member presentation', () => {
     await wrapper.find('.discovery-follow').trigger('click');
     await flushPromises();
     expect(follow).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }));
-    expect(wrapper.text()).toContain('追蹤中的貼文');
+    expect(wrapper.text()).toContain('追蹤中的衣友動態');
     expect(wrapper.findAll('.following-card')).toHaveLength(2);
     expect(wrapper.find('.discovery-follow').exists()).toBe(false);
     app.ootdPosts = [];
     await flushPromises();
     expect(wrapper.find('.following-journal').exists()).toBe(false);
-    expect(wrapper.text()).not.toContain('追蹤中的貼文');
+    expect(wrapper.text()).not.toContain('追蹤中的衣友動態');
     expect(wrapper.text()).not.toContain('追蹤衣友後，就能在這裡看到他們的貼文。');
+    wrapper.unmount();
+  });
+
+  it('displays followed SOS posts in dynamic feed and opens SOS detail on click', async () => {
+    const auth = useAuthStore();
+    const app = useAppStore();
+    const social = useSocialStore();
+    const sosStore = useSosStore();
+    const sosPost = {
+      id: 'sos-post-1',
+      sender_id: 'followed-user',
+      user_id: 'followed-user',
+      username: '@followed_user',
+      display_name: 'Followed Friend',
+      image: '/images/sos-cover.webp',
+      cover_image: '/images/sos-cover.webp',
+      title: '週末野餐穿搭求救',
+      status: 'OPEN',
+      created_at: new Date().toISOString()
+    };
+    vi.spyOn(api, 'fetchSosPostsFromSupabase').mockResolvedValue([sosPost]);
+    vi.spyOn(api, 'fetchSavedSosIds').mockResolvedValue(new Set());
+    vi.spyOn(useOotdStore(), 'loadRemotePosts').mockResolvedValue();
+    vi.spyOn(social, 'refresh').mockResolvedValue();
+    auth.session = { user: { id: 'member-auth' } };
+    auth.user = auth.session.user;
+    auth.profileIdentity = { status: IDENTITY_STATUS.PROFILE_READY, authUserId: auth.user.id, profileId: 'member-profile', profile: { id: 'member-profile' }, error: null };
+    app.ootdPosts = [];
+    app.followingUsers = ['@followed_user'];
+    social.followingProfiles = [{ following_id: 'followed-user', following: { id: 'followed-user', username: '@followed_user' } }];
+    app.sosPosts = [sosPost];
+    sosStore.sosPosts = [sosPost];
+
+    const wrapper = mount(HomeView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('追蹤中的衣友動態');
+    expect(wrapper.findAll('.following-card')).toHaveLength(1);
+    expect(wrapper.text()).toContain('週末野餐穿搭求救');
+
+    await wrapper.find('.following-open').trigger('click');
+    expect(app.activeSosDetailId).toBe('sos-post-1');
+    expect(app.isSosDetailOpen).toBe(true);
     wrapper.unmount();
   });
 });

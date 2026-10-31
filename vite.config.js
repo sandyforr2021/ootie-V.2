@@ -21,6 +21,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: resolve(__dirname, 'index.html'),
+      external: ['onnxruntime-web/webgpu'],
       output: {
         // Keep stable SDK/framework code cached when application screens change.
         // Deferred modals still control what is downloaded on the first visit.
@@ -31,7 +32,14 @@ export default defineConfig({
       }
     }
   },
+  worker: {
+    rollupOptions: {
+      external: ['onnxruntime-web/webgpu']
+    }
+  },
   server: {
+    port: 5174,
+    strictPort: true,
     watch: {
       ignored: ['**/OOTIE-main/OOTIE-main/**']
     }

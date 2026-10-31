@@ -27,6 +27,10 @@
         <AppIcon class="nav-icon" :name="item.routeName" /><span class="nav-text">{{ displayLabel(item) }}</span>
       </router-link>
     </nav>
+    <div class="sidebar-footer">
+      <p class="sidebar-footer-slogan">{{ $t('你的衣櫥，更多穿搭可能。') }}</p>
+      <p class="sidebar-footer-copy">© 2026 OOTie</p>
+    </div>
   </aside>
 </template>
 
@@ -57,5 +61,9 @@ const displayLabel = (item) => locale.value === 'es'
 .sidebar .nav a.nav-group-start{margin-top:16px}
 .sidebar .nav a.nav-group-start::before{content:'';position:absolute;top:-9px;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}
 .sidebar.collapsed .nav a,.sidebar.collapsed .nav a:nth-child(5){padding-inline:8px}
-@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:18px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start{margin-top:12px}}
+.sidebar-footer{margin-top:auto;padding-top:20px;font-size:11px;line-height:1.5;color:var(--muted)}
+.sidebar-footer-slogan,.sidebar-footer-copy{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-footer-copy{margin-top:3px;font-size:10px}
+.sidebar.collapsed .sidebar-footer{display:none}
+@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:18px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start{margin-top:12px}.sidebar-footer{padding-top:12px}}
 </style>
