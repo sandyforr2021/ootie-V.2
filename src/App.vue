@@ -80,6 +80,9 @@ watch(() => authStore.profileId, profileId => {
   if (profileId) void socialStore.refresh(profileId);
   else socialStore.clear();
 }, { immediate: true });
+watch(() => authStore.session?.user?.id, () => {
+  appStore.wishlistProducts = [];
+}, { immediate: true });
 const modalLoaders = {
   auth: () => import('@/components/modal/AuthModal.vue'),
   itemDetail: () => import('@/components/modal/ItemDetailModal.vue'),

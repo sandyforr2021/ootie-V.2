@@ -47,7 +47,7 @@ const pieces = computed(() => outfits.value[selectedOutfit.value] || outfits.val
 <template>
  <section :class="['weather-wardrobe', { 'no-weather': !weather.current }]" aria-labelledby="weather-outfit-title">
   <div class="weather-intro"><h2 id="weather-outfit-title">{{ t('今日穿搭') }}</h2>
-   <div v-if="!weather.current" class="outfit-location-prompt"><AppIcon name="locate" :size="30"/><p>{{ t('先選擇所在地區，查看適合當地天氣的穿搭。') }}</p><button type="button" class="secondary" @click="weather.openLocationPicker()">{{ t('選擇地區') }}</button></div>
+   <div v-if="!weather.current" class="outfit-location-prompt"><AppIcon name="locate" :size="22"/><p>{{ t('先選擇所在的地區，查看適合當地天氣的穿搭。') }}</p><button type="button" class="secondary" @click="weather.openLocationPicker()">{{ t('選擇地區') }}</button></div>
    <OutfitBoard v-else-if="pieces.length" :pieces="pieces" @open="open"/>
    <router-link v-else class="outfit-empty" to="/closet?quick=add-item"><AppIcon name="Closet" :size="32"/>{{ t('加入第一件衣服') }}</router-link>
    <div v-if="outfits.length>1" class="outfit-choices" :aria-label="t('今日搭配')"><button v-for="(outfit,index) in outfits" :key="index" type="button" :aria-pressed="index===selectedOutfit" @click="selectedOutfit=index">{{ $tf('搭配 {number}',{number:index+1}) }}</button></div>
@@ -61,10 +61,10 @@ const pieces = computed(() => outfits.value[selectedOutfit.value] || outfits.val
 <style scoped>
 
 .weather-wardrobe{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);align-items:center;gap:40px;padding:28px 32px;margin:32px 0 40px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(115deg,#fff5ed 0%,#fff7fb 48%,#f0f5ff 100%);color:var(--ink)}
-.weather-wardrobe.no-weather{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 32px}
-.weather-wardrobe.no-weather .weather-intro{width:100%;display:flex;flex-direction:column;align-items:center}
-.outfit-location-prompt{display:flex;min-height:180px;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}.outfit-location-prompt>svg{color:var(--accent)}.outfit-location-prompt p{max-width:28ch;margin:0;font-size:14px;line-height:1.8}.outfit-location-prompt button{min-height:44px}
+.weather-wardrobe.no-weather{display:block;padding:24px 32px}
+.weather-wardrobe.no-weather .weather-intro{width:100%}
+.outfit-location-prompt{display:flex;min-height:0;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;text-align:left}.outfit-location-prompt>svg{color:var(--accent);flex:none}.outfit-location-prompt p{flex:1;min-width:0;max-width:none;margin:0;font-size:14px;line-height:1.6;white-space:nowrap}.outfit-location-prompt button{min-height:44px;flex:none}
 .weather-intro{min-width:0}.weather-intro h2{font:400 30px/1.4 var(--font-display);margin:0 0 18px}.outfit-context{min-width:0}.outfit-context ul{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:16px}.outfit-context li{display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.8}.outfit-context li svg{color:var(--accent);margin-top:2px}.outfit-occasion{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--muted)}.outfit-occasion select{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;max-width:100%;min-height:44px}
 .outfit-choices{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}.outfit-choices button{border:1px solid var(--line);background:white;border-radius:24px;padding:10px 16px;min-height:44px;color:var(--muted);font-size:12px;cursor:pointer}.outfit-choices button[aria-pressed=true]{background:var(--ink);color:white;border-color:var(--ink)}.outfit-empty{display:flex;align-items:center;justify-content:center;gap:12px;min-height:200px;color:var(--ink)}.outfit-history-note{font-size:12px;color:var(--muted)}.outfit-history-note button{background:none;border:0;color:var(--accent);text-decoration:underline}
-@media(max-width:700px){.weather-wardrobe{grid-template-columns:minmax(0,1fr);gap:24px;padding:24px}.outfit-context ul{margin-top:18px}.weather-intro h2{font-size:27px}}
+@media(max-width:700px){.weather-wardrobe{grid-template-columns:minmax(0,1fr);gap:24px;padding:24px}.weather-wardrobe.no-weather{padding:20px}.outfit-location-prompt{flex-wrap:wrap;justify-content:flex-start}.outfit-location-prompt p{flex-basis:calc(100% - 42px);white-space:normal}.outfit-context ul{margin-top:18px}.weather-intro h2{font-size:27px}}
 </style>

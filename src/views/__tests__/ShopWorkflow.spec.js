@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
 import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
+import ItemDetailModal from '@/components/modal/ItemDetailModal.vue';
 
 const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, allowance:{}, products: [], jobs: [], saved: [], savedClothing: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
@@ -40,6 +41,12 @@ describe('Shopping studio workflow', () => {
     fixture.credits=100; fixture.points=100; fixture.allowance={}; fixture.jobs=[]; fixture.saved=[]; fixture.savedClothing=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
+      if(/^products\/[^/]+\/state$/.test(path) && body){
+        const id=path.split('/')[1], product=fixture.products.find(item=>item.id===id);
+        const changes=body.sourceUrl!==undefined?{...body,source_url:body.sourceUrl}:body;
+        if(product)Object.assign(product,changes);
+        return {product:{...product,...changes}};
+      }
       if(path==='capabilities')return {enabled:true,remainingUnits:fixture.credits,pointBalance:fixture.points,costs:{try_on:2,skin_tone:20},...fixture.allowance};
       if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
@@ -56,6 +63,8 @@ describe('Shopping studio workflow', () => {
     await wrapper.vm.$router.push('/shop');await flushPromises();
     expect(wrapper.find('h1').text()).toBe('試穿工作室');
     expect(wrapper.find('.shop-tabs').exists()).toBe(true);
+    expect(wrapper.findAll('.shop-tabs button').map(button=>button.text())).toEqual(['試穿模擬','私人相簿','個人色彩分析']);
+    expect(wrapper.find('.studio-balance-card strong').text()).toBe('100');
     expect(fixture.request).toHaveBeenCalledWith('products','unit-only',undefined);
   });
   it('resolves saved public clothing independently of the general feed image limit',async()=>{
@@ -194,7 +203,7 @@ describe('Shopping studio workflow', () => {
     await wrapper.vm.refresh();
     await flushPromises();
     expect(wrapper.find('.studio-shortlist').exists()).toBe(true);
-    expect(wrapper.find('.studio-credit-summary').text()).toContain('100');
+    expect(wrapper.find('.studio-balance-card').text()).toContain('100');
     await wrapper.find('.shop-product-image').trigger('click');
     await wrapper.findAll('.studio-steps button')[1].trigger('click');
     await wrapper.vm.refresh();await flushPromises();
@@ -243,6 +252,7 @@ describe('Shopping studio workflow', () => {
   });
   it('removes and restores a wishlist product through its owner-scoped state endpoint',async()=>{
     await render(WishlistPanel,'/closet?tab=wishlist');
+    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
     await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
     expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'dismissed'});
     expect(wrapper.find('.wishlist-card').exists()).toBe(false);
@@ -250,8 +260,46 @@ describe('Shopping studio workflow', () => {
     expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'wishlist'});
     expect(wrapper.find('.wishlist-card').exists()).toBe(true);
   });
+  it('filters wishlist items by category and switches between rack and cards',async()=>{
+    fixture.products=[
+      {id:'top',title:'Linen top',category:'upper_body',state:'wishlist',image_path:'products/top.jpg'},
+      {id:'bottom',title:'Wide trousers',category:'lower_body',state:'wishlist',image_path:'products/bottom.jpg'},
+      {id:'outer',title:'Light jacket',category:'upper_body',outfit_layer:'outer',state:'wishlist',image_path:'products/outer.jpg'}
+    ];
+    await render(WishlistPanel,'/closet?tab=wishlist');
+    expect(wrapper.findAll('.rack-item')).toHaveLength(3);
+    await wrapper.findAll('.wishlist-category-row .category').find(button=>button.text()==='外套').trigger('click');
+    expect(wrapper.find('.rack-row h2').text()).toContain('外套');
+    expect(wrapper.findAll('.rack-item')).toHaveLength(1);
+    await wrapper.findAll('.wishlist-category-row .category').find(button=>button.text()==='下身').trigger('click');
+    expect(wrapper.findAll('.rack-item')).toHaveLength(1);
+    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
+    expect(wrapper.findAll('.wishlist-card')).toHaveLength(1);
+    await wrapper.find('.wishlist-product-open').trigger('click');
+    expect(useAppStore().isDetailOpen).toBe(true);
+    expect(useAppStore().selectedItemId).toBe('bottom');
+  });
+  it('edits wishlist product metadata from the item detail modal',async()=>{
+    const appStore=useAppStore();
+    appStore.wishlistProducts=[{id:'product-unit',title:'Cotton shirt',category:'upper_body',color:'#c8bba9',source_url:'',state:'wishlist',photo:'blob:unit-only'}];
+    appStore.selectedItemId='product-unit';appStore.isDetailOpen=true;
+    await render(ItemDetailModal,'/closet?tab=wishlist');
+    expect(wrapper.text()).toContain('放入我的衣櫥');
+    expect(wrapper.text()).toContain('刪除');
+    expect(wrapper.find('.detail-fields').text()).toContain('上衣');
+    await wrapper.findAll('.modal-actions button').find(button=>button.text()==='編輯').trigger('click');
+    await wrapper.find('.wishlist-edit-form input:not([type=color])').setValue('Linen blouse');
+    await wrapper.find('.wishlist-edit-form').trigger('submit');
+    await flushPromises();
+    expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{
+      title:'Linen blouse',category:'upper_body',color:'#c8bba9',sourceUrl:''
+    });
+    expect(appStore.wishlistProducts[0].title).toBe('Linen blouse');
+    expect(wrapper.find('.wishlist-edit-form').exists()).toBe(false);
+  });
   it('keeps a wishlist product visible when removal fails',async()=>{
     await render(WishlistPanel,'/closet?tab=wishlist');
+    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
     fixture.request.mockRejectedValueOnce(new Error('offline'));
     await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
     expect(wrapper.find('.wishlist-card').exists()).toBe(true);expect(wrapper.find('[role=alert]').exists()).toBe(true);

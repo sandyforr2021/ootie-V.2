@@ -52,6 +52,7 @@ export const useAppStore = defineStore('app', () => {
   };
 
   const items = ref(genuineContent(saved?.items || []).filter(item => !defaultItems.some(fixture => fixture.id === item.id && fixture.photo === item.photo)));
+  const wishlistProducts = ref([]);
   const cloneItems = (source) => JSON.parse(JSON.stringify(source || []));
   const localItemsSnapshot = ref(cloneItems(items.value));
   const isRemoteItemsActive = ref(false);
@@ -351,6 +352,7 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     items,
+    wishlistProducts,
     isRemoteItemsActive,
     isGuestItemsActive,
     beginRemoteItems,
@@ -413,5 +415,4 @@ export const useAppStore = defineStore('app', () => {
     addNotification
   };
 });
-
 

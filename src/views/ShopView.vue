@@ -77,7 +77,7 @@ const identitySnapshot = () => ({ version:sessionVersion, userId:auth.session?.u
 const identityCurrent = (identity) => !disposed && identity.version === sessionVersion && identity.userId === auth.session?.user?.id && identity.profileId === auth.profileId;
 const urls = new Map(); const loadingImages = new Set();
 const categories = computed(() => [['upper_body',t('上衣','Tops')],['lower_body',t('下身','Bottoms')],['full_body',t('連身服飾','Full outfit')],['shoes',t('鞋子','Shoes')],['auto',t('自動辨識','Auto')]]);
-const tabs = computed(() => [['wishlist',t('試穿模擬')],['tone',t('個人色彩分析')],['album',t('私人相簿','Private album')]]);
+const tabs = computed(() => [['wishlist',t('試穿模擬')],['album',t('私人相簿','Private album')],['tone',t('個人色彩分析')]]);
 const visibleProducts = computed(() => products.value.filter((p) => supportsTryOn(p) && (showPassed.value || p.state !== 'dismissed')).slice(0,productLimit.value));
 const activeJobs = computed(() => jobs.value.filter((j) => ['queued','preparing','submitting','processing'].includes(j.status)));
 const albumJobs = computed(() => jobs.value.filter((j) => (j.sequence_index || 1)===(j.sequence_total || 1) && ['try_on','garment_cleanup'].includes(j.kind) && !j.result_deleted_at && (j.status !== 'succeeded' || j.result_path)).slice(0,jobLimit.value));
@@ -479,7 +479,10 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
       <h1>{{ t(tab === 'activity' ? '購物足跡' : '試穿工作室') }}</h1>
       <div v-if="tab !== 'activity'" class="studio-account">
         <div class="studio-account-row">
-          <p v-if="auth.isMember" class="studio-credit-summary" role="status">{{ t('目前點數') }}: {{ loading ? '…' : capabilities.pointBalance ?? '—' }}</p>
+          <section v-if="auth.isMember" class="studio-balance-card" :aria-label="t('目前點數')">
+            <span>{{ t('目前點數') }}</span>
+            <strong>{{ loading ? '…' : capabilities.pointBalance ?? '—' }}</strong>
+          </section>
           <router-link class="studio-points-link" to="/credits">{{ t('我的點數') }}<AppIcon name="chevron" :size="16" /></router-link>
         </div>
         <p v-if="auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
@@ -628,11 +631,17 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 .shop-studio-heading h1{margin:0}
 .studio-account{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:100%}
 .studio-account-row{display:flex;align-items:center;justify-content:flex-end;gap:4px 18px;flex-wrap:wrap}
-.shop-studio-heading .studio-credit-summary{margin:0;padding:0;background:none;border-radius:0;font-size:13px;line-height:1.7;color:var(--ink)}
+.studio-balance-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;min-width:170px;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 12px 24px #3a25451a}
+.studio-balance-card span{font-size:12px;color:#eee3f4}
+.studio-balance-card strong{grid-column:1/-1;font-size:32px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .studio-points-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink);font-size:13px;text-decoration:none}
 .studio-points-link:hover{text-decoration:underline;text-underline-offset:4px}
 .shop-studio-heading .studio-daily-note{font-size:12px;line-height:1.6;max-width:46ch;text-align:right;color:var(--muted)}
 @media(max-width:760px){.shop-studio-heading{grid-template-columns:1fr;gap:12px}.studio-account{align-items:flex-start}.studio-account-row{justify-content:flex-start;gap:2px 14px}.shop-studio-heading .studio-daily-note{text-align:left}}
+.shop-view .shop-product-image{position:relative;display:grid;place-items:center;flex:none;width:100%;overflow:hidden}
+.shop-view .shop-product-image :deep(img){display:block;width:100%;height:100%;max-height:100%;object-fit:contain}
+.shop-view .shop-product-info{position:relative;z-index:1;min-width:0;background:var(--white)}
+.shop-view .shop-product-info h3{position:relative;z-index:1;overflow-wrap:anywhere}
 </style>
 
 <style scoped>.garment-source-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.garment-source-tabs button[aria-pressed=true]{background:var(--ink);color:white}.garment-source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:14px;margin-bottom:24px}.garment-source-grid button{min-width:0;padding:10px}.garment-source-grid img{width:100%;height:150px;object-fit:contain}.garment-source-grid span,.garment-source-grid small{display:block;overflow-wrap:anywhere;margin-top:8px}.selected-person-preview{max-width:240px;margin:20px 0}.selected-person-preview img{width:100%;max-height:320px;object-fit:contain}.selected-person-preview p{font-size:13px}</style>

@@ -55,7 +55,7 @@ const displayLabel = (item) => locale.value === 'es'
 .sidebar-toggle { width: 44px; height: 44px; flex: 0 0 44px; }
 .sidebar-chevron { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .sidebar{overflow-y:auto;overscroll-behavior:contain}
-.sidebar .brand-row{margin-bottom:28px}
+.sidebar .brand-row{margin-bottom:90px}
 .sidebar .nav{gap:4px}
 .sidebar .nav a,.sidebar .nav a:nth-child(5){position:relative;min-height:44px;margin-top:0;border:0;border-radius:7px;padding:10px 14px}
 .sidebar .nav a.nav-group-start{margin-top:16px}
@@ -65,5 +65,5 @@ const displayLabel = (item) => locale.value === 'es'
 .sidebar-footer-slogan,.sidebar-footer-copy{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-footer-copy{margin-top:3px;font-size:10px}
 .sidebar.collapsed .sidebar-footer{display:none}
-@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:18px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start{margin-top:12px}.sidebar-footer{padding-top:12px}}
+@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:36px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start{margin-top:12px}.sidebar-footer{padding-top:12px}}
 </style>

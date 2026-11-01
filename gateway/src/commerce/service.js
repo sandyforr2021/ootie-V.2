@@ -193,8 +193,38 @@ export class CommerceService {
   }
   async updateProduct(user, id, body) {
     assert(isUuid(id), 'INVALID_PRODUCT', 400);
-    assert(['wishlist','kept','dismissed','purchased'].includes(body?.state), 'INVALID_PRODUCT_STATE', 400);
-    const product = await this.repository.updateProduct(id, user.id, { state: body.state });
+    const current = await this.repository.product(id, user.id);
+    assert(current && current.state !== 'tryon_only', 'PRODUCT_NOT_FOUND', 404, '找不到商品。');
+    let changes;
+    if (Object.hasOwn(body || {}, 'state')) {
+      assert(['wishlist','kept','dismissed','purchased'].includes(body.state), 'INVALID_PRODUCT_STATE', 400);
+      changes = { state: body.state };
+    } else {
+      const allowedFields = new Set(['title','category','color','sourceUrl']);
+      assert(body && typeof body === 'object' && !Array.isArray(body)
+        && Object.keys(body).length > 0 && Object.keys(body).every(key => allowedFields.has(key)),
+      'INVALID_PRODUCT', 400);
+      changes = {};
+      if (Object.hasOwn(body, 'title')) {
+        const title = String(body.title || '').trim();
+        assert(title.length > 0 && title.length <= 160, 'INVALID_TITLE', 400, '請填寫 160 字以內的商品名稱。');
+        changes.title = title;
+      }
+      if (Object.hasOwn(body, 'category')) {
+        assert(categories.has(body.category), 'INVALID_CATEGORY', 400, '請選擇商品分類。');
+        changes.category = body.category === 'outer' ? 'upper_body' : body.category;
+        changes.outfit_layer = outfitLayer({ category: body.category });
+      }
+      if (Object.hasOwn(body, 'color')) {
+        assert(/^#[\da-f]{6}$/i.test(body.color || ''), 'INVALID_COLOR', 400, '請選擇商品主要顏色。');
+        changes.color = body.color;
+      }
+      if (Object.hasOwn(body, 'sourceUrl')) {
+        changes.source_url = publicHttpUrl(body.sourceUrl, { optional: true });
+      }
+      assert(Object.keys(changes).length > 0, 'INVALID_PRODUCT', 400);
+    }
+    const product = await this.repository.updateProduct(id, user.id, changes);
     assert(product, 'PRODUCT_NOT_FOUND', 404, '找不到商品。');
     return product;
   }

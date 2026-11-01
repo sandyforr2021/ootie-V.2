@@ -49,20 +49,6 @@
             <span>{{ appStore.profile.username || '' }}</span>
           </div>
         </div>
-        <div class="popover-stats">
-          <div class="popover-stat">
-            <strong>{{ appStore.profile.hearts || 0 }}</strong>
-            <span>Hearts</span>
-          </div>
-          <div class="popover-stat">
-            <strong>{{ appStore.profile.helped || 0 }}</strong>
-            <span>{{ $t("幫助衣友") }}</span>
-          </div>
-          <div class="popover-stat">
-            <strong>{{ appStore.profile.likes || 0 }}</strong>
-            <span>{{ $t("獲得讚數") }}</span>
-          </div>
-        </div>
         <div class="popover-actions">
           <router-link to="/profile" class="btn-primary popover-btn" @click="closeProfileMenu">{{ $t("前往個人檔案") }}</router-link>
           <router-link to="/settings" class="btn-secondary popover-btn" @click="closeProfileMenu">{{ $t("帳號設定") }}</router-link>
@@ -295,29 +281,6 @@ const handleLogout = async () => {
 .popover-copy span {
   color: var(--muted);
   font-size: 0.8rem;
-}
-
-.popover-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-
-.popover-stat {
-  text-align: center;
-}
-.popover-stat strong {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--accent-violet-ink);
-}
-.popover-stat span {
-  color: var(--muted);
-  font-size: 0.72rem;
 }
 
 .popover-actions {

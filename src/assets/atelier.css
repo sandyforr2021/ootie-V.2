@@ -10,7 +10,7 @@ button:not(:disabled):active,.primary:active,.secondary:active{transform:scale(.
 main{max-width:1510px;padding:24px clamp(24px,4vw,64px) 64px;margin-inline:auto}
 .sidebar{width:218px;padding:30px 18px;background:#f5e6ef;border-color:var(--line);position:sticky;top:0;height:100dvh}
 .sidebar .brand-row{margin-bottom:45px}.brand-mark{font-family:var(--font-display);font-weight:500!important;font-size:42px!important;letter-spacing:-.04em!important;line-height:1}.brand-period{color:var(--accent)}
-.sidebar .brand{padding-left:13px}.sidebar .nav{gap:5px}.sidebar .nav a{font-size:13px;font-weight:500;min-height:46px;border-radius:7px;padding:12px 14px;color:#685267}
+.sidebar .brand{padding-left:0}.sidebar .nav{gap:5px}.sidebar .nav a{font-size:13px;font-weight:500;min-height:46px;border-radius:7px;padding:12px 14px;color:#685267}
 .sidebar .nav a.active{background:#af235e;color:#ffffff;font-weight:650;box-shadow:none}
 .sidebar .nav a:nth-child(5){margin-top:28px;border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0;padding-top:21px}
 .sidebar.collapsed .nav a:nth-child(5){margin-top:18px}.sidebar .sidebar-footer{font-size:11px;line-height:1.8;padding:20px 13px 0;margin-top:auto}

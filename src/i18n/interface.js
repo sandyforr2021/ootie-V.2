@@ -351,6 +351,8 @@ SOS 求救|Style SOS|コーデ相談|Ayuda de estilo
 太棒了！你的每件衣服都很常穿，衣櫥利用率很高！|Your wardrobe is getting plenty of wear.|ワードローブをよく活用できています。|Estás aprovechando tu armario.
 查看完整冷宮排名 →|See all unworn items →|着ていない服をすべて見る →|Ver prendas menos usadas →
 搜尋你的衣櫥|Search your wardrobe|ワードローブを検索|Buscar en tu armario
+沒有符合篩選條件的商品。|No products match these filters.|条件に合う商品がありません。|No hay productos que coincidan con los filtros.
+請輸入有效的商品網址。|Enter a valid product URL.|有効な商品URLを入力してください。|Introduce una URL de producto válida.
 篩選|Filters|絞り込み|Filtros
 依色系篩選|Filter by color|色で絞り込み|Filtrar por color
 色系|Color family|色系統|Familia de color

@@ -5,7 +5,7 @@ import { categoryFamily } from '@/services/commerce';
 import { itemName, itemPhoto } from '@/services/itemPresentation';
 import WardrobeCutout from './WardrobeCutout.vue';
 
-const props = defineProps({ items: { type: Array, default: () => [] } });
+const props = defineProps({ items: { type: Array, default: () => [] }, showFavorites: { type: Boolean, default: true } });
 defineEmits(['open', 'favorite']);
 const tracks = new Map();
 const edges = ref({});
@@ -31,7 +31,7 @@ const rows = computed(() => [
   { id: 'dress', label: '洋裝', family: 'full_body' },
   { id: 'shoes', label: '鞋履', family: 'shoes', shelf: true },
   { id: 'accessories', label: '包款與配件', family: 'accessory', shelf: true }
-].map(row => ({...row, items: props.items.filter(item => categoryFamily(item.category) === row.family)})).filter(row => row.items.length));
+].map(row => ({...row, items: props.items.filter(item => (item.outfit_layer === 'outer' ? 'outer' : categoryFamily(item.category)) === row.family)})).filter(row => row.items.length));
 function slide(id, direction) {
   const element = tracks.get(id);
   element?.scrollBy({ left: direction * element.clientWidth * .8, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
@@ -44,7 +44,7 @@ function slide(id, direction) {
       <div :ref="el => attach(row.id,el)" class="rack-track" tabindex="0" role="region" :aria-labelledby="`rack-heading-${row.id}`" @scroll="measure">
         <article v-for="item in row.items" :key="item.id" class="rack-item">
           <button class="rack-piece" type="button" :aria-label="`${$t('查看單品')}: ${itemName(item)}`" @click="$emit('open',item.id)"><WardrobeCutout :src="itemPhoto(item)" :category="item.category" :alt="itemName(item)" /></button>
-          <div class="rack-caption"><span :title="itemName(item)">{{ itemName(item) }}</span><button class="rack-favorite" type="button" :aria-pressed="Boolean(item.favorite)" :aria-label="`${$t(item.favorite?'移除最愛':'加入最愛')} ${itemName(item)}`" @click="$emit('favorite',item.id)"><Heart :size="16" :fill="item.favorite?'currentColor':'none'" /></button></div>
+          <div class="rack-caption"><span :title="itemName(item)">{{ itemName(item) }}</span><button v-if="showFavorites" class="rack-favorite" type="button" :aria-pressed="Boolean(item.favorite)" :aria-label="`${$t(item.favorite?'移除最愛':'加入最愛')} ${itemName(item)}`" @click="$emit('favorite',item.id)"><Heart :size="16" :fill="item.favorite?'currentColor':'none'" /></button></div>
         </article>
       </div>
     </section>
