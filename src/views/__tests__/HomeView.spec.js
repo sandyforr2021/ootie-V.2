@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
@@ -10,6 +10,7 @@ import { useOotdStore } from '@/stores/ootd';
 import { useSosStore } from '@/stores/sos';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
 import * as api from '@/services/supabase';
+import { setLocale } from '@/i18n';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,9 +30,12 @@ const router = createRouter({
 });
 
 describe('HomeView guest/member presentation', () => {
+  afterEach(() => setLocale('zh-TW'));
+
   beforeEach(async () => {
     setActivePinia(createPinia());
     localStorage.clear();
+    setLocale('zh-TW');
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     await router.push('/');
     await router.isReady();
@@ -57,6 +61,35 @@ describe('HomeView guest/member presentation', () => {
     wrapper.unmount();
   });
 
+  it('updates all public-home shopping copy when the language changes', async () => {
+    setLocale('en');
+    const wrapper = mount(HomeView, { global: { plugins: [router] } });
+    const shopping = wrapper.find('.brand-feature-shopping');
+    expect(shopping.find('.brand-feature-copy h3').text()).toBe('Keep your next finds in view.');
+    expect(shopping.findAll('li > span:last-child').map(node => node.text())).toEqual([
+      'Wishlist and product management',
+      'Save in one tap with the browser companion or extension',
+      'Track try-ons and store visits in your shopping activity'
+    ]);
+
+    setLocale('ja');
+    await wrapper.vm.$nextTick();
+    expect(shopping.findAll('li > span:last-child').map(node => node.text())).toEqual([
+      'ほしいものリストと商品管理',
+      'ブラウザーアシスタント／拡張機能からワンタップで保存',
+      '試着やストア訪問を購買履歴で確認'
+    ]);
+    setLocale('es');
+    await wrapper.vm.$nextTick();
+    expect(shopping.findAll('li > span:last-child').map(node => node.text())).toEqual([
+      'Lista de deseos y gestión de productos',
+      'Guarda con un toque desde el asistente o la extensión del navegador',
+      'Consulta las pruebas y visitas a tiendas en tu actividad de compras'
+    ]);
+    wrapper.unmount();
+    setLocale('zh-TW');
+  });
+
   it('switches to the utility dashboard for a resolved member', async () => {
     const auth = useAuthStore();
     const app = useAppStore();
@@ -72,7 +105,7 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.text()).not.toContain('取得 AI 穿搭建議');
     expect(wrapper.find('.brand-home').exists()).toBe(false);
     expect(wrapper.find('.quick-actions').exists()).toBe(false);
-    expect(wrapper.find('.weather-wardrobe').text()).toContain('先選擇所在地區');
+    expect(wrapper.find('.weather-wardrobe').text()).toContain('先選擇所在的地區');
     expect(wrapper.find('.weather-wardrobe .outfit-empty').exists()).toBe(false);
     await wrapper.find('.outfit-location-prompt button').trigger('click');
     expect(wrapper.find('#home-weather-city').exists()).toBe(true);

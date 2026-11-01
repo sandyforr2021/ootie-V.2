@@ -10,6 +10,7 @@ import ItemDetailModal from '@/components/modal/ItemDetailModal.vue';
 
 const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, allowance:{}, products: [], jobs: [], saved: [], savedClothing: [] }));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
+vi.mock('@/services/pointAccount', () => ({ loadPointAccount: vi.fn(async () => ({ balance: 100, transactions: [] })) }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
   aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ id:'photo-unit', path: 'person/unit/photo.jpg' }] })), deletePersonPhoto: fixture.deletePhoto, loadPrivateImage: vi.fn(async () => 'blob:unit-only'), uploadPersonPhoto: vi.fn(async()=>({path:'person/unit/new.jpg'})) }
@@ -19,13 +20,14 @@ vi.mock('@/stores/ootd', () => ({ useOotdStore: () => ({ loadRemotePosts: vi.fn(
 vi.mock('@/services/socialMetrics', () => ({ listSavedOutfits: vi.fn(async()=>fixture.saved) }));
 vi.mock('@/services/clothingRepository', async importOriginal => ({ ...await importOriginal(), getPublicItemsByIds: vi.fn(async()=>fixture.savedClothing) }));
 import ShopView from '../ShopView.vue';
+import CreditView from '../CreditView.vue';
 import WishlistPanel from '@/components/closet/WishlistPanel.vue';
 import { aiGateway } from '@/services/aiGateway';
 import { getPublicItemsByIds } from '@/services/clothingRepository';
 import * as remotePosts from '@/services/supabase';
 let wrapper;
 async function render(component=ShopView, path='/shop') {
-  const router = createRouter({ history:createMemoryHistory(), routes:[{path:'/shop',component:ShopView},{path:'/closet',component:WishlistPanel}] });
+  const router = createRouter({ history:createMemoryHistory(), routes:[{path:'/shop',component:ShopView},{path:'/closet',component:WishlistPanel},{path:'/credits',component:CreditView}] });
   await router.push(path); wrapper=mount(component,{global:{plugins:[router]}}); await flushPromises(); return wrapper;
 }
 async function selectPiece() {
@@ -51,7 +53,7 @@ describe('Shopping studio workflow', () => {
       if(path==='jobs')return {jobs:fixture.jobs.map(job=>({...job}))}; if(path==='posts')return {posts:[]}; return {};
     });
   });
-  afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+  afterEach(()=>{ wrapper?.unmount(); vi.restoreAllMocks(); vi.unstubAllEnvs(); setLocale('zh-TW'); });
   it('opens shopping activity directly and restores the studio when returning',async()=>{
     vi.mocked(aiGateway.listPersonPhotos).mockClear();
     await render(ShopView,'/shop?tab=activity');
@@ -65,6 +67,8 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.shop-tabs').exists()).toBe(true);
     expect(wrapper.findAll('.shop-tabs button').map(button=>button.text())).toEqual(['試穿模擬','私人相簿','個人色彩分析']);
     expect(wrapper.find('.balance-card .personal-balance').text()).toBe('100');
+    expect(wrapper.find('.studio-point-balance').attributes('href')).toBe('/credits#point-history');
+    expect(wrapper.find('.balance-card a:not(.studio-point-balance)').exists()).toBe(false);
     expect(wrapper.find('.studio-balance-card').exists()).toBe(false);
     expect(fixture.request).toHaveBeenCalledWith('products','unit-only',undefined);
   });
@@ -128,6 +132,7 @@ describe('Shopping studio workflow', () => {
     await render();await selectPiece();await wrapper.find('.shop-fitting .shop-consent input').setValue(true);
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeUndefined();
     expect(wrapper.text()).toContain(`今日免費額度 ${remaining}／2 張`);
+    expect(wrapper.find('.balance-card .studio-daily-note').text()).toContain(`今日免費額度 ${remaining}／2 張`);
     expect(wrapper.find('.shop-selection-summary').text()).toContain('本次使用免費額度 1 張');
     expect(wrapper.find('.shop-selection-summary').text()).not.toContain('2 平台點數');
     await wrapper.find('.shop-fitting .shop-wide').trigger('click');await flushPromises();
@@ -270,6 +275,16 @@ describe('Shopping studio workflow', () => {
     expect(useAppStore().isDetailOpen).toBe(true);
     expect(useAppStore().selectedItemId).toBe('product-unit');
   });
+  it('localizes wishlist category names instead of showing internal values',async()=>{
+    setLocale('en');
+    fixture.products=[
+      {id:'top',title:'Linen top',category:'upper_body',state:'wishlist'},
+      {id:'bottom',title:'Wide trousers',category:'lower_body',state:'wishlist'},
+      {id:'auto',title:'Unsorted item',category:'auto',state:'wishlist'}
+    ];
+    await render(WishlistPanel,'/closet?tab=wishlist');
+    expect(wrapper.findAll('.item-meta').map(node=>node.text())).toEqual(['Tops','Bottoms','Auto']);
+  });
   it('filters wishlist items by category and switches between rack and cards',async()=>{
     fixture.products=[
       {id:'top',title:'Linen top',category:'upper_body',state:'wishlist',image_path:'products/top.jpg'},
@@ -296,8 +311,10 @@ describe('Shopping studio workflow', () => {
     appStore.wishlistProducts=[{id:'product-unit',title:'Cotton shirt',category:'upper_body',color:'#c8bba9',source_url:'',state:'wishlist',photo:'blob:unit-only'}];
     appStore.selectedItemId='product-unit';appStore.isDetailOpen=true;
     await render(ItemDetailModal,'/closet?tab=wishlist');
-    expect(wrapper.text()).toContain('放入我的衣櫥');
+    expect(wrapper.text()).toContain('加入衣櫥');
     expect(wrapper.text()).toContain('刪除');
+    expect(wrapper.find('.modal-actions .secondary').text()).toContain('加入衣櫥');
+    expect(wrapper.find('.modal-actions .danger').text()).toBe('刪除');
     expect(wrapper.find('.detail-category').exists()).toBe(false);
     expect(wrapper.find('.detail-fields').text()).toContain('上衣');
     await wrapper.findAll('.modal-actions button').find(button=>button.text()==='編輯').trigger('click');
@@ -309,6 +326,25 @@ describe('Shopping studio workflow', () => {
     });
     expect(appStore.wishlistProducts[0].title).toBe('Linen blouse');
     expect(wrapper.find('.wishlist-edit-form').exists()).toBe(false);
+  });
+  it('renders wishlist details and actions in the selected language',async()=>{
+    const appStore=useAppStore();
+    setLocale('en');
+    appStore.wishlistProducts=[{id:'product-unit',title:'Wide trousers',category:'lower_body',state:'wishlist',photo:'blob:unit-only'}];
+    appStore.selectedItemId='product-unit';appStore.isDetailOpen=true;
+    await render(ItemDetailModal,'/closet?tab=wishlist');
+    expect(wrapper.find('.detail-layout h2').text()).toBe('Wide trousers');
+    expect(wrapper.find('.detail-fields').text()).toContain('Bottoms');
+    expect(wrapper.find('.modal-actions .secondary').text()).toContain('Add to wardrobe');
+    expect(wrapper.find('.modal-actions .danger').text()).toBe('Delete');
+  });
+  it('places point history under the current balance on the credits page',async()=>{
+    await render(CreditView,'/credits');
+    const balance=wrapper.find('.credit-balance-value');
+    expect(balance.find('.personal-balance').text()).toBe('100');
+    expect(balance.find('.point-history-link').text()).toBe('查看點數紀錄');
+    expect(balance.element.children[0].className).toBe('personal-balance');
+    expect(balance.element.children[1].className).toBe('point-history-link');
   });
   it('keeps wishlist details open when deleting a product fails',async()=>{
     const appStore=useAppStore();

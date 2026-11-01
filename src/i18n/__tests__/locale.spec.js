@@ -41,11 +41,21 @@ describe('four-language product experience',()=>{
     for(const key of keys) for(const {code} of LANGUAGES) expect(messages[key]?.[code],`${key}/${code}`).toBeTruthy();
   });
   it('translates the sidebar slogan and weather location errors in every locale',()=>{
-    expect(translateFor('en','你的衣櫥，更多穿搭可能。')).toBe('Your wardrobe, more possibilities.');
+    expect(translateFor('en','你的衣櫥，更多穿搭可能。')).toBe('Your wardrobe. More ways to wear it.');
     expect(translateFor('ja','定位未授權，請手動選擇城市。')).toBe('位置情報が許可されていません。都市を手動で選択してください。');
     expect(translateFor('es','此裝置不支援定位，請手動選擇城市。')).toBe('Este dispositivo no admite la ubicación. Elige una ciudad manualmente.');
     for(const key of ['你的衣櫥，更多穿搭可能。','此裝置不支援定位，請手動選擇城市。','定位未授權，請手動選擇城市。','目前無法取得位置，請手動選擇城市。']) {
       for(const {code} of LANGUAGES) expect(messages[key]?.[code],`${key}/${code}`).toBeTruthy();
     }
+  });
+  it('translates the public-home shopping copy in every locale',()=>{
+    const keys=[
+      '保存商品圖片、資訊與購買連結。透過瀏覽器收藏助手／擴充程式一鍵收藏，想買清單幫你整理選擇，購物足跡留下收藏、試穿與商店造訪紀錄。',
+      '心動不必散落在每個分頁。',
+      '想買清單與商品管理',
+      '瀏覽器收藏助手／擴充程式一鍵收藏',
+      '購物足跡留下試穿與造訪紀錄'
+    ];
+    for(const key of keys) for(const {code} of LANGUAGES) expect(messages[key]?.[code],`${key}/${code}`).toBeTruthy();
   });
 });

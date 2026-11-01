@@ -23,6 +23,11 @@ const emptyForm = () => ({ title:'', sourceUrl:'', imageUrl:'', imageData:'', ca
 const form = ref(emptyForm());
 const urls = new Map(); let generation = 0; let identityVersion = 0;
 const itemFamily = item => item.outfit_layer === 'outer' ? 'outer' : categoryFamily(item.category);
+const categoryNames = { upper_body:'Tops', lower_body:'Bottoms', full_body:'Dress', outer:'Outerwear', shoes:'Shoes', accessory:'Accessories' };
+const categoryLabel = item => {
+  const key = item.category === 'auto' ? '自動辨識' : categoryNames[itemFamily(item)] || item.category;
+  return t(labels[key] || key);
+};
 const filterCategories = computed(() => closetCategories.filter(category => category !== 'Bags'));
 const visibleItems = computed(() => {
   const query = searchQuery.value.toLocaleLowerCase('zh-Hant');
@@ -161,7 +166,7 @@ onBeforeUnmount(() => { identityVersion++; generation++; for(const u of urls.val
           </div>
           <div class="item-info">
             <h3>{{ item.title }}</h3>
-            <p class="item-meta">{{ t(labels[item.outfit_layer === 'outer' ? 'Outerwear' : item.category] || item.category) }}</p>
+            <p class="item-meta">{{ categoryLabel(item) }}</p>
           </div>
         </article>
       </div>

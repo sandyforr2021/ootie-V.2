@@ -27,15 +27,15 @@
         </dl>
         <p v-if="item.notes" class="detail-notes">{{ item.notes }}</p>
         <div v-if="sourceUrl" class="detail-source-links">
-          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('前往商品頁面') }} <AppIcon name="ExternalLink" :size="15" /></a>
+          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('前往商品頁面') }} <AppIcon name="link" :size="15" /></a>
           <a v-if="!isWishlist" href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
         </div>
 
         <div class="modal-actions">
           <template v-if="isWishlist">
-            <button class="primary" @click="addToCloset">{{ $t('放入我的衣櫥') }}</button>
+            <button class="secondary" @click="addToCloset">{{ $t('加入衣櫥') }}</button>
             <button class="secondary" @click="startWishlistEdit">{{ $t("編輯") }}</button>
-            <button class="secondary" @click="deleteItem">{{ $t('刪除') }}</button>
+            <button class="danger" @click="deleteItem">{{ $t('刪除') }}</button>
           </template>
           <template v-else>
             <button class="secondary" @click="closetStore.toggleFavorite(item.id)">

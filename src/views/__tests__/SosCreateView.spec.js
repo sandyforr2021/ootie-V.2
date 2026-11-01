@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import * as ootdMedia from '@/services/ootdMedia';
 import * as clothingRepo from '@/services/clothingRepository';
+import { clearMediaMemory, registerMedia } from '@/services/mediaMemory';
 
 const createTestRouter = () => createRouter({
   history: createWebHistory(),
@@ -317,6 +318,56 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
       cover_url: 'https://example.com/img.jpg',
       cover_path: 'ootd/test/img.jpg'
     }));
+  });
+
+  it('publishes with a deferred wardrobe image as the cover', async () => {
+    clearMediaMemory();
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const closetStore = useClosetStore();
+    const sosStore = useSosStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+    const photoId = registerMedia(authStore.profileId, 'sos-cover', async () => 'blob:wardrobe-cover');
+    const item = { id: 'item-deferred', owner_id: authStore.profileId, name: 'Wardrobe shirt', hidden: false, photo: photoId };
+    appStore.items = [item];
+    vi.spyOn(closetStore, 'loadRemoteItems').mockResolvedValue({ ok: true });
+    const fetchSpy = vi.fn(async url => {
+      expect(url).toBe('blob:wardrobe-cover');
+      return { ok: true, blob: async () => new Blob(['mock'], { type: 'image/jpeg' }) };
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    const upload = vi.spyOn(ootdMedia, 'uploadOotdImage').mockResolvedValue({
+      path: 'ootd/test/deferred-cover.jpg',
+      publicUrl: 'https://example.com/deferred-cover.jpg'
+    });
+    const publish = vi.spyOn(sosStore, 'createSosPost').mockResolvedValue(true);
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('衣櫥圖片求救');
+    await wrapper.find('#sosDetails').setValue('請幫忙搭配');
+    await wrapper.find('.closet-picker-btn').trigger('click');
+    await flushPromises();
+    await wrapper.find('.sos-selection-card').trigger('click');
+    await flushPromises();
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(wrapper.find('.sos-form-error').exists()).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    expect(upload).toHaveBeenCalledOnce();
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({
+      title: '衣櫥圖片求救',
+      cover_url: 'https://example.com/deferred-cover.jpg',
+      cover_path: 'ootd/test/deferred-cover.jpg',
+      cover_item_id: item.id
+    }));
+    wrapper.unmount();
+    clearMediaMemory();
   });
 
   it('does not let wardrobe ID lookup failures block publishing or discard form input', async () => {

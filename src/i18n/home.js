@@ -1,6 +1,6 @@
 export const homeMessages = `
-OOTie｜你的衣櫥，更多穿搭可能。|OOTie | Your wardrobe, more possibilities|OOTie｜クローゼットに、もっと着こなしを。|OOTie | Tu armario, más posibilidades
-你的衣櫥，更多穿搭可能。|Your wardrobe, more possibilities.|あなたのクローゼットに、もっと着こなしを。|Tu armario, más posibilidades.
+OOTie｜你的衣櫥，更多穿搭可能。|OOTie | Your wardrobe. More ways to wear it.|OOTie｜あなたのクローゼットに、もっと着こなしを。|OOTie | Tu armario. Más formas de vestir.
+你的衣櫥，更多穿搭可能。|Your wardrobe. More ways to wear it.|あなたのクローゼットに、もっと着こなしを。|Tu armario. Más formas de vestir.
 資訊與條款|Information and policies|各種ポリシー|Información y políticas
 AI 使用說明|AI usage|AI の利用について|Uso de IA
 你的衣櫥，|Your wardrobe.|あなたのクローゼットに、|Tu armario.
@@ -40,6 +40,10 @@ AI 虛擬試穿|AI virtual try-on|AI バーチャル試着|Probador virtual con 
 走進試穿工作室|Open the fitting studio|試着スタジオへ|Abre el probador
 心動不必散落在每個分頁。|Keep your next finds in view.|気になる服を、見失わない。|No pierdas de vista tus próximos hallazgos.
 保存商品圖片、資訊與購買連結。想買清單幫你整理選擇，購物足跡留下收藏、試穿與商店造訪紀錄。|Save product images, details and store links. Keep choices in your wishlist and revisit your saved finds, try-ons and store visits.|商品画像・情報・購入リンクを保存。ほしいものリストで比較し、保存・試着・ストア訪問の履歴を振り返れます。|Guarda imágenes, detalles y enlaces de tiendas. Organiza tus opciones y revisa tus favoritos, pruebas y visitas a tiendas.
+保存商品圖片、資訊與購買連結。透過瀏覽器收藏助手／擴充程式一鍵收藏，想買清單幫你整理選擇，購物足跡留下收藏、試穿與商店造訪紀錄。|Save product photos, details and purchase links. Use the browser companion or extension to save in one tap, organize choices in your wishlist, and track saved items, try-ons and store visits in your shopping activity.|商品画像・情報・購入リンクを保存。ブラウザーアシスタント／拡張機能からワンタップで保存し、ほしいものリストで比較。保存・試着・ストア訪問の履歴も確認できます。|Guarda imágenes, información y enlaces de compra. Añade productos con un toque desde el asistente o la extensión del navegador, organiza tus opciones en la lista de deseos y consulta tus favoritos, pruebas y visitas a tiendas.
+想買清單與商品管理|Wishlist and product management|ほしいものリストと商品管理|Lista de deseos y gestión de productos
+瀏覽器收藏助手／擴充程式一鍵收藏|Save in one tap with the browser companion or extension|ブラウザーアシスタント／拡張機能からワンタップで保存|Guarda con un toque desde el asistente o la extensión del navegador
+購物足跡留下試穿與造訪紀錄|Track try-ons and store visits in your shopping activity|試着やストア訪問を購買履歴で確認|Consulta las pruebas y visitas a tiendas en tu actividad de compras
 商品資訊與購買連結|Product details and store links|商品情報と購入リンク|Detalles y enlaces de tiendas
 查看想買清單|Open your wishlist|ほしいものリストへ|Abre tu lista de deseos
 從衣櫥出發，找到下一個可能。|From your wardrobe to what comes next.|クローゼットから、次の可能性へ。|De tu armario a tu próxima idea.

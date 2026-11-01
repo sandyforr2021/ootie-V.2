@@ -4,7 +4,7 @@ import {curatedWardrobePhoto} from './curatedWardrobeMedia';
 
 export function itemName(item) {
   if (!item) return '';
-  return locale.value === 'zh-TW' ? item.name_zh || item.name || '' : item.name || item.name_zh || '';
+  return locale.value === 'zh-TW' ? item.name_zh || item.name || item.title || '' : item.name || item.name_zh || item.title || '';
 }
 
 // Correct only the original seeded merchant close-up. User replacement photos

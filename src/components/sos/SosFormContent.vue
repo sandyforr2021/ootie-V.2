@@ -162,6 +162,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { validateOotdImage, uploadOotdImage } from '@/services/ootdMedia';
 import { getItemById } from '@/services/clothingRepository';
+import { acquireMedia, isDeferredMedia, releaseMedia } from '@/services/mediaMemory';
 
 const props = defineProps({
   isModal: {
@@ -316,12 +317,18 @@ const selectedCoverFile = async (profileId) => {
     item = await getItemById(coverItemId.value);
   }
   if (!item?.photo || item.owner_id !== profileId || item.hidden) throw new Error('COVER_UNAVAILABLE');
-  const response = await fetch(item.photo);
-  if (!response.ok) throw new Error('COVER_UNAVAILABLE');
-  const blob = await response.blob();
-  const file = new File([blob], 'sos-cover', { type: blob.type });
-  validateOotdImage(file);
-  return file;
+  const deferred = isDeferredMedia(item.photo);
+  const photoUrl = deferred ? await acquireMedia(item.photo) : item.photo;
+  try {
+    const response = await fetch(photoUrl);
+    if (!response.ok) throw new Error('COVER_UNAVAILABLE');
+    const blob = await response.blob();
+    const file = new File([blob], 'sos-cover', { type: blob.type });
+    validateOotdImage(file);
+    return file;
+  } finally {
+    if (deferred) releaseMedia(item.photo);
+  }
 };
 
 const initForm = async () => {

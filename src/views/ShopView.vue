@@ -478,20 +478,20 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
     <header v-if="!isCommunity" class="shop-studio-heading ootie-page-heading">
       <h1>{{ t(tab === 'activity' ? '購物足跡' : '試穿工作室') }}</h1>
       <section v-if="tab !== 'activity'" class="balance-card" :aria-label="t('目前點數')">
-        <span>{{ t('目前點數') }}</span>
-        <template v-if="auth.isMember">
+        <router-link v-if="auth.isMember" class="studio-point-balance" to="/credits#point-history">
+          <span>{{ t('目前點數') }}</span>
           <strong class="personal-balance">{{ loading ? '…' : capabilities.pointBalance ?? '—' }}</strong>
-          <router-link to="/credits#point-history">{{ t('查看點數紀錄') }}</router-link>
-        </template>
+        </router-link>
         <template v-else>
+          <span>{{ t('目前點數') }}</span>
           <strong class="personal-balance">—</strong>
           <button class="secondary" @click="login">{{ t('登入／註冊') }}</button>
         </template>
+        <p v-if="auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
+        <p v-if="auth.isMember && !loading && capabilities.generationPolicyVersion === 2" class="studio-daily-note" role="status">{{ tf('今日免費額度 {remaining}／2 張・點數生成不限每日張數',{remaining:capabilities.dailyFreeGenerationRemaining}) }}</p>
+        <p v-else-if="auth.isMember && !loading && capabilities.dailyGenerationRemaining != null" class="studio-daily-note" role="status">{{ tf('每天最多生成 {limit} 次，今天還可生成 {remaining} 次。',{limit:capabilities.dailyGenerationLimit || 2,remaining:capabilities.dailyGenerationRemaining}) }}</p>
       </section>
     </header>
-    <p v-if="tab !== 'activity' && auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
-    <p v-if="tab !== 'activity' && auth.isMember && !loading && capabilities.generationPolicyVersion === 2" class="studio-daily-note" role="status">{{ tf('今日免費額度 {remaining}／2 張・點數生成不限每日張數',{remaining:capabilities.dailyFreeGenerationRemaining}) }}</p>
-    <p v-else-if="tab !== 'activity' && auth.isMember && !loading && capabilities.dailyGenerationRemaining != null" class="studio-daily-note" role="status">{{ tf('每天最多生成 {limit} 次，今天還可生成 {remaining} 次。',{limit:capabilities.dailyGenerationLimit || 2,remaining:capabilities.dailyGenerationRemaining}) }}</p>
 
     <router-link v-if="isCommunity" class="community-back" to="/explore">← {{ t('返回探索') }}</router-link>
     <nav v-if="!isCommunity && tab !== 'activity'" class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key || (tab==='links' && key==='saved')}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>
@@ -640,7 +640,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 <style scoped>.garment-source-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.garment-source-tabs button[aria-pressed=true]{background:var(--ink);color:white}.garment-source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:14px;margin-bottom:24px}.garment-source-grid button{min-width:0;padding:10px}.garment-source-grid img{width:100%;height:150px;object-fit:contain}.garment-source-grid span,.garment-source-grid small{display:block;overflow-wrap:anywhere;margin-top:8px}.selected-person-preview{max-width:240px;margin:20px 0}.selected-person-preview img{width:100%;max-height:320px;object-fit:contain}.selected-person-preview p{font-size:13px}</style>
 
 <style scoped>
-.studio-top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.studio-add-product{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.studio-top-actions .studio-next{margin:0;padding:0;border:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.studio-top-actions .studio-next>div{display:none}.studio-top-actions .studio-next button{display:inline-flex;align-items:center;gap:12px;min-height:44px;white-space:normal;text-align:left}.studio-selected-product>span{flex:1;min-width:0}.studio-selected-product>button{display:grid;place-items:center;flex:none;padding:7px;min-width:36px;min-height:44px;border:0;background:none;color:var(--muted)}.studio-selected-product>button:hover{color:var(--accent);background:var(--accent-pink-soft)}.shop-tone-results{margin:0 0 24px}.shop-view .shop-product-image{height:auto!important;min-height:0;aspect-ratio:4/5;overflow:visible}.shop-view .studio-daily-note{margin:-16px 0 16px;font-size:12px;line-height:1.6;color:var(--muted)}@media(max-width:700px){.studio-shortlist>.shop-section-title{flex-wrap:wrap}.studio-top-actions{width:100%}.studio-top-actions .studio-next{margin-left:auto}.studio-top-actions .studio-next button{font-size:12px}}
+.studio-top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.studio-add-product{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.studio-top-actions .studio-next{margin:0;padding:0;border:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.studio-top-actions .studio-next>div{display:none}.studio-top-actions .studio-next button{display:inline-flex;align-items:center;gap:12px;min-height:44px;white-space:normal;text-align:left}.studio-selected-product>span{flex:1;min-width:0}.studio-selected-product>button{display:grid;place-items:center;flex:none;padding:7px;min-width:36px;min-height:44px;border:0;background:none;color:var(--muted)}.studio-selected-product>button:hover{color:var(--accent);background:var(--accent-pink-soft)}.shop-tone-results{margin:0 0 24px}.shop-view .shop-product-image{height:auto!important;min-height:0;aspect-ratio:4/5;overflow:visible}.shop-view .studio-point-balance{display:flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none}.shop-view .studio-point-balance:focus-visible{outline:2px solid currentColor;outline-offset:3px}.shop-view .studio-daily-note{flex-basis:100%;margin:0;text-align:right;font-size:12px;line-height:1.6;color:var(--muted)}@media(max-width:700px){.studio-shortlist>.shop-section-title{flex-wrap:wrap}.studio-top-actions{width:100%}.studio-top-actions .studio-next{margin-left:auto}.studio-top-actions .studio-next button{font-size:12px}}
 </style>
 
 <style scoped>.studio-sidebar-next{display:grid;gap:12px;margin-top:22px}.studio-sidebar-next button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:46px}.studio-sidebar-next p{margin:0}</style>
