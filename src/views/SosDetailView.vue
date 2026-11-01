@@ -95,7 +95,7 @@ watch(() => route.params.id, () => {
 
 <style scoped>
 .sos-detail-page {
-  max-width: 760px;
+  max-width: 820px;
   margin: 0 auto;
   padding: 24px 20px 80px;
 }
