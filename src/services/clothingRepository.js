@@ -188,6 +188,39 @@ export async function getPublicItemsByIds(itemIds, client = supabase, options = 
 }
 
 /**
+ * Fetches the current non-hidden public wardrobe for a profile.
+ * The caller must confirm that the profile has public_closet enabled; RLS
+ * remains the authority for which clothing rows are readable.
+ * @param {string} profileId - The ootie_profiles.id UUID.
+ * @param {object} [client=supabase] - Supabase client instance.
+ * @returns {Promise<Array>} Current publicly readable items owned by profileId.
+ */
+export async function getPublicItemsByOwnerId(profileId, client = supabase, options = {}) {
+  if (!isUuid(profileId)) {
+    throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, {
+      message: '無效的個人檔案擁有者 ID。',
+      userMessage: '無效的個人檔案擁有者 ID。'
+    });
+  }
+
+  try {
+    const { data, error } = await client
+      .from('ootie_clothing_items')
+      .select('id,owner_id,name,name_zh,brand,category,primary_color,photo,photo_display_path,photo_updated_at,source_url,hidden')
+      .eq('owner_id', profileId)
+      .eq('hidden', false);
+
+    if (error) throw normalizeServiceError(error);
+    const items = genuineContent(data || []).filter(
+      (item) => item.owner_id === profileId && item.hidden === false
+    );
+    return await hydrateSharedClothingPhotos(items, client, options);
+  } catch (err) {
+    throw normalizeServiceError(err);
+  }
+}
+
+/**
  * Fetches a single clothing item by its primary key (ootie_clothing_items.id).
  * @param {string} itemId - The ootie_clothing_items.id UUID.
  * @param {object} [client=supabase] - Supabase client instance.

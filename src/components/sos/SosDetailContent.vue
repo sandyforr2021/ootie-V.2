@@ -32,14 +32,20 @@
 
     <!-- Public Closet Gallery Section -->
     <div class="sos-detail-gallery">
-      <h3>{{ t('本次公開的衣物') }} ({{ publicItems.length }})</h3>
-      <div v-if="publicItems.length" class="sos-detail-gallery-grid">
+      <h3>{{ t('發文者目前公開的衣櫥') }} ({{ publicItems.length }})</h3>
+      <p v-if="publicItemsLoading" class="sos-detail-gallery-status" role="status">
+        {{ t('正在載入發文者目前公開的衣櫥…') }}
+      </p>
+      <p v-else-if="publicItemsError" class="sos-detail-gallery-status" role="alert">
+        {{ t('目前無法載入發文者的公開衣櫥，請稍後再試。') }}
+      </p>
+      <div v-else-if="publicItems.length" class="sos-detail-gallery-grid">
         <div v-for="item in publicItems" :key="item.id" class="sos-detail-gallery-item">
           <MediaImage class="product-image" :src="item.photo" :alt="item.name_zh || item.name" />
         </div>
       </div>
-      <p v-else style="color:var(--muted); font-size:13px; font-style:italic;">
-        {{ t("這是歷史求救貼文，當時公開的衣物清單未被保存。") }}
+      <p v-else-if="!publicItemsLoading" class="sos-detail-gallery-status">
+        {{ t("發文者目前沒有可公開展示的衣物。") }}
       </p>
     </div>
 
@@ -156,6 +162,7 @@ import { computed, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useSosStore } from '@/stores/sos';
 import { updatePublicContentMeta } from '@/services/documentMeta';
+import { getPublicItemsByOwnerId } from '@/services/clothingRepository';
 
 const props = defineProps({
   post: {
@@ -173,6 +180,10 @@ const emit = defineEmits(['close', 'deleted']);
 const appStore = useAppStore();
 const sosStore = useSosStore();
 const shareUrl = ref('');
+const publicItems = ref([]);
+const publicItemsLoading = ref(false);
+const publicItemsError = ref(false);
+let publicItemsRequest = 0;
 
 const isOwner = computed(() => {
   return props.post && props.post.sender_id === appStore.profile.id;
@@ -180,11 +191,6 @@ const isOwner = computed(() => {
 
 const coverItem = computed(() => {
   return sosStore.getPublicItemsForSos(props.post).find(item => String(item.id) === String(props.post?.cover_item_id));
-});
-
-const publicItems = computed(() => {
-  if (!props.post || !props.post.closet_item_ids) return [];
-  return sosStore.getPublicItemsForSos(props.post);
 });
 
 const suggestions = computed(() => {
@@ -196,6 +202,33 @@ const helperCount = computed(() => {
   if (!props.post) return 0;
   return sosStore.getHelperCountForSos(props.post.id);
 });
+
+watch(
+  () => [props.post?.sender_id, props.post?.public_closet],
+  async ([profileId, publicCloset]) => {
+    const request = ++publicItemsRequest;
+    publicItems.value = [];
+    publicItemsError.value = false;
+    if (!profileId || publicCloset !== true) {
+      publicItemsLoading.value = false;
+      return;
+    }
+
+    publicItemsLoading.value = true;
+    try {
+      const items = await getPublicItemsByOwnerId(profileId, undefined, { defer: true });
+      if (request === publicItemsRequest) publicItems.value = items;
+    } catch (error) {
+      if (request === publicItemsRequest) {
+        publicItemsError.value = true;
+        console.error('Unable to load current public wardrobe for SOS:', error);
+      }
+    } finally {
+      if (request === publicItemsRequest) publicItemsLoading.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 watch(() => props.post, (post) => {
   shareUrl.value = '';

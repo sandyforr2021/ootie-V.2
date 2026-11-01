@@ -31,7 +31,6 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     setActivePinia(createPinia());
     localStorage.clear();
     installLocalInteractionFixtures();
-    vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockResolvedValue(['item-1', 'item-2']);
     vi.spyOn(useClosetStore(), 'loadRemoteItems').mockResolvedValue({ ok: true });
   });
 
@@ -59,6 +58,88 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('目前已公開衣櫥，衣友可以從你的衣櫥提供搭配建議。');
     expect(wrapper.find('button[type="submit"]').element.disabled).toBe(false);
+  });
+
+  it('prevents publishing when the public wardrobe is disabled', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const publicIds = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds');
+    const publish = vi.spyOn(useSosStore(), 'createSosPost');
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = false;
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('求救標題');
+    await wrapper.find('#sosDetails').setValue('求救內容');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(publicIds).not.toHaveBeenCalled();
+    expect(publish).not.toHaveBeenCalled();
+    expect(wrapper.find('#sosTitle').element.value).toBe('求救標題');
+  });
+
+  it('publishes a title and details with an empty public wardrobe and no image', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const sosStore = useSosStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+    const publish = vi.spyOn(sosStore, 'createSosPost').mockResolvedValue(true);
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('只有標題與內文');
+    await wrapper.find('#sosDetails').setValue('不需要附圖或衣物');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({
+      title: '只有標題與內文',
+      details: '不需要附圖或衣物',
+      closet_item_ids: [],
+      cover_url: null,
+      cover_path: null
+    }));
+    expect(router.currentRoute.value.path).toBe('/sos');
+  });
+
+  it('publishes an uploaded image with an empty public wardrobe', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const sosStore = useSosStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+    vi.spyOn(ootdMedia, 'uploadOotdImage').mockResolvedValue({ path: 'ootd/test/empty-closet.jpg', publicUrl: 'https://example.com/empty-closet.jpg' });
+    const publish = vi.spyOn(sosStore, 'createSosPost').mockResolvedValue(true);
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+    await wrapper.find('#sosTitle').setValue('附圖但沒有衣物');
+    await wrapper.find('#sosDetails').setValue('公開衣櫥目前是空的');
+    const file = new File(['mock'], 'outfit.jpg', { type: 'image/jpeg' });
+    const fileInput = wrapper.find('.upload-btn input[type="file"]');
+    Object.defineProperty(fileInput.element, 'files', { value: [file] });
+    await fileInput.trigger('change');
+    await flushPromises();
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({
+      closet_item_ids: [],
+      cover_url: 'https://example.com/empty-closet.jpg',
+      cover_path: 'ootd/test/empty-closet.jpg'
+    }));
   });
 
   it('allows computer image upload and preview independently of wardrobe loading', async () => {
@@ -164,7 +245,7 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     expect(titleInput.element.value).toBe('緊急搭配求助');
   });
 
-  it('publishes with fresh public item IDs query at submit time', async () => {
+  it('publishes without querying public wardrobe IDs', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
@@ -173,7 +254,7 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     appStore.profile.public_closet = true;
 
-    const publicIdsSpy = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockResolvedValue(['fresh-item-1', 'fresh-item-2']);
+    const publicIdsSpy = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds');
     const createSosSpy = vi.spyOn(sosStore, 'createSosPost').mockResolvedValue(true);
 
     await router.push('/sos/create');
@@ -185,14 +266,14 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
-    expect(publicIdsSpy).toHaveBeenCalledWith(authStore.profileId);
+    expect(publicIdsSpy).not.toHaveBeenCalled();
     expect(createSosSpy).toHaveBeenCalledWith(expect.objectContaining({
       title: '明天約會穿什麼？',
       details: '想穿得俐落一點',
       cover_url: null,
       cover_path: null,
       cover_item_id: null,
-      closet_item_ids: ['fresh-item-1', 'fresh-item-2']
+      closet_item_ids: []
     }));
 
     expect(sosStore.activeTab).toBe('sent');
@@ -238,7 +319,7 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     }));
   });
 
-  it('handles public item IDs query failure and preserves user form input', async () => {
+  it('does not let wardrobe ID lookup failures block publishing or discard form input', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
@@ -246,9 +327,12 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     appStore.profile.public_closet = true;
 
-    vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockRejectedValue({
-      userMessage: '無法取得最新公開衣物清單，請稍後再試。'
+    const publicIds = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockRejectedValue(new Error('query failed'));
+    const upload = vi.spyOn(ootdMedia, 'uploadOotdImage').mockResolvedValue({
+      path: 'ootd/test/keep-image.jpg',
+      publicUrl: 'https://example.com/keep-image.jpg'
     });
+    const publish = vi.spyOn(useSosStore(), 'createSosPost').mockResolvedValue(true);
 
     await router.push('/sos/create');
     const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
@@ -256,12 +340,21 @@ describe('SosCreateView standalone page UX and Lazy Loading', () => {
 
     await wrapper.find('#sosTitle').setValue('保留的標題');
     await wrapper.find('#sosDetails').setValue('保留的描述');
+    const file = new File(['mock'], 'keep-image.jpg', { type: 'image/jpeg' });
+    const fileInput = wrapper.find('.upload-btn input[type="file"]');
+    Object.defineProperty(fileInput.element, 'files', { value: [file] });
+    await fileInput.trigger('change');
+    await flushPromises();
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
-    expect(wrapper.find('.sos-form-error').text()).toContain('無法取得最新公開衣物清單，請稍後再試。');
+    expect(wrapper.find('.sos-form-error').exists()).toBe(false);
     expect(wrapper.find('#sosTitle').element.value).toBe('保留的標題');
     expect(wrapper.find('#sosDetails').element.value).toBe('保留的描述');
+    expect(wrapper.find('.sos-cover-preview-card').text()).toContain('keep-image.jpg');
+    expect(publicIds).not.toHaveBeenCalled();
+    expect(upload).toHaveBeenCalledOnce();
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ closet_item_ids: [] }));
   });
 
   it('rejects unsupported image format during upload', async () => {

@@ -24,6 +24,10 @@ export const accountMessages = `
 衣櫥已設為公開|Your wardrobe is now shared.|ワードローブを公開しました。|Tu armario está compartido.
 衣櫥已設為私人|Your wardrobe is now private.|ワードローブを非公開にしました。|Tu armario es privado.
 衣櫥設定未儲存，請重試。|Your wardrobe setting could not be saved. Please retry.|設定を保存できませんでした。再試行してください。|No se guardó la preferencia de tu armario. Inténtalo de nuevo.
+目前還有進行中的 SOS 求救貼文，請先結束所有求救貼文，才能關閉公開衣櫥。|You still have an open SOS request. Close all SOS requests before making your wardrobe private.|進行中のSOS投稿があります。ワードローブを非公開にする前に、すべてのSOSを終了してください。|Todavía tienes una solicitud SOS abierta. Ciérralas antes de ocultar tu armario.
+無法確認進行中的求救貼文，請稍後再試。|Could not check for open SOS requests. Please try again later.|進行中のSOS投稿を確認できませんでした。後でもう一度お試しください。|No se pudieron comprobar las solicitudes SOS abiertas. Inténtalo más tarde.
+無法關閉公開衣櫥|Cannot make wardrobe private|ワードローブを非公開にできません|No se puede ocultar el armario
+知道了|Got it|了解|Entendido
 編輯個人資料|Edit your profile|プロフィールを編集|Editar tu perfil
 公開個人資料|Public profile|公開プロフィール|Perfil público
 顯示暱稱|Display name|表示名|Nombre visible

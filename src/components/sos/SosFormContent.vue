@@ -140,7 +140,7 @@
             {{ $t("取消") }}
           </button>
           <router-link v-else to="/sos" class="secondary form-cancel-btn">{{ $t("取消") }}</router-link>
-          <button type="submit" class="primary" :disabled="!appStore.profile.public_closet || submitting">
+          <button type="submit" class="primary" :disabled="appStore.profile.public_closet !== true || submitting">
             {{ submitting ? t('正在發布…') : t('確認發布') }}
           </button>
         </div>
@@ -161,7 +161,7 @@ import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { validateOotdImage, uploadOotdImage } from '@/services/ootdMedia';
-import { getCurrentUserPublicItemIds, getItemById } from '@/services/clothingRepository';
+import { getItemById } from '@/services/clothingRepository';
 
 const props = defineProps({
   isModal: {
@@ -341,7 +341,7 @@ watch(() => appStore.sosTargetItemId, () => { initForm(); });
 
 const handleSubmit = async () => {
   if (submitting.value) return;
-  if (!appStore.profile.public_closet) {
+  if (appStore.profile.public_closet !== true) {
     appStore.showToast(t('請先開啟「公開衣櫥」功能，才能發布求救。'));
     return;
   }
@@ -351,30 +351,15 @@ const handleSubmit = async () => {
 
   submitting.value = true;
   submitError.value = '';
-  let sharedItemIds = [];
-  try {
-    sharedItemIds = await getCurrentUserPublicItemIds(profileId);
-  } catch (err) {
-    submitting.value = false;
-    submitError.value = err?.userMessage || t('無法取得最新公開衣物清單，請稍後再試。');
-    appStore.showToast(submitError.value, { type: 'error' });
-    return;
-  }
-
-  if (!sharedItemIds.length) {
-    submitting.value = false;
-    appStore.showToast(t('請先在衣櫥加入至少一件衣物。'));
-    return;
-  }
 
   if (coverMode.value === 'upload' && !coverFile.value) {
     submitting.value = false;
     appStore.showToast(t('請選擇圖片，或點擊「移除圖片」。'), { type: 'warning' });
     return;
   }
-  if (coverMode.value === 'closet' && (!coverItemId.value || !sharedItemIds.includes(coverItemId.value))) {
+  if (coverMode.value === 'closet' && !coverItemId.value) {
     submitting.value = false;
-    appStore.showToast(t('所選單品已不在公開衣櫥中，請重新選擇單品。'), { type: 'warning' });
+    appStore.showToast(t('請重新選擇求救附圖。'), { type: 'warning' });
     return;
   }
 
@@ -394,7 +379,7 @@ const handleSubmit = async () => {
       weather: weather.value,
       when_label: null,
       vibes: [],
-      closet_item_ids: sharedItemIds,
+      closet_item_ids: [],
       cover_url: uploaded?.publicUrl || null,
       cover_path: uploaded?.path || null,
       cover_item_id: coverMode.value === 'closet' ? coverItemId.value : null

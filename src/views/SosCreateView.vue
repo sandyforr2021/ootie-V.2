@@ -1,7 +1,7 @@
 <template>
   <section class="page active app-page sos-create-page" id="sosCreatePage">
     <router-link class="back-link" to="/sos">{{ $t("返回穿搭求救") }}</router-link>
-    <header class="core-page-hero sos-create-hero ootie-page-heading">
+    <header class="core-page-hero sos-page-hero sos-create-hero ootie-page-heading">
       <div>
         <h1>{{ t("請衣友幫忙搭配") }}</h1>
       </div>

@@ -20,11 +20,81 @@ describe('profileRepository', () => {
     const maybeSingle = vi.fn().mockResolvedValue({ data: { id: mockProfileId }, error: null });
     const select = vi.fn().mockReturnValue({ maybeSingle });
     const upsert = vi.fn().mockReturnValue({ select });
-    const client = { from: vi.fn().mockReturnValue({ upsert }) };
+    const findProfile = vi.fn().mockResolvedValue({ data: [], error: null });
+    const client = { from: vi.fn().mockReturnValue({ upsert, select: vi.fn(() => ({ eq: findProfile })) }) };
     await bootstrapOAuthProfile({ user: { id: mockAuthUserId, email: 'new.user@example.com', user_metadata: { full_name: 'New User', picture: 'https://example.com/avatar.jpg' } } }, client);
     expect(client.from).toHaveBeenCalledWith('ootie_profiles');
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ user_id: mockAuthUserId, display_name: 'New User' }), { onConflict: 'user_id' });
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: mockAuthUserId, display_name: 'New User' }),
+      { onConflict: 'user_id', ignoreDuplicates: true }
+    );
+    expect(upsert.mock.calls[0][0].public_closet).toBe(false);
     expect(upsert.mock.calls[0][0]).not.toHaveProperty('birth_date');
+  });
+
+  it('updates an existing OAuth profile without changing public_closet', async () => {
+    const existing = { id: mockProfileId, user_id: mockAuthUserId, public_closet: true };
+    const findProfile = vi.fn().mockResolvedValue({ data: [existing], error: null });
+    const maybeSingle = vi.fn().mockResolvedValue({ data: existing, error: null });
+    const updateSelect = vi.fn().mockReturnValue({ maybeSingle });
+    const updateEq = vi.fn().mockReturnValue({ select: updateSelect });
+    const update = vi.fn().mockReturnValue({ eq: updateEq });
+    const upsert = vi.fn();
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn(() => ({ eq: findProfile })),
+        update,
+        upsert
+      })
+    };
+
+    const result = await bootstrapOAuthProfile({
+      user: {
+        id: mockAuthUserId,
+        email: 'existing.user@example.com',
+        user_metadata: { full_name: 'Existing User' }
+      }
+    }, client);
+
+    expect(result.public_closet).toBe(true);
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ username: '@existing_user_111111' }));
+    expect(update.mock.calls[0][0]).not.toHaveProperty('public_closet');
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite public_closet if another OAuth bootstrap creates the profile concurrently', async () => {
+    const existing = { id: mockProfileId, user_id: mockAuthUserId, public_closet: true };
+    const findProfile = vi.fn()
+      .mockResolvedValueOnce({ data: [], error: null })
+      .mockResolvedValueOnce({ data: [existing], error: null });
+    const maybeSingle = vi.fn().mockResolvedValue({ data: existing, error: null });
+    const updateSelect = vi.fn().mockReturnValue({ maybeSingle });
+    const updateEq = vi.fn().mockReturnValue({ select: updateSelect });
+    const update = vi.fn().mockReturnValue({ eq: updateEq });
+    const upsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
+      })
+    });
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn(() => ({ eq: findProfile })),
+        update,
+        upsert
+      })
+    };
+
+    await bootstrapOAuthProfile({
+      user: {
+        id: mockAuthUserId,
+        email: 'existing.user@example.com',
+        user_metadata: { full_name: 'Existing User' }
+      }
+    }, client);
+
+    expect(upsert.mock.calls[0][0].public_closet).toBe(false);
+    expect(upsert.mock.calls[0][1].ignoreDuplicates).toBe(true);
+    expect(update.mock.calls[0][0]).not.toHaveProperty('public_closet');
   });
 
   describe('loadProfileByAuthUserId', () => {
@@ -184,7 +254,7 @@ describe('profileRepository', () => {
           user_id: mockAuthUserId,
           name: 'New User'
         }),
-        { onConflict: 'user_id' }
+        { onConflict: 'user_id', ignoreDuplicates: true }
       );
     });
   });

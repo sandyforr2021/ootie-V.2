@@ -90,6 +90,7 @@ export const useSosStore = defineStore('sos', () => {
           username: p.ootie_profiles?.username || p.username || '@衣友',
           display_name: p.ootie_profiles?.display_name || p.ootie_profiles?.username || '',
           curated: isStyleCrew(p.ootie_profiles),
+          public_closet: p.ootie_profiles?.public_closet === true,
           initials: p.ootie_profiles?.initials || p.initials || '衣友',
           avatar_url: p.ootie_profiles?.avatar_url || '',
           title: p.title || '穿搭求救',
@@ -195,20 +196,17 @@ export const useSosStore = defineStore('sos', () => {
   const createSosPost = async ({ title, occasion, weather, when_label, vibes, details, closet_item_ids, cover_url, cover_path, cover_item_id }) => {
     const profileId = requireMember();
     if (!profileId) return false;
-    const requestedItemIds = Array.isArray(closet_item_ids)
-      ? closet_item_ids
-      : appStore.items.map((item) => item.id);
-    const ownedItemIds = appStore.items.length > 0
-      ? new Set(
-          appStore.items
-            .filter((item) => String(item.owner_id) === String(profileId))
-            .map((item) => String(item.id))
-        )
-      : null;
-    const finalItemIds = [...new Set(requestedItemIds.map((id) => String(id)))]
-      .filter((id) => (ownedItemIds ? ownedItemIds.has(id) : isUuid(id)));
-    if (!finalItemIds.length) {
-      appStore.showToast(t('請至少選擇 1 件要公開給衣友的衣物。'));
+    if (appStore.profile.public_closet !== true) {
+      appStore.showToast(t('請先開啟「公開衣櫥」功能，才能發布求救。'));
+      return false;
+    }
+    const finalItemIds = [...new Set((Array.isArray(closet_item_ids) ? closet_item_ids : []).map((id) => String(id)))];
+    if (finalItemIds.some((id) => !isUuid(id))) {
+      appStore.showToast(t('公開衣物清單無效，請重新整理後再試。'), { type: 'error' });
+      return false;
+    }
+    if (cover_item_id && !isUuid(String(cover_item_id))) {
+      appStore.showToast(t('求救附圖單品無效，請重新選擇。'), { type: 'error' });
       return false;
     }
 
@@ -218,6 +216,7 @@ export const useSosStore = defineStore('sos', () => {
       closet_owner_id: profileId,
       username: appStore.profile.username,
       initials: appStore.profile.initials,
+      public_closet: appStore.profile.public_closet === true,
       title: (title || '').trim(),
       occasion,
       weather,
@@ -225,7 +224,7 @@ export const useSosStore = defineStore('sos', () => {
       vibes: vibes || [],
       closet_item_ids: finalItemIds,
       cover_url: cover_url || null, cover_path: cover_path || null,
-      cover_item_id: finalItemIds.includes(String(cover_item_id || '')) ? cover_item_id : null,
+      cover_item_id: cover_item_id || null,
       details: (details || '').trim(),
       status: 'OPEN',
       adopted_suggestion_id: null,

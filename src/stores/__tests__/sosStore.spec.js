@@ -5,6 +5,7 @@ import * as api from '@/services/supabase';
 import { useAppStore } from '../app';
 import { useAuthStore } from '../auth';
 import { useSosStore } from '../sos';
+import * as clothingRepository from '@/services/clothingRepository';
 
 const owner = '11111111-1111-4111-8111-111111111111';
 const other = '22222222-2222-4222-8222-222222222222';
@@ -24,7 +25,7 @@ beforeEach(async () => {
   app = useAppStore(); auth = useAuthStore();
   auth.session = {user:{id:'auth-user'}}; auth.user = auth.session.user;
   auth.profileIdentity = {status:'PROFILE_READY',profileId:owner,profile:{id:owner}};
-  app.profile = {...app.profile,id:owner,username:'@jury'};
+  app.profile = {...app.profile,id:owner,username:'@jury',public_closet:true};
   app.items = [{id:itemId,owner_id:owner,name:'Cotton shirt'}];
   store = useSosStore();
   await store.initFromSupabase();
@@ -51,6 +52,49 @@ describe('SOS persisted interaction contract', () => {
     expect(store.sosPosts).toHaveLength(1);
     expect(app.toastSyncStatus).toBe('REMOTE_FAILED');
   });
+  it('accepts an explicitly supplied empty public wardrobe', async () => {
+    const write = vi.spyOn(api,'insertSosPostToSupabase').mockImplementation(async row => ({...row,id:suggestionId}));
+    expect(await store.createSosPost({...input,closet_item_ids:[]})).toBe(true);
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({
+      closet_item_ids:[],
+      public_closet:true
+    }));
+  });
+  it('keeps a wardrobe cover item independent from the shared clothing list', async () => {
+    const write = vi.spyOn(api,'insertSosPostToSupabase').mockImplementation(async row => ({...row,id:suggestionId}));
+    expect(await store.createSosPost({
+      ...input,
+      closet_item_ids:[],
+      cover_item_id:itemId,
+      cover_url:'https://example.org/sos-cover.jpg',
+      cover_path:'ootd/owner/sos-cover.jpg'
+    })).toBe(true);
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({
+      closet_item_ids:[],
+      cover_item_id:itemId,
+      cover_url:'https://example.org/sos-cover.jpg'
+    }));
+  });
+  it('uses explicit current public IDs without filtering through a stale local closet', async () => {
+    const freshItemId = '66666666-6666-4666-8666-666666666666';
+    app.items = [{id:'77777777-7777-4777-8777-777777777777',owner_id:other,hidden:true}];
+    const write = vi.spyOn(api,'insertSosPostToSupabase').mockImplementation(async row => ({...row,id:suggestionId}));
+    expect(await store.createSosPost({...input,closet_item_ids:[freshItemId]})).toBe(true);
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({closet_item_ids:[freshItemId]}));
+  });
+  it('defaults a missing shared list to empty and requires valid IDs and an enabled public wardrobe', async () => {
+    const write = vi.spyOn(api,'insertSosPostToSupabase');
+    write.mockImplementation(async row => ({...row,id:suggestionId}));
+    expect(await store.createSosPost({title:'No source'})).toBe(true);
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({closet_item_ids:[]}));
+    write.mockClear();
+    write.mockResolvedValue(null);
+    expect(await store.createSosPost({...input,closet_item_ids:['not-a-uuid']})).toBe(false);
+    expect(write).not.toHaveBeenCalled();
+    app.profile.public_closet = false;
+    expect(await store.createSosPost(input)).toBe(false);
+    expect(write).not.toHaveBeenCalled();
+  });
   it('updates one suggestion without inventing a helped-friends count', async () => {
     const write = vi.spyOn(api,'insertOutfitSuggestionToSupabase').mockImplementation(async row => ({...row,id:suggestionId}));
     const helped = app.profile.helped;
@@ -66,11 +110,11 @@ describe('SOS persisted interaction contract', () => {
     expect(await store.submitSuggestion({sosId,selectedIds:[other],message:'No'})).toBe(false);
     expect(write).not.toHaveBeenCalled();
   });
-  it('does not publish somebody else’s wardrobe items', async () => {
+  it('does not let stale local ownership data filter the explicit current public IDs', async () => {
     app.items[0].owner_id = other;
-    const write = vi.spyOn(api,'insertSosPostToSupabase');
-    expect(await store.createSosPost(input)).toBe(false);
-    expect(write).not.toHaveBeenCalled();
+    const write = vi.spyOn(api,'insertSosPostToSupabase').mockImplementation(async row => ({...row,id:suggestionId}));
+    expect(await store.createSosPost(input)).toBe(true);
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({closet_item_ids:[itemId]}));
   });
   it('leaves status and adoption unchanged after denied updates', async () => {
     store.sosPosts[0].sender_id = owner;
@@ -88,6 +132,18 @@ describe('SOS persisted interaction contract', () => {
     await store.initFromSupabase();
     expect(store.sosPosts[0].saved).toBe(true);
     expect(api.fetchSavedSosIds).toHaveBeenLastCalledWith(owner);
+  });
+  it('hydrates the author public-closet state from the remote profile relation', async () => {
+    vi.spyOn(clothingRepository, 'getPublicItemsByIds').mockResolvedValue([]);
+    api.fetchSosPostsFromSupabase.mockResolvedValue([
+      {id:sosId,user_id:other,closet_item_ids:[],ootie_profiles:{public_closet:true}},
+      {id:suggestionId,user_id:owner,closet_item_ids:[],ootie_profiles:{public_closet:false}},
+      {id:'66666666-6666-4666-8666-666666666666',user_id:owner,closet_item_ids:[],ootie_profiles:{}}
+    ]);
+
+    await store.initFromSupabase();
+
+    expect(store.sosPosts.map(post => post.public_closet)).toEqual([true,false,false]);
   });
   it('does not apply a pending write to a different signed-in account', async () => {
     let finish;

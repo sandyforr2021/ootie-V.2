@@ -356,7 +356,7 @@ export async function fetchSosPostsFromSupabase() {
   try {
     const { data, error } = await supabase
       .from('ootie_sos_posts')
-      .select('*,ootie_profiles!ootie_sos_posts_user_id_fkey(username,display_name,initials,avatar_url)')
+      .select('*,ootie_profiles!ootie_sos_posts_user_id_fkey(username,display_name,initials,avatar_url,public_closet)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -368,6 +368,20 @@ export async function fetchSosPostsFromSupabase() {
     console.error('Supabase SOS fetch failed:', err);
     return null;
   }
+}
+
+export async function hasOpenSosPost(profileId, client = supabase) {
+  if (!isUuid(profileId)) throw new Error('Invalid SOS author profile ID');
+
+  const { data, error } = await client
+    .from('ootie_sos_posts')
+    .select('id')
+    .eq('user_id', profileId)
+    .eq('status', 'OPEN')
+    .limit(1);
+
+  if (error) throw error;
+  return Boolean(data?.length);
 }
 
 /**

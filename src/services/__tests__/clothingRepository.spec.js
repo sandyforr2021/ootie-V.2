@@ -7,7 +7,8 @@ import {
   updateClothingItem,
   deleteClothingItem,
   getPublicItemsByIds,
-  getCurrentUserPublicItemIds
+  getCurrentUserPublicItemIds,
+  getPublicItemsByOwnerId
 } from '../clothingRepository';
 import { ServiceError, SERVICE_ERROR_CODE } from '../serviceError';
 
@@ -153,7 +154,9 @@ describe('clothingRepository (READ-ONLY)', () => {
     it('queries lightweight ID-only data filtered by owner and hidden false', async () => {
       const eqHidden = vi.fn().mockResolvedValue({
         data: [
-          { id: mockItemId, owner_id: mockProfileId, hidden: false }
+          { id: mockItemId, owner_id: mockProfileId, hidden: false },
+          { id: '55555555-5555-4555-8555-555555555555', owner_id: mockProfileId, hidden: true },
+          { id: '66666666-6666-4666-8666-666666666666', owner_id: '77777777-7777-4777-8777-777777777777', hidden: false }
         ],
         error: null
       });
@@ -180,6 +183,28 @@ describe('clothingRepository (READ-ONLY)', () => {
       expect(result).toHaveLength(1);
       expect(fromFn).toHaveBeenCalledWith('ootie_clothing_items');
       expect(inFn).toHaveBeenCalledWith('id', [mockItemId]);
+    });
+  });
+
+  describe('getPublicItemsByOwnerId', () => {
+    it('loads the owner’s current non-hidden wardrobe without an ID snapshot', async () => {
+      const ownerItems = [
+        { id: mockItemId, owner_id: mockProfileId, hidden: false, name: 'Current item' },
+        { id: '55555555-5555-4555-8555-555555555555', owner_id: mockProfileId, hidden: true, name: 'Hidden item' },
+        { id: '66666666-6666-4666-8666-666666666666', owner_id: '77777777-7777-4777-8777-777777777777', hidden: false, name: 'Other owner item' }
+      ];
+      const eqHidden = vi.fn().mockResolvedValue({ data: ownerItems, error: null });
+      const eqOwner = vi.fn().mockReturnValue({ eq: eqHidden });
+      const selectFn = vi.fn().mockReturnValue({ eq: eqOwner });
+      const fromFn = vi.fn().mockReturnValue({ select: selectFn });
+
+      const result = await getPublicItemsByOwnerId(mockProfileId, { from: fromFn });
+
+      expect(result.map(item => item.id)).toEqual([mockItemId]);
+      expect(fromFn).toHaveBeenCalledWith('ootie_clothing_items');
+      expect(selectFn).toHaveBeenCalledWith(expect.stringContaining('hidden'));
+      expect(eqOwner).toHaveBeenCalledWith('owner_id', mockProfileId);
+      expect(eqHidden).toHaveBeenCalledWith('hidden', false);
     });
   });
 

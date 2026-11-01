@@ -24,6 +24,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useOotdStore } from '@/stores/ootd';
 import { IDENTITY_STATUS } from '@/services/identityResolver';
 import * as profileRepository from '@/services/profileRepository';
+import * as sosService from '@/services/supabase';
 import {getCurrentUserItems} from '@/services/clothingRepository';
 
 enableAutoUnmount(afterEach);
@@ -156,24 +157,90 @@ describe('Profile & OOTD Integration Tests (legacy/sinsin features)', () => {
 
   it('2. Public Closet Toggle Integration', async () => {
     const appStore = useAppStore();
+    appStore.profile.public_closet = true;
     const wrapper = mount(ClosetVisibility, {
       global: { plugins: [pinia, router] }
     });
 
-    const initialStatus = appStore.profile.public_closet;
+    const hasOpenPost = vi.spyOn(sosService, 'hasOpenSosPost').mockResolvedValue(false);
     const save = vi.spyOn(profileRepository, 'updatePublicProfile')
       .mockImplementation(async (_id, values) => values);
     const switchBtn = wrapper.find('.switch');
 
     await switchBtn.trigger('click');
     await flushPromises();
-    expect(appStore.profile.public_closet).toBe(!initialStatus);
-    expect(save).toHaveBeenCalledWith(useAuthStore().profileId, { public_closet: !initialStatus });
+    expect(hasOpenPost).toHaveBeenCalledWith(useAuthStore().profileId);
+    expect(appStore.profile.public_closet).toBe(false);
+    expect(save).toHaveBeenCalledWith(useAuthStore().profileId, { public_closet: false });
     expect(appStore.toastSyncStatus).toBe('SYNCED');
 
     await switchBtn.trigger('click');
     await flushPromises();
-    expect(appStore.profile.public_closet).toBe(initialStatus);
+    expect(hasOpenPost).toHaveBeenCalledTimes(1);
+    expect(appStore.profile.public_closet).toBe(true);
+  });
+
+  it('blocks making a public wardrobe private while an SOS is open', async () => {
+    const appStore = useAppStore();
+    appStore.profile.public_closet = true;
+    vi.spyOn(sosService, 'hasOpenSosPost').mockResolvedValue(true);
+    const save = vi.spyOn(profileRepository, 'updatePublicProfile');
+    const wrapper = mount(ClosetVisibility, { global: { plugins: [pinia, router] } });
+
+    await wrapper.find('.switch').trigger('click');
+    await flushPromises();
+
+    expect(appStore.profile.public_closet).toBe(true);
+    expect(save).not.toHaveBeenCalled();
+    expect(wrapper.find('[role="dialog"]').text()).toContain('目前還有進行中的 SOS 求救貼文');
+  });
+
+  it('fails closed when checking for open SOS requests fails', async () => {
+    const appStore = useAppStore();
+    appStore.profile.public_closet = true;
+    vi.spyOn(sosService, 'hasOpenSosPost').mockRejectedValue(new Error('offline'));
+    const save = vi.spyOn(profileRepository, 'updatePublicProfile');
+    const wrapper = mount(ClosetVisibility, { global: { plugins: [pinia, router] } });
+
+    await wrapper.find('.switch').trigger('click');
+    await flushPromises();
+
+    expect(appStore.profile.public_closet).toBe(true);
+    expect(save).not.toHaveBeenCalled();
+    expect(wrapper.find('[role="dialog"]').text()).toContain('無法確認進行中的求救貼文');
+  });
+
+  it('keeps the wardrobe public when the profile update fails after an empty SOS check', async () => {
+    const appStore = useAppStore();
+    appStore.profile.public_closet = true;
+    vi.spyOn(sosService, 'hasOpenSosPost').mockResolvedValue(false);
+    vi.spyOn(profileRepository, 'updatePublicProfile').mockRejectedValue(new Error('offline'));
+    const wrapper = mount(ClosetVisibility, { global: { plugins: [pinia, router] } });
+
+    await wrapper.find('.switch').trigger('click');
+    await flushPromises();
+
+    expect(appStore.profile.public_closet).toBe(true);
+    expect(appStore.toastSyncStatus).toBe('REMOTE_FAILED');
+  });
+
+  it('ignores repeated clicks while checking open SOS requests', async () => {
+    const appStore = useAppStore();
+    appStore.profile.public_closet = true;
+    let finishCheck;
+    const hasOpenPost = vi.spyOn(sosService, 'hasOpenSosPost')
+      .mockReturnValue(new Promise(resolve => { finishCheck = resolve; }));
+    const save = vi.spyOn(profileRepository, 'updatePublicProfile').mockResolvedValue({ public_closet: false });
+    const wrapper = mount(ClosetVisibility, { global: { plugins: [pinia, router] } });
+
+    await wrapper.find('.switch').trigger('click');
+    await wrapper.find('.switch').trigger('click');
+    expect(wrapper.find('.switch').attributes('disabled')).toBeDefined();
+    expect(hasOpenPost).toHaveBeenCalledTimes(1);
+
+    finishCheck(false);
+    await flushPromises();
+    expect(save).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the wardrobe private when the server rejects sharing', async () => {

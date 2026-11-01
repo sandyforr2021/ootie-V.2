@@ -97,7 +97,7 @@ watch(() => route.params.id, () => {
 .sos-detail-page {
   max-width: 820px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 24px 0 80px;
 }
 .sos-detail-page-header {
   margin-bottom: 16px;
@@ -125,7 +125,7 @@ watch(() => route.params.id, () => {
 }
 @media (max-width: 600px) {
   .sos-detail-page {
-    padding: 16px 14px 60px;
+    padding: 16px 0 60px;
   }
   .sos-detail-card {
     padding: 20px 16px;

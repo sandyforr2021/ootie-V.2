@@ -2,6 +2,8 @@
    keep their semantics; geometry and title typography are defined only here. */
 #main-content .app-page{max-width:1260px;margin-inline:auto;margin-top:0;padding-top:0}
 #main-content .ootie-page-heading{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:24px;min-height:116px;width:100%;margin:8px 0 28px;padding:24px 28px;border:0;border-radius:12px;background:var(--gradient-celebration);box-shadow:none;overflow:visible;animation:none;transform:none}
+#main-content .sos-page-hero.ootie-page-heading{background:linear-gradient(128deg,var(--accent-pink-soft),#fff 52%,var(--accent-lavender-soft))}
+#main-content .sos-page-hero.ootie-page-heading::after{content:none}
 #main-content .ootie-page-heading h1{font-family:var(--font-display);font-size:40px;font-weight:500;line-height:1.4;letter-spacing:.01em;color:var(--ink);margin:0;padding:0;min-width:0;max-width:none;text-align:left;text-wrap:balance;overflow-wrap:anywhere}
 #main-content .ootie-page-heading>div{min-width:0}
 #main-content .ootie-page-heading .closet-title-group{gap:10px 20px;flex:1}

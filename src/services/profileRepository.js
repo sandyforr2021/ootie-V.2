@@ -170,7 +170,7 @@ export async function upsertProfile(profileData, authUserId, client = supabase) 
   try {
     const { data, error } = await client
       .from('ootie_profiles')
-      .upsert(payload, { onConflict: 'user_id' })
+      .upsert(payload, { onConflict: 'user_id', ignoreDuplicates: true })
       .select()
       .maybeSingle();
 
@@ -192,15 +192,29 @@ export async function bootstrapOAuthProfile(session, client = supabase) {
   const emailStem = String(user.email?.split('@')[0] || 'member').toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 18) || 'member';
   const username = `@${emailStem}_${user.id.slice(0, 6)}`;
   const initials = rawName.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'OT';
-  return upsertProfile({
-    name: rawName,
+  const existingProfile = await loadProfileByAuthUserId(user.id, client);
+  const profileData = {
     display_name: rawName,
     username,
     avatar_url: metadata.avatar_url || metadata.picture || null,
     initials,
-    slogan: '用衣櫥記錄日常，也和衣友分享穿搭靈感。',
+    slogan: '用衣櫥記錄日常，也和衣友分享穿搭靈感。'
+  };
+
+  if (existingProfile) {
+    return updatePublicProfile(existingProfile.id, profileData, client);
+  }
+
+  const createdProfile = await upsertProfile({
+    ...profileData,
+    name: rawName,
     public_closet: false
   }, user.id, client);
+  if (createdProfile) return createdProfile;
+
+  const concurrentlyCreatedProfile = await loadProfileByAuthUserId(user.id, client);
+  if (!concurrentlyCreatedProfile) throw new Error('OAUTH_PROFILE_BOOTSTRAP_NOT_CONFIRMED');
+  return updatePublicProfile(concurrentlyCreatedProfile.id, profileData, client);
 }
 
 export async function getPublicProfileByUsername(username, client = supabase) {
