@@ -11,10 +11,8 @@
         <MediaImage v-if="contextItem.photo" :src="contextItem.photo" :alt="contextItem.name_zh || contextItem.name" style="width:72px;height:90px;object-fit:contain" />
         {{ tf('已帶入單品：{name}', { name: contextItem.name_zh || contextItem.name }) }}
       </p>
-      <p v-if="loadingCloset" role="status" class="form-help">{{ t('正在讀取衣櫥…') }}</p>
-      <p v-if="closetLoadFailed" role="alert" class="sos-form-error">{{ t('衣櫥無法載入，請重新整理後再試。') }}</p>
-      <form :aria-busy="loadingCloset || submitting" class="sos-create-form" @submit.prevent="handleSubmit">
-        <fieldset :disabled="loadingCloset || closetLoadFailed || submitting" class="sos-form-fields">
+      <form :aria-busy="submitting" class="sos-create-form" @submit.prevent="handleSubmit">
+        <fieldset :disabled="submitting" class="sos-form-fields">
           <div class="form-field">
             <label for="sosTitle">{{ t("標題") }}</label>
             <input id="sosTitle" v-model="title" required maxlength="120" :placeholder="t('例如：明天第一次約會，我該穿什麼？')" />
@@ -80,8 +78,8 @@
 
               <button
                 type="button"
-                class="sos-picker-btn closet-btn"
-                :disabled="!appStore.profile.public_closet || !myAvailableItems.length"
+                class="sos-picker-btn closet-btn closet-picker-btn"
+                :disabled="!appStore.profile.public_closet"
                 @click="openClosetSelector"
               >
                 <AppIcon name="Closet" :size="18" />
@@ -111,7 +109,7 @@
                 <strong>{{ selectedClosetItem?.name_zh || selectedClosetItem?.name || t('衣櫥單品') }}</strong>
                 <span>{{ t('來自我的衣櫥') }}</span>
               </div>
-              <button type="button" class="secondary" @click="showClosetDrawer = true">{{ t('更換單品') }}</button>
+              <button type="button" class="secondary" @click="openClosetSelector">{{ t('更換單品') }}</button>
             </div>
 
             <div v-if="showClosetDrawer" class="sos-closet-drawer">
@@ -119,7 +117,9 @@
                 <strong>{{ t('選擇一件衣櫥單品作為附圖') }}</strong>
                 <button type="button" class="text-button" @click="showClosetDrawer = false">{{ t('收合') }}</button>
               </div>
-              <div v-if="myAvailableItems.length" class="sos-selection-grid">
+              <p v-if="loadingCloset" role="status" class="form-help">{{ t('正在讀取衣櫥…') }}</p>
+              <p v-else-if="closetLoadFailed" role="alert" class="sos-form-error">{{ t('衣櫥無法載入，請重新整理後再試。') }}</p>
+              <div v-else-if="myAvailableItems.length" class="sos-selection-grid">
                 <label
                   v-for="item in myAvailableItems"
                   :key="item.id"
@@ -144,7 +144,7 @@
           <p v-if="submitError" class="sos-form-error" role="alert">{{ submitError }}</p>
           <div class="form-actions" style="margin-top:28px">
             <router-link to="/sos" class="secondary form-cancel-btn">{{ $t("取消") }}</router-link>
-            <button type="submit" class="primary" :disabled="loadingCloset || closetLoadFailed || !appStore.profile.public_closet || submitting">
+            <button type="submit" class="primary" :disabled="!appStore.profile.public_closet || submitting">
               {{ submitting ? t('正在發布…') : t('確認發布') }}
             </button>
           </div>
@@ -165,6 +165,7 @@ import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import { validateOotdImage, uploadOotdImage } from '@/services/ootdMedia';
+import { getCurrentUserPublicItemIds, getItemById } from '@/services/clothingRepository';
 
 const route = useRoute();
 const router = useRouter();
@@ -180,6 +181,7 @@ const weather = ref('晴天');
 const submitting = ref(false);
 const loadingCloset = ref(false);
 const closetLoadFailed = ref(false);
+const closetLoaded = ref(false);
 const submitError = ref('');
 
 const coverMode = ref('none');
@@ -189,9 +191,44 @@ const coverItemId = ref(null);
 const showClosetDrawer = ref(false);
 
 const contextItemId = computed(() => route.query.item_id || appStore.sosTargetItemId || null);
-const contextItem = computed(() => contextItemId.value ? appStore.items.find(i => String(i.id) === String(contextItemId.value)) : null);
+const contextItem = ref(null);
+
+const resolveContextItem = async (profileId) => {
+  if (!contextItemId.value) {
+    contextItem.value = null;
+    return;
+  }
+  let item = appStore.items.find(i => String(i.id) === String(contextItemId.value) && i.owner_id === profileId);
+  if (!item) {
+    try {
+      const fetched = await getItemById(contextItemId.value);
+      if (fetched && fetched.owner_id === profileId) {
+        item = fetched;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  if (item) {
+    contextItem.value = item;
+    const name = item.name_zh || item.name || '這件單品';
+    if (!title.value) title.value = tf('這件{name}，想請衣友幫忙搭配', { name });
+    if (!details.value) details.value = tf('我很少穿這件{name}，想請衣友幫我找找適合的搭配。', { name });
+    if (!item.hidden) {
+      coverMode.value = 'closet';
+      coverItemId.value = item.id;
+    }
+  }
+};
+
 const myAvailableItems = computed(() => appStore.items.filter(i => !i.hidden && i.owner_id === authStore.profileId));
-const selectedClosetItem = computed(() => coverItemId.value ? (appStore.items.find(i => String(i.id) === String(coverItemId.value)) || null) : null);
+const selectedClosetItem = computed(() => {
+  if (!coverItemId.value) return null;
+  if (contextItem.value && String(contextItem.value.id) === String(coverItemId.value)) {
+    return contextItem.value;
+  }
+  return appStore.items.find(i => String(i.id) === String(coverItemId.value)) || null;
+});
 
 const clearCoverImage = () => {
   coverMode.value = 'none';
@@ -222,7 +259,27 @@ const handleFileUpload = (event) => {
   }
 };
 
-const openClosetSelector = () => { showClosetDrawer.value = true; };
+const openClosetSelector = async () => {
+  showClosetDrawer.value = true;
+  if (loadingCloset.value) return;
+  const profileId = authStore.profileId;
+  if (!profileId) return;
+
+  if (closetLoaded.value && appStore.items.some(i => i.owner_id === profileId)) return;
+
+  loadingCloset.value = true;
+  closetLoadFailed.value = false;
+  try {
+    const result = await closetStore.loadRemoteItems(profileId);
+    closetLoadFailed.value = !result?.ok;
+    if (result?.ok) closetLoaded.value = true;
+  } catch {
+    closetLoadFailed.value = true;
+  } finally {
+    loadingCloset.value = false;
+  }
+};
+
 const selectClosetItem = (item) => {
   coverMode.value = 'closet';
   coverItemId.value = item.id;
@@ -232,8 +289,14 @@ const selectClosetItem = (item) => {
 };
 
 const selectedCoverFile = async (profileId) => {
-  const item = appStore.items.find(entry => String(entry.id) === String(coverItemId.value));
-  if (!item?.photo || item.owner_id !== profileId) throw new Error('COVER_UNAVAILABLE');
+  let item = selectedClosetItem.value;
+  if (!item) {
+    item = appStore.items.find(entry => String(entry.id) === String(coverItemId.value));
+  }
+  if (!item?.photo) {
+    item = await getItemById(coverItemId.value);
+  }
+  if (!item?.photo || item.owner_id !== profileId || item.hidden) throw new Error('COVER_UNAVAILABLE');
   const response = await fetch(item.photo);
   if (!response.ok) throw new Error('COVER_UNAVAILABLE');
   const blob = await response.blob();
@@ -250,56 +313,51 @@ const initForm = async () => {
   }
   const profileId = authStore.profileId;
   if (!profileId) return;
-
-  loadingCloset.value = true;
-  closetLoadFailed.value = false;
-  try {
-    const result = await closetStore.loadRemoteItems();
-    closetLoadFailed.value = !result?.ok;
-  } catch {
-    closetLoadFailed.value = true;
-  } finally {
-    loadingCloset.value = false;
-  }
-
-  if (contextItem.value) {
-    const item = contextItem.value;
-    const name = item.name_zh || item.name || '這件單品';
-    title.value = tf('這件{name}，想請衣友幫忙搭配', { name });
-    details.value = tf('我很少穿這件{name}，想請衣友幫我找找適合的搭配。', { name });
-    if (!item.hidden && item.owner_id === profileId) {
-      coverMode.value = 'closet';
-      coverItemId.value = item.id;
-    }
-  }
+  await resolveContextItem(profileId);
 };
 
 onMounted(() => { initForm(); });
 watch(() => route.query.item_id, () => { initForm(); });
 
 const handleSubmit = async () => {
-  if (loadingCloset.value || closetLoadFailed.value || !appStore.profile.public_closet || submitting.value) return;
+  if (submitting.value) return;
+  if (!appStore.profile.public_closet) {
+    appStore.showToast(t('請先開啟「公開衣櫥」功能，才能發布求救。'));
+    return;
+  }
   const userId = authStore.user?.id;
   const profileId = authStore.profileId;
   if (!userId || !profileId || !authStore.isMember) return;
 
-  const sharedItemIds = myAvailableItems.value.map(i => i.id);
+  submitting.value = true;
+  submitError.value = '';
+  let sharedItemIds = [];
+  try {
+    sharedItemIds = await getCurrentUserPublicItemIds(profileId);
+  } catch (err) {
+    submitting.value = false;
+    submitError.value = err?.userMessage || t('無法取得最新公開衣物清單，請稍後再試。');
+    appStore.showToast(submitError.value, { type: 'error' });
+    return;
+  }
+
   if (!sharedItemIds.length) {
+    submitting.value = false;
     appStore.showToast(t('請先在衣櫥加入至少一件衣物。'));
     return;
   }
 
   if (coverMode.value === 'upload' && !coverFile.value) {
+    submitting.value = false;
     appStore.showToast(t('請選擇圖片，或點擊「移除圖片」。'), { type: 'warning' });
     return;
   }
-  if (coverMode.value === 'closet' && !coverItemId.value) {
-    appStore.showToast(t('請選擇單品，或點擊「移除圖片」。'), { type: 'warning' });
+  if (coverMode.value === 'closet' && (!coverItemId.value || !sharedItemIds.includes(coverItemId.value))) {
+    submitting.value = false;
+    appStore.showToast(t('所選單品已不在公開衣櫥中，請重新選擇單品。'), { type: 'warning' });
     return;
   }
 
-  submitting.value = true;
-  submitError.value = '';
   let uploaded = null;
   let success = false;
 
@@ -380,4 +438,3 @@ const handleSubmit = async () => {
   .sos-image-pickers { grid-template-columns: 1fr; }
 }
 </style>
-

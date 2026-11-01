@@ -6,7 +6,8 @@ import {
   createClothingItem,
   updateClothingItem,
   deleteClothingItem,
-  getPublicItemsByIds
+  getPublicItemsByIds,
+  getCurrentUserPublicItemIds
 } from '../clothingRepository';
 import { ServiceError, SERVICE_ERROR_CODE } from '../serviceError';
 
@@ -139,6 +140,34 @@ describe('clothingRepository (READ-ONLY)', () => {
       await expect(getItemById(mockItemId, mockClient)).rejects.toMatchObject({
         code: SERVICE_ERROR_CODE.NETWORK_ERROR
       });
+    });
+  });
+
+  describe('getCurrentUserPublicItemIds', () => {
+    it('throws VALIDATION_ERROR when profileId is invalid', async () => {
+      await expect(getCurrentUserPublicItemIds('not-a-uuid')).rejects.toMatchObject({
+        code: SERVICE_ERROR_CODE.VALIDATION_ERROR
+      });
+    });
+
+    it('queries lightweight ID-only data filtered by owner and hidden false', async () => {
+      const eqHidden = vi.fn().mockResolvedValue({
+        data: [
+          { id: mockItemId, owner_id: mockProfileId, hidden: false }
+        ],
+        error: null
+      });
+      const eqOwner = vi.fn().mockReturnValue({ eq: eqHidden });
+      const selectFn = vi.fn().mockReturnValue({ eq: eqOwner });
+      const fromFn = vi.fn().mockReturnValue({ select: selectFn });
+      const mockClient = { from: fromFn };
+
+      const result = await getCurrentUserPublicItemIds(mockProfileId, mockClient);
+      expect(result).toEqual([mockItemId]);
+      expect(fromFn).toHaveBeenCalledWith('ootie_clothing_items');
+      expect(selectFn).toHaveBeenCalledWith('id,owner_id,hidden');
+      expect(eqOwner).toHaveBeenCalledWith('owner_id', mockProfileId);
+      expect(eqHidden).toHaveBeenCalledWith('hidden', false);
     });
   });
 

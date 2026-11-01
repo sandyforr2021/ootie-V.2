@@ -10,6 +10,7 @@ import { useSosStore } from '@/stores/sos';
 import { useAuthStore } from '@/stores/auth';
 import { useClosetStore } from '@/stores/closet';
 import * as ootdMedia from '@/services/ootdMedia';
+import * as clothingRepo from '@/services/clothingRepository';
 
 const createTestRouter = () => createRouter({
   history: createWebHistory(),
@@ -20,7 +21,7 @@ const createTestRouter = () => createRouter({
   ]
 });
 
-describe('SosCreateView standalone page UX', () => {
+describe('SosCreateView standalone page UX and Lazy Loading', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -30,17 +31,21 @@ describe('SosCreateView standalone page UX', () => {
     setActivePinia(createPinia());
     localStorage.clear();
     installLocalInteractionFixtures();
+    vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockResolvedValue(['item-1', 'item-2']);
     vi.spyOn(useClosetStore(), 'loadRemoteItems').mockResolvedValue({ ok: true });
   });
 
-  it('renders the standalone SOS create page and checks public wardrobe constraint', async () => {
+  it('renders without loading wardrobe on initial entry', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
+    const closetStore = useClosetStore();
+    const loadSpy = vi.spyOn(closetStore, 'loadRemoteItems');
+
     authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
-
     appStore.profile.public_closet = false;
+
     await router.push('/sos/create');
     const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
     await flushPromises();
@@ -48,6 +53,7 @@ describe('SosCreateView standalone page UX', () => {
     expect(wrapper.text()).toContain('請衣友幫忙搭配');
     expect(wrapper.text()).toContain('請先開啟「公開衣櫥」功能，才能發布求救。');
     expect(wrapper.find('button[type="submit"]').element.disabled).toBe(true);
+    expect(loadSpy).not.toHaveBeenCalled();
 
     appStore.profile.public_closet = true;
     await wrapper.vm.$nextTick();
@@ -55,10 +61,13 @@ describe('SosCreateView standalone page UX', () => {
     expect(wrapper.find('button[type="submit"]').element.disabled).toBe(false);
   });
 
-  it('allows computer image upload and preview', async () => {
+  it('allows computer image upload and preview independently of wardrobe loading', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
+    const closetStore = useClosetStore();
+    const loadSpy = vi.spyOn(closetStore, 'loadRemoteItems');
+
     authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     appStore.profile.public_closet = true;
@@ -76,12 +85,14 @@ describe('SosCreateView standalone page UX', () => {
     expect(wrapper.text()).toContain('outfit.jpg');
     expect(wrapper.text()).toContain('已上傳本機圖片');
     expect(wrapper.find('.sos-cover-preview-card').exists()).toBe(true);
+    expect(loadSpy).not.toHaveBeenCalled();
   });
 
-  it('allows selecting an image from wardrobe and replaces selection on choosing another', async () => {
+  it('loads wardrobe only upon clicking choose from wardrobe and replaces selection', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
+    const closetStore = useClosetStore();
     authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     appStore.profile.public_closet = true;
@@ -89,13 +100,22 @@ describe('SosCreateView standalone page UX', () => {
     const item1 = { id: 'item-1', owner_id: authStore.profileId, name: 'White Shirt', hidden: false, photo: 'https://example.com/item1.jpg' };
     const item2 = { id: 'item-2', owner_id: authStore.profileId, name: 'Blue Jeans', hidden: false, photo: 'https://example.com/item2.jpg' };
     const hiddenItem = { id: 'item-hidden', owner_id: authStore.profileId, name: 'Secret Dress', hidden: true, photo: 'https://example.com/hidden.jpg' };
-    appStore.items = [item1, item2, hiddenItem];
+
+    const loadSpy = vi.spyOn(closetStore, 'loadRemoteItems').mockImplementation(async () => {
+      appStore.items = [item1, item2, hiddenItem];
+      return { ok: true };
+    });
 
     await router.push('/sos/create');
     const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
     await flushPromises();
 
-    await wrapper.find('.closet-btn').trigger('click');
+    expect(loadSpy).not.toHaveBeenCalled();
+
+    await wrapper.find('.closet-picker-btn').trigger('click');
+    await flushPromises();
+
+    expect(loadSpy).toHaveBeenCalledWith(authStore.profileId);
     expect(wrapper.find('.sos-closet-drawer').exists()).toBe(true);
 
     const cardTexts = wrapper.findAll('.sos-selection-card').map(c => c.text());
@@ -109,7 +129,8 @@ describe('SosCreateView standalone page UX', () => {
 
     expect(wrapper.find('.sos-cover-preview-card').text()).toContain('White Shirt');
 
-    await wrapper.find('.sos-cover-preview-card button.secondary').trigger('click');
+    await wrapper.find('.sos-cover-preview-card button').trigger('click');
+    await flushPromises();
     const cardsAgain = wrapper.findAll('.sos-selection-card');
     await cardsAgain[1].trigger('click');
     await flushPromises();
@@ -118,7 +139,32 @@ describe('SosCreateView standalone page UX', () => {
     expect(wrapper.findAll('.sos-cover-preview-card')).toHaveLength(1);
   });
 
-  it('publishes without an image and redirects to /sos', async () => {
+  it('handles wardrobe load failure without blocking form typing', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const closetStore = useClosetStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+
+    vi.spyOn(closetStore, 'loadRemoteItems').mockResolvedValue({ ok: false });
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    await wrapper.find('.closet-picker-btn').trigger('click');
+    await flushPromises();
+
+    expect(wrapper.find('.sos-closet-drawer').text()).toContain('衣櫥無法載入，請重新整理後再試。');
+    const titleInput = wrapper.find('#sosTitle');
+    expect(titleInput.element.disabled).toBe(false);
+    await titleInput.setValue('緊急搭配求助');
+    expect(titleInput.element.value).toBe('緊急搭配求助');
+  });
+
+  it('publishes with fresh public item IDs query at submit time', async () => {
     const router = createTestRouter();
     const appStore = useAppStore();
     const authStore = useAuthStore();
@@ -127,9 +173,7 @@ describe('SosCreateView standalone page UX', () => {
     authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     appStore.profile.public_closet = true;
 
-    const item = { id: 'item-1', owner_id: authStore.profileId, name: 'Shirt', hidden: false, photo: 'https://example.com/shirt.jpg' };
-    appStore.items = [item];
-
+    const publicIdsSpy = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockResolvedValue(['fresh-item-1', 'fresh-item-2']);
     const createSosSpy = vi.spyOn(sosStore, 'createSosPost').mockResolvedValue(true);
 
     await router.push('/sos/create');
@@ -141,13 +185,14 @@ describe('SosCreateView standalone page UX', () => {
     await wrapper.find('form').trigger('submit');
     await flushPromises();
 
+    expect(publicIdsSpy).toHaveBeenCalledWith(authStore.profileId);
     expect(createSosSpy).toHaveBeenCalledWith(expect.objectContaining({
       title: '明天約會穿什麼？',
       details: '想穿得俐落一點',
       cover_url: null,
       cover_path: null,
       cover_item_id: null,
-      closet_item_ids: ['item-1']
+      closet_item_ids: ['fresh-item-1', 'fresh-item-2']
     }));
 
     expect(sosStore.activeTab).toBe('sent');
@@ -191,5 +236,78 @@ describe('SosCreateView standalone page UX', () => {
       cover_url: 'https://example.com/img.jpg',
       cover_path: 'ootd/test/img.jpg'
     }));
+  });
+
+  it('handles public item IDs query failure and preserves user form input', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+
+    vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds').mockRejectedValue({
+      userMessage: '無法取得最新公開衣物清單，請稍後再試。'
+    });
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    await wrapper.find('#sosTitle').setValue('保留的標題');
+    await wrapper.find('#sosDetails').setValue('保留的描述');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(wrapper.find('.sos-form-error').text()).toContain('無法取得最新公開衣物清單，請稍後再試。');
+    expect(wrapper.find('#sosTitle').element.value).toBe('保留的標題');
+    expect(wrapper.find('#sosDetails').element.value).toBe('保留的描述');
+  });
+
+  it('rejects unsupported image format during upload', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    const badFile = new File(['mock'], 'outfit.svg', { type: 'image/svg+xml' });
+    const fileInput = wrapper.find('.upload-btn input[type="file"]');
+    Object.defineProperty(fileInput.element, 'files', { value: [badFile] });
+    await fileInput.trigger('change');
+    await flushPromises();
+
+    expect(wrapper.find('.sos-cover-preview-card').exists()).toBe(false);
+  });
+
+  it('displays error message when publishing fails', async () => {
+    const router = createTestRouter();
+    const appStore = useAppStore();
+    const authStore = useAuthStore();
+    const sosStore = useSosStore();
+    authStore.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+    authStore.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
+    appStore.profile.public_closet = true;
+
+    const item = { id: 'item-1', owner_id: authStore.profileId, name: 'Shirt', hidden: false, photo: 'https://example.com/shirt.jpg' };
+    appStore.items = [item];
+
+    vi.spyOn(sosStore, 'createSosPost').mockRejectedValue({ userMessage: '伺服器忙碌中，請稍後再試。' });
+
+    await router.push('/sos/create');
+    const wrapper = mount(SosCreateView, { global: { plugins: [router] } });
+    await flushPromises();
+
+    await wrapper.find('#sosTitle').setValue('測試求救');
+    await wrapper.find('#sosDetails').setValue('測試內容');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(wrapper.find('.sos-form-error').text()).toContain('伺服器忙碌中，請稍後再試。');
   });
 });

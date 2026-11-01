@@ -135,6 +135,40 @@ export async function getCurrentUserItems(profileId, client = supabase, options 
 export const fetchClothingItems = getCurrentUserItems;
 
 /**
+ * Fetches only the active public (non-hidden) clothing item IDs for the current profile owner.
+ * Lightweight ID-only query used during SOS post creation without fetching heavy metadata/images.
+ * @param {string} profileId - The ootie_profiles.id UUID.
+ * @param {object} [client=supabase] - Supabase client instance.
+ * @returns {Promise<Array<string>>} List of item ID UUIDs.
+ */
+export async function getCurrentUserPublicItemIds(profileId, client = supabase) {
+  if (!isUuid(profileId)) {
+    throw new ServiceError(SERVICE_ERROR_CODE.VALIDATION_ERROR, {
+      message: '無效的個人檔案擁有者 ID。',
+      userMessage: '無效的個人檔案擁有者 ID。'
+    });
+  }
+
+  try {
+    const { data, error } = await client
+      .from('ootie_clothing_items')
+      .select('id,owner_id,hidden')
+      .eq('owner_id', profileId)
+      .eq('hidden', false);
+
+    if (error) {
+      throw normalizeServiceError(error);
+    }
+
+    return (data || [])
+      .filter((item) => item.owner_id === profileId && !item.hidden)
+      .map((item) => item.id);
+  } catch (err) {
+    throw normalizeServiceError(err);
+  }
+}
+
+/**
  * Resolves clothing referenced by public social content. Database RLS remains
  * the source of truth: private or non-readable rows are simply not returned.
  */

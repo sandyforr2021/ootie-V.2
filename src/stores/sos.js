@@ -20,6 +20,10 @@ import {
   fetchSavedSosIds
 } from '@/services/supabase';
 
+const isUuid = (str) =>
+  typeof str === 'string' &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
 export const useSosStore = defineStore('sos', () => {
   const appStore = useAppStore();
   const authStore = useAuthStore();
@@ -194,13 +198,15 @@ export const useSosStore = defineStore('sos', () => {
     const requestedItemIds = Array.isArray(closet_item_ids)
       ? closet_item_ids
       : appStore.items.map((item) => item.id);
-    const ownedItemIds = new Set(
-      appStore.items
-        .filter((item) => String(item.owner_id) === String(profileId))
-        .map((item) => String(item.id))
-    );
+    const ownedItemIds = appStore.items.length > 0
+      ? new Set(
+          appStore.items
+            .filter((item) => String(item.owner_id) === String(profileId))
+            .map((item) => String(item.id))
+        )
+      : null;
     const finalItemIds = [...new Set(requestedItemIds.map((id) => String(id)))]
-      .filter((id) => ownedItemIds.has(id));
+      .filter((id) => (ownedItemIds ? ownedItemIds.has(id) : isUuid(id)));
     if (!finalItemIds.length) {
       appStore.showToast(t('請至少選擇 1 件要公開給衣友的衣物。'));
       return false;
