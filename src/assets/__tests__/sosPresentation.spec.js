@@ -9,11 +9,12 @@ const sosCreateView = readFileSync(resolve(process.cwd(), 'src/views/SosCreateVi
 const sosDetailView = readFileSync(resolve(process.cwd(), 'src/views/SosDetailView.vue'), 'utf8');
 
 describe('SOS presentation contract', () => {
-  it('removes only SOS hero decoration and preserves its shared pink-lavender gradient', () => {
+  it('removes SOS hero decoration and inherits the shared page heading background', () => {
     expect(sosListView).toMatch(/core-page-hero\s+sos-page-hero\s+ootie-page-heading/);
     expect(sosCreateView).toMatch(/core-page-hero\s+sos-page-hero\s+sos-create-hero/);
     expect(headingCss).toMatch(/#main-content\s+\.sos-page-hero\.ootie-page-heading::after\s*\{\s*content:none\s*\}/);
-    expect(headingCss).toMatch(/#main-content\s+\.sos-page-hero\.ootie-page-heading\s*\{[^}]*background:linear-gradient\(128deg,var\(--accent-pink-soft\),#fff 52%,var\(--accent-lavender-soft\)\)/);
+    expect(headingCss).not.toMatch(/#main-content\s+\.sos-page-hero\.ootie-page-heading\s*\{[^}]*background:/);
+    expect(headingCss).toMatch(/#main-content\s+\.ootie-page-heading\s*\{[^}]*background:var\(--gradient-celebration\)/);
     expect(mainCss).toMatch(/\.core-page-hero::after\s*\{[^}]*background:\s*rgba\(255,\s*255,\s*255,\s*\.45\)/);
   });
 

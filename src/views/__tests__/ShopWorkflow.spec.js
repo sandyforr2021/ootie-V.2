@@ -64,8 +64,17 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('h1').text()).toBe('試穿工作室');
     expect(wrapper.find('.shop-tabs').exists()).toBe(true);
     expect(wrapper.findAll('.shop-tabs button').map(button=>button.text())).toEqual(['試穿模擬','私人相簿','個人色彩分析']);
-    expect(wrapper.find('.studio-balance-card strong').text()).toBe('100');
+    expect(wrapper.find('.balance-card .personal-balance').text()).toBe('100');
+    expect(wrapper.find('.studio-balance-card').exists()).toBe(false);
     expect(fixture.request).toHaveBeenCalledWith('products','unit-only',undefined);
+  });
+  it('keeps the personal color analysis tab selected when its route query changes',async()=>{
+    await render();
+    await wrapper.findAll('.shop-tabs button').find(button=>button.text()==='個人色彩分析').trigger('click');
+    await flushPromises();
+    expect(wrapper.vm.$route.query.tab).toBe('tone');
+    expect(wrapper.find('.shop-tone-section').exists()).toBe(true);
+    expect(wrapper.findAll('.shop-tabs button')[2].classes()).toContain('active');
   });
   it('resolves saved public clothing independently of the general feed image limit',async()=>{
     vi.stubEnv('VITE_SUPABASE_URL','https://project.supabase.co');
@@ -203,7 +212,7 @@ describe('Shopping studio workflow', () => {
     await wrapper.vm.refresh();
     await flushPromises();
     expect(wrapper.find('.studio-shortlist').exists()).toBe(true);
-    expect(wrapper.find('.studio-balance-card').text()).toContain('100');
+    expect(wrapper.find('.balance-card .personal-balance').text()).toBe('100');
     await wrapper.find('.shop-product-image').trigger('click');
     await wrapper.findAll('.studio-steps button')[1].trigger('click');
     await wrapper.vm.refresh();await flushPromises();
@@ -250,15 +259,16 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.findAll('.shop-album-grid .shop-result')).toHaveLength(1);
     expect(wrapper.find('[role=alert]').exists()).toBe(true);
   });
-  it('removes and restores a wishlist product through its owner-scoped state endpoint',async()=>{
+  it('renders wishlist cards without purchase, try-on, or delete actions',async()=>{
     await render(WishlistPanel,'/closet?tab=wishlist');
-    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
-    await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
-    expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'dismissed'});
-    expect(wrapper.find('.wishlist-card').exists()).toBe(false);
-    await wrapper.find('.wishlist-undo button').trigger('click');await flushPromises();
-    expect(fixture.request).toHaveBeenCalledWith('products/product-unit/state','unit-only',{state:'wishlist'});
-    expect(wrapper.find('.wishlist-card').exists()).toBe(true);
+    expect(wrapper.find('.item-card').exists()).toBe(true);
+    expect(wrapper.find('.item-info h3').text()).toBe('Cotton shirt');
+    expect(wrapper.find('.item-card a').exists()).toBe(false);
+    expect(wrapper.find('.item-card button').exists()).toBe(false);
+    expect(wrapper.find('.wishlist-card-actions').exists()).toBe(false);
+    await wrapper.find('.item-image').trigger('click');
+    expect(useAppStore().isDetailOpen).toBe(true);
+    expect(useAppStore().selectedItemId).toBe('product-unit');
   });
   it('filters wishlist items by category and switches between rack and cards',async()=>{
     fixture.products=[
@@ -267,15 +277,17 @@ describe('Shopping studio workflow', () => {
       {id:'outer',title:'Light jacket',category:'upper_body',outfit_layer:'outer',state:'wishlist',image_path:'products/outer.jpg'}
     ];
     await render(WishlistPanel,'/closet?tab=wishlist');
-    expect(wrapper.findAll('.rack-item')).toHaveLength(3);
+    expect(wrapper.findAll('.item-card')).toHaveLength(3);
     await wrapper.findAll('.wishlist-category-row .category').find(button=>button.text()==='外套').trigger('click');
-    expect(wrapper.find('.rack-row h2').text()).toContain('外套');
-    expect(wrapper.findAll('.rack-item')).toHaveLength(1);
+    expect(wrapper.find('.item-info h3').text()).toBe('Light jacket');
+    expect(wrapper.findAll('.item-card')).toHaveLength(1);
     await wrapper.findAll('.wishlist-category-row .category').find(button=>button.text()==='下身').trigger('click');
+    expect(wrapper.findAll('.item-card')).toHaveLength(1);
+    expect(wrapper.find('.item-info h3').text()).toBe('Wide trousers');
+    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='衣架').trigger('click');
     expect(wrapper.findAll('.rack-item')).toHaveLength(1);
     await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
-    expect(wrapper.findAll('.wishlist-card')).toHaveLength(1);
-    await wrapper.find('.wishlist-product-open').trigger('click');
+    await wrapper.find('.item-image').trigger('click');
     expect(useAppStore().isDetailOpen).toBe(true);
     expect(useAppStore().selectedItemId).toBe('bottom');
   });
@@ -286,6 +298,7 @@ describe('Shopping studio workflow', () => {
     await render(ItemDetailModal,'/closet?tab=wishlist');
     expect(wrapper.text()).toContain('放入我的衣櫥');
     expect(wrapper.text()).toContain('刪除');
+    expect(wrapper.find('.detail-category').exists()).toBe(false);
     expect(wrapper.find('.detail-fields').text()).toContain('上衣');
     await wrapper.findAll('.modal-actions button').find(button=>button.text()==='編輯').trigger('click');
     await wrapper.find('.wishlist-edit-form input:not([type=color])').setValue('Linen blouse');
@@ -297,12 +310,15 @@ describe('Shopping studio workflow', () => {
     expect(appStore.wishlistProducts[0].title).toBe('Linen blouse');
     expect(wrapper.find('.wishlist-edit-form').exists()).toBe(false);
   });
-  it('keeps a wishlist product visible when removal fails',async()=>{
-    await render(WishlistPanel,'/closet?tab=wishlist');
-    await wrapper.findAll('.closet-view-mode button').find(button=>button.text()==='圖卡').trigger('click');
+  it('keeps wishlist details open when deleting a product fails',async()=>{
+    const appStore=useAppStore();
+    appStore.wishlistProducts=[{id:'product-unit',title:'Cotton shirt',category:'upper_body',state:'wishlist',photo:'blob:unit-only'}];
+    appStore.selectedItemId='product-unit';appStore.isDetailOpen=true;
+    await render(ItemDetailModal,'/closet?tab=wishlist');
     fixture.request.mockRejectedValueOnce(new Error('offline'));
-    await wrapper.find('.wishlist-delete').trigger('click');await flushPromises();
-    expect(wrapper.find('.wishlist-card').exists()).toBe(true);expect(wrapper.find('[role=alert]').exists()).toBe(true);
+    await wrapper.findAll('.modal-actions button').find(button=>button.text()==='刪除').trigger('click');await flushPromises();
+    expect(wrapper.find('.detail-layout').exists()).toBe(true);
+    expect(appStore.wishlistProducts).toHaveLength(1);
   });
   it('hides unsupported shoes from try-on without removing them from the wishlist',async()=>{
     fixture.products.push({id:'shoe',title:'Boots',category:'shoes',state:'wishlist'});

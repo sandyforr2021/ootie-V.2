@@ -102,4 +102,7 @@ OOTIE Style Crew · 團隊策展穿搭故事|OOTIE Style Crew · A team-curated 
 城市搜尋暫時無法使用。|Place search is unavailable right now.|地域を検索できません。|La búsqueda de lugares no está disponible.
 天氣資料格式不完整。|The weather response is incomplete.|天気データが不完全です。|Los datos del tiempo están incompletos.
 請選擇有效地區。|Choose a valid place.|有効な地域を選択してください。|Elige un lugar válido.
+此裝置不支援定位，請手動選擇城市。|Location is not supported on this device. Choose a city manually.|この端末では位置情報を利用できません。都市を手動で選択してください。|Este dispositivo no admite la ubicación. Elige una ciudad manualmente.
+定位未授權，請手動選擇城市。|Location permission was denied. Choose a city manually.|位置情報が許可されていません。都市を手動で選択してください。|Se denegó el permiso de ubicación. Elige una ciudad manualmente.
+目前無法取得位置，請手動選擇城市。|Could not get your location. Choose a city manually.|現在地を取得できません。都市を手動で選択してください。|No se pudo obtener tu ubicación. Elige una ciudad manualmente.
 `;

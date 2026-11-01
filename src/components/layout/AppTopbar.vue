@@ -62,6 +62,7 @@
 <script setup>
 import MediaImage from '@/components/ui/MediaImage.vue';
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useSocialStore } from '@/stores/social';
@@ -71,6 +72,7 @@ import LanguageSelect from './LanguageSelect.vue';
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const socialStore = useSocialStore();
+const router = useRouter();
 const isProfileMenuOpen = ref(false);
 
 const unreadCount = computed(() => {
@@ -98,6 +100,7 @@ const closeProfileMenu = () => {
 const handleLogout = async () => {
   closeProfileMenu();
   await authStore.logout();
+  await router.replace('/');
   appStore.showToast('已登出');
 };
 

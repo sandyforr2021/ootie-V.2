@@ -19,7 +19,7 @@
         </template>
         <template v-else>
         <h2>{{ itemName(item) }}</h2>
-        <p v-if="item.brand || item.title" class="detail-category">{{ item.brand || item.title }}</p>
+        <p v-if="!isWishlist && (item.brand || item.title)" class="detail-category">{{ item.brand || item.title }}</p>
         <dl class="detail-fields">
           <div v-for="field in details" :key="field.label">
             <dt>{{ $t(field.label) }}</dt><dd>{{ field.value }}</dd>

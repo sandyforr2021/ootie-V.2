@@ -223,7 +223,7 @@ const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
 const route = useRoute();
-const closetView = ref('rack');
+const closetView = ref('cards');
 const showWishlist = computed(() => route.query.tab === 'wishlist');
 const styleOptions = computed(() => [...new Set(['Minimal', 'Casual', 'Smart Casual', 'Chic', ...appStore.items.map(item => item.style).filter(Boolean)])]);
 

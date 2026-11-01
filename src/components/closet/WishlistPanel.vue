@@ -9,8 +9,8 @@ import { preprocessPersonImage } from '@/services/imageUpload';
 import { t } from '@/i18n';
 import { categories as closetCategories, labels } from '@/constants';
 import ExtensionGuide from '@/components/bookmarks/ExtensionGuide.vue';
-import AppIcon from '@/components/ui/AppIcon.vue';
 import WardrobeRack from '@/components/closet/WardrobeRack.vue';
+import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
 
 defineProps({toolbarTarget:{type:String,default:''}});
 const auth = useAuthStore(), route = useRoute(), router = useRouter();
@@ -18,10 +18,9 @@ const appStore = useAppStore();
 const token = computed(() => auth.session?.access_token || '');
 const items = ref([]), images = ref({}), loading = ref(false), busy = ref(false), error = ref('');
 const modalOpen = ref(false), guideOpen = ref(false), manual = ref(false), mode = ref('link');
-const searchQuery = ref(''), activeCategory = ref('All'), closetView = ref('rack');
+const searchQuery = ref(''), activeCategory = ref('All'), closetView = ref('cards');
 const emptyForm = () => ({ title:'', sourceUrl:'', imageUrl:'', imageData:'', category:'upper_body', color:'#c8bba9' });
 const form = ref(emptyForm());
-const removedItem=ref(null);
 const urls = new Map(); let generation = 0; let identityVersion = 0;
 const itemFamily = item => item.outfit_layer === 'outer' ? 'outer' : categoryFamily(item.category);
 const filterCategories = computed(() => closetCategories.filter(category => category !== 'Bags'));
@@ -52,6 +51,11 @@ function publishItems() {
   appStore.wishlistProducts = items.value.map(item => ({ ...item, photo: images.value[item.image_path] || '' }));
 }
 const login = () => auth.openAuthModal('login', null, route.fullPath);
+function openDetail(id) {
+  appStore.wishlistProducts = items.value.map(item => ({ ...item, photo: images.value[item.image_path] || '' }));
+  appStore.selectedItemId = id;
+  appStore.isDetailOpen = true;
+}
 function closeForm() {
   modalOpen.value = false;
   if (route.query.quick || route.query.title) void router.replace({path:'/closet',query:{tab:'wishlist',lang:route.query.lang}});
@@ -112,21 +116,8 @@ async function save() {
   } catch { if (isCurrent(identity)) error.value=t('暫時無法完成，請稍後再試。'); }
   finally { if (isCurrent(identity)) busy.value=false; }
 }
-async function setRemoved(item,restore=false){
- if(busy.value||!ready())return;
- const restoreState = item.state && item.state !== 'dismissed' ? item.state : 'wishlist';
- const identity=currentIdentity();busy.value=true;error.value='';
- try{
-  await api(`products/${item.id}/state`,{state:restore?restoreState:'dismissed'},identity.accessToken);
-  if(!isCurrent(identity))return;
-  if(restore){items.value.unshift({...item,state:restoreState});removedItem.value=null;}
-  else{items.value=items.value.filter(entry=>entry.id!==item.id);removedItem.value={...item,state:restoreState};}
-  publishItems();
- }catch{if(isCurrent(identity))error.value=t('暫時無法完成，請稍後再試。');}
- finally{if(isCurrent(identity))busy.value=false;}
-}
 watch(() => auth.session?.user?.id, (_next, previous) => {
-  identityVersion++; generation++; items.value=[]; removedItem.value=null; loading.value=false; busy.value=false; error.value='';
+  identityVersion++; generation++; items.value=[]; loading.value=false; busy.value=false; error.value='';
   appStore.wishlistProducts = [];
   for(const u of urls.values()) URL.revokeObjectURL(u); urls.clear(); images.value={};
   if (previous) {
@@ -148,7 +139,7 @@ onBeforeUnmount(() => { identityVersion++; generation++; for(const u of urls.val
 <template>
   <section class="wishlist" :aria-label="t('想買清單')">
     <Teleport :to="toolbarTarget||'body'" :disabled="!toolbarTarget" defer><div class="wishlist-toolbar-actions"><button class="secondary" @click="guideOpen=true">{{ t('瀏覽器收藏助手') }}</button><button class="primary" @click="openForm">＋ {{ t('新增商品') }}</button></div></Teleport>
-    <p v-if="error && !modalOpen" role="alert">{{ error }}</p><p v-if="removedItem" class="wishlist-undo" role="status">{{ t('已從想買清單移除') }}<button type="button" :disabled="busy" @click="setRemoved(removedItem,true)">{{ t('復原') }}</button></p>
+    <p v-if="error && !modalOpen" role="alert">{{ error }}</p>
     <p v-if="!auth.initialized || loading" role="status">{{ t('載入中…') }}</p>
     <div v-else-if="!auth.isMember" class="empty"><p>{{ t('登入後儲存你的商品、私人照片與試穿結果。') }}</p><button class="primary" @click="login">{{ t('登入／註冊') }}</button></div>
     <div v-else-if="!items.length" class="empty"><p>{{ t('想買清單還沒有商品。') }}</p><button class="secondary" @click="openForm">{{ t('新增商品') }}</button></div>
@@ -162,13 +153,16 @@ onBeforeUnmount(() => { identityVersion++; generation++; for(const u of urls.val
       </div>
       <div class="wishlist-count"><strong>{{ visibleItems.length }} {{ t('件單品') }}</strong></div>
       <p v-if="!visibleItems.length" class="empty wishlist-filter-empty">{{ t('沒有符合篩選條件的商品。') }}</p>
-      <WardrobeRack v-else-if="closetView==='rack'" :items="rackItems" :show-favorites="false" @open="id=>{appStore.wishlistProducts=items.map(item=>({...item,photo:images[item.image_path]||''}));appStore.selectedItemId=id;appStore.isDetailOpen=true}" />
-      <div v-else class="wishlist-grid">
-        <article v-for="item in visibleItems" :key="item.id" class="wishlist-card">
-          <button type="button" class="wishlist-product-open" :aria-label="`${t('查看單品')}: ${item.title}`" @click="appStore.selectedItemId=item.id;appStore.wishlistProducts=items.map(product=>({...product,photo:images[product.image_path]||''}));appStore.isDetailOpen=true">
-            <img v-if="images[item.image_path]" :src="images[item.image_path]" :alt="item.title" loading="lazy"><span v-else class="wishlist-placeholder">{{ t('商品照片') }}</span><span class="wishlist-card-title">{{ item.title }}</span>
-          </button>
-          <div class="wishlist-card-actions"><a v-if="safeCommerceUrl(item.source_url)" :href="safeCommerceUrl(item.source_url)" target="_blank" rel="noopener noreferrer">{{ t('前往購買 ↗') }}</a><router-link :to="{path:'/shop',query:{product:item.id}}">{{ t('選擇試穿') }} →</router-link><button type="button" class="wishlist-delete" :disabled="busy" :aria-label="t('刪除')" :title="t('刪除')" @click="setRemoved(item)"><AppIcon name="delete" :size="19"/></button></div>
+      <WardrobeRack v-else-if="closetView==='rack'" :items="rackItems" :show-favorites="false" @open="openDetail" />
+      <div v-else class="grid">
+        <article v-for="(item,index) in visibleItems" :key="item.id" class="item-card" :style="{ animationDelay: `${index * 45}ms` }">
+          <div class="item-image" role="button" tabindex="0" :aria-label="`${t('查看單品')}: ${item.title}`" @click="openDetail(item.id)" @keydown.enter="openDetail(item.id)" @keydown.space.prevent="openDetail(item.id)">
+            <WardrobeCutout class="product-image" :src="images[item.image_path] || ''" :category="item.outfit_layer === 'outer' ? 'outer' : item.category" :alt="item.title" />
+          </div>
+          <div class="item-info">
+            <h3>{{ item.title }}</h3>
+            <p class="item-meta">{{ t(labels[item.outfit_layer === 'outer' ? 'Outerwear' : item.category] || item.category) }}</p>
+          </div>
         </article>
       </div>
     </template>

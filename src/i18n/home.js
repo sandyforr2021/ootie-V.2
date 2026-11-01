@@ -1,5 +1,6 @@
 export const homeMessages = `
 OOTie｜你的衣櫥，更多穿搭可能。|OOTie | Your wardrobe, more possibilities|OOTie｜クローゼットに、もっと着こなしを。|OOTie | Tu armario, más posibilidades
+你的衣櫥，更多穿搭可能。|Your wardrobe, more possibilities.|あなたのクローゼットに、もっと着こなしを。|Tu armario, más posibilidades.
 資訊與條款|Information and policies|各種ポリシー|Información y políticas
 AI 使用說明|AI usage|AI の利用について|Uso de IA
 你的衣櫥，|Your wardrobe.|あなたのクローゼットに、|Tu armario.

@@ -448,7 +448,7 @@ watch(()=>route.query,async(query)=>{
   if (query.tab==='links') { await router.replace({path:'/closet',query:{tab:'wishlist',lang:query.lang}}); return; }
   if (query.tab==='wardrobe') { selectionSource.value='closet'; tab.value='wishlist'; await router.replace({path:'/shop',query:{lang:query.lang}}); return; }
   if(normalizeLocale(query.lang)) setLocale(query.lang);
-  if(['wishlist','album','community','activity','wardrobe','saved','links'].includes(query.tab)) tab.value=query.tab;
+  if(['wishlist','album','community','activity','wardrobe','saved','links','tone'].includes(query.tab)) tab.value=query.tab;
   else tab.value=route.path==='/community/tryons'?'community':'wishlist';
   if(query.product && products.value.some(p => p.id === query.product)) { tab.value='wishlist'; selected.value=[String(query.product)]; step.value=2; }
   if(query.title) form.value={...form.value,title:String(query.title).slice(0,160),sourceUrl:safeCommerceUrl(query.url),imageUrl:safeCommerceUrl(query.image)};
@@ -477,19 +477,21 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
   <div class="shop-view app-page">
     <header v-if="!isCommunity" class="shop-studio-heading ootie-page-heading">
       <h1>{{ t(tab === 'activity' ? '購物足跡' : '試穿工作室') }}</h1>
-      <div v-if="tab !== 'activity'" class="studio-account">
-        <div class="studio-account-row">
-          <section v-if="auth.isMember" class="studio-balance-card" :aria-label="t('目前點數')">
-            <span>{{ t('目前點數') }}</span>
-            <strong>{{ loading ? '…' : capabilities.pointBalance ?? '—' }}</strong>
-          </section>
-          <router-link class="studio-points-link" to="/credits">{{ t('我的點數') }}<AppIcon name="chevron" :size="16" /></router-link>
-        </div>
-        <p v-if="auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
-        <p v-if="auth.isMember && !loading && capabilities.generationPolicyVersion === 2" class="studio-daily-note" role="status">{{ tf('今日免費額度 {remaining}／2 張・點數生成不限每日張數',{remaining:capabilities.dailyFreeGenerationRemaining}) }}</p>
-        <p v-else-if="auth.isMember && !loading && capabilities.dailyGenerationRemaining != null" class="studio-daily-note" role="status">{{ tf('每天最多生成 {limit} 次，今天還可生成 {remaining} 次。',{limit:capabilities.dailyGenerationLimit || 2,remaining:capabilities.dailyGenerationRemaining}) }}</p>
-      </div>
+      <section v-if="tab !== 'activity'" class="balance-card" :aria-label="t('目前點數')">
+        <span>{{ t('目前點數') }}</span>
+        <template v-if="auth.isMember">
+          <strong class="personal-balance">{{ loading ? '…' : capabilities.pointBalance ?? '—' }}</strong>
+          <router-link to="/credits#point-history">{{ t('查看點數紀錄') }}</router-link>
+        </template>
+        <template v-else>
+          <strong class="personal-balance">—</strong>
+          <button class="secondary" @click="login">{{ t('登入／註冊') }}</button>
+        </template>
+      </section>
     </header>
+    <p v-if="tab !== 'activity' && auth.isMember && !loading && capabilities.pointBalance == null" class="studio-daily-note" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
+    <p v-if="tab !== 'activity' && auth.isMember && !loading && capabilities.generationPolicyVersion === 2" class="studio-daily-note" role="status">{{ tf('今日免費額度 {remaining}／2 張・點數生成不限每日張數',{remaining:capabilities.dailyFreeGenerationRemaining}) }}</p>
+    <p v-else-if="tab !== 'activity' && auth.isMember && !loading && capabilities.dailyGenerationRemaining != null" class="studio-daily-note" role="status">{{ tf('每天最多生成 {limit} 次，今天還可生成 {remaining} 次。',{limit:capabilities.dailyGenerationLimit || 2,remaining:capabilities.dailyGenerationRemaining}) }}</p>
 
     <router-link v-if="isCommunity" class="community-back" to="/explore">← {{ t('返回探索') }}</router-link>
     <nav v-if="!isCommunity && tab !== 'activity'" class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key || (tab==='links' && key==='saved')}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>
@@ -629,15 +631,6 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 <style scoped>.community-back{display:inline-block;padding:16px 0}.shop-product-info{min-width:0}.shop-product-info h3{overflow-wrap:anywhere}.shop-product-actions,.shop-secondary-actions{flex-wrap:wrap}
 .shop-studio-heading{grid-template-columns:minmax(0,1fr) auto;align-items:center;background:var(--gradient-celebration)}
 .shop-studio-heading h1{margin:0}
-.studio-account{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:100%}
-.studio-account-row{display:flex;align-items:center;justify-content:flex-end;gap:4px 18px;flex-wrap:wrap}
-.studio-balance-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;min-width:170px;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 12px 24px #3a25451a}
-.studio-balance-card span{font-size:12px;color:#eee3f4}
-.studio-balance-card strong{grid-column:1/-1;font-size:32px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.studio-points-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--ink);font-size:13px;text-decoration:none}
-.studio-points-link:hover{text-decoration:underline;text-underline-offset:4px}
-.shop-studio-heading .studio-daily-note{font-size:12px;line-height:1.6;max-width:46ch;text-align:right;color:var(--muted)}
-@media(max-width:760px){.shop-studio-heading{grid-template-columns:1fr;gap:12px}.studio-account{align-items:flex-start}.studio-account-row{justify-content:flex-start;gap:2px 14px}.shop-studio-heading .studio-daily-note{text-align:left}}
 .shop-view .shop-product-image{position:relative;display:grid;place-items:center;flex:none;width:100%;overflow:hidden}
 .shop-view .shop-product-image :deep(img){display:block;width:100%;height:100%;max-height:100%;object-fit:contain}
 .shop-view .shop-product-info{position:relative;z-index:1;min-width:0;background:var(--white)}
@@ -647,7 +640,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 <style scoped>.garment-source-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.garment-source-tabs button[aria-pressed=true]{background:var(--ink);color:white}.garment-source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:14px;margin-bottom:24px}.garment-source-grid button{min-width:0;padding:10px}.garment-source-grid img{width:100%;height:150px;object-fit:contain}.garment-source-grid span,.garment-source-grid small{display:block;overflow-wrap:anywhere;margin-top:8px}.selected-person-preview{max-width:240px;margin:20px 0}.selected-person-preview img{width:100%;max-height:320px;object-fit:contain}.selected-person-preview p{font-size:13px}</style>
 
 <style scoped>
-.studio-top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.studio-add-product{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.studio-top-actions .studio-next{margin:0;padding:0;border:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.studio-top-actions .studio-next>div{display:none}.studio-top-actions .studio-next button{display:inline-flex;align-items:center;gap:12px;min-height:44px;white-space:normal;text-align:left}.studio-selected-product>span{flex:1;min-width:0}.studio-selected-product>button{display:grid;place-items:center;flex:none;padding:7px;min-width:36px;min-height:44px;border:0;background:none;color:var(--muted)}.studio-selected-product>button:hover{color:var(--accent);background:var(--accent-pink-soft)}.shop-tone-results{margin:0 0 24px}@media(max-width:700px){.studio-shortlist>.shop-section-title{flex-wrap:wrap}.studio-top-actions{width:100%}.studio-top-actions .studio-next{margin-left:auto}.studio-top-actions .studio-next button{font-size:12px}}
+.studio-top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.studio-add-product{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.studio-top-actions .studio-next{margin:0;padding:0;border:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.studio-top-actions .studio-next>div{display:none}.studio-top-actions .studio-next button{display:inline-flex;align-items:center;gap:12px;min-height:44px;white-space:normal;text-align:left}.studio-selected-product>span{flex:1;min-width:0}.studio-selected-product>button{display:grid;place-items:center;flex:none;padding:7px;min-width:36px;min-height:44px;border:0;background:none;color:var(--muted)}.studio-selected-product>button:hover{color:var(--accent);background:var(--accent-pink-soft)}.shop-tone-results{margin:0 0 24px}.shop-view .shop-product-image{height:auto!important;min-height:0;aspect-ratio:4/5;overflow:visible}.shop-view .studio-daily-note{margin:-16px 0 16px;font-size:12px;line-height:1.6;color:var(--muted)}@media(max-width:700px){.studio-shortlist>.shop-section-title{flex-wrap:wrap}.studio-top-actions{width:100%}.studio-top-actions .studio-next{margin-left:auto}.studio-top-actions .studio-next button{font-size:12px}}
 </style>
 
 <style scoped>.studio-sidebar-next{display:grid;gap:12px;margin-top:22px}.studio-sidebar-next button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:46px}.studio-sidebar-next p{margin:0}</style>

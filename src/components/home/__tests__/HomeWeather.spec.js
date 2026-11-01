@@ -4,11 +4,12 @@ import {createPinia,setActivePinia} from 'pinia';
 import HomeWeather from '../HomeWeather.vue';
 import {useWeatherStore} from '@/stores/weather';
 import {getBrowserPosition} from '@/services/weather';
+import {setLocale} from '@/i18n';
 vi.mock('@/services/weather',async original=>({...await original(),getBrowserPosition:vi.fn()}));
 let wrapper;
 describe('home weather location controls',()=>{
  beforeEach(()=>{setActivePinia(createPinia());useWeatherStore().current={temperature:23,summary:'晴朗',city:'台北市'};});
- afterEach(()=>{wrapper?.unmount();vi.restoreAllMocks();});
+ afterEach(()=>{wrapper?.unmount();vi.restoreAllMocks();setLocale('zh-TW');});
  it('requests a fresh location on demand without replacing a selected city with cached coordinates',async()=>{
   vi.mocked(getBrowserPosition).mockResolvedValue({latitude:25,longitude:121});
   const select=vi.spyOn(useWeatherStore(),'selectPlace').mockResolvedValue();
@@ -21,5 +22,11 @@ describe('home weather location controls',()=>{
   wrapper=mount(HomeWeather);await wrapper.find('.weather-relocate').trigger('click');await flushPromises();
   expect(wrapper.text()).toContain('23°C');expect(wrapper.find('[role=alert]').text()).toContain('定位未授權');
   expect(wrapper.find('input').exists()).toBe(true);
+ });
+ it('translates location errors in the selected language',async()=>{
+  setLocale('en');
+  vi.mocked(getBrowserPosition).mockRejectedValue(new Error('定位未授權，請手動選擇城市。'));
+  wrapper=mount(HomeWeather);await wrapper.find('.weather-relocate').trigger('click');await flushPromises();
+  expect(wrapper.find('[role=alert]').text()).toBe('Location permission was denied. Choose a city manually.');
  });
 });
