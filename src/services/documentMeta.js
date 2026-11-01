@@ -6,7 +6,7 @@ const ROUTE_TITLES = {
   Bookmarks: '書籤與收藏穿搭｜OOTIE', Stats: '衣櫥統計｜OOTIE', Sos: '穿搭 SOS｜OOTIE', SosCreate: '發布穿搭求救｜OOTIE',
   Ai: 'AI 穿搭助理｜OOTIE', Tryon: '虛擬試穿｜OOTIE', Profile: '個人檔案｜OOTIE',
   Membership: '方案與點數｜OOTIE', Settings: '帳號設定｜OOTIE', Legal: '資訊與條款｜OOTIE',
-  Shop: '購物試穿｜OOTIE', OotdDetail: 'OOTD 詳情｜OOTIE', NotFound: '找不到頁面｜OOTIE',
+  Shop: '購物試穿｜OOTIE', OotdDetail: 'OOTD 詳情｜OOTIE', SosDetail: '穿搭求救詳情｜OOTIE', NotFound: '找不到頁面｜OOTIE',
   Wishlist:'想買清單｜OOTIE', Activity:'購物足跡｜OOTIE'
 };
 

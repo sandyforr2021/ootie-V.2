@@ -85,8 +85,7 @@ const clockDate = computed(() => new Intl.DateTimeFormat(locale.value, { month: 
 onBeforeUnmount(()=>clearInterval(clockTimer));
 const openPost = post => {
   if (post.type === 'sos') {
-    appStore.activeSosDetailId = post.id;
-    appStore.isSosDetailOpen = true;
+    router.push({ name: 'SosDetail', params: { id: post.id }, query: { from: 'home' } });
   } else {
     router.push({ name: 'OotdDetail', params: { id: post.id }, query: { user: post.username, from: 'home' } });
   }

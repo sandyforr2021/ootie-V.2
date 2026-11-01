@@ -133,9 +133,7 @@ const handleNotificationClick = async (notification, event) => {
       appStore.showToast('找不到這則通知對應的求救');
       return;
     }
-    appStore.activeSosDetailId = sos.id;
-    appStore.isSosDetailOpen = true;
-    router.push({ path: '/sos', query: { sos: sos.id } });
+    router.push({ path: `/sos/${sos.id}` });
     return;
   }
 

@@ -4823,7 +4823,6 @@ h1 {
 
 .sos-page-hero {
   background:
-    radial-gradient(circle at 84% 18%, rgba(169, 216, 242, .62) 0 8%, transparent 9%),
     linear-gradient(128deg, var(--accent-pink-soft), #fff 52%, var(--accent-lavender-soft));
 }
 

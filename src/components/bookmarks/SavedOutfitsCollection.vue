@@ -124,9 +124,7 @@ const openEntry = (entry) => {
   if (entry.target_type === 'OOTD') {
     router.push({ path: `/ootd/${entry.target_id}`, query: { user: entry.target?.username, from: 'saved', type:filter.value } });
   } else {
-    appStore.activeSosDetailId = entry.target_id;
-    appStore.isSosDetailOpen = true;
-    router.push({path:'/sos',query:{sos:entry.target_id,from:'saved',type:filter.value}});
+    router.push({ path: `/sos/${entry.target_id}`, query: { from: 'saved', type: filter.value } });
   }
 };
 

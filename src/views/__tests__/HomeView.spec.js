@@ -23,6 +23,7 @@ const router = createRouter({
     { path: '/tryon', component: { template: '<div>Tryon</div>' } },
     { path: '/membership', component: { template: '<div>Membership</div>' } },
     { path: '/ootd/:id', name: 'OotdDetail', component: { template: '<div>Post</div>' } },
+    { path: '/sos/:id', name: 'SosDetail', component: { template: '<div>SosDetail</div>' } },
     { path: '/legal/:document', component: { template: '<div>Policy</div>' } }
   ]
 });
@@ -154,8 +155,9 @@ describe('HomeView guest/member presentation', () => {
     expect(wrapper.text()).toContain('週末野餐穿搭求救');
 
     await wrapper.find('.following-open').trigger('click');
-    expect(app.activeSosDetailId).toBe('sos-post-1');
-    expect(app.isSosDetailOpen).toBe(true);
+    await flushPromises();
+    expect(router.currentRoute.value.name).toBe('SosDetail');
+    expect(router.currentRoute.value.params.id).toBe('sos-post-1');
     wrapper.unmount();
   });
 });

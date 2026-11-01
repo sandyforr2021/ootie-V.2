@@ -147,15 +147,13 @@ const deletePost = async id => {
 
 const openSosForm = (itemId = null) => {
   if (!authStore.isMember) {
-    appStore.openLoginGate('AUTH_REQUIRED', itemId ? `/sos/create?item_id=${encodeURIComponent(itemId)}` : '/sos/create');
+    appStore.openLoginGate('AUTH_REQUIRED', itemId ? `/sos?item_id=${encodeURIComponent(itemId)}` : '/sos');
     return;
   }
   if (itemId) {
     appStore.sosTargetItemId = itemId;
-    router.push({ path: '/sos/create', query: { item_id: itemId } });
-  } else {
-    router.push('/sos/create');
   }
+  appStore.isSosFormOpen = true;
 };
 
 watch(
@@ -184,8 +182,7 @@ const openSuggestion = (sosId) => {
 };
 
 const openSosDetail = (sosId) => {
-  appStore.activeSosDetailId = sosId;
-  appStore.isSosDetailOpen = true;
+  router.push({ name: 'SosDetail', params: { id: sosId } });
 };
 
 const openCloseConfirm = (sosId) => {
@@ -193,10 +190,14 @@ const openCloseConfirm = (sosId) => {
   appStore.isSosCloseConfirmOpen = true;
 };
 
-// Shared links can arrive before the public request list has loaded.
+// Compatible redirect for legacy /sos?sos=<id> links using router.replace
 watch(
-  () => sosStore.sosPosts.find(post => post.id === route.query.sos)?.id,
-  (sosId) => { if (sosId) openSosDetail(sosId); },
+  () => route.query.sos,
+  (sosId) => {
+    if (sosId) {
+      router.replace({ name: 'SosDetail', params: { id: sosId }, query: { ...route.query, sos: undefined } });
+    }
+  },
   { immediate: true }
 );
 </script>

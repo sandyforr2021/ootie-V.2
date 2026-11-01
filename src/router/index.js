@@ -6,6 +6,7 @@ const ClosetView = () => import('@/views/ClosetView.vue');
 const SosView = () => import('@/views/SosView.vue');
 const ProfileView = () => import('@/views/ProfileView.vue');
 const OotdDetailView = () => import('@/views/OotdDetailView.vue');
+const SosDetailView = () => import('@/views/SosDetailView.vue');
 const StatsView = () => import('@/views/StatsView.vue');
 const AiView = () => import('@/views/AiView.vue');
 const TryonView = () => import('@/views/TryonView.vue');
@@ -33,6 +34,7 @@ const routes = [
   { path: '/explore', name: 'Explore', component: ExploreView },
   { path: '/sos', name: 'Sos', component: SosView },
   { path: '/sos/create', name: 'SosCreate', component: () => import('@/views/SosCreateView.vue') },
+  { path: '/sos/:id', name: 'SosDetail', component: SosDetailView },
   { path: '/ai', name: 'Ai', redirect: '/shop' },
   { path: '/tryon', name: 'Tryon', redirect: '/shop' },
   { path: '/profile', name: 'Profile', component: ProfileView },
