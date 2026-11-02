@@ -20,7 +20,7 @@ watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
 </script>
 <template>
 <section class="page active credits-page app-page">
- <header class="membership-hero ootie-page-heading">
+ <header class="membership-hero">
   <h1>{{ t('方案與點數') }}</h1>
   <section class="balance-card" :aria-label="t('我的點數')">
    <span>{{ t('目前點數') }}</span>
@@ -71,10 +71,10 @@ watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
 .membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-size:clamp(32px,3.8vw,54px);font-weight:750;line-height:1.2;letter-spacing:-.025em;margin:0 0 18px;text-align:left}
 :lang(zh-TW) .membership-hero h1,:lang(ja) .membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-weight:750;line-height:1.35;letter-spacing:.01em}
 .membership-intro p{font-size:14px;margin:0;max-width:40ch}
-.balance-card{padding:28px;border-radius:16px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 16px 30px #3a25451a;min-width:0}
+.balance-card{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:28px;border-radius:16px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 16px 30px #3a25451a;min-width:0;text-align:right}
 .balance-card>span{font-size:14px;color:#eee3f4}.balance-card p{color:#eee3f4}.personal-balance{display:block;font-size:clamp(42px,4.3vw,64px);line-height:1.15;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 18px;overflow-wrap:anywhere}
 .balance-card a{font-size:12px;color:#eee3f4;text-decoration:underline;text-underline-offset:4px}.balance-card .secondary{color:white;border-color:#cdbcd6}
-.credit-balance-value{display:grid;justify-items:start;gap:8px}.credit-balance-value .point-history-link{display:block}
+.credit-balance-value{display:grid;justify-items:end;gap:8px;text-align:right}.credit-balance-value .point-history-link{display:block}
 .membership-options,.point-history{margin-top:40px}.membership-section-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.membership-section-heading h2{font-size:24px;margin:0;font-weight:700}.membership-section-heading>span{font-size:12px;color:var(--muted)}
 .membership-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.membership-card{display:flex;flex-direction:column;min-width:0;padding:26px;border-radius:16px;border:1px solid var(--line);background:#fff}.membership-card.featured{background:linear-gradient(145deg,#fff 8%,#f3ebff);border-color:#a891bd}.membership-card h3{font-size:20px;margin:0 0 22px}.membership-card p{font-size:14px;line-height:1.7;margin:0 0 20px}.membership-card .point-price{display:flex;align-items:baseline;gap:8px;color:var(--ink);min-height:48px;font-size:30px;font-weight:650;margin:0 0 16px}.point-price strong{font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}.point-price span{font-size:13px;font-weight:400;color:var(--muted)}
 .membership-card ul{padding-left:18px;font-size:13px;line-height:1.8;margin:0 0 28px}.membership-card li+li{margin-top:6px}.membership-card>a{margin-top:auto;width:100%;text-decoration:none;min-height:46px;font-size:14px}.membership-availability{font-size:12px;margin:16px 0 0}.point-history{scroll-margin-top:30px}.point-history ul{list-style:none;padding:0;margin:0}.point-history li{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--line);padding:16px 0;font-size:14px}.point-history li strong{font-variant-numeric:tabular-nums;font-size:20px}.point-history .credit{color:var(--sage-dark)}.point-history small{display:block;color:var(--muted);font-size:12px;margin-top:4px}

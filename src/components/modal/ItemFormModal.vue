@@ -240,6 +240,9 @@ import { defaultCurrency } from '@/services/money';
 import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
 import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
+import { useAuthStore } from '@/stores/auth';
+import { aiGateway } from '@/services/aiGateway';
+import { commerceClient, safeCommerceUrl } from '@/services/commerce';
 import { getColorFamilyForPrimaryColor, legacyColorNames } from '@/constants';
 import { analyzeImageColor } from '@/services/colorDetection';
 import { prepareClothingImage, blobToDataUrl } from '@/services/clothingMedia';
@@ -250,6 +253,7 @@ import GarmentCleanup from '@/components/closet/GarmentCleanup.vue';
 
 const appStore = useAppStore();
 const closetStore = useClosetStore();
+const authStore = useAuthStore();
 const CAPTURE_GUIDE_KEY = 'ootie:capture-guide-seen:v1';
 
 const isEdit = computed(() => !!appStore.editingItemId);
@@ -518,10 +522,61 @@ const restoreBackground = () => {
   backgroundMessage.value = '';
 };
 
+const closetCategoryForProduct = (product) => product.outfit_layer === 'outer'
+  ? 'Outerwear'
+  : ({ upper_body: 'Tops', lower_body: 'Bottoms', full_body: 'Dress', shoes: 'Shoes' })[product.category] || '';
+
+const loadSourceProductImage = async (product) => {
+  const sequence = selectionSequence;
+  const accessToken = authStore.session?.access_token;
+  if (product.ownerProfileId !== authStore.profileId) {
+    mediaStatus.value = 'error';
+    mediaError.value = '登入狀態已變更，請重新開啟想買清單。';
+    return;
+  }
+  if (!product.image_path || !accessToken) {
+    mediaStatus.value = 'error';
+    mediaError.value = '商品圖片目前無法載入，請重新選擇照片。';
+    return;
+  }
+
+  let imageUrl = '';
+  mediaStatus.value = 'processing';
+  try {
+    imageUrl = await aiGateway.loadPrivateImage(accessToken, product.image_path);
+    if (sequence !== selectionSequence || !appStore.isItemFormOpen) return;
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error('商品圖片目前無法載入，請重新選擇照片。');
+    const imageBlob = await response.blob();
+    const imageFile = new File([imageBlob], 'wishlist-product.jpg', { type: imageBlob.type || 'image/jpeg' });
+    const nextMedia = await prepareClothingImage(imageFile);
+    if (sequence !== selectionSequence || !appStore.isItemFormOpen) return;
+
+    preparedMedia.value = nextMedia;
+    originalDisplay = { displayBlob: nextMedia.displayBlob, width: nextMedia.width, height: nextMedia.height };
+    previewObjectUrl = URL.createObjectURL(nextMedia.displayBlob);
+    photoPreview.value = previewObjectUrl;
+    warningsAcknowledged.value = nextMedia.warnings.length === 0;
+    singleItemConfirmed.value = true;
+    mediaStatus.value = 'ready';
+    void analyzeSelectedImage(previewObjectUrl, sequence);
+    await tryBackgroundRemoval();
+  } catch (error) {
+    if (sequence !== selectionSequence) return;
+    mediaStatus.value = 'error';
+    mediaError.value = error?.userMessage || error?.message || '商品圖片目前無法載入，請重新選擇照片。';
+  } finally {
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+  }
+};
+
 watch(
   () => appStore.isItemFormOpen,
   (open) => {
-    if (!open) return;
+    if (!open) {
+      appStore.itemFormSourceProduct = null;
+      return;
+    }
     isAddingBrand.value = false;
     newBrandName.value = '';
     brandError.value = '';
@@ -529,9 +584,10 @@ watch(
     colorAnalysisState.value = 'idle';
     lastSuggestedName = '';
     categoryWasSuggested = false;
-    categoryEdited.value = !!appStore.editingItemId;
+    const sourceProduct = appStore.itemFormSourceProduct;
+    categoryEdited.value = !!appStore.editingItemId || !!sourceProduct;
     resetMediaSelection({ keepExistingPreview: true });
-    showCaptureGuide.value = !appStore.editingItemId && localStorage.getItem(CAPTURE_GUIDE_KEY) !== 'true';
+    showCaptureGuide.value = !appStore.editingItemId && !sourceProduct && localStorage.getItem(CAPTURE_GUIDE_KEY) !== 'true';
     if (appStore.editingItemId) {
       const item = appStore.items.find((i) => i.id === appStore.editingItemId);
       if (item) {
@@ -570,6 +626,15 @@ watch(
         photo: ''
       });
       photoPreview.value = '';
+      if (sourceProduct) {
+        Object.assign(form, {
+          name: sourceProduct.title,
+          category: closetCategoryForProduct(sourceProduct),
+          primary_color: '白色',
+          secondary_color: '無彩色系'
+        });
+        void loadSourceProductImage(sourceProduct);
+      }
     }
   },
   { immediate: true }
@@ -638,6 +703,7 @@ const close = () => {
   visionController?.abort();
   resetMediaSelection();
   appStore.isItemFormOpen = false;
+  appStore.itemFormSourceProduct = null;
 };
 
 const requestUploadCancel = () => {
@@ -662,6 +728,21 @@ const handleSubmit = async () => {
   mediaError.value = '';
   try {
     const payload = { ...form };
+    const sourceProduct = appStore.itemFormSourceProduct;
+    if (sourceProduct) {
+      if (sourceProduct.ownerProfileId !== authStore.profileId) {
+        throw new Error('登入狀態已變更，請重新開啟想買清單。');
+      }
+      if (closetStore.dataMode !== CLOSET_DATA_MODE.REMOTE) {
+        throw new Error('請先載入遠端衣櫥，再加入想買商品。');
+      }
+      const sourceUrl = safeCommerceUrl(sourceProduct.source_url);
+      payload.id = sourceProduct.id;
+      payload.name_zh = payload.name;
+      payload.color_hex = sourceProduct.color || '#c8bba9';
+      payload.source_url = sourceUrl || '';
+      payload.source_domain = sourceUrl ? new URL(sourceUrl).hostname : '';
+    }
     // These fields are no longer editable. Never write their hidden values back
     // when editing an existing item, so old purchase data is preserved.
     if (isEdit.value) {
@@ -686,10 +767,21 @@ const handleSubmit = async () => {
         payload.photo = await blobToDataUrl(preparedMedia.value.displayBlob);
       }
     }
+    const existingSourceItem = sourceProduct
+      ? appStore.items.find(item => item.id === sourceProduct.id && item.owner_id === authStore.profileId)
+      : null;
     const result = isEdit.value
       ? await closetStore.updateItem(appStore.editingItemId, payload)
-      : await closetStore.addItem(payload);
+      : existingSourceItem
+        ? await closetStore.updateItem(existingSourceItem.id, payload)
+        : await closetStore.addItem(payload);
     if (result?.ok) {
+      if (sourceProduct) {
+        mediaStatus.value = 'saving';
+        await commerceClient.request(`products/${sourceProduct.id}/state`, authStore.session?.access_token, { state: 'purchased' });
+        appStore.wishlistProducts = (appStore.wishlistProducts || []).filter(product => product.id !== sourceProduct.id);
+        appStore.showToast('已加入衣櫥。', { type: 'success' });
+      }
       mediaStatus.value = 'complete';
       isSubmitting.value = false;
       close();

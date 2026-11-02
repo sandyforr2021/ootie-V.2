@@ -151,7 +151,7 @@ describe('SOS clothing preview and selection UX', () => {
     auth.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     auth.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     app.profile.public_closet = true;
-    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'blob:private-item' };
+    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'blob:private-item', hidden: false };
     const publicIds = vi.spyOn(clothingRepo, 'getCurrentUserPublicItemIds');
     vi.spyOn(useClosetStore(), 'loadRemoteItems').mockImplementation(async () => { app.items = [item]; return { ok: true }; });
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(['image'], { type: 'image/jpeg' }) }));
@@ -189,7 +189,7 @@ describe('SOS clothing preview and selection UX', () => {
     auth.user = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
     auth.profileIdentity = { status: 'PROFILE_READY', profileId: '11111111-1111-4111-8111-111111111111', profile: { id: '11111111-1111-4111-8111-111111111111' } };
     app.profile.public_closet = true;
-    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'https://example.org/private.jpg' };
+    const item = { id: '33333333-3333-4333-8333-333333333333', owner_id: auth.profileId, name: 'Jacket', photo: 'https://example.org/private.jpg', hidden: false };
     vi.spyOn(useClosetStore(), 'loadRemoteItems').mockImplementation(async () => { app.items = [item]; return { ok: true }; });
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('CORS')));
     const publish = vi.spyOn(useSosStore(), 'createSosPost').mockResolvedValue(true);

@@ -164,6 +164,7 @@ export const useAppStore = defineStore('app', () => {
   // Modals visibility state
   const isItemFormOpen = ref(false);
   const editingItemId = ref(null);
+  const itemFormSourceProduct = ref(null);
   const isDetailOpen = ref(false);
   const selectedItemId = ref(null);
 
@@ -383,6 +384,7 @@ export const useAppStore = defineStore('app', () => {
     // Modals
     isItemFormOpen,
     editingItemId,
+    itemFormSourceProduct,
     isDetailOpen,
     selectedItemId,
     isOotdFormOpen,
@@ -415,4 +417,3 @@ export const useAppStore = defineStore('app', () => {
     addNotification
   };
 });
-

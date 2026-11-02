@@ -60,7 +60,7 @@ import { safeCommerceUrl, commerceClient } from '@/services/commerce';
 import { t } from '@/i18n';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useClosetStore } from '@/stores/closet';
+import { useClosetStore, CLOSET_DATA_MODE } from '@/stores/closet';
 import { labels } from '@/constants';
 
 const appStore = useAppStore();
@@ -176,21 +176,25 @@ const addToCloset = async () => {
   const product = item.value;
   try {
     const profileId = authStore.profileId;
-    if (profileId) {
-      await closetStore.loadRemoteItems(profileId);
+    if (!profileId) throw new Error(t('請先登入並載入遠端衣櫥。'));
+    const result = await closetStore.loadRemoteItems(profileId);
+    if (!result?.ok || closetStore.dataMode !== CLOSET_DATA_MODE.REMOTE) {
+      throw result?.error || new Error(t('衣櫥無法載入，請稍後再試。'));
     }
-    await closetStore.addItem({
+
+    appStore.itemFormSourceProduct = {
       id: product.id,
-      name: product.title,
-      name_zh: product.title,
-      category: product.outfit_layer === 'outer' ? 'Outerwear' : ({upper_body:'Tops',lower_body:'Bottoms',full_body:'Dresses',shoes:'Shoes',auto:'Other'})[product.category] || 'Other',
-      color_hex: product.color || '#c8bba9',
-      source_url: product.source_url
-    });
-    await commerceClient.request(`products/${product.id}/state`, authStore.session?.access_token, { state: 'purchased' });
-    appStore.wishlistProducts = (appStore.wishlistProducts || []).filter(p => p.id !== product.id);
-    appStore.showToast(t('已加入衣櫥。'), { type: 'success' });
-    close();
+      ownerProfileId: profileId,
+      title: product.title || '',
+      category: product.category || '',
+      outfit_layer: product.outfit_layer || '',
+      color: product.color || '',
+      image_path: product.image_path || '',
+      source_url: safeCommerceUrl(product.source_url)
+    };
+    appStore.editingItemId = null;
+    appStore.isDetailOpen = false;
+    appStore.isItemFormOpen = true;
   } catch (err) {
     appStore.showToast(err?.userMessage || t('暫時無法完成，請稍後再試。'), { type: 'error' });
   }

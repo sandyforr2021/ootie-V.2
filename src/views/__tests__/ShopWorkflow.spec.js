@@ -8,14 +8,28 @@ import { setLocale } from '@/i18n';
 import * as imageUpload from '@/services/imageUpload';
 import ItemDetailModal from '@/components/modal/ItemDetailModal.vue';
 
-const fixture = vi.hoisted(() => ({ request: vi.fn(), deletePhoto: vi.fn(), credits: 100, points:100, allowance:{}, products: [], jobs: [], saved: [], savedClothing: [] }));
+const fixture = vi.hoisted(() => ({
+  request: vi.fn(),
+  deletePhoto: vi.fn(),
+  credits: 100,
+  points:100,
+  allowance:{},
+  products: [],
+  jobs: [],
+  saved: [],
+  savedClothing: [],
+  closetStore: { dataMode: 'REMOTE', loadRemoteItems: vi.fn() }
+}));
 vi.mock('@/services/commerce', async importOriginal => ({ ...await importOriginal(), commerceClient: { request: fixture.request } }));
 vi.mock('@/services/pointAccount', () => ({ loadPointAccount: vi.fn(async () => ({ balance: 100, transactions: [] })) }));
 vi.mock('@/services/aiGateway', () => ({
   createGenerationId: () => 'batch-unit-only',
   aiGateway: { listPersonPhotos: vi.fn(async () => ({ photos: [{ id:'photo-unit', path: 'person/unit/photo.jpg' }] })), deletePersonPhoto: fixture.deletePhoto, loadPrivateImage: vi.fn(async () => 'blob:unit-only'), uploadPersonPhoto: vi.fn(async()=>({path:'person/unit/new.jpg'})) }
 }));
-vi.mock('@/stores/closet', () => ({ useClosetStore: () => ({ loadRemoteItems: vi.fn() }) }));
+vi.mock('@/stores/closet', () => ({
+  CLOSET_DATA_MODE: { REMOTE: 'REMOTE' },
+  useClosetStore: () => fixture.closetStore
+}));
 vi.mock('@/stores/ootd', () => ({ useOotdStore: () => ({ loadRemotePosts: vi.fn(async()=>true) }) }));
 vi.mock('@/services/socialMetrics', () => ({ listSavedOutfits: vi.fn(async()=>fixture.saved) }));
 vi.mock('@/services/clothingRepository', async importOriginal => ({ ...await importOriginal(), getPublicItemsByIds: vi.fn(async()=>fixture.savedClothing) }));
@@ -41,6 +55,8 @@ describe('Shopping studio workflow', () => {
     const auth=useAuthStore(); auth.initialized=true; auth.session={access_token:'unit-only',user:{id:'user-unit'}}; auth.user=auth.session.user;
     auth.profileIdentity={status:'PROFILE_READY',profileId:'profile-unit',profile:{id:'profile-unit'}};
     fixture.credits=100; fixture.points=100; fixture.allowance={}; fixture.jobs=[]; fixture.saved=[]; fixture.savedClothing=[]; fixture.products=[{id:'product-unit',title:'Cotton shirt',state:'wishlist',image_path:'products/unit.jpg'}];
+    fixture.closetStore.dataMode='REMOTE';
+    fixture.closetStore.loadRemoteItems.mockReset().mockResolvedValue({ok:true,data:[]});
     fixture.request.mockReset().mockImplementation(async(path,token,body)=>{
       if(path==='products')return body?{product:{...fixture.products[0],id:'new-product',title:body.title}}:{products:fixture.products};
       if(/^products\/[^/]+\/state$/.test(path) && body){
@@ -337,6 +353,34 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.detail-fields').text()).toContain('Bottoms');
     expect(wrapper.find('.modal-actions .secondary').text()).toContain('Add to wardrobe');
     expect(wrapper.find('.modal-actions .danger').text()).toBe('Delete');
+  });
+  it('opens the closet form with product metadata instead of copying the wishlist item',async()=>{
+    const appStore=useAppStore();
+    appStore.wishlistProducts=[{
+      id:'product-unit',title:'Cotton shirt',category:'upper_body',color:'#b5d6f3',
+      source_url:'https://shop.example/item',image_path:'shop/member/item.jpg',state:'wishlist'
+    }];
+    appStore.selectedItemId='product-unit';appStore.isDetailOpen=true;
+    await render(ItemDetailModal,'/closet?tab=wishlist');
+    await wrapper.findAll('.modal-actions button').find(button=>button.text()==='加入衣櫥').trigger('click');
+    await flushPromises();
+    expect(fixture.closetStore.loadRemoteItems).toHaveBeenCalledWith('profile-unit');
+    expect(appStore.itemFormSourceProduct).toEqual(expect.objectContaining({
+      id:'product-unit',ownerProfileId:'profile-unit',title:'Cotton shirt',category:'upper_body',color:'#b5d6f3',
+      image_path:'shop/member/item.jpg',source_url:'https://shop.example/item'
+    }));
+    expect(appStore.isItemFormOpen).toBe(true);
+    expect(appStore.isDetailOpen).toBe(false);
+    expect(fixture.request).not.toHaveBeenCalledWith('products/product-unit/state',expect.anything(),{state:'purchased'});
+  });
+  it('keeps already purchased products out of the studio wishlist',async()=>{
+    fixture.products=[
+      {id:'wishlist',title:'Wishlist shirt',category:'upper_body',state:'wishlist'},
+      {id:'purchased',title:'Purchased shirt',category:'upper_body',state:'purchased'}
+    ];
+    await render();
+    expect(wrapper.text()).toContain('Wishlist shirt');
+    expect(wrapper.text()).not.toContain('Purchased shirt');
   });
   it('places point history under the current balance on the credits page',async()=>{
     await render(CreditView,'/credits');

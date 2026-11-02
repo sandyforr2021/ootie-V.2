@@ -156,6 +156,7 @@ describe('clothingRepository (READ-ONLY)', () => {
         data: [
           { id: mockItemId, owner_id: mockProfileId, hidden: false },
           { id: '55555555-5555-4555-8555-555555555555', owner_id: mockProfileId, hidden: true },
+          { id: '66666666-6666-4666-8666-666666666666', owner_id: mockProfileId, hidden: null },
           { id: '66666666-6666-4666-8666-666666666666', owner_id: '77777777-7777-4777-8777-777777777777', hidden: false }
         ],
         error: null
@@ -231,6 +232,7 @@ describe('clothingRepository (READ-ONLY)', () => {
         name: 'Verified shirt',
         category: 'Tops',
         price: null,
+        hidden: false,
         owner_id: mockProfileId
       });
     });

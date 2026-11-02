@@ -161,7 +161,7 @@ export async function getCurrentUserPublicItemIds(profileId, client = supabase) 
     }
 
     return (data || [])
-      .filter((item) => item.owner_id === profileId && !item.hidden)
+      .filter((item) => item.owner_id === profileId && item.hidden === false)
       .map((item) => item.id);
   } catch (err) {
     throw normalizeServiceError(err);
@@ -263,7 +263,7 @@ export async function createClothingItem(profileId, payload, client = supabase, 
   try {
     const { data, error } = await client
       .from('ootie_clothing_items')
-      .insert({ ...cleanPayload, owner_id: profileId, ...(itemId ? { id: itemId } : {}) })
+      .insert({ ...cleanPayload, hidden: false, owner_id: profileId, ...(itemId ? { id: itemId } : {}) })
       .select()
       .single();
 

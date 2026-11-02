@@ -220,14 +220,14 @@ const resolveContextItem = async (profileId) => {
     const name = item.name_zh || item.name || '這件單品';
     if (!title.value) title.value = tf('這件{name}，想請衣友幫忙搭配', { name });
     if (!details.value) details.value = tf('我很少穿這件{name}，想請衣友幫我找找適合的搭配。', { name });
-    if (!item.hidden) {
+    if (item.hidden === false) {
       coverMode.value = 'closet';
       coverItemId.value = item.id;
     }
   }
 };
 
-const myAvailableItems = computed(() => appStore.items.filter(i => !i.hidden && i.owner_id === authStore.profileId));
+const myAvailableItems = computed(() => appStore.items.filter(i => i.hidden === false && i.owner_id === authStore.profileId));
 const selectedClosetItem = computed(() => {
   if (!coverItemId.value) return null;
   if (contextItem.value && String(contextItem.value.id) === String(coverItemId.value)) {
@@ -316,7 +316,7 @@ const selectedCoverFile = async (profileId) => {
   if (!item?.photo) {
     item = await getItemById(coverItemId.value);
   }
-  if (!item?.photo || item.owner_id !== profileId || item.hidden) throw new Error('COVER_UNAVAILABLE');
+  if (!item?.photo || item.owner_id !== profileId || item.hidden !== false) throw new Error('COVER_UNAVAILABLE');
   const deferred = isDeferredMedia(item.photo);
   const photoUrl = deferred ? await acquireMedia(item.photo) : item.photo;
   try {

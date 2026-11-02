@@ -78,7 +78,7 @@ const identityCurrent = (identity) => !disposed && identity.version === sessionV
 const urls = new Map(); const loadingImages = new Set();
 const categories = computed(() => [['upper_body',t('上衣','Tops')],['lower_body',t('下身','Bottoms')],['full_body',t('連身服飾','Full outfit')],['shoes',t('鞋子','Shoes')],['auto',t('自動辨識','Auto')]]);
 const tabs = computed(() => [['wishlist',t('試穿模擬')],['album',t('私人相簿','Private album')],['tone',t('個人色彩分析')]]);
-const visibleProducts = computed(() => products.value.filter((p) => supportsTryOn(p) && (showPassed.value || p.state !== 'dismissed')).slice(0,productLimit.value));
+const visibleProducts = computed(() => products.value.filter((p) => supportsTryOn(p) && p.state !== 'purchased' && (showPassed.value || p.state !== 'dismissed')).slice(0,productLimit.value));
 const activeJobs = computed(() => jobs.value.filter((j) => ['queued','preparing','submitting','processing'].includes(j.status)));
 const albumJobs = computed(() => jobs.value.filter((j) => (j.sequence_index || 1)===(j.sequence_total || 1) && ['try_on','garment_cleanup'].includes(j.kind) && !j.result_deleted_at && (j.status !== 'succeeded' || j.result_path)).slice(0,jobLimit.value));
 const palette = computed(() => personalPalette(jobs.value.find((j) => j.kind === 'skin_tone' && j.status === 'succeeded')?.result_data));

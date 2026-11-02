@@ -55,15 +55,20 @@ const displayLabel = (item) => locale.value === 'es'
 .sidebar-toggle { width: 44px; height: 44px; flex: 0 0 44px; }
 .sidebar-chevron { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .sidebar{overflow-y:auto;overscroll-behavior:contain}
-.sidebar .brand-row{margin-bottom:90px}
+.sidebar .brand-row{height:44px;min-height:44px;margin-bottom:90px}
+.sidebar.collapsed .brand-row{justify-content:center}
+.sidebar.collapsed .sidebar-toggle{margin-inline:auto}
 .sidebar .nav{gap:4px}
 .sidebar .nav a,.sidebar .nav a:nth-child(5){position:relative;min-height:44px;margin-top:0;border:0;border-radius:7px;padding:10px 14px}
 .sidebar .nav a.nav-group-start{margin-top:16px}
+.sidebar.collapsed .nav a.nav-group-start{margin-top:16px}
 .sidebar .nav a.nav-group-start::before{content:'';position:absolute;top:-9px;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}
-.sidebar.collapsed .nav a,.sidebar.collapsed .nav a:nth-child(5){padding-inline:8px}
+.sidebar.collapsed .nav a,.sidebar.collapsed .nav a:nth-child(5){width:44px;min-width:44px;height:44px;min-height:44px;aspect-ratio:1;padding:0;gap:0;justify-content:center;justify-self:center}
 .sidebar-footer{margin-top:auto;padding-top:20px;font-size:11px;line-height:1.5;color:var(--muted)}
-.sidebar-footer-slogan,.sidebar-footer-copy{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-footer-slogan,.sidebar-footer-copy{margin:0}
+.sidebar-footer-slogan{white-space:normal;overflow-wrap:anywhere}
+.sidebar-footer-copy{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-footer-copy{margin-top:3px;font-size:10px}
 .sidebar.collapsed .sidebar-footer{display:none}
-@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:36px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start{margin-top:12px}.sidebar-footer{padding-top:12px}}
+@media(max-height:800px){.sidebar{padding-top:20px;padding-bottom:20px}.sidebar .brand-row{margin-bottom:36px}.sidebar .nav a{padding-block:9px}.sidebar .nav a.nav-group-start,.sidebar.collapsed .nav a.nav-group-start{margin-top:12px}.sidebar-footer{padding-top:12px}}
 </style>
