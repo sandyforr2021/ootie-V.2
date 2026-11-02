@@ -6,7 +6,7 @@ import { ref, computed, watch } from 'vue';
 import { useAppStore } from './app';
 import { useAuthStore } from './auth';
 import { createSavedOutfit, deleteSavedOutfit } from '@/services/socialMetrics';
-import { getPublicItemsByIds } from '@/services/clothingRepository';
+import { getPublicItemCountsByOwnerIds, getPublicItemsByIds } from '@/services/clothingRepository';
 import { removeOotdImage } from '@/services/ootdMedia';
 import {
   fetchSosPostsFromSupabase,
@@ -57,6 +57,8 @@ export const useSosStore = defineStore('sos', () => {
   const sosPosts = ref(appStore.sosPosts || []);
   const outfitSuggestions = ref(appStore.outfitSuggestions || []);
   const publicClosetItems = ref([]);
+  const publicItemCounts = ref({});
+  const publicItemCountsLoaded = ref(false);
 
   // Update appStore on change
   watch(
@@ -74,6 +76,8 @@ export const useSosStore = defineStore('sos', () => {
   const initFromSupabase = async () => {
     const version = ++loadVersion;
     publicClosetItems.value = [];
+    publicItemCounts.value = {};
+    publicItemCountsLoaded.value = false;
     const profileId = authStore.isMember ? authStore.profileId : null;
     try {
       const remotePosts = genuineContent(await fetchSosPostsFromSupabase());
@@ -113,6 +117,18 @@ export const useSosStore = defineStore('sos', () => {
         const items = await getPublicItemsByIds(referencedIds,undefined,{defer:true});
         if (version !== loadVersion) return;
         publicClosetItems.value = items;
+        const publicOwnerIds = [...new Set(sosPosts.value
+          .filter(post => post.public_closet === true)
+          .map(post => post.closet_owner_id || post.sender_id)
+          .filter(Boolean))];
+        try {
+          const counts = await getPublicItemCountsByOwnerIds(publicOwnerIds);
+          if (version !== loadVersion) return;
+          publicItemCounts.value = Object.fromEntries(counts);
+          publicItemCountsLoaded.value = true;
+        } catch (error) {
+          console.error('Unable to load public wardrobe counts for SOS feed:', error);
+        }
       }
 
       const remoteSuggestions = genuineContent(await fetchOutfitSuggestionsFromSupabase());
@@ -182,6 +198,17 @@ export const useSosStore = defineStore('sos', () => {
     return [...new Map(merged.filter((item) => idSet.has(String(item.id))).map((item) => [String(item.id), item])).values()];
   };
 
+  const getPublicItemCountForSos = (post) => {
+    if (post?.public_closet === false) return 0;
+    const ownerId = post?.closet_owner_id || post?.sender_id;
+    if (post?.public_closet === true && ownerId) {
+      return Object.hasOwn(publicItemCounts.value, ownerId) ? publicItemCounts.value[ownerId] : null;
+    }
+    const snapshotCount = Array.isArray(post?.closet_item_ids) ? post.closet_item_ids.length : 0;
+    if (snapshotCount > 0) return snapshotCount;
+    return publicItemCountsLoaded.value ? 0 : null;
+  };
+
   const toggleSave = async (sosId) => {
     const post = sosPosts.value.find(entry => entry.id === sosId);
     const profileId = requireMember();
@@ -232,9 +259,17 @@ export const useSosStore = defineStore('sos', () => {
       created_at: new Date().toISOString()
     };
 
-    return persist('create', () => insertSosPostToSupabase(newPost), row => {
+    const created = await persist('create', () => insertSosPostToSupabase(newPost), row => {
       sosPosts.value.unshift({...newPost, ...row, sender_id: row.user_id || newPost.sender_id});
     }, '穿搭求救已發布並同步');
+    if (created) {
+      void getPublicItemCountsByOwnerIds([profileId]).then(counts => {
+        if (profileId === authStore.profileId) {
+          publicItemCounts.value = { ...publicItemCounts.value, ...Object.fromEntries(counts) };
+        }
+      }).catch(error => console.error('Unable to refresh public wardrobe count for SOS:', error));
+    }
+    return created;
   };
 
   const submitSuggestion = async ({ sosId, selectedIds, message }) => {
@@ -336,6 +371,9 @@ export const useSosStore = defineStore('sos', () => {
     sosPosts,
     outfitSuggestions,
     publicClosetItems,
+    publicItemCounts,
+    publicItemCountsLoaded,
+    getPublicItemCountForSos,
     receivedSosPosts,
     sentSosPosts,
     filteredSosPosts,

@@ -8,7 +8,8 @@ import {
   deleteClothingItem,
   getPublicItemsByIds,
   getCurrentUserPublicItemIds,
-  getPublicItemsByOwnerId
+  getPublicItemsByOwnerId,
+  getPublicItemCountsByOwnerIds
 } from '../clothingRepository';
 import { ServiceError, SERVICE_ERROR_CODE } from '../serviceError';
 
@@ -206,6 +207,46 @@ describe('clothingRepository (READ-ONLY)', () => {
       expect(selectFn).toHaveBeenCalledWith(expect.stringContaining('hidden'));
       expect(eqOwner).toHaveBeenCalledWith('owner_id', mockProfileId);
       expect(eqHidden).toHaveBeenCalledWith('hidden', false);
+    });
+  });
+
+  describe('getPublicItemCountsByOwnerIds', () => {
+    it('counts only visible clothing rows for the requested owners', async () => {
+      const ownerItems = [
+        { owner_id: mockProfileId, hidden: false },
+        { owner_id: mockProfileId, hidden: false },
+        { owner_id: mockProfileId, hidden: true },
+        { owner_id: '77777777-7777-4777-8777-777777777777', hidden: false }
+      ];
+      const eqHidden = vi.fn().mockResolvedValue({ data: ownerItems, error: null });
+      const inOwners = vi.fn().mockReturnValue({ eq: eqHidden });
+      const selectFn = vi.fn().mockReturnValue({ in: inOwners });
+      const fromFn = vi.fn().mockReturnValue({ select: selectFn });
+
+      const result = await getPublicItemCountsByOwnerIds(
+        [mockProfileId, mockProfileId, 'not-a-uuid'],
+        { from: fromFn }
+      );
+
+      expect(result).toEqual(new Map([[mockProfileId, 2]]));
+      expect(selectFn).toHaveBeenCalledWith('owner_id');
+      expect(inOwners).toHaveBeenCalledWith('owner_id', [mockProfileId]);
+      expect(eqHidden).toHaveBeenCalledWith('hidden', false);
+    });
+
+    it('includes zero-count owners without querying for an empty list', async () => {
+      const mockClient = { from: vi.fn() };
+      await expect(getPublicItemCountsByOwnerIds([mockProfileId], {
+          from: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({
+              in: vi.fn().mockReturnValue({
+                eq: vi.fn().mockResolvedValue({ data: [], error: null })
+              })
+            })
+          })
+      })).resolves.toEqual(new Map([[mockProfileId, 0]]));
+      await expect(getPublicItemCountsByOwnerIds([], mockClient)).resolves.toEqual(new Map());
+      expect(mockClient.from).not.toHaveBeenCalled();
     });
   });
 

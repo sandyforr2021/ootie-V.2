@@ -75,8 +75,8 @@
 
           <div class="sos-card-footer">
             <span class="sos-available">
-              <template v-if="authStore.isMember">{{ tf('{count} 件公開衣物 · {helpers} 位衣友建議', { count: (post.closet_item_ids || []).length, helpers: sosStore.getHelperCountForSos(post.id) }) }}</template>
-              <template v-else>{{ tf('{count} 件公開衣物 · 登入查看搭配建議', { count: (post.closet_item_ids || []).length }) }}</template>
+              <template v-if="authStore.isMember">{{ tf('{count} 件公開衣物 · {helpers} 位衣友建議', { count: sosStore.getPublicItemCountForSos(post) ?? '—', helpers: sosStore.getHelperCountForSos(post.id) }) }}</template>
+              <template v-else>{{ tf('{count} 件公開衣物 · 登入查看搭配建議', { count: sosStore.getPublicItemCountForSos(post) ?? '—' }) }}</template>
             </span>
 
             <div class="sos-card-actions">

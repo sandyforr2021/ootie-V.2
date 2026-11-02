@@ -20,14 +20,15 @@ watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
 </script>
 <template>
 <section class="page active credits-page app-page">
- <header class="membership-hero">
+ <header class="membership-hero ootie-page-heading">
   <h1>{{ t('方案與點數') }}</h1>
-  <section class="balance-card" :aria-label="t('我的點數')">
-   <span>{{ t('目前點數') }}</span>
-   <p v-if="pointsLoading || !auth.initialized" role="status">{{ t('載入中…') }}</p>
-   <template v-else-if="!auth.isMember"><strong class="personal-balance">—</strong><button class="secondary" @click="auth.openAuthModal('login',null,'/credits')">{{ t('登入／註冊') }}</button></template>
-   <div v-else-if="pointsError" role="alert"><p>{{ t('點數紀錄暫時無法載入。') }}</p><button class="secondary" @click="loadPoints">{{ t('重試') }}</button></div>
-   <div v-else-if="points" class="credit-balance-value"><strong class="personal-balance">{{ points.balance }}</strong><a class="point-history-link" href="#point-history">{{ t('查看點數紀錄') }}</a></div>
+  <section class="balance-card credit-balance-card" :aria-label="t('我的點數')">
+   <div class="credit-balance-value">
+    <div class="credit-balance-row"><span>{{ t('目前點數') }}</span><strong class="personal-balance">{{ pointsLoading || !auth.initialized ? t('載入中…') : pointsError || !auth.isMember ? '—' : points?.balance ?? '—' }}</strong></div>
+    <a v-if="auth.isMember && points && !pointsError" class="point-history-link" href="#point-history">{{ t('查看點數紀錄') }}</a>
+    <p v-else-if="pointsError" role="alert">{{ t('點數紀錄暫時無法載入。') }} <button class="text-button" @click="loadPoints">{{ t('重試') }}</button></p>
+    <button v-else-if="!auth.isMember && auth.initialized" class="secondary" @click="auth.openAuthModal('login',null,'/credits')">{{ t('登入／註冊') }}</button>
+   </div>
   </section>
  </header>
  <section class="membership-options" aria-labelledby="point-options-title">
@@ -67,19 +68,19 @@ watch(()=>[auth.profileId,auth.isMember],loadPoints,{immediate:true});
 </template>
 <style scoped>
 .credits-page{max-width:1240px;margin-inline:auto}
-.membership-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.48fr);align-items:center;gap:40px;padding:clamp(24px,4vw,48px);border:1px solid #e2d6ec;border-radius:24px;background:var(--gradient-celebration);min-height:260px}
-.membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-size:clamp(32px,3.8vw,54px);font-weight:750;line-height:1.2;letter-spacing:-.025em;margin:0 0 18px;text-align:left}
-:lang(zh-TW) .membership-hero h1,:lang(ja) .membership-hero h1{font-family:'DM Sans','Noto Sans TC','Yu Gothic',sans-serif;font-weight:750;line-height:1.35;letter-spacing:.01em}
-.membership-intro p{font-size:14px;margin:0;max-width:40ch}
-.balance-card{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:28px;border-radius:16px;background:linear-gradient(135deg,#302236,#211c2b);color:#fff;box-shadow:0 16px 30px #3a25451a;min-width:0;text-align:right}
-.balance-card>span{font-size:14px;color:#eee3f4}.balance-card p{color:#eee3f4}.personal-balance{display:block;font-size:clamp(42px,4.3vw,64px);line-height:1.15;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 18px;overflow-wrap:anywhere}
-.balance-card a{font-size:12px;color:#eee3f4;text-decoration:underline;text-underline-offset:4px}.balance-card .secondary{color:white;border-color:#cdbcd6}
-.credit-balance-value{display:grid;justify-items:end;gap:8px;text-align:right}.credit-balance-value .point-history-link{display:block}
+#main-content .membership-hero.ootie-page-heading .credit-balance-card{align-items:flex-end;flex-direction:column;text-align:right}
+.credit-balance-value{display:grid;justify-items:end;gap:4px;text-align:right}
+.credit-balance-row{display:flex;align-items:baseline;gap:12px}
+.credit-balance-row>span{font-size:12px;color:var(--muted)}
+.credit-balance-value .personal-balance{overflow-wrap:anywhere}
+.credit-balance-value .point-history-link{display:block}
+.credit-balance-value p{margin:0;color:var(--muted);font-size:12px}
+.credit-balance-value .text-button{font-size:12px}
 .membership-options,.point-history{margin-top:40px}.membership-section-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.membership-section-heading h2{font-size:24px;margin:0;font-weight:700}.membership-section-heading>span{font-size:12px;color:var(--muted)}
 .membership-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.membership-card{display:flex;flex-direction:column;min-width:0;padding:26px;border-radius:16px;border:1px solid var(--line);background:#fff}.membership-card.featured{background:linear-gradient(145deg,#fff 8%,#f3ebff);border-color:#a891bd}.membership-card h3{font-size:20px;margin:0 0 22px}.membership-card p{font-size:14px;line-height:1.7;margin:0 0 20px}.membership-card .point-price{display:flex;align-items:baseline;gap:8px;color:var(--ink);min-height:48px;font-size:30px;font-weight:650;margin:0 0 16px}.point-price strong{font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}.point-price span{font-size:13px;font-weight:400;color:var(--muted)}
 .membership-card ul{padding-left:18px;font-size:13px;line-height:1.8;margin:0 0 28px}.membership-card li+li{margin-top:6px}.membership-card>a{margin-top:auto;width:100%;text-decoration:none;min-height:46px;font-size:14px}.membership-availability{font-size:12px;margin:16px 0 0}.point-history{scroll-margin-top:30px}.point-history ul{list-style:none;padding:0;margin:0}.point-history li{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--line);padding:16px 0;font-size:14px}.point-history li strong{font-variant-numeric:tabular-nums;font-size:20px}.point-history .credit{color:var(--sage-dark)}.point-history small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-@media(max-width:980px){.membership-hero{gap:24px;grid-template-columns:minmax(0,1fr) 240px}.membership-grid{gap:12px}.membership-card{padding:20px}}
-@media(max-width:760px){.membership-hero{grid-template-columns:1fr;gap:26px}.balance-card{max-width:none}.membership-grid{grid-template-columns:1fr}.membership-card{padding:24px}.membership-section-heading{align-items:flex-start;flex-wrap:wrap}.membership-hero h1{font-size:34px}.membership-options,.point-history{margin-top:30px}}
+@media(max-width:980px){.membership-grid{gap:12px}.membership-card{padding:20px}}
+@media(max-width:760px){#main-content .membership-hero.ootie-page-heading .credit-balance-card{align-self:flex-end;justify-content:flex-end;max-width:100%}.membership-grid{grid-template-columns:1fr}.membership-card{padding:24px}.membership-section-heading{align-items:flex-start;flex-wrap:wrap}.membership-options,.point-history{margin-top:30px}}
 </style>
 <style scoped>
 .text-button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:8px 4px;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.text-button:disabled{opacity:.5;cursor:wait}

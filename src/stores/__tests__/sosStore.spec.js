@@ -145,6 +145,34 @@ describe('SOS persisted interaction contract', () => {
 
     expect(store.sosPosts.map(post => post.public_closet)).toEqual([true,false,false]);
   });
+  it('uses the current public wardrobe count when a SOS post has no item snapshot', async () => {
+    vi.spyOn(clothingRepository, 'getPublicItemsByIds').mockResolvedValue([]);
+    vi.spyOn(clothingRepository, 'getPublicItemCountsByOwnerIds').mockResolvedValue(new Map([[other, 3]]));
+    api.fetchSosPostsFromSupabase.mockResolvedValue([
+      {id:sosId,user_id:other,closet_item_ids:[],ootie_profiles:{public_closet:true}}
+    ]);
+
+    await store.initFromSupabase();
+
+    expect(store.getPublicItemCountForSos(store.sosPosts[0])).toBe(3);
+    expect(clothingRepository.getPublicItemCountsByOwnerIds).toHaveBeenCalledWith([other]);
+  });
+  it('does not report zero when the public wardrobe count query fails', async () => {
+    const reportError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(clothingRepository, 'getPublicItemsByIds').mockResolvedValue([]);
+    vi.spyOn(clothingRepository, 'getPublicItemCountsByOwnerIds').mockRejectedValue(new Error('offline'));
+    api.fetchSosPostsFromSupabase.mockResolvedValue([
+      {id:sosId,user_id:other,closet_item_ids:[],ootie_profiles:{public_closet:true}}
+    ]);
+
+    await store.initFromSupabase();
+
+    expect(store.getPublicItemCountForSos(store.sosPosts[0])).toBeNull();
+    expect(reportError).toHaveBeenCalledWith(
+      'Unable to load public wardrobe counts for SOS feed:',
+      expect.any(Error)
+    );
+  });
   it('does not apply a pending write to a different signed-in account', async () => {
     let finish;
     vi.spyOn(api,'insertSosPostToSupabase').mockImplementation(() => new Promise(resolve => {finish=resolve;}));

@@ -220,6 +220,30 @@ export async function getPublicItemsByOwnerId(profileId, client = supabase, opti
   }
 }
 
+export async function getPublicItemCountsByOwnerIds(profileIds, client = supabase) {
+  const ownerIds = [...new Set((Array.isArray(profileIds) ? profileIds : []).filter(isUuid))];
+  const counts = new Map(ownerIds.map((id) => [id, 0]));
+  if (!ownerIds.length) return counts;
+
+  try {
+    const { data, error } = await client
+      .from('ootie_clothing_items')
+      .select('owner_id')
+      .in('owner_id', ownerIds)
+      .eq('hidden', false);
+
+    if (error) throw normalizeServiceError(error);
+    for (const item of genuineContent(data || [])) {
+      if (item.hidden === false && counts.has(item.owner_id)) {
+        counts.set(item.owner_id, counts.get(item.owner_id) + 1);
+      }
+    }
+    return counts;
+  } catch (err) {
+    throw normalizeServiceError(err);
+  }
+}
+
 /**
  * Fetches a single clothing item by its primary key (ootie_clothing_items.id).
  * @param {string} itemId - The ootie_clothing_items.id UUID.

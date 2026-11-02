@@ -26,11 +26,6 @@
           </div>
         </dl>
         <p v-if="item.notes" class="detail-notes">{{ item.notes }}</p>
-        <div v-if="sourceUrl" class="detail-source-links">
-          <a :href="sourceUrl" target="_blank" rel="noopener noreferrer">{{ $t('前往商品頁面') }} <AppIcon name="link" :size="15" /></a>
-          <a v-if="!isWishlist" href="https://lens.google/" target="_blank" rel="noopener noreferrer">{{ $t('到 Google Lens 找相似款') }} <AppIcon name="Search" :size="15" /></a>
-        </div>
-
         <div class="modal-actions">
           <template v-if="isWishlist">
             <button class="secondary" @click="addToCloset">{{ $t('加入衣櫥') }}</button>
@@ -53,7 +48,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
-import AppIcon from '@/components/ui/AppIcon.vue';
+import { useRouter } from 'vue-router';
 import { itemName, itemPhoto } from '@/services/itemPresentation';
 import WardrobeCutout from '@/components/closet/WardrobeCutout.vue';
 import { safeCommerceUrl, commerceClient } from '@/services/commerce';
@@ -66,6 +61,7 @@ import { labels } from '@/constants';
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const closetStore = useClosetStore();
+const router = useRouter();
 const editingWishlist = ref(false), wishlistEditBusy = ref(false), wishlistEditError = ref('');
 const wishlistEditForm = ref({title:'',category:'upper_body',color:'#c8bba9',sourceUrl:''});
 
@@ -89,7 +85,6 @@ watch([item, isWishlist], ([product, wishlist]) => {
   wishlistEditError.value = '';
 }, { immediate: true });
 
-const sourceUrl = computed(() => safeCommerceUrl(item.value?.source_url));
 const details = computed(() => {
   const i = item.value || {};
   if (isWishlist.value) {
@@ -182,6 +177,7 @@ const addToCloset = async () => {
       throw result?.error || new Error(t('衣櫥無法載入，請稍後再試。'));
     }
 
+    await router.push('/closet');
     appStore.itemFormSourceProduct = {
       id: product.id,
       ownerProfileId: profileId,

@@ -37,6 +37,7 @@ import ShopView from '../ShopView.vue';
 import CreditView from '../CreditView.vue';
 import WishlistPanel from '@/components/closet/WishlistPanel.vue';
 import { aiGateway } from '@/services/aiGateway';
+import { loadPointAccount } from '@/services/pointAccount';
 import { getPublicItemsByIds } from '@/services/clothingRepository';
 import * as remotePosts from '@/services/supabase';
 let wrapper;
@@ -333,6 +334,7 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.modal-actions .danger').text()).toBe('刪除');
     expect(wrapper.find('.detail-category').exists()).toBe(false);
     expect(wrapper.find('.detail-fields').text()).toContain('上衣');
+    expect(wrapper.find('.detail-source-links').exists()).toBe(false);
     await wrapper.findAll('.modal-actions button').find(button=>button.text()==='編輯').trigger('click');
     await wrapper.find('.wishlist-edit-form input:not([type=color])').setValue('Linen blouse');
     await wrapper.find('.wishlist-edit-form').trigger('submit');
@@ -354,6 +356,15 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.modal-actions .secondary').text()).toContain('Add to wardrobe');
     expect(wrapper.find('.modal-actions .danger').text()).toBe('Delete');
   });
+  it('removes outbound product and image-search links from wardrobe details',async()=>{
+    const appStore=useAppStore();
+    appStore.items=[{id:'item-unit',name:'Cotton shirt',category:'Tops',source_url:'https://shop.example/item',photo:'blob:unit-only'}];
+    appStore.selectedItemId='item-unit';appStore.isDetailOpen=true;
+    await render(ItemDetailModal,'/closet');
+    expect(wrapper.find('.detail-source-links').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('前往商品頁面');
+    expect(wrapper.text()).not.toContain('Google Lens');
+  });
   it('opens the closet form with product metadata instead of copying the wishlist item',async()=>{
     const appStore=useAppStore();
     appStore.wishlistProducts=[{
@@ -364,6 +375,7 @@ describe('Shopping studio workflow', () => {
     await render(ItemDetailModal,'/closet?tab=wishlist');
     await wrapper.findAll('.modal-actions button').find(button=>button.text()==='加入衣櫥').trigger('click');
     await flushPromises();
+    expect(wrapper.vm.$route.fullPath).toBe('/closet');
     expect(fixture.closetStore.loadRemoteItems).toHaveBeenCalledWith('profile-unit');
     expect(appStore.itemFormSourceProduct).toEqual(expect.objectContaining({
       id:'product-unit',ownerProfileId:'profile-unit',title:'Cotton shirt',category:'upper_body',color:'#b5d6f3',
@@ -387,8 +399,17 @@ describe('Shopping studio workflow', () => {
     const balance=wrapper.find('.credit-balance-value');
     expect(balance.find('.personal-balance').text()).toBe('100');
     expect(balance.find('.point-history-link').text()).toBe('查看點數紀錄');
-    expect(balance.element.children[0].className).toBe('personal-balance');
+    expect(balance.find('.credit-balance-row').text()).toContain('目前點數100');
+    expect(balance.element.children[0].className).toBe('credit-balance-row');
     expect(balance.element.children[1].className).toBe('point-history-link');
+  });
+  it('shows a visible error instead of a points total when the balance cannot load',async()=>{
+    vi.mocked(loadPointAccount).mockRejectedValueOnce(new Error('offline'));
+    await render(CreditView,'/credits');
+    const balance=wrapper.find('.credit-balance-value');
+    expect(balance.find('.personal-balance').text()).toBe('—');
+    expect(balance.find('[role="alert"]').text()).toContain('點數紀錄暫時無法載入。');
+    expect(balance.find('button').text()).toBe('重試');
   });
   it('keeps wishlist details open when deleting a product fails',async()=>{
     const appStore=useAppStore();
