@@ -89,7 +89,12 @@ describe('ItemForm brand and image intelligence foundations', () => {
 
     expect(wrapper.find('#primary_color').element.value).toBe('丹寧藍');
     expect(wrapper.find('#secondary_color').element.value).toBe('藍綠冷色系');
-    expect(wrapper.text()).toContain('圖片主色建議：丹寧藍');
+    expect(wrapper.text()).toContain('丹寧藍');
+    expect(wrapper.text()).not.toContain('圖片主色建議：');
+    expect(wrapper.text()).not.toContain('重新去背');
+    expect(wrapper.text()).not.toContain('辨識品名與分類');
+    expect(wrapper.text()).not.toContain('自動去背，原照片可隨時還原。');
+    expect(wrapper.find('.vision-controls button').exists()).toBe(false);
     expect(wrapper.text()).not.toContain('自動去背尚未配置，目前使用原圖。');
 
     await wrapper.find('#primary_color').setValue('黑色');

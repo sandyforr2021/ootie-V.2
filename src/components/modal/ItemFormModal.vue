@@ -68,8 +68,7 @@
             />
             <div v-if="preparedMedia" class="upload-choice-row">
               <button v-if="backgroundBusy" type="button" class="text-button" @click="cancelBackgroundRemoval">{{ $t('取消去背') }}</button>
-              <button v-if="!backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="tryBackgroundRemoval">{{ backgroundBusy ? $t('正在處理背景…') : $t('重新去背') }}</button>
-              <button v-else type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="restoreBackground">{{ $t('還原照片') }}</button>
+              <button v-if="backgroundRemoved" type="button" class="secondary" :disabled="backgroundBusy || isSubmitting" @click="restoreBackground">{{ $t('還原照片') }}</button>
             </div>
             <p v-if="backgroundMessage" role="status">{{ backgroundMessage }}</p>
             <GarmentCleanup v-if="preparedMedia && !backgroundBusy" :key="selectionSequence" :blob="originalDisplay?.displayBlob" @result="useDisplayBlob" />
@@ -110,13 +109,9 @@
               >{{ $t("繼續使用原圖") }}</button>
             </section>
           </div>
-
-          <p class="capture-privacy-note">{{ $t('自動去背，原照片可隨時還原。') }}</p>
         </div>
 
         <div v-if="preparedMedia" class="vision-controls">
-          <button type="button" class="secondary" :disabled="visionBusy || isSubmitting" @click="recognizeGarment">{{ $t(visionState==='loading'?'正在載入辨識模型…':visionState==='analyzing'?'正在辨識衣物…':'辨識品名與分類') }}</button>
-          <button v-if="visionBusy" type="button" class="text-button" @click="visionController?.abort();visionState='idle'">{{ $t('取消') }}</button>
           <p v-if="visionMessage" role="status">{{ visionMessage }}</p>
         </div>
         <div class="form-grid">
@@ -188,7 +183,7 @@
 
           <div v-if="colorAnalysisState !== 'idle'" class="image-intelligence-status" aria-live="polite">
             <span v-if="colorAnalysisState === 'loading'">{{ $t("正在分析圖片主色…") }}</span>
-            <span v-else-if="colorAnalysisState === 'success'">{{ $t("圖片主色建議：") }}{{ $t(colorSuggestion.primaryColor) }}</span>
+            <span v-else-if="colorAnalysisState === 'success'">{{ $t(colorSuggestion.primaryColor) }}</span>
             <span v-else>{{ $t("無法自動辨識主色，請使用上方手動選擇。") }}</span>
           </div>
 

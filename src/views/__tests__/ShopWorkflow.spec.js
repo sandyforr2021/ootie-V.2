@@ -433,6 +433,45 @@ describe('Shopping studio workflow', () => {
     expect(wrapper.find('.shop-fitting .shop-wide').attributes('disabled')).toBeDefined();
     expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body)).toHaveLength(0);
   });
+  it('uploads a private portrait and submits it to the existing YouCam color-analysis job',async()=>{
+    vi.spyOn(imageUpload,'preprocessPersonImage').mockResolvedValue({dataUrl:'data:image/jpeg;base64,portrait'});
+    vi.mocked(aiGateway.uploadPersonPhoto).mockClear();
+    await render(ShopView,'/shop?tab=tone');
+
+    const upload=wrapper.find('.shop-tone-section input[type="file"]');
+    expect(upload.exists()).toBe(true);
+    Object.defineProperty(upload.element,'files',{value:[new File(['portrait'],'portrait.jpg',{type:'image/jpeg'})],configurable:true});
+    await upload.trigger('change');
+    await flushPromises();
+    expect(aiGateway.uploadPersonPhoto).toHaveBeenCalledWith('unit-only',{
+      photoId:'batch-unit-only',
+      imageData:'data:image/jpeg;base64,portrait'
+    });
+
+    await wrapper.find('.shop-tone-section .shop-consent input').setValue(true);
+    const submit=wrapper.find('.shop-tone-section .shop-primary');
+    expect(submit.attributes('disabled')).toBeUndefined();
+    await submit.trigger('click');
+    await flushPromises();
+
+    const request=fixture.request.mock.calls.find(([path,,body])=>path==='jobs'&&body?.kind==='skin_tone');
+    expect(request?.[2]).toEqual(expect.objectContaining({
+      kind:'skin_tone',
+      personPath:'person/unit/new.jpg',
+      productIds:[],
+      clothingItemIds:[],
+      savedItems:[],
+      consent:true
+    }));
+    expect(wrapper.vm.$route.query.tab).toBe('tone');
+  });
+  it('prevents color analysis when the member has fewer than the required points',async()=>{
+    fixture.points=5;
+    await render(ShopView,'/shop?tab=tone');
+    expect(wrapper.find('.shop-tone-section').text()).toContain('平台點數不足，無法進行個人色彩分析。');
+    expect(wrapper.find('.shop-tone-section .shop-primary').attributes('disabled')).toBeDefined();
+    expect(fixture.request.mock.calls.filter(([path,,body])=>path==='jobs'&&body?.kind==='skin_tone')).toHaveLength(0);
+  });
   it('puts personal color results before album images',async()=>{
     fixture.jobs=[{id:'tone',kind:'skin_tone',status:'succeeded',result_data:{}}];
     await render(ShopView,'/shop?tab=album');

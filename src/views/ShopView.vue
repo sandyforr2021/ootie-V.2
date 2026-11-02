@@ -28,7 +28,7 @@ const token = computed(() => auth.session?.access_token || '');
 const isCommunity=computed(()=>route.name==='TryonCommunity');
 const tab = ref(['album','community','activity','wardrobe','saved','links','tone'].includes(route.query.tab) ? route.query.tab : (isCommunity.value?'community':'wishlist'));
 const products = ref([]); const jobs = ref([]); const photos = ref([]); const posts = ref([]);
-const images = ref({}); const selected = ref([]); const selectedClothing = ref([]); const selectedSaved = ref([]); const savedEntries = ref([]); const selectionSource = ref('wishlist'); const selectedPhoto = ref(''); const consent = ref(false);
+const images = ref({}); const selected = ref([]); const selectedClothing = ref([]); const selectedSaved = ref([]); const savedEntries = ref([]); const selectionSource = ref('wishlist'); const selectedPhoto = ref(''); const consent = ref(false); const toneConsent = ref(false);
 const savedClothing = ref([]),savedPostRows=ref([]);
 const capabilities = ref({ enabled:false, remainingUnits:0, costs:{ try_on:2, skin_tone:20 } });
 const metrics = ref(null); const busy = ref(''); const loading = ref(false); const error = ref(''); const notice = ref('');
@@ -71,6 +71,17 @@ const serviceUnavailableHint = computed(() => {
 });
 const submitHint = computed(() => !selectionCount.value ? t('選擇至少一件商品，再繼續。') : !selectedOutfit.value.valid ? t('整套試穿請各選最多一件上衣、下身與外套。') : !generationAllowance.value.allowed ? allowanceError(generationAllowance.value.reason) : !capabilities.value.enabled || capabilities.value.remainingUnits < selectionCount.value * capabilities.value.costs.try_on ? serviceUnavailableHint.value : (!selectedPhoto.value || !consent.value) ? t('選擇一張私人照片，並同意本次處理後即可送出。') : '');
 const comparisonIds = ref([]); const pendingBatch = ref(null); const sharedPost = ref(null);
+const toneCost = computed(() => capabilities.value.costs?.skin_tone ?? 20);
+const canSubmitTone = computed(() => auth.isMember && !!selectedPhoto.value && toneConsent.value
+  && capabilities.value.enabled && Number.isSafeInteger(capabilities.value.pointBalance)
+  && capabilities.value.pointBalance >= toneCost.value && !busy.value && !pendingBatch.value);
+const recoveryConsent = computed({
+  get: () => pendingBatch.value?.selection?.kind === 'skin_tone' ? toneConsent.value : consent.value,
+  set: (value) => {
+    if (pendingBatch.value?.selection?.kind === 'skin_tone') toneConsent.value = value;
+    else consent.value = value;
+  }
+});
 let pollTimer; let disposed = false; let sessionVersion = 0;
 const identityReady = () => auth.isMember && !!token.value && auth.user?.id === auth.session?.user?.id && (!auth.profileIdentity?.authUserId || auth.profileIdentity.authUserId === auth.session?.user?.id);
 const identitySnapshot = () => ({ version:sessionVersion, userId:auth.session?.user?.id, profileId:auth.profileId, accessToken:token.value });
@@ -88,6 +99,7 @@ const matches = computed(() => matchingProduct.value ? wardrobeMatches(matchingP
 const canSubmit = computed(() => generationAllowance.value.allowed && selectedOutfit.value.valid && capabilities.value.enabled && capabilities.value.remainingUnits >= selectionCount.value * capabilities.value.costs.try_on && selectionCount.value && selectedPhoto.value && consent.value && !busy.value && !pendingBatch.value);
 const jobTitle = (job) => job.kind==='garment_cleanup' ? t('整理結果') : job.sequence_total>1 ? t('整套試穿') : products.value.find((p) => p.id === job.product_id)?.title || job.product?.title || t('試穿結果','Try-on result');
 const stateLabel = (status) => ({ queued:t('等待中','Queued'), preparing:t('準備圖片','Preparing'), submitting:t('送出中','Submitting'), processing:t('試穿製作中','Processing'), succeeded:t('已完成','Ready'), failed:t('未完成','Failed'), needs_review:t('等待服務核對','Needs review'), cancelled:t('已取消','Cancelled') })[status] || status;
+const toneStateLabel = (status) => status === 'processing' ? t('色彩分析進行中') : stateLabel(status);
 const reasonLabel = (reason) => ({ neutral:t('中性色，容易搭配','A versatile neutral'), tonal:t('相近色系，柔和協調','Similar hues, a soft pairing'), contrast:t('對比色，增加層次','Contrasting hues, more definition'), category:t('可互補的衣物類別','A complementary garment category') })[reason];
 const api = (path, body, accessToken=token.value, options) => options ? commerceClient.request(path, accessToken, body, options) : commerceClient.request(path, accessToken, body);
 const login = () => auth.openAuthModal('login', null, '/shop');
@@ -184,7 +196,7 @@ async function hydrate(path) {
   finally { loadingImages.delete(path); }
 }
 async function hydrateVisible() {
-  const paths=tab.value==='album'?albumJobs.value.map(j=>j.result_path):tab.value==='wishlist'?[
+  const paths=tab.value==='album'?albumJobs.value.map(j=>j.result_path):tab.value==='tone'?[selectedPhoto.value,...(choosePhoto.value?photos.value:photos.value.slice(0,8)).map(p=>p.path)]:tab.value==='wishlist'?[
     ...(step.value===2?visibleProducts.value:chosenProducts.value).map(p=>p.image_path),
     ...(step.value===3?[selectedPhoto.value,...(choosePhoto.value?photos.value:photos.value.slice(0,8)).map(p=>p.path)]:[])
   ]:[];
@@ -199,7 +211,8 @@ async function refreshJobs() {
   if (pendingBatch.value) {
     const recovered=jobData.jobs.some((job)=>job.batch_id===pendingBatch.value.id);
     if (recovered) {
-      clearPending(); tab.value='album';
+      tab.value=pendingBatch.value.selection?.kind==='skin_tone'?'tone':'album';
+      clearPending();
       notice.value=t('已找到原提交的工作，已恢復進度。','Your original submission was found and its progress is restored.');
     }
   }
@@ -299,12 +312,14 @@ async function uploadPerson(event) {
 async function submit(kind='try_on') {
   if(!auth.isMember) return login();
   if(kind==='try_on' && !canSubmit.value) return;
+  if(kind==='skin_tone' && !canSubmitTone.value) return;
   if(pendingBatch.value) { error.value=t('先查詢或恢復待確認的提交，再建立新的工作。','Check or recover the pending request before starting another job.'); return; }
   await act('submit',async(identity)=>{
     const selection={kind,personPath:selectedPhoto.value,productIds:kind==='try_on'?[...selected.value]:[],clothingItemIds:kind==='try_on'?[...selectedClothing.value]:[],savedItems:kind==='try_on'?[...selectedSaved.value]:[]};
     const pending={ id:createGenerationId(),key:JSON.stringify(selection),selection };
     persistPending(pending);
-    try { await api('jobs',{...selection,consent:consent.value,batchId:pending.id},identity.accessToken); if (!identityCurrent(identity)) return; }
+    const hasConsent = kind === 'skin_tone' ? toneConsent.value : consent.value;
+    try { await api('jobs',{...selection,consent:hasConsent,batchId:pending.id},identity.accessToken); if (!identityCurrent(identity)) return; }
     catch (err) {
       if (!identityCurrent(identity)) return;
       if (err.status>=400 && err.status<500) { clearPending(); throw err; }
@@ -313,14 +328,21 @@ async function submit(kind='try_on') {
     }
     if (!identityCurrent(identity)) return;
     if (pendingBatch.value) clearPending();
-    selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; step.value=2; await refreshJobs(); if(!identityCurrent(identity)) return; selectTab('album');
+    if (kind === 'try_on') {
+      selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; step.value=2;
+    } else {
+      toneConsent.value = false;
+    }
+    await refreshJobs(); if(!identityCurrent(identity)) return;
+    if (kind === 'try_on') selectTab('album');
     notice.value=t('已排入工作池。你可以離開頁面，稍後回相簿查看。','Added to the queue. You can leave and return to your album later.');
   });
 }
 async function retryPending() {
-  if (!pendingBatch.value || !consent.value || busy.value) return;
+  if (!pendingBatch.value || !recoveryConsent.value || busy.value) return;
   await act('recover', async (identity) => {
     const pending=pendingBatch.value;
+    const targetTab=pending.selection?.kind==='skin_tone'?'tone':'album';
     try {
       await api('jobs',{...pending.selection,consent:true,batchId:pending.id},identity.accessToken); if (!identityCurrent(identity)) return;
     } catch (err) {
@@ -331,7 +353,7 @@ async function retryPending() {
     }
     if (!identityCurrent(identity)) return;
     if (pendingBatch.value) clearPending();
-    await refreshJobs(); if(!identityCurrent(identity)) return; selectTab('album');
+    await refreshJobs(); if(!identityCurrent(identity)) return; selectTab(targetTab);
     notice.value=t('已用原提交編號恢復這筆工作。','The original submission ID was reused to recover this job.');
   });
 }
@@ -460,9 +482,9 @@ watch(tab,async(value,previous)=>{
   if(identityReady() && (value==='activity' || previous==='activity')) await refresh();
 });
 watch([productLimit,jobLimit,step,tab,choosePhoto],hydrateVisible);
-watch(selectedPhoto,()=>{consent.value=false;});
+watch(selectedPhoto,()=>{consent.value=false;toneConsent.value=false;});
 watch(()=>[auth.session?.user?.id,auth.profileId],()=>{
-  sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; savedEntries.value=[]; selectedPhoto.value=''; pendingBatch.value=readPending(auth.session?.user?.id); metrics.value=null; matchingProduct.value=null; shareJob.value=null; purchasedProduct.value=null; consent.value=false; busy.value=''; loading.value=false; error.value=''; notice.value=''; comparisonIds.value=[]; form.value={title:'',sourceUrl:'',imageUrl:'',imageData:'',category:'upper_body',color:'#c8bba9'};
+  sessionVersion++; products.value=[]; jobs.value=[]; photos.value=[]; selected.value=[]; selectedClothing.value=[]; selectedSaved.value=[]; savedEntries.value=[]; selectedPhoto.value=''; pendingBatch.value=readPending(auth.session?.user?.id); metrics.value=null; matchingProduct.value=null; shareJob.value=null; purchasedProduct.value=null; consent.value=false; toneConsent.value=false; busy.value=''; loading.value=false; error.value=''; notice.value=''; comparisonIds.value=[]; form.value={title:'',sourceUrl:'',imageUrl:'',imageData:'',category:'upper_body',color:'#c8bba9'};
   savedClothing.value=[];savedPostRows.value=[];
   for(const url of urls.values()) URL.revokeObjectURL(url); urls.clear(); images.value={};
 },{flush:'sync',immediate:true});
@@ -496,7 +518,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
     <router-link v-if="isCommunity" class="community-back" to="/explore">← {{ t('返回探索') }}</router-link>
     <nav v-if="!isCommunity && tab !== 'activity'" class="shop-tabs" :aria-label="t('購物試穿功能','Shopping studio')"><button v-for="[key,label] in tabs" :key="key" :class="{active:tab===key || (tab==='links' && key==='saved')}" :aria-current="tab===key?'page':undefined" @click="selectTab(key)">{{ label }}<span v-if="key==='album' && activeJobs.length" class="shop-count">{{ activeJobs.length }}</span></button></nav>
     <p v-if="error" class="shop-message error" role="alert">{{ error }}</p><p v-if="notice" class="shop-message" role="status">{{ notice }}</p>
-    <section v-if="pendingBatch && auth.isMember" class="shop-pending-recovery" role="status"><div><strong>{{ t('有一筆提交尚待確認','One submission is waiting for confirmation') }}</strong><p>{{ t('重新整理後，先查詢原提交編號。若伺服器尚無這筆工作，可在同意處理照片後用相同編號恢復，避免重複扣點。','We first check the original request ID. If the server has no matching job, you can consent again and retry with that same ID to avoid duplicate charges.') }}</p></div><label class="shop-consent"><input v-model="consent" type="checkbox"><span>{{ t('我再次同意以這張私人照片恢復原提交。','I consent again to resume the original request with this private photo.') }}</span></label><div class="shop-result-actions"><button :disabled="!!busy" @click="refreshJobs">{{ t('查詢原工作','Check original job') }}</button><button class="shop-primary" :disabled="!!busy || !consent" @click="retryPending">{{ busy==='recover'?t('恢復中…','Recovering…'):t('用原編號恢復','Resume same request') }}</button></div></section>
+    <section v-if="pendingBatch && auth.isMember" class="shop-pending-recovery" role="status"><div><strong>{{ t('有一筆提交尚待確認','One submission is waiting for confirmation') }}</strong><p>{{ t('重新整理後，先查詢原提交編號。若伺服器尚無這筆工作，可在同意處理照片後用相同編號恢復，避免重複扣點。','We first check the original request ID. If the server has no matching job, you can consent again and retry with that same ID to avoid duplicate charges.') }}</p></div><label class="shop-consent"><input v-model="recoveryConsent" type="checkbox"><span>{{ t('我再次同意以這張私人照片恢復原提交。','I consent again to resume the original request with this private photo.') }}</span></label><div class="shop-result-actions"><button :disabled="!!busy" @click="refreshJobs">{{ t('查詢原工作','Check original job') }}</button><button class="shop-primary" :disabled="!!busy || !recoveryConsent" @click="retryPending">{{ busy==='recover'?t('恢復中…','Recovering…'):t('用原編號恢復','Resume same request') }}</button></div></section>
     <p v-if="!auth.initialized && !auth.isMember && tab!=='community'" role="status">{{ t('載入中…') }}</p><div v-else-if="!auth.isMember && tab!=='community'" class="shop-login"><p>{{ t('登入後儲存你的商品、私人照片與試穿結果。','Sign in to save products, private photos and try-on results.') }}</p><button class="shop-primary" @click="login">{{ t('登入／註冊','Sign in / Sign up') }}</button></div>
 
     <section v-if="tab==='wishlist'" class="shop-studio">
@@ -552,7 +574,20 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 
     <section v-else-if="tab==='tone'" class="shop-panel shop-tone-section">
       <div class="shop-section-title"><div><h2>{{ t('個人色彩分析') }}</h2><p>{{ t('檢視您的膚色分析結果與專屬色調建議。') }}</p></div><button :disabled="loading" @click="refresh">{{ t('更新進度','Refresh') }}</button></div>
-      <div v-if="toneJobs.length" class="shop-panel shop-tone-results"><h3>{{ t('個人色彩分析','Personal color analysis') }}</h3><p v-for="job in toneJobs" :key="job.id">{{ stateLabel(job.status) }} · {{ formatDate(job.created_at,{dateStyle:'medium'}) }} <span v-if="job.status==='failed'" class="shop-hint">{{ t('請改用光線均勻、臉部清晰的正面近照。') }}</span> <span v-if="job.result_data?.skin_color" class="shop-skin-swatch" :style="{background:job.result_data.skin_color}"></span></p><div class="shop-palette"><div v-for="color in palette" :key="color.key"><i :style="{background:color.color}"></i><span>{{ t({soft:'柔和',contrast:'對比',neutral:'中性'}[color.key]) }}</span></div></div></div>
+      <div class="shop-panel shop-tone-upload">
+        <p>{{ t('色彩分析請選用光線均勻、臉部清晰的正面近照。分析一次，後續搭配沿用結果。') }}</p>
+        <label class="shop-person-upload">＋ {{ busy==='photo'?t('處理照片中…'):t('上傳私人照片') }}<input type="file" accept="image/jpeg,image/png" :disabled="!auth.isMember || !!busy || !!pendingBatch" @change="uploadPerson"></label>
+        <div v-if="selectedPhoto && images[selectedPhoto]" class="selected-person-preview"><MediaImage :src="images[selectedPhoto]" :alt="t('本次選用的私人照片')" /></div>
+        <button v-if="photos.length" type="button" @click="choosePhoto=!choosePhoto">{{ choosePhoto?t('完成'):t('更換或管理照片') }}</button>
+        <div v-if="choosePhoto || !selectedPhoto" class="shop-person-list"><div v-for="photo in photos" :key="photo.path" class="shop-person-entry"><button :disabled="!!pendingBatch" :class="{selected:selectedPhoto===photo.path}" :aria-pressed="selectedPhoto===photo.path" :aria-label="t('選用這張照片')" @click="selectedPhoto=photo.path;choosePhoto=false;hydrate(photo.path)"><MediaImage v-if="images[photo.path]" :src="images[photo.path]" :alt="t('我的私人照片')" /><span v-else>{{ t('照片') }}</span></button><button class="shop-photo-delete" :disabled="!!busy || pendingBatch?.selection?.personPath===photo.path" :aria-label="t('刪除這張照片')" @click="removePhoto(photo)">×</button></div></div>
+        <label class="shop-consent"><input v-model="toneConsent" type="checkbox"><span>{{ t('我有權使用選用的照片，同意由 OOTIE 及其影像處理服務供應商進行這次試穿或色彩分析。原始照片保持私人。') }}</span></label>
+        <p class="shop-hint">{{ tf('本次分析需 {points} 點。', {points:toneCost}) }}</p>
+        <p v-if="auth.isMember && !loading && capabilities.pointBalance == null" class="shop-hint" role="status">{{ t('點數紀錄暫時無法載入。') }}</p>
+        <p v-else-if="auth.isMember && !loading && capabilities.pointBalance < toneCost" class="shop-hint" role="status">{{ t('平台點數不足，無法進行個人色彩分析。') }}</p>
+        <p v-else-if="auth.isMember && !loading && !capabilities.enabled" class="shop-hint" role="status">{{ t('分析服務暫時無法使用，請稍後再試。') }}</p>
+        <button class="shop-primary shop-wide" :disabled="!canSubmitTone" @click="submit('skin_tone')">{{ busy==='submit'?t('色彩分析處理中…'):t('分析選用照片的色彩') }}</button>
+      </div>
+      <div v-if="toneJobs.length" class="shop-panel shop-tone-results"><h3>{{ t('個人色彩分析','Personal color analysis') }}</h3><p v-for="job in toneJobs" :key="job.id">{{ toneStateLabel(job.status) }} · {{ formatDate(job.created_at,{dateStyle:'medium'}) }} <span v-if="job.status==='failed'" class="shop-hint">{{ t('請改用光線均勻、臉部清晰的正面近照。') }}</span> <span v-if="job.result_data?.skin_color" class="shop-skin-swatch" :style="{background:job.result_data.skin_color}"></span></p><div class="shop-palette"><div v-for="color in palette" :key="color.key"><i :style="{background:color.color}"></i><span>{{ t({soft:'柔和',contrast:'對比',neutral:'中性'}[color.key]) }}</span></div></div></div>
       <p v-if="loading && !toneJobs.length" role="status">{{ t('載入中…') }}</p>
       <div v-else-if="!toneJobs.length" class="shop-empty">
         <AppIcon name="album" :size="34" />
@@ -604,6 +639,7 @@ onBeforeUnmount(()=>{document.removeEventListener('visibilitychange',resumeJobs)
 .shop-triptych figcaption{padding-top:5px;font-size:10px;color:var(--shop-muted)}
 .studio-share-author{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;text-decoration:none}.studio-share-author img,.studio-author-initials{width:36px;height:36px;border-radius:50%;object-fit:cover}.studio-author-initials{display:grid;place-items:center;background:var(--accent-lavender-soft)}.studio-saved{padding-bottom:24px}
 .studio-extension-entry{margin-bottom:16px;display:flex;align-items:center;gap:8px}.studio-product-preview{display:block;max-width:220px;max-height:260px;object-fit:contain;margin:16px auto}
+.shop-tone-upload{display:grid;gap:12px}.shop-tone-upload>p:first-child{margin:0}.shop-tone-upload .shop-person-upload{margin:0}.shop-tone-upload .selected-person-preview{max-width:220px;max-height:260px;overflow:hidden;border-radius:12px;background:#f8f2eb}.shop-tone-upload .selected-person-preview :deep(img){display:block;width:100%;max-height:260px;object-fit:contain}.shop-tone-upload .shop-consent{margin:4px 0}.shop-tone-results{margin-top:20px}
 
 .shop-view{--shop-ink:#35312e;--shop-muted:#766d66;--shop-line:#e7ded4;--shop-pink:#f6d9df;--shop-cream:#fffaf3;color:var(--shop-ink);max-width:1400px;margin:auto;padding:8px 0 56px}.shop-view button,.shop-view input,.shop-view select,.shop-view textarea{font:inherit}.shop-view button{cursor:pointer;border:1px solid var(--shop-line);background:#fffdf9;color:var(--shop-ink);border-radius:12px;padding:10px 14px;transition:background .15s,transform .15s}.shop-view button:hover:not(:disabled){background:#f8e9e7}.shop-view button:disabled{opacity:.48;cursor:not-allowed}.shop-view :focus-visible{outline:3px solid #6d8d9c;outline-offset:3px}.shop-view a{color:#57453f;text-underline-offset:4px}.shop-view h2{font-size:23px;margin:7px 0 12px;letter-spacing:-.6px}.shop-view h3{font-size:16px;line-height:1.5;margin:8px 0}.shop-view p{line-height:1.75}.shop-view label{display:block;font-size:13px;font-weight:600}.shop-view input:not([type=checkbox]):not([type=file]),.shop-view select,.shop-view textarea{width:100%;border:1px solid var(--shop-line);border-radius:10px;background:#fff;padding:12px;box-sizing:border-box;margin-top:7px;color:var(--shop-ink);min-height:44px}.shop-view input[type=color]{padding:5px!important}.shop-view input[type=checkbox]{accent-color:#78534e;width:18px;height:18px;flex-shrink:0}.shop-view .shop-primary{background:#433934;color:#fff;border-color:#433934;font-weight:600}.shop-view .shop-primary:hover:not(:disabled){background:#67504a}.shop-hero{display:grid;grid-template-columns:1fr 250px;gap:40px;background:var(--shop-cream);border:1px solid var(--shop-line);border-radius:28px;padding:40px 44px;margin-bottom:24px;overflow:hidden}.shop-kicker,.shop-eyebrow{font-size:10px;letter-spacing:2px;font-weight:700;color:#7f635b}.shop-kicker{display:flex;align-items:center;gap:18px}.shop-view .language-toggle{padding:5px 9px;border-radius:7px;font-size:11px}.shop-hero h1{font-size:clamp(28px,3.2vw,46px);line-height:1.4;letter-spacing:-1.5px;margin:20px 0 14px;font-weight:650}.shop-hero h1 em{font-style:normal;color:#8d5c58}.shop-hero-copy>p{color:var(--shop-muted);max-width:550px;font-size:14px;margin:0}.shop-journey{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.shop-journey span{padding:8px 12px;background:#fff;border:1px solid #ede4da;border-radius:99px;font-size:11px}.shop-hero-note{align-self:center;background:#f4e4c2;border-radius:120px 120px 16px 16px;padding:30px 24px 25px;transform:rotate(3deg);text-align:center;box-shadow:8px 9px 0 #f6dce1}.shop-note-star{display:block;font-size:36px;color:#8d6752;margin-bottom:12px}.shop-hero-note strong{font-size:22px;line-height:1.7}.shop-hero-note p{font-size:11px;margin-top:16px}.shop-color-dots{display:flex;justify-content:center;margin-top:18px}.shop-color-dots i{width:22px;height:22px;border-radius:50%;background:#ead0cd;border:2px solid #fff;margin-left:-5px}.shop-color-dots i:nth-child(2){background:#a4b9c7}.shop-color-dots i:nth-child(3){background:#725b51}.shop-tabs{display:flex;border-bottom:1px solid var(--shop-line);gap:20px;margin-bottom:28px;overflow:auto}.shop-tabs button{border:0;border-radius:0;white-space:nowrap;padding:14px 2px;background:transparent;color:var(--shop-muted);font-size:14px;position:relative}.shop-tabs button.active{color:#774f49;font-weight:700;border-bottom:3px solid #bc837e}.shop-count{display:inline-grid;place-items:center;margin-left:7px;background:var(--shop-pink);border-radius:20px;min-width:20px;height:20px;font-size:10px}.shop-message{border-radius:12px;padding:14px 18px;background:#eef2e8;color:#445c40;font-size:14px}.shop-message.error{background:#fbe5e2;color:#893e37}.shop-login{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:18px 22px;background:#f5ece6;border-radius:16px;margin-bottom:22px}.shop-login p{font-size:14px;margin:0}.shop-workspace{display:grid;grid-template-columns:minmax(0,1fr) 290px;align-items:start;gap:24px}.shop-panel{border:1px solid var(--shop-line);border-radius:20px;background:#fffefb;padding:24px}.shop-section-title{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:18px}.shop-section-title p{font-size:13px;color:var(--shop-muted);margin:0}.shop-tag{font-size:10px;border:1px solid var(--shop-line);border-radius:30px;padding:7px 10px;white-space:nowrap}.shop-url-row{display:flex;align-items:end;gap:8px}.shop-url-row button{white-space:nowrap;height:44px;font-size:12px}.shop-import-details{display:grid;grid-template-columns:150px 1fr;gap:18px;margin-top:20px}.shop-image-upload{border:1px dashed #cdbbb0;border-radius:14px;background:#f8f2eb;min-height:200px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:10px;cursor:pointer;text-align:center;overflow:hidden;position:relative}.shop-image-upload>span{font-size:40px;font-weight:300;color:#9e7c70}.shop-image-upload img{width:100%;height:145px;object-fit:contain}.shop-image-upload strong{font-size:12px;margin:8px 0}.shop-image-upload small{color:var(--shop-muted);font-size:10px}.shop-image-upload input,.shop-person-upload input{position:absolute;opacity:0;width:100%;height:100%;inset:0;cursor:pointer}.shop-fields{display:grid;gap:13px}.shop-field-pair{display:grid;grid-template-columns:1fr 80px;gap:12px}.shop-hint{font-size:11px!important;color:var(--shop-muted);line-height:1.8;display:block}.shop-import>.shop-primary{margin-top:5px}.shop-list-heading{margin:30px 0 16px}.shop-list-heading button{font-size:11px}.shop-empty{padding:42px 20px;text-align:center;border:1px dashed var(--shop-line);border-radius:20px;background:#fcf8f2}.shop-empty>span{font-size:38px;color:#ad8d80}.shop-empty p{font-size:13px;color:var(--shop-muted);max-width:420px;margin:auto}.shop-empty button{margin-top:15px}.shop-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.shop-product{border:1px solid var(--shop-line);border-radius:16px;overflow:hidden;background:#fffefb}.shop-product.selected{border:2px solid #b78078}.shop-view .shop-product-image{position:relative;padding:10px;border:0;border-radius:0;width:100%;height:190px;background:#f5f0e9;display:grid;place-items:center}.shop-product-image img{width:100%;height:100%;object-fit:contain}.shop-image-placeholder{font-size:11px;color:var(--shop-muted)}.shop-select-mark{position:absolute;right:10px;top:10px;background:#fff;border:1px solid var(--shop-line);border-radius:50%;width:26px;height:26px;display:grid;place-items:center}.selected .shop-select-mark{background:#a6746d;color:#fff}.shop-product-info{padding:13px}.shop-product-info>small{font-size:10px;color:#9b7267}.shop-product-info h3{font-size:13px;overflow-wrap:anywhere}.shop-product-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px}.shop-product-actions button{padding:7px 9px;font-size:11px}.shop-secondary-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;border-top:1px solid #efe7df;padding-top:10px}.shop-secondary-actions button{border:0;padding:0;background:none;font-size:10px;color:var(--shop-muted)}.shop-fitting{position:sticky;top:22px}.shop-fitting>p,.shop-tone p{font-size:12px;color:var(--shop-muted)}.shop-person-upload{position:relative;text-align:center;border:1px dashed #bda99e;border-radius:12px;padding:16px 8px;margin:18px 0;overflow:hidden}.shop-person-list{display:flex;gap:8px;overflow:auto;margin-bottom:16px}.shop-person-list button{flex-shrink:0;width:65px;height:83px;padding:2px;overflow:hidden}.shop-person-list img{width:100%;height:100%;object-fit:cover;border-radius:8px}.shop-person-list .selected{border:2px solid #9c6b63}.shop-consent{display:flex!important;align-items:start;gap:9px;font-size:11px!important;line-height:1.7;font-weight:400!important;margin:16px 0}.shop-consent input{margin-top:1px}.shop-selection-summary{display:flex;align-items:center;gap:8px;background:#f8eee8;border-radius:10px;padding:12px;margin-top:20px;font-size:11px}.shop-selection-summary strong{font-size:20px}.shop-selection-summary small{margin-left:auto}.shop-wide{width:100%;margin-top:10px}.shop-tone{border-top:1px solid var(--shop-line);padding-top:22px;margin-top:24px}.shop-tone button{font-size:11px;padding:10px}.shop-tone small{display:block;color:var(--shop-muted);font-size:10px;line-height:1.7;margin-top:12px}.shop-palette{display:flex;gap:18px;margin-top:18px}.shop-palette div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px}.shop-palette i{width:36px;height:36px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--shop-line)}.shop-album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.shop-result{padding:15px;overflow:hidden}.shop-result-media{position:relative;aspect-ratio:3/4;background:#f4eee6;border-radius:12px;overflow:hidden;margin-bottom:12px}.shop-result-media img{width:100%;height:100%;object-fit:contain}.shop-job-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#9b8170;font-size:13px}.shop-job-placeholder>span{font-size:45px}.working{animation:shop-breathe 2s ease-in-out infinite}.shop-job-state{position:absolute;bottom:10px;left:10px;background:#fffcf3e8;border:1px solid #e6d8cc;border-radius:30px;padding:6px 12px;font-size:10px}.shop-result>small{font-size:10px;color:var(--shop-muted)}.shop-result-actions{display:flex;gap:6px;flex-wrap:wrap}.shop-result-actions button{font-size:11px;padding:8px}.shop-result-actions button[aria-pressed=true]{background:var(--shop-pink)}.shop-comparison{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;background:#f7eae7;padding:20px;border-radius:20px;margin-bottom:24px}.shop-comparison figure{margin:0}.shop-comparison img{width:100%;aspect-ratio:3/4;object-fit:contain;background:#fff;border-radius:10px}.shop-comparison figcaption{font-size:12px;text-align:center;padding:8px}.shop-tone-results{margin-top:22px}.shop-skin-swatch{display:inline-block;width:20px;height:20px;border-radius:50%;vertical-align:middle}.shop-shared-image{width:100%;aspect-ratio:3/4;object-fit:contain;background:#f8f2ea;border-radius:12px;margin-bottom:12px}.shop-caption{font-size:13px;white-space:pre-line;overflow-wrap:anywhere}.shop-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:28px 0}.shop-metrics>div{display:flex;flex-direction:column;gap:8px;background:#f7eee7;padding:20px;border-radius:14px}.shop-metrics strong{font-size:30px}.shop-metrics span{font-size:12px}.shop-load-more{display:block;margin:24px auto}.shop-modal-backdrop{position:fixed;inset:0;background:#332a2566;backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}.shop-modal{background:#fffaf3;border-radius:24px;padding:30px;max-width:520px;width:100%;max-height:85vh;overflow:auto;position:relative;box-shadow:0 24px 80px #2a221c30}.shop-modal-close{position:absolute;right:15px;top:15px;padding:3px 11px!important;font-size:24px!important}.shop-match-list article{display:flex;gap:16px;align-items:center;background:#fff;border:1px solid var(--shop-line);border-radius:12px;padding:12px;margin:10px 0}.shop-match-list img{width:80px;height:85px;object-fit:contain}.shop-match-list p{font-size:12px;margin:0}.shop-share-preview{height:220px;max-width:100%;object-fit:contain;display:block;margin:14px auto}.shop-modal textarea{resize:vertical}.shop-modal h2{padding-right:25px}
 @keyframes shop-breathe{50%{opacity:.4;transform:scale(.9)}}

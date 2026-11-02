@@ -94,6 +94,11 @@ export const shopMessages = `
 讓配色多一點個人感|Make color personal|自分らしい色選び|Colores más personales
 色彩分析請選用光線均勻、臉部清晰的正面近照。分析一次，後續搭配沿用結果。|For color analysis, select a well-lit, close-up portrait. Reuse your result for future pairings.|色分析には、均一な照明で顔がはっきり写る正面のアップ写真を。結果は次回以降も利用できます。|Para analizar el color, elige un retrato de cerca con luz uniforme. Reutiliza el resultado en futuras combinaciones.
 分析選用照片的色彩|Analyze selected portrait|選んだ写真の色を分析|Analizar retrato seleccionado
+本次分析需 {points} 點。|This analysis costs {points} points.|今回の分析には{points}ポイント必要です。|Este análisis cuesta {points} puntos.
+平台點數不足，無法進行個人色彩分析。|Not enough platform points for personal color analysis.|パーソナルカラー分析に必要なポイントが不足しています。|No tienes suficientes puntos para el análisis personal de color.
+分析服務暫時無法使用，請稍後再試。|Color analysis is temporarily unavailable. Please try again later.|カラー分析は一時的に利用できません。後でもう一度お試しください。|El análisis de color no está disponible temporalmente. Inténtalo de nuevo más tarde.
+色彩分析處理中…|Analyzing colors…|カラーを分析中…|Analizando colores…
+色彩分析進行中|Color analysis in progress|カラー分析中|Análisis de color en curso
 柔和|Soft|やわらか|Suave
 對比|Contrast|コントラスト|Contraste
 中性|Neutral|ニュートラル|Neutro
